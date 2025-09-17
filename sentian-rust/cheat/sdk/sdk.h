@@ -520,6 +520,7 @@ namespace rust {
     class networkable;
     class item_container;
     class base_player;
+    class held_entity;
 }
 
 namespace rust {
@@ -759,23 +760,11 @@ namespace rust {
         FIELD( rust::model_state*, model_state, Offsets::BasePlayer::modelState );
         FIELD( int, player_flags, Offsets::BasePlayer::playerFlags );
 
-        HIDDEN_VALUE( player_eyes*, eyes, Offsets::BasePlayer::eyes,
-            {
-                values[ i ] = values[ i ];
-            }
-        );
-
         ENCRYPTED_VALUE( uint64_t, user_id, Offsets::BasePlayer::userID,
             {
                 values[ i ] = ( ( ( values[ i ] + 2124885473 ) << 16 ) | 
                     ( ( unsigned int )( values[ i ] + 2124885473 ) >> 16 ) ) + 73061426;
             }, {}
-        );
-
-        HIDDEN_VALUE( player_inventory*, inventory, Offsets::BasePlayer::inventory,
-            {
-                values[ i ] = values[ i ];
-            }
         );
 
         FIELD( sys::string*, display_name, Offsets::BasePlayer::_displayName );
@@ -787,6 +776,67 @@ namespace rust {
             um::caller& caller = um::get_caller_for_thread();
 
             return caller( get_speed, this, running, ducking, crawling );
+        }
+
+        player_eyes* get_eyes() {
+            unity::game_object* game_object = get_game_object();
+            if ( !is_valid_ptr( game_object ) )
+                return nullptr;
+
+            return game_object->get_component<rust::player_eyes>();
+        }
+
+        player_inventory* get_inventory() {
+            unity::game_object* game_object = get_game_object();
+            if ( !is_valid_ptr( game_object ) )
+                return nullptr;
+
+            return game_object->get_component<rust::player_inventory>();
+        }
+
+        item* get_held_item() {
+            player_inventory* inventory = get_inventory();
+            if ( !is_valid_ptr( inventory ) )
+                return nullptr;
+
+            item_container* belt = inventory->container_belt;
+            if ( !is_valid_ptr( belt ) )
+                return nullptr;
+
+            sys::list<item*>* items_list = belt->item_list;
+            if ( !is_valid_ptr( items_list ) || !is_valid_ptr( items_list->items ) )
+                return nullptr;
+
+            sys::array<item*>* items = items_list->items;
+            if ( !is_valid_ptr( items ) )
+                return nullptr;
+
+            uint64_t active_item_id = cl_active_item;
+
+            // The list contains the actual count, not the underlying array
+            for ( size_t i = 0; i < items_list->size; i++ ) {
+                item* item_ = items->buffer[ i ];
+                if ( !is_valid_ptr( item_ ) )
+                    continue;
+
+                if ( item_->uid == active_item_id ) {
+                    return item_;
+                }
+            }
+
+            return nullptr;
+        }
+
+        held_entity* get_held_entity() {
+            item* held_item = get_held_item();
+            if ( !held_item )
+                return nullptr;
+
+            base_entity* held_entity_ = held_item->held_entity;
+            if ( !is_valid_ptr( held_entity_ ) )
+                return nullptr;
+
+            return held_entity_->as<held_entity>();
         }
 
         static inline il2cpp_class* s_klass;
@@ -828,6 +878,11 @@ namespace rust {
         static inline il2cpp_class* s_klass;
     };
 
+    class base_melee : public attack_entity {
+    public:
+        static inline il2cpp_class* s_klass;
+    };
+
     class base_projectile : public attack_entity {
     public:
         static inline il2cpp_class* s_klass;
@@ -851,5 +906,55 @@ namespace rust {
     class outline_manager {
     public:
         static inline il2cpp_class* s_klass;
+    };
+
+    class projectile_shoot {
+    public:
+        class projectile {
+        public:
+            FIELD( Vector3, start_pos, Offsets::ProtoBuf_ProjectileShoot_Projectile::startPos );
+            FIELD( Vector3, start_vel, Offsets::ProtoBuf_ProjectileShoot_Projectile::startVel );
+        };
+
+        FIELD( sys::list<projectile*>*, projectiles, Offsets::ProtoBuf_ProjectileShoot::projectiles );
+
+        static inline il2cpp_class* s_klass;
+    };
+
+    class player_projectile_update {
+    public:
+        FIELD( int, projectile_id, Offsets::ProtoBuf_PlayerProjectileUpdate::projectileID );
+        FIELD( Vector3, cur_position, Offsets::ProtoBuf_PlayerProjectileUpdate::curPosition );
+        FIELD( Vector3, cur_velocity, Offsets::ProtoBuf_PlayerProjectileUpdate::curVelocity );
+        FIELD( float, travel_time, Offsets::ProtoBuf_PlayerProjectileUpdate::travelTime );
+        FIELD( bool, should_pool, Offsets::ProtoBuf_PlayerProjectileUpdate::ShouldPool );
+
+        static inline il2cpp_class* s_klass;
+    };
+
+    class player_projectile_attack {
+    public:
+        static inline il2cpp_class* s_klass;
+    };
+
+    class player_tick {
+    public:
+        static inline il2cpp_class* s_klass;
+    };
+
+    class projectile {
+    public:
+
+    };
+
+    class local_player {
+    public:
+        static base_player* get_entity() {
+            base_player* ( *get_entity )() = ( decltype( get_entity ) )( game_assembly + Offsets::LocalPlayer::get_Entity );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_entity );
+        }
     };
 }

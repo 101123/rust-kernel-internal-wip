@@ -737,15 +737,11 @@ bool init_player_if_needed( rust::base_player* player, cached_player& cached_pla
     if ( cached_player.init )
         return true;
 
-    unity::game_object* game_object = player->get_game_object();
-    if ( !is_valid_ptr( game_object ) )
-        return false;
-
-    rust::player_eyes* eyes = game_object->get_component<rust::player_eyes>();
+    rust::player_eyes* eyes = player->get_eyes();
     if ( !is_valid_ptr( eyes ) )
         return false;
 
-    rust::player_inventory* inventory = game_object->get_component<rust::player_inventory>();
+    rust::player_inventory* inventory = player->get_inventory();
     if ( !is_valid_ptr( inventory ) )
         return false;
 

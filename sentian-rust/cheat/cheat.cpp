@@ -39,8 +39,13 @@ class_lookup class_lookups[] = {
 	{ &rust::outline_manager::s_klass, nullptr, nullptr, OutlineManager_TypeDefinitionIndex },
 	{ &rust::held_entity::s_klass, &rust::held_entity::s_type_object, nullptr, HeldEntity_TypeDefinitionIndex },
 	{ &rust::attack_entity::s_klass, nullptr, nullptr, AttackEntity_TypeDefinitionIndex },
+	{ &rust::base_melee::s_klass, nullptr, nullptr, BaseMelee_TypeDefinitionIndex },
 	{ &rust::base_projectile::s_klass, nullptr, nullptr, BaseProjectile_TypeDefinitionIndex },
-	{ &rust::player_walk_movement::s_klass, nullptr, nullptr, PlayerWalkMovement_TypeDefinitionIndex }
+	{ &rust::player_walk_movement::s_klass, nullptr, nullptr, PlayerWalkMovement_TypeDefinitionIndex },
+	{ &rust::player_projectile_update::s_klass, nullptr, nullptr, ProtoBuf_PlayerProjectileUpdate_TypeDefinitionIndex },
+	{ &rust::player_projectile_attack::s_klass, nullptr, nullptr, ProtoBuf_PlayerProjectileAttack_TypeDefinitionIndex },
+	{ &rust::projectile_shoot::s_klass, nullptr, nullptr, ProtoBuf_ProjectileShoot_TypeDefinitionIndex },
+	{ &rust::player_tick::s_klass, nullptr, nullptr, PlayerTick_TypeDefinitionIndex }
 };
 
 bool populate_classes() {
