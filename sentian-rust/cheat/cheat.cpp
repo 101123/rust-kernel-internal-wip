@@ -160,13 +160,22 @@ bool resolve_hooks() {
 		.handler = movement_hook_handler
 	};
 
+	hook projectile_shoot_hook {
+		.init = false,
+		.type = hook_type::vftable,
+		.value = ( uintptr_t* )( ( uintptr_t )rust::projectile_shoot::s_klass + Offsets::IProto::WriteToStream_vtableoff ),
+		.original = 0ull,
+		.corrupt = generate_corrupt_value(),
+		.handler = projectile_shoot_write_to_stream_hook_handler
+	};
+
 	auto& hooks = hook_manager::hooks;
 
 	hooks.add( create_networkable_hook );
 	hooks.add( destroy_networkable_hook );
-	// hooks.add( on_pre_cull_hook );
 	hooks.add( on_render_image_hook );
-	hooks.add( movement_hook );
+	//hooks.add( movement_hook );
+	hooks.add( projectile_shoot_hook );
 
 	return true;
 }

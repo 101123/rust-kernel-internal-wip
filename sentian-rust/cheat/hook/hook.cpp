@@ -178,5 +178,75 @@ void movement_hook( rust::player_walk_movement* player_walk_movement, rust::mode
 }
 
 void movement_hook_handler( _CONTEXT* context ) {
-	movement_hook( ( rust::player_walk_movement* )context->Rcx, ( rust::model_state* )context->Rdx );
+	// movement_hook( ( rust::player_walk_movement* )context->Rcx, ( rust::model_state* )context->Rdx );
+}
+
+void projectile_shoot_write_to_stream_hook( sys::list<rust::projectile_shoot::projectile*>* server_projectiles_list, sys::list<rust::projectile*>* created_projectiles_list ) {
+	if ( !is_valid_ptr( created_projectiles_list ) || !is_valid_ptr( created_projectiles_list->items ) )
+		return;
+
+	sys::array<rust::projectile_shoot::projectile*>* server_projectiles = server_projectiles_list->items;
+	if ( !is_valid_ptr( server_projectiles ) )
+		return;
+
+	sys::array<rust::projectile*>* client_projectiles = created_projectiles_list->items;
+	if ( !is_valid_ptr( server_projectiles ) )
+		return;
+
+	LOG( "Projectile ct: %d\n", server_projectiles_list->size );
+
+	// The list contains the actual count, not the underlying array
+	for ( size_t i = 0; i < server_projectiles_list->size; i++ ) {
+		rust::projectile_shoot::projectile* server_projectile = server_projectiles->buffer[ i ];
+		if ( !is_valid_ptr( server_projectile ) )
+			continue;
+
+		rust::projectile* client_projectile = client_projectiles->buffer[ i ];
+		if ( !is_valid_ptr( client_projectile ) )
+			continue;
+
+		LOG( "Server: %p, Client: %p\n", server_projectile, client_projectile );
+	}
+}
+
+void projectile_shoot_write_to_stream_hook_handler( _CONTEXT* context ) {
+	rust::projectile_shoot* projectile_shoot = ( rust::projectile_shoot* )context->Rcx;
+	if ( !is_valid_ptr( projectile_shoot ) || !is_valid_ptr( projectile_shoot->projectiles ) )
+		return;
+
+	rust::base_player* local_player = rust::local_player::get_entity();
+	if ( !is_valid_ptr( local_player ) )
+		return;
+
+	rust::held_entity* held_entity = local_player->get_held_entity();
+	if ( !held_entity )
+		return;
+
+	if ( held_entity->as<rust::base_projectile>() ) {
+		// TODO: Improve this to lessen chance of false positives
+		static context_search search = context_search<sys::list<rust::projectile*>*>( context,
+			[&]( sys::list<rust::projectile*>* value ) {
+				if ( !is_valid_ptr( value ) || !is_valid_ptr( value->items ) )
+					return false;
+
+				return value->size == projectile_shoot->projectiles->size;
+			}, true, 0x100 );
+
+		if ( !search.resolved() )
+			return;
+
+		projectile_shoot_write_to_stream_hook( projectile_shoot->projectiles, search.get( context ) );
+	}
+
+	else if ( held_entity->as<rust::base_melee>() ) {
+		
+	}
+}
+
+void player_projectile_update_write_to_stream_hook_handler( _CONTEXT* context ) {
+
+}
+
+void player_projectile_attack_write_to_stream_hook_handler( _CONTEXT* context ) {
+
 }
