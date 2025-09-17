@@ -133,21 +133,6 @@ bool resolve_hooks() {
 		.handler = destroy_networkable_hook_handler
 	};
 
-	uintptr_t rust_camera_main_camera_on_pre_cull_method = util::find_pattern(
-		game_assembly + Offsets::MainCamera::OnPreCull, "\xF0\x83\x0C\x24\x00\x48\x8D\x0D", 0x100 );
-
-	if ( !is_valid_ptr( rust_camera_main_camera_on_pre_cull_method ) )
-		return false;
-
-	hook on_pre_cull_hook {
-		.init = false,
-		.type = hook_type::method_info,
-		.value = ( uintptr_t* )util::relative_32( rust_camera_main_camera_on_pre_cull_method + 5, 3 ),
-		.original = 0ull,
-		.corrupt = generate_corrupt_value(),
-		.handler = on_pre_cull_hook_handler
-	};
-
 	method_info* outline_manager_on_render_image_method = il2cpp_class_get_method_from_name( rust::outline_manager::s_klass, "OnRenderImage", 2 );
 	if ( !outline_manager_on_render_image_method )
 		return false;
@@ -174,7 +159,7 @@ bool resolve_hooks() {
 
 	hooks.add( create_networkable_hook );
 	hooks.add( destroy_networkable_hook );
-	hooks.add( on_pre_cull_hook );
+	// hooks.add( on_pre_cull_hook );
 	hooks.add( on_render_image_hook );
 	hooks.add( movement_hook );
 

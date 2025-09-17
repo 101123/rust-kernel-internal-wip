@@ -127,17 +127,7 @@ void destroy_networkable_hook_handler( _CONTEXT* context ) {
 	destroy_networkable_hook( search.get( context ) );
 }
 
-void on_pre_cull_hook() {
-	entity_manager::update();
-
-	if ( unity::input::get_key_down( unity::key_code::y ) ) {
-		glow_manager::enabled = !glow_manager::enabled;
-	}
-}
-
-void on_pre_cull_hook_handler( _CONTEXT* context ) {
-	on_pre_cull_hook();
-}
+// TODO: Clean up and put asset bundle loading in another place
 
 bool init = false;
 
@@ -158,6 +148,9 @@ void on_render_image_hook_handler( _CONTEXT* context ) {
 		glow_manager::init( asset_bundle );
 		init = true;
 	}
+
+	// Update entities
+	entity_manager::update();
 
 	glow_manager::on_render_image_hook( ( unity::render_texture* )context->Rdx, ( unity::render_texture* )context->R8 );
 
