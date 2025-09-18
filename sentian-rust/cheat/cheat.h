@@ -4,14 +4,17 @@
 
 struct _CONTEXT;
 
-enum class hook_type : uint8_t {
-	method_info,
-	vftable
-};
+namespace hook_flags {
+	enum : int {
+		method_info = 1,
+		vftable = 2,
+		post = 4
+	};
+}
 
 struct hook {
 	bool init;
-	hook_type type;
+	int flags;
 	uintptr_t* value;
 	uintptr_t original;
 	uint64_t corrupt;

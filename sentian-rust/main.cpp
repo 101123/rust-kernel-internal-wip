@@ -184,16 +184,52 @@ bool is_exception_hook( CONTEXT* context, uint64_t find, uint64_t replace, uint6
 	return match;
 }
 
+void post_hook_impl( _CONTEXT* context ) {
+	uint64_t integers[] = {
+		context->Rcx,
+		context->Rdx,
+		context->R8,
+		context->R9,
+		*( uint64_t* )( context->Rsp + 0x8 ),
+		*( uint64_t* )( context->Rsp + 0x10 ),
+		*( uint64_t* )( context->Rsp + 0x18 ),
+		*( uint64_t* )( context->Rsp + 0x20 )
+	};
+
+	float floats[] = {
+		*( float* )&context->Xmm0,
+		*( float* )&context->Xmm1,
+		*( float* )&context->Xmm2,
+		*( float* )&context->Xmm3
+	};
+
+	// Preserve return address
+	uintptr_t retaddr = *( uintptr_t* )( context->Rsp );
+
+	um::caller& caller = um::get_caller_for_thread();
+
+	// Call the original, rip is correct from is_exception_hook call prior
+	um::detail::run_usermode_call( caller.get_buffer(), context->Rip, integers, floats );
+
+	// Set rip to return address
+	context->Rip = retaddr;
+}
+
 bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t previous_mode ) {
 	if ( is_rust_process() ) {
 		for ( const hook& hook : hook_manager::hooks ) {
 			if ( !hook.init )
 				continue;
 
-			if ( is_exception_hook( context, hook.corrupt, hook.original ) ) {
-				hook.handler( context );
-				return true;
+			if ( !is_exception_hook( context, hook.corrupt, hook.original ) )
+				continue;
+
+			if ( hook.flags & ( hook_flags::vftable | hook_flags::post ) ) {
+				post_hook_impl( context );
 			}
+
+			hook.handler( context );
+			return true;
 		}
 	}
 

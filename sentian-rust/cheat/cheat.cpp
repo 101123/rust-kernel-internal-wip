@@ -116,7 +116,7 @@ bool resolve_hooks() {
 
 	hook create_networkable_hook {
 		.init = false,
-		.type = hook_type::method_info,
+		.flags = hook_flags::method_info,
 		.value = ( uintptr_t* )util::relative_32( facepunch_pool_get_networkable_method, 3 ),
 		.original = 0ull,
 		.corrupt = generate_corrupt_value(),
@@ -131,7 +131,7 @@ bool resolve_hooks() {
 
 	hook destroy_networkable_hook {
 		.init = false,
-		.type = hook_type::method_info,
+		.flags = hook_flags::method_info,
 		.value = ( uintptr_t* )util::relative_32( facepunch_pool_free_networkable_method, 3 ),
 		.original = 0ull,
 		.corrupt = generate_corrupt_value(),
@@ -144,7 +144,7 @@ bool resolve_hooks() {
 
 	hook on_render_image_hook {
 		.init = false,
-		.type = hook_type::vftable,
+		.flags = hook_flags::vftable | hook_flags::post,
 		.value = ( uintptr_t* )&outline_manager_on_render_image_method->method_ptr,
 		.original = 0ull,
 		.corrupt = generate_corrupt_value(),
@@ -153,7 +153,7 @@ bool resolve_hooks() {
 
 	hook movement_hook {
 		.init = false,
-		.type = hook_type::vftable,
+		.flags = hook_flags::vftable,
 		.value = ( uintptr_t* )( ( uintptr_t )rust::player_walk_movement::s_klass + Offsets::PlayerWalkMovement::DoFixedUpdate_vtableoff ),
 		.original = 0ull,
 		.corrupt = generate_corrupt_value(),
@@ -162,7 +162,7 @@ bool resolve_hooks() {
 
 	hook projectile_shoot_hook {
 		.init = false,
-		.type = hook_type::vftable,
+		.flags = hook_flags::vftable,
 		.value = ( uintptr_t* )( ( uintptr_t )rust::projectile_shoot::s_klass + Offsets::IProto::WriteToStream_vtableoff ),
 		.original = 0ull,
 		.corrupt = generate_corrupt_value(),
@@ -200,7 +200,7 @@ void hook_manager::place_hooks() {
 			hook.original = *hook.value;
 
 			// If it's a vftable hook, we set the corrupted value to the address of the function - 1 so that it lands on function padding (0xCC)
-			if ( hook.type == hook_type::vftable ) {
+			if ( hook.flags & hook_flags::vftable ) {
 				hook.corrupt = hook.original - 1;
 			}
 

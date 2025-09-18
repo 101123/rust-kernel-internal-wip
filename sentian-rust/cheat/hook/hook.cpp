@@ -75,37 +75,6 @@ private:
 	size_t m_offset;
 };
 
-void call_original_and_return( _CONTEXT* context ) {
-	uint64_t integers[] = {
-		context->Rcx,
-		context->Rdx,
-		context->R8,
-		context->R9,
-		*( uint64_t* )( context->Rsp + 0x8 ),
-		*( uint64_t* )( context->Rsp + 0x10 ),
-		*( uint64_t* )( context->Rsp + 0x18 ),
-		*( uint64_t* )( context->Rsp + 0x20 )
-	};
-
-	float floats[] = {
-		*( float* )&context->Xmm0,
-		*( float* )&context->Xmm1,
-		*( float* )&context->Xmm2,
-		*( float* )&context->Xmm3
-	};
-
-	// Preserve return address
-	uintptr_t retaddr = *( uintptr_t* )( context->Rsp );
-
-	um::caller& caller = um::get_caller_for_thread();
-
-	// Call the original
-	um::detail::run_usermode_call( caller.get_buffer(), context->Rip, integers, floats );
-
-	// Set rip to return address
-	context->Rip = retaddr;
-}
-
 void create_networkable_hook( rust::base_networkable* networkable ) {
 	if ( !is_valid_ptr( networkable ) || !is_valid_ptr( networkable->cached_ptr ) )
 		return;
@@ -163,8 +132,6 @@ void destroy_networkable_hook_handler( _CONTEXT* context ) {
 bool init = false;
 
 void on_render_image_hook_handler( _CONTEXT* context ) {
-	call_original_and_return( context );
-
 	if ( !init ) {
 		asset_bundle = unity::asset_bundle::load_from_file( L"C://assetbundle", 0u, 0ull );
 		glow_manager::init( asset_bundle );
