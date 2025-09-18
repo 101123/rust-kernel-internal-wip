@@ -1,4 +1,4 @@
-#include "hook.h"
+#include "hooks.h"
 #include "global.h"	
 #include "cheat/cheat.h"
 #include "cheat/sdk/sdk.h"
@@ -164,7 +164,22 @@ void movement_hook( rust::player_walk_movement* player_walk_movement, rust::mode
 }
 
 void movement_hook_handler( _CONTEXT* context ) {
-	// movement_hook( ( rust::player_walk_movement* )context->Rcx, ( rust::model_state* )context->Rdx );
+	movement_hook( ( rust::player_walk_movement* )context->Rcx, ( rust::model_state* )context->Rdx );
+}
+
+void player_tick_write_to_stream_delta_hook( rust::player_tick* player_tick ) {
+	if ( !is_valid_ptr( player_tick ) )
+		return;
+
+	rust::model_state* model_state = player_tick->model_state;
+	if ( !is_valid_ptr( model_state ) )
+		return;
+
+	model_state->set_flag( rust::model_state::flag::sprinting, true );
+}
+
+void player_tick_write_to_stream_delta_hook_handler( _CONTEXT* context ) {
+	player_tick_write_to_stream_delta_hook( ( rust::player_tick* )context->Rcx );
 }
 
 void projectile_shoot_write_to_stream_hook( sys::list<rust::projectile_shoot::projectile*>* server_projectiles_list, sys::list<rust::projectile*>* created_projectiles_list ) {

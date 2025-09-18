@@ -1,7 +1,7 @@
 #include "cheat/cheat.h"
 #include "global.h"
 #include "sdk/sdk.h"
-#include "cheat/hook/hook.h"
+#include "cheat/hooks/hooks.h"
 #include "util.h"
 #include "cheat/entities.h"
 
@@ -179,14 +179,24 @@ bool resolve_hooks() {
 		.handler = item_icon_try_to_move_hook_handler
 	};
 
+	hook player_tick_hook {
+		.init = false,
+		.flags = hook_flags::vftable,
+		.value = ( uintptr_t* )( ( uintptr_t )rust::player_tick::s_klass + Offsets::IProto::WriteToStreamDelta_vtableoff ),
+		.original = 0ull,
+		.corrupt = generate_corrupt_value(),
+		.handler = player_tick_write_to_stream_delta_hook_handler
+	};
+
 	auto& hooks = hook_manager::hooks;
 
 	hooks.add( create_networkable_hook );
 	hooks.add( destroy_networkable_hook );
 	hooks.add( on_render_image_hook );
-	//hooks.add( movement_hook );
+	hooks.add( movement_hook );
 	hooks.add( projectile_shoot_hook );
 	hooks.add( try_to_move_hook );
+	hooks.add( player_tick_hook );
 
 	return true;
 }

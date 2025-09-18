@@ -937,8 +937,20 @@ namespace rust {
         static inline il2cpp_class* s_klass;
     };
 
+    class input_message {
+    public:
+
+    };
+
     class player_tick {
     public:
+        FIELD( input_message*, input_state, Offsets::PlayerTick::inputState );
+        FIELD( Vector3, position, Offsets::PlayerTick::position );
+        FIELD( rust::model_state*, model_state, Offsets::PlayerTick::modelState );
+        FIELD( uint64_t, active_item, Offsets::PlayerTick::activeItem );
+        FIELD( Vector3, eye_pos, Offsets::PlayerTick::eyePos );
+        FIELD( uint64_t, parent_id, Offsets::PlayerTick::parentID );
+
         static inline il2cpp_class* s_klass;
     };
 
