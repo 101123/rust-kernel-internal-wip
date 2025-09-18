@@ -236,3 +236,17 @@ void player_projectile_update_write_to_stream_hook_handler( _CONTEXT* context ) 
 void player_projectile_attack_write_to_stream_hook_handler( _CONTEXT* context ) {
 
 }
+
+void item_icon_try_to_move_hook( rust::item_icon* item_icon ) {
+	if ( !is_valid_ptr( item_icon ) )
+		return;
+
+	// Instant loot
+	{
+		item_icon->run_timed_action();
+	}
+}
+
+void item_icon_try_to_move_hook_handler( _CONTEXT* context ) {
+	item_icon_try_to_move_hook( ( rust::item_icon* )context->Rcx );
+}

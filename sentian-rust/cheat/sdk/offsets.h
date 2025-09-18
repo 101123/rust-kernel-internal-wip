@@ -1567,6 +1567,7 @@ namespace Offsets {
 	namespace ItemIcon {
 
 		// Functions
+		constexpr const static size_t RunTimedAction = 0x23673f0;
 		constexpr const static size_t SetTimedLootAction = 0x2370710;
 	}
 

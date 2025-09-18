@@ -45,7 +45,8 @@ class_lookup class_lookups[] = {
 	{ &rust::player_projectile_update::s_klass, nullptr, nullptr, ProtoBuf_PlayerProjectileUpdate_TypeDefinitionIndex },
 	{ &rust::player_projectile_attack::s_klass, nullptr, nullptr, ProtoBuf_PlayerProjectileAttack_TypeDefinitionIndex },
 	{ &rust::projectile_shoot::s_klass, nullptr, nullptr, ProtoBuf_ProjectileShoot_TypeDefinitionIndex },
-	{ &rust::player_tick::s_klass, nullptr, nullptr, PlayerTick_TypeDefinitionIndex }
+	{ &rust::player_tick::s_klass, nullptr, nullptr, PlayerTick_TypeDefinitionIndex },
+	{ &rust::item_icon::s_klass, nullptr, nullptr, ItemIcon_TypeDefinitionIndex }
 };
 
 bool populate_classes() {
@@ -169,6 +170,15 @@ bool resolve_hooks() {
 		.handler = projectile_shoot_write_to_stream_hook_handler
 	};
 
+	hook try_to_move_hook {
+		.init = false,
+		.flags = hook_flags::vftable | hook_flags::post,
+		.value = ( uintptr_t* )( ( uintptr_t )rust::item_icon::s_klass + 0x368 ),
+		.original = 0ull,
+		.corrupt = generate_corrupt_value(),
+		.handler = item_icon_try_to_move_hook_handler
+	};
+
 	auto& hooks = hook_manager::hooks;
 
 	hooks.add( create_networkable_hook );
@@ -176,6 +186,7 @@ bool resolve_hooks() {
 	hooks.add( on_render_image_hook );
 	//hooks.add( movement_hook );
 	hooks.add( projectile_shoot_hook );
+	hooks.add( try_to_move_hook );
 
 	return true;
 }

@@ -957,4 +957,18 @@ namespace rust {
             return caller( get_entity );
         }
     };
+
+    class item_icon {
+    public:
+        void run_timed_action() {
+            void ( *run_timed_action )( item_icon* ) = 
+                ( decltype( run_timed_action ) )( game_assembly + Offsets::ItemIcon::RunTimedAction );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( run_timed_action, this );
+        }
+
+        static inline il2cpp_class* s_klass;
+    };
 }
