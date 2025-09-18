@@ -10,6 +10,8 @@ namespace hook_flags {
 		vftable = 2,
 		post = 4
 	};
+
+	constexpr int post_compatible = vftable | post;
 }
 
 struct hook {

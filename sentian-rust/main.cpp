@@ -224,7 +224,7 @@ bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t
 			if ( !is_exception_hook( context, hook.corrupt, hook.original ) )
 				continue;
 
-			if ( hook.flags & ( hook_flags::vftable | hook_flags::post ) ) {
+			if ( ( hook.flags & hook_flags::post_compatible ) == hook_flags::post_compatible ) {
 				post_hook_impl( context );
 			}
 
