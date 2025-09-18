@@ -22,7 +22,8 @@ namespace um {
 		bool initialize();
 		void destroy();
 
-		bool initialized() { return m_initialized; };
+		bool initialized() { return m_initialized; }
+		uintptr_t get_buffer() { return m_buffer; }
 
 		void* alloc( size_t size, size_t alignment = 1ull ) {
 			uintptr_t aligned_address = ( m_stack + alignment - 1 ) & ~( alignment - 1 );
