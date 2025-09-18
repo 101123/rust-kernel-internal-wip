@@ -124,7 +124,9 @@ void deinit_cheat() {
 	entity_manager::destroy();
 	glow_manager::destroy();
 
-	asset_bundle->unload( true );
+	if ( asset_bundle ) {
+		asset_bundle->unload( true );
+	}
 
 	um::destroy_callers();
 }
@@ -190,10 +192,10 @@ void post_hook_impl( _CONTEXT* context ) {
 		context->Rdx,
 		context->R8,
 		context->R9,
-		*( uint64_t* )( context->Rsp + 0x8 ),
-		*( uint64_t* )( context->Rsp + 0x10 ),
-		*( uint64_t* )( context->Rsp + 0x18 ),
-		*( uint64_t* )( context->Rsp + 0x20 )
+		*( uint64_t* )( context->Rsp + 0x20 ),
+		*( uint64_t* )( context->Rsp + 0x28 ),
+		*( uint64_t* )( context->Rsp + 0x30 ),
+		*( uint64_t* )( context->Rsp + 0x38 )
 	};
 
 	float floats[] = {
@@ -211,7 +213,8 @@ void post_hook_impl( _CONTEXT* context ) {
 	// Call the original, rip is correct from is_exception_hook call prior
 	um::detail::run_usermode_call( caller.get_buffer(), context->Rip, integers, floats );
 
-	// Set rip to return address
+	// Emulate ret
+	context->Rsp += 0x8;
 	context->Rip = retaddr;
 }
 
