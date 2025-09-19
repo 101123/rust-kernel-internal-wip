@@ -228,13 +228,22 @@ void projectile_shoot_write_to_stream_hook_handler( _CONTEXT* context ) {
 		return;
 
 	if ( held_entity->as<rust::base_projectile>() ) {
-		// TODO: Improve this to lessen chance of false positives
+		// TODO: Improve this further
 		static context_search search = context_search<sys::list<rust::projectile*>*>( context,
 			[&]( sys::list<rust::projectile*>* value ) {
 				if ( !is_valid_ptr( value ) || !is_valid_ptr( value->items ) )
 					return false;
 
-				return value->size == projectile_shoot->projectiles->size;
+				il2cpp_class* klass = value->klass;
+				if ( !is_valid_ptr( klass ) || !is_valid_ptr( klass->name ) )
+					return false;
+
+				// Protect against garbage
+				char class_name[ 64 ] = {};
+				memcpy( class_name, klass->name, sizeof( class_name ) - 1llu );
+
+				// We've found a list, it may or not contain projectile objects
+				return strcmp( class_name, "List`1" ) == 0;
 			}, true, 0x100 );
 
 		if ( !search.resolved() )

@@ -35,7 +35,7 @@ namespace sys {
     };
 
     template <typename T>
-    class list {
+    class list : public il2cpp_object {
     private:
         uint8_t _[ 0x10 ];
     public:
