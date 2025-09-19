@@ -4,6 +4,7 @@
 #include "cheat/entities.h"
 
 #include "renderer.h"
+#include "gui.h"
 
 Matrix4x4 view_matrix;
 Vector3 camera_position;
@@ -215,6 +216,8 @@ void on_render( IDXGISwapChain* swap_chain ) {
 	renderer::draw_text( 10.f, 10.f, fonts::verdana, text_flags::drop_shadow, COL32( 255, 255, 255, 255 ), "sentian.gg" );
 
 	draw_esp();
+
+	gui::run();
 
 	renderer::end_frame();
 }

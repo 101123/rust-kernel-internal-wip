@@ -13,6 +13,8 @@
 #include "render.h"
 #include "renderer.h"
 
+#include "gui.h"
+
 struct IDXGISwapChain;
 
 namespace user_sdk {
@@ -114,6 +116,9 @@ bool init_cheat() {
 	// Initialize entity manager internal maps
 	entity_manager::init();
 
+	// Initialize gui draw list
+	gui::init();
+
 	return true;
 }
 
@@ -127,6 +132,8 @@ void deinit_cheat() {
 
 	// TODO: Fix bsod when calling this
 	// renderer::destroy();
+
+	gui::destroy();
 
 	if ( asset_bundle ) {
 		asset_bundle->unload( true );

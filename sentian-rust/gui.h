@@ -1,7 +1,7 @@
 #pragma once
 
 namespace gui {
-	bool open;
+	inline bool open;
 
 	void init();
 	void destroy();

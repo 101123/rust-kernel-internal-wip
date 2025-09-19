@@ -8,6 +8,9 @@
 #include "math/vec4.h"
 
 #include "vars.h"
+#include "um.h"
+
+#include "cheat/sdk/sdk.h"
 
 #include <imgui/imgui_internal.h>
 
@@ -87,8 +90,9 @@ public:
         command.bounds = rect( x, y, 0.f, 0.f );
         command.z_index = current_z_index_;
 
-        memcpy( command.text.buffer, text, min( strlen( text ), sizeof( command.text.buffer ) ) );
-        command.text.buffer[ _countof( command.text.buffer ) - 1ull ] = '\0';
+        int length = min( strlen( text ), sizeof( command.text.buffer ) );
+        memcpy( command.text.buffer, text, length );
+        command.text.buffer[ length - 1 ] = '\0';
         command.text.font = font;
         command.text.flags = flags;
         command.text.color = color;
@@ -203,7 +207,7 @@ state_history2<bool> left_mouse_state;
 state_history2<Vector2> mouse_position;
 state_history2<uint64_t> active_hash;
 
-rect menu_bounds;
+rect menu_bounds = rect( 400.f, 400.f, 548.f, 480.f );
 
 bool left_mouse_clicked;
 bool left_mouse_held;
@@ -225,7 +229,21 @@ uint32_t gradient_off[ 4 ] = {
 };
 
 void update_input() {
+    left_mouse_state = {
+        .previous = left_mouse_state.current,
+        .current = unity::input::get_mouse_button( 0 )
+    };
 
+    left_mouse_clicked = left_mouse_state.current && !left_mouse_state.previous;
+    left_mouse_held = left_mouse_state.previous && left_mouse_state.current;
+
+    Vector2 mouse_pos = unity::input::get_mouse_position();
+    mouse_pos.y = 1440.f - mouse_pos.y;
+
+    mouse_position = {
+        .previous = mouse_position.current,
+        .current = mouse_pos
+    };
 }
 
 bool mouse_in_rect( const rect& bounds ) {
@@ -429,7 +447,7 @@ public:
     };
 
     template <typename T>
-    void slider( const char* label, char* fmt, T& value, const T& min, const T& max ) {
+    void slider( const char* label, const char* fmt, T& value, const T& min, const T& max ) {
         auto& draw_list = gui_draw_list.get();
 
         static_assert( std::is_arithmetic_v<T> );
@@ -575,6 +593,67 @@ void gui::destroy() {
     gui_draw_list.destruct();
 }
 
-void gui::run() {
+bool init_gui = false;
 
+void draw_gui_background() {
+    renderer::draw_filled_rect( menu_bounds.x, menu_bounds.y, menu_bounds.w, menu_bounds.h, COL32( 40, 40, 40, 255 ) );
+    renderer::draw_filled_rect( menu_bounds.x + 1.f, menu_bounds.y + 1.f, menu_bounds.w - 2.f, menu_bounds.h - 2.f, COL32( 61, 61, 61, 255 ) );
+    renderer::draw_filled_rect( menu_bounds.x + 2.f, menu_bounds.y + 2.f, menu_bounds.w - 4.f, menu_bounds.h - 4.f, COL32( 54, 54, 54, 255 ) );
+
+    rect top_bar = rect( menu_bounds.x + 2.f, menu_bounds.y + 2.f, menu_bounds.w - 4.f, 20.f );
+
+    renderer::draw_filled_rect( top_bar.x, top_bar.y, top_bar.w, top_bar.h, COL32( 50, 50, 50, 255 ) );
+    renderer::draw_filled_rect( top_bar.x, top_bar.y + top_bar.h, top_bar.w, 1.f, COL32( 38, 38, 38, 255 ) );
+    renderer::draw_filled_rect( top_bar.x, top_bar.y + top_bar.h + 1.f, top_bar.w, 1.f, COL32( 61, 61, 61, 255 ) );
+
+    rect bottom_bar = rect( menu_bounds.x + 2.f, menu_bounds.y + ( menu_bounds.h - 18.f ) - 4.f, menu_bounds.w - 4.f, 18.f );
+
+    renderer::draw_filled_rect( bottom_bar.x, bottom_bar.y, bottom_bar.w, 1.f, COL32( 61, 61, 61, 255 ) );
+    renderer::draw_filled_rect( bottom_bar.x, bottom_bar.y + 1.f, bottom_bar.w, 1.f, COL32( 38, 38, 38, 255 ) );
+    renderer::draw_filled_rect( bottom_bar.x, bottom_bar.y + 2.f, bottom_bar.w, 18.f, COL32( 50, 50, 50, 255 ) );
+}
+
+bool bool_ = false;
+float float_ = 0.f;
+int int_ = 0;
+uint32_t col = COL32( 255, 255, 255, 0 );
+
+void gui::run() {
+    auto& draw_list = gui_draw_list.get();
+
+    draw_list.clear();
+
+    update_input();
+
+    char buffer[ 64 ];
+    snprintf( buffer, sizeof( buffer ), "%.2f %.2f %d\n", mouse_position.current.x, mouse_position.current.y, left_mouse_held );
+    renderer::draw_text( 100.f, 100.f, fonts::verdana, text_flags::none, COL32_RED, buffer );
+
+    if ( mouse_in_rect( rect( menu_bounds.x, menu_bounds.y, menu_bounds.w, 30.f ) ) && left_mouse_held ) {
+        menu_bounds.x += mouse_position.current.x - mouse_position.previous.x;
+        menu_bounds.y += mouse_position.current.y - mouse_position.previous.y;
+    }
+
+    draw_gui_background();
+
+    group_box test = group_box( rect( menu_bounds.x + 10.f, menu_bounds.y + 50.f, 260.f, 400.f ), "test" );
+
+    test.begin();
+
+    test.toggle( "This is a toggle", bool_ );
+    test.color_picker( col );
+
+    if ( bool_ ) {
+        test.slider( "This is a slider", "%.2f", float_, 0.f, 100.f );
+    }
+
+    test.end();
+
+    group_box test2 = group_box( rect( menu_bounds.x + 10.f + 260.f + 8.f, menu_bounds.y + 50.f, 260.f, 400.f ) );
+
+    test2.begin();
+
+    test2.end();
+
+    draw_list.render();
 }
