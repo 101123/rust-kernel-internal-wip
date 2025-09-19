@@ -322,6 +322,17 @@ namespace unity {
 
     class shader : public object {
     public:
+        static shader* find( sys::string name ) {
+            shader* ( *find )( sys::string* ) =
+                ( decltype( find ) )( game_assembly + Offsets::Shader::Find );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            sys::string* name_ = caller.push<sys::string>( name );
+
+            return caller( find, name_ );
+        }
+
         static int property_to_id( sys::string name ) {
             int ( *property_to_id )( sys::string* ) =
                 ( decltype( property_to_id ) )( unity_player + Offsets::Shader::PropertyToID );
@@ -382,6 +393,15 @@ namespace unity {
             return caller( set_texture_impl, this, name, value );
         }
 
+        void set_shader( shader* value) {
+            void ( *set_shader )( material*, shader* ) =
+                ( decltype( set_shader ) )( unity_player + Offsets::Material::set_shader );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( set_shader, this, value );
+        }
+
         static inline il2cpp_class* s_klass;
         static inline il2cpp_object* s_type_object;
     };
@@ -404,6 +424,15 @@ namespace unity {
             um::caller& caller = um::get_caller_for_thread();
 
             return caller( get_is_visible, this );
+        }
+
+        sys::array<material*>* get_materials() {
+            sys::array<material*>* ( *get_material_array )( renderer* ) =
+                ( decltype( get_material_array ) )( unity_player + Offsets::Renderer::GetMaterialArray );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_material_array, this );
         }
     };
 
