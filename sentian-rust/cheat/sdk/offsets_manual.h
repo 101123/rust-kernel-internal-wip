@@ -19,6 +19,6 @@ namespace Offsets {
 
     namespace IProto {
         constexpr const static size_t WriteToStreamDelta_vtableoff = 0x1B8;
-        constexpr const static size_t WriteToStream_vtableoff = 0x1D8;
+        constexpr const static size_t WriteToStream_vtableoff = 0x1E8;
     }
 }
