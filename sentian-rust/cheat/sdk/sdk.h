@@ -93,7 +93,9 @@ namespace unity {
         v = 118, w = 119, x = 120, y = 121,
         z = 122,
 
-        f11 = 0x124
+        end = 279,
+
+        f11 = 292
     };
 
     enum hide_flags {

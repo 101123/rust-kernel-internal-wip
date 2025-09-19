@@ -482,7 +482,7 @@ public:
         draw_styled_rect( slider_bounds );
 
         const rect draw_bounds = rect( slider_bounds.x + 3.f, slider_bounds.y + 3.f, slider_bounds.w - 6.f, slider_bounds.h - 6.f );
-        float fill_width = draw_bounds.w * std::clamp( static_cast< float >( *value - min ) / static_cast< float >( max - min ), 0.f, 1.f );
+        float fill_width = draw_bounds.w * std::clamp( static_cast<float>( *value - min ) / static_cast<float>( max - min ), 0.f, 1.f );
 
         draw_list.add_filled_rect_multi_color( draw_bounds.x, draw_bounds.y, fill_width, draw_bounds.h, gradient_on );
 
@@ -501,7 +501,7 @@ public:
     };
 
     template <typename T>
-    void combo_box( const char* label, std::initializer_list<const char*> options, T& value ) {
+    void combo_box( const char* label, std::initializer_list<const char*> options, T* value ) {
         auto& draw_list = gui_draw_list.get();
 
         static_assert( std::is_integral_v<T> );
@@ -516,7 +516,7 @@ public:
 
         const bool hovered = mouse_in_rect( combo_bounds );
 
-        const uint64_t hash = ( uint64_t )&value;
+        const uint64_t hash = ( uint64_t )value;
         const bool active = active_hash.current == hash;
 
         if ( hovered && left_mouse_clicked ) {
@@ -536,7 +536,7 @@ public:
                 const bool hovered = mouse_in_rect( option_bounds );
 
                 if ( hovered && left_mouse_clicked ) {
-                    value = static_cast< T >( i );
+                    *value = static_cast<T>( i );
                     active_hash.current = 0ull;
                 }
 
@@ -548,7 +548,7 @@ public:
 
         draw_styled_rect( combo_bounds );
 
-        draw_list.add_text( position.x + 24.f, position.y + 20.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), options.begin()[ value ] );
+        draw_list.add_text( position.x + 24.f, position.y + 20.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), options.begin()[ *value ] );
 
         draw_list.pop_z_index();
 
@@ -606,11 +606,67 @@ void draw_gui_background() {
     renderer::draw_filled_rect( top_bar.x, top_bar.y + top_bar.h, top_bar.w, 1.f, COL32( 38, 38, 38, 255 ) );
     renderer::draw_filled_rect( top_bar.x, top_bar.y + top_bar.h + 1.f, top_bar.w, 1.f, COL32( 61, 61, 61, 255 ) );
 
+    renderer::draw_text( top_bar.x + 6.f, top_bar.y + 3.f, 0, 0, gradient_on[ 0 ], "sentian" );
+    renderer::draw_text( top_bar.x + 43.f, top_bar.y + 3.f, 0, 0, COL32( 160, 160, 160, 255 ), ".gg" );
+
     rect bottom_bar = rect( menu_bounds.x + 2.f, menu_bounds.y + ( menu_bounds.h - 18.f ) - 4.f, menu_bounds.w - 4.f, 18.f );
 
     renderer::draw_filled_rect( bottom_bar.x, bottom_bar.y, bottom_bar.w, 1.f, COL32( 61, 61, 61, 255 ) );
     renderer::draw_filled_rect( bottom_bar.x, bottom_bar.y + 1.f, bottom_bar.w, 1.f, COL32( 38, 38, 38, 255 ) );
     renderer::draw_filled_rect( bottom_bar.x, bottom_bar.y + 2.f, bottom_bar.w, 18.f, COL32( 50, 50, 50, 255 ) );
+}
+
+enum tabs {
+    combat,
+    visuals,
+    misc,
+    settings
+};
+
+enum combat_subtabs {
+    aimbot
+};
+
+enum visual_subtabs {
+    players,
+    scientists,
+    world,
+    resources,
+    deployables,
+    vehicles,
+    animals,
+    traps,
+    loot
+};
+
+enum misc_subtabs {
+    quality_of_life,
+    movement,
+};
+
+uint32_t current_tab;
+uint32_t current_subtab[ 4 ];
+
+void tab( const char* label, uint32_t value, uint32_t* tab, rect& cursor, float padding, bool subtab = false ) {
+    float width = renderer::calc_text_size( fonts::verdana, label ).x + padding;
+
+    cursor.x -= width;
+
+    const bool selected = value == *tab;
+
+    if ( mouse_in_rect( rect( cursor.x, cursor.y, width, cursor.h ) ) && left_mouse_clicked ) {
+        *tab = value;
+    }
+
+    if ( selected && !subtab ) {
+        renderer::draw_filled_rect_with_flags( cursor.x, cursor.y, width, cursor.h - 1.f, gradient_on[ 0 ], 3.f, draw_flags::round_corners_top );
+        renderer::draw_filled_rect( cursor.x, cursor.y + 3.f, width, cursor.h - 4.f, COL32( 38, 38, 38, 255 ) );
+
+        renderer::draw_filled_rect_with_flags( cursor.x + 1.f, cursor.y + 1.f, width - 2.f, cursor.h - 1.f, COL32( 61, 61, 61, 255 ), 3.f, draw_flags::round_corners_top );
+        renderer::draw_filled_rect_with_flags( cursor.x + 2.f, cursor.y + 2.f, width - 4.f, cursor.h, COL32( 54, 54, 54, 255 ), 3.f, draw_flags::round_corners_top );
+    }
+
+    renderer::draw_text( cursor.x + width / 2.f, cursor.y + 3.f, 0, text_flags::centered, selected ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), label );
 }
 
 void gui::run() {
@@ -620,10 +676,6 @@ void gui::run() {
 
     update_input();
 
-    char buffer[ 64 ];
-    snprintf( buffer, sizeof( buffer ), "%.2f %.2f %d\n", mouse_position.current.x, mouse_position.current.y, left_mouse_held );
-    renderer::draw_text( 100.f, 100.f, fonts::verdana, text_flags::none, COL32_RED, buffer );
-
     if ( mouse_in_rect( rect( menu_bounds.x, menu_bounds.y, menu_bounds.w, 30.f ) ) && left_mouse_held ) {
         menu_bounds.x += mouse_position.current.x - mouse_position.previous.x;
         menu_bounds.y += mouse_position.current.y - mouse_position.previous.y;
@@ -631,25 +683,115 @@ void gui::run() {
 
     draw_gui_background();
 
-    group_box test = group_box( rect( menu_bounds.x + 10.f, menu_bounds.y + 50.f, 260.f, 400.f ), "test" );
+    rect tabs_cursor = rect( menu_bounds.x + menu_bounds.w - 6.f, menu_bounds.y + 3.f, 0.f, 20.f );
 
-    test.begin();
+    tab( "Settings", tabs::settings, &current_tab, tabs_cursor, 20.f );
+    tab( "Miscellaneous", tabs::misc, &current_tab, tabs_cursor, 20.f );
+    tab( "Visuals", tabs::visuals, &current_tab, tabs_cursor, 20.f );
+    tab( "Combat", tabs::combat, &current_tab, tabs_cursor, 20.f );
 
-    test.toggle( "Glow", &glow );
-    test.color_picker( &glow_outline_color );
+    rect subtabs_cursor = rect( menu_bounds.x + menu_bounds.w - 5.f, menu_bounds.y + 28.f, 0.f, 20.f );
 
-    if ( glow ) {
-        test.slider( "Glow blur scale", "%.2f", &glow_blur_scale, 0.f, 10.f );
-        test.slider( "Glow outline scale", "%.2f", &glow_outline_scale, 0.f, 10.f );
+    switch ( current_tab ) {
+        case tabs::combat:
+            tab( "Main", combat_subtabs::aimbot, &current_subtab[ tabs::combat ], subtabs_cursor, 19.f, true );
+            break;
+        case tabs::visuals:
+            tab( "Loot", visual_subtabs::loot, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( "Traps", visual_subtabs::traps, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( "Animals", visual_subtabs::animals, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( "Vehicles", visual_subtabs::vehicles, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( "Deployables", visual_subtabs::deployables, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( "Resources", visual_subtabs::resources, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( "World", visual_subtabs::world, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( "Scientists", visual_subtabs::scientists, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( "Players", visual_subtabs::players, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            break;
+        case tabs::misc:
+            tab( "Movement", misc_subtabs::movement, &current_subtab[ tabs::misc ], subtabs_cursor, 19.f, true );
+            tab( "Quality of life", misc_subtabs::quality_of_life, &current_subtab[ tabs::misc ], subtabs_cursor, 19.f, true );
+            break;
     }
 
-    test.end();
+    group_box left = group_box( rect( menu_bounds.x + 10.f, menu_bounds.y + 50.f, 260.f, 400.f ), "test" );
+    group_box right = group_box( rect( menu_bounds.x + 10.f + 260.f + 8.f, menu_bounds.y + 50.f, 260.f, 400.f ) );
 
-    group_box test2 = group_box( rect( menu_bounds.x + 10.f + 260.f + 8.f, menu_bounds.y + 50.f, 260.f, 400.f ) );
+    switch ( current_tab ) {
+        case tabs::visuals: {
+            switch ( current_subtab[ tabs::visuals ] ) {
+                case visual_subtabs::players: {
+                    left.begin();
+                    
+                    left.toggle( "Enabled", &cvar_players.m_enabled );
+                    left.toggle( "Bounding box", &cvar_players.m_box );
+                    left.color_picker( &cvar_players.m_box_color );
+                    left.toggle( "Skeleton", &cvar_players.m_skeleton );
+                    left.color_picker( &cvar_players.m_skeleton_color );
+                    left.toggle( "Name", &cvar_players.m_name );
+                    left.color_picker( &cvar_players.m_name_color );
+                    left.toggle( "Held item", &cvar_players.m_held_item );
+                    left.color_picker( &cvar_players.m_held_item_color );
 
-    test2.begin();
+                    if ( cvar_players.m_held_item ) {
+                        left.combo_box( "Held item type", { "Text", "Icon" }, &cvar_players.m_held_item_type );
+                    }
 
-    test2.end();
+                    left.toggle( "Distance", &cvar_players.m_distance );
+                    left.color_picker( &cvar_players.m_distance_color );
+
+                    left.end();
+
+                    right.begin();
+
+                    right.toggle( "Glow", &glow );
+                    right.color_picker( &glow_outline_color );
+
+                    if ( glow ) {
+                        right.slider( "Glow blur scale", "%.2f", &glow_blur_scale, 0.f, 10.f );
+                        right.slider( "Glow outline scale", "%.2f", &glow_outline_scale, 0.f, 10.f );
+                    }
+
+                    right.end();
+
+                    break;
+                }
+
+                case visual_subtabs::scientists: {
+                    break;
+                }
+            }
+
+            break;
+        }
+
+        case tabs::misc: {
+            switch ( current_subtab[ tabs::misc ] ) {
+                case misc_subtabs::quality_of_life: {
+                    left.begin();
+                    left.toggle( "Instant loot", &instant_loot );
+                    left.end();
+
+                    right.begin();
+                    right.end();
+
+                    break;
+                }
+
+                case misc_subtabs::movement: {
+                    left.begin();
+                    left.toggle( "Omnisprint", &omnisprint );
+                    left.end();
+
+                    right.begin();
+                    right.end();
+
+                    break;
+                }
+            }
+
+            break;
+        }
+    }
 
     draw_list.render();
 }

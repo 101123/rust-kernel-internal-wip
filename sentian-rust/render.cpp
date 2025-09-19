@@ -121,13 +121,13 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		float half = ( bounds.right - bounds.left ) / 2.f;
 
 		// Bounding box
-		{
+		if ( cvar_players.m_box ) {
 			renderer::draw_rect( bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top, 3.f, COL32( 0, 0, 0, 130 ) );
-			renderer::draw_rect( bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top, 1.f, COL32( 125, 195, 255, 255 ) );
+			renderer::draw_rect( bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top, 1.f, cvar_players.m_box_color );
 		}
 
 		// Skeleton
-		{
+		if ( cvar_players.m_skeleton ) {
 			for ( size_t j = 0; j < _countof( bone_connections ); j++ ) {
 				const w2s_result& a_w2s = w2s_results[ bone_connections[ j ][ 0 ] ];
 				const w2s_result& b_w2s = w2s_results[ bone_connections[ j ][ 1 ] ];
@@ -137,30 +137,30 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 				const Vector2& a_pos = a_w2s.screen;
 				const Vector2& b_pos = b_w2s.screen;
 
-				renderer::draw_line( a_pos.x, a_pos.y, b_pos.x, b_pos.y, 1.f, COL32( 125, 195, 255, 255 ) );
+				renderer::draw_line( a_pos.x, a_pos.y, b_pos.x, b_pos.y, 1.f, cvar_players.m_skeleton_color );
 			}
 		}
 
 		// Name
-		{
-			renderer::draw_text( bounds.left + half, bounds.top - 14.f, fonts::verdana, text_flags::centered | text_flags::drop_shadow, COL32( 125, 195, 255, 220 ), cached_player.name );
+		if ( cvar_players.m_name ) {
+			renderer::draw_text( bounds.left + half, bounds.top - 14.f, fonts::verdana, text_flags::centered | text_flags::drop_shadow, cvar_players.m_name_color, cached_player.name );
 		}
 
 		float offset = 0.f;
 
 		// Held item
-		{
+		if ( cvar_players.m_held_item ) {
 			if ( cached_player.active_item != -1 ) {
-				renderer::draw_text( bounds.left + half, bounds.bottom + 1.f, fonts::small_fonts, text_flags::centered, COL32( 125, 195, 255, 220 ), cached_player.belt_items[ cached_player.active_item ].name );
+				renderer::draw_text( bounds.left + half, bounds.bottom + 1.f, fonts::small_fonts, text_flags::centered, cvar_players.m_held_item_color, cached_player.belt_items[ cached_player.active_item ].name );
 				offset += 8.f + 1.f;
 			}
 		}
 
 		// Distance
-		{
+		if ( cvar_players.m_distance ) {
 			char buffer[ 16 ] = {};
 			snprintf( buffer, sizeof( buffer ), "%dM", ( int )distance );
-			renderer::draw_text( bounds.left + half, bounds.bottom + 1.f + offset, fonts::small_fonts, text_flags::centered, COL32( 125, 195, 255, 220 ), buffer );
+			renderer::draw_text( bounds.left + half, bounds.bottom + 1.f + offset, fonts::small_fonts, text_flags::centered, cvar_players.m_distance_color, buffer );
 		}
 	}
 }
@@ -199,7 +199,9 @@ void draw_esp() {
 		renderer::draw_text( screen.x, screen.y + 8.f, fonts::small_fonts, text_flags::centered, COL32_WHITE, buffer );
 	}
 
-	draw_players( entities.players );
+	if ( cvar_players.m_enabled ) {
+		draw_players( entities.players );
+	}
 }
 
 bool renderer_init;
@@ -217,7 +219,9 @@ void on_render( IDXGISwapChain* swap_chain ) {
 
 	draw_esp();
 
-	gui::run();
+	if ( gui::open ) {
+		gui::run();
+	}
 
 	renderer::end_frame();
 }

@@ -279,6 +279,10 @@ void renderer::draw_filled_rect( float x, float y, float width, float height, ui
 	draw_list->AddRectFilled( ImVec2( x, y ), ImVec2( x + width, y + height ), color, rounding );
 }
 
+void renderer::draw_filled_rect_with_flags( float x, float y, float width, float height, uint32_t color, float rounding, uint32_t flags ) {
+	draw_list->AddRectFilled( ImVec2( x, y ), ImVec2( x + width, y + height ), color, rounding, flags );
+}
+
 void renderer::draw_filled_rect_multi_color( float x, float y, float width, float height, uint32_t colors[ 4 ] ) {
 	draw_list->AddRectFilledMultiColor( ImVec2( x, y ), ImVec2( x + width, y + height ), colors[ 0 ], colors[ 1 ], colors[ 2 ], colors[ 3 ] );
 }
@@ -329,4 +333,11 @@ void renderer::push_clip_rect( float x, float y, float width, float height ) {
 
 void renderer::pop_clip_rect() {
 	draw_list->PopClipRect();
+}
+
+Vector2 renderer::calc_text_size( uint32_t font, const char* text ) {
+	ImFont* _font = fonts[ font ];
+	ImVec2 size = _font->CalcTextSizeA( _font->LegacySize, FLT_MAX, 0.f, text );
+
+	return Vector2( size.x, size.y );
 }

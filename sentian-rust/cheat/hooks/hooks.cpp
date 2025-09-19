@@ -5,6 +5,7 @@
 #include "nt.h"
 #include "cheat/entities.h"
 #include "cheat/glow.h"
+#include "gui.h"
 
 #include <cstddef>
 
@@ -138,15 +139,18 @@ void on_render_image_hook_handler( _CONTEXT* context ) {
 		init = true;
 	}
 
+	if ( unity::input::get_key_down( unity::key_code::end ) ) {
+		gui::open = !gui::open;
+	}
+
 	// Update entities
 	entity_manager::update();
 
 	glow_manager::on_render_image_hook( ( unity::render_texture* )context->Rdx, ( unity::render_texture* )context->R8 );
 }
 
-void movement_hook( rust::player_walk_movement* player_walk_movement, rust::model_state* model_state ) {
-	// omnisprint
-	{
+void movement_hook( rust::player_walk_movement* player_walk_movement, rust::model_state* model_state ) {	
+	if ( omnisprint ) {
 		rust::base_player* owner = player_walk_movement->owner;
 		if ( !owner )
 			return;
@@ -253,11 +257,7 @@ void player_projectile_attack_write_to_stream_hook_handler( _CONTEXT* context ) 
 }
 
 void item_icon_try_to_move_hook( rust::item_icon* item_icon ) {
-	if ( !is_valid_ptr( item_icon ) )
-		return;
-
-	// Instant loot
-	{
+	if ( instant_loot ) {
 		item_icon->run_timed_action();
 	}
 }

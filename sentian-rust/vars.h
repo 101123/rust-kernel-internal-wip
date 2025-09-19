@@ -237,6 +237,10 @@ inline visual cvar_dropped_electrical = WRAP_VISUAL( "Dropped Electrical", false
 inline visual cvar_dropped_fun = WRAP_VISUAL( "Dropped Fun", false, 500, COL32( 142, 68, 173, 255 ) );
 inline cvar_i cvar_dropped_items_maximum_distance = cvar_i( H( "Dropped Items Maximum Distance" ), 500 );
 
+inline cvar instant_loot = cvar( H( "Instant Loot" ), true );
+
+inline cvar omnisprint = cvar( H( "Omnisprint" ), false );
+
 inline cvar glow = cvar( H( "Glow" ), true );
 inline cvar_ui glow_outline_color = cvar_ui( H( "Glow Outline Color" ), COL32( 255, 255, 255, 255 ) );
 inline cvar_f glow_blur_scale = cvar_f( H( "Glow Blur Scale" ), 0.75f );
