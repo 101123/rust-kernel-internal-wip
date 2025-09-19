@@ -142,7 +142,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 
 		// Name
 		{
-			renderer::draw_text( bounds.left + half, bounds.top - 14.f, Fonts::Verdana, TextFlags::Centered | TextFlags::DropShadow, COL32( 125, 195, 255, 220 ), cached_player.name );
+			renderer::draw_text( bounds.left + half, bounds.top - 14.f, fonts::verdana, text_flags::centered | text_flags::drop_shadow, COL32( 125, 195, 255, 220 ), cached_player.name );
 		}
 
 		float offset = 0.f;
@@ -150,7 +150,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		// Held item
 		{
 			if ( cached_player.active_item != -1 ) {
-				renderer::draw_text( bounds.left + half, bounds.bottom + 1.f, Fonts::SmallFonts, TextFlags::Centered, COL32( 125, 195, 255, 220 ), cached_player.belt_items[ cached_player.active_item ].name );
+				renderer::draw_text( bounds.left + half, bounds.bottom + 1.f, fonts::small_fonts, text_flags::centered, COL32( 125, 195, 255, 220 ), cached_player.belt_items[ cached_player.active_item ].name );
 				offset += 8.f + 1.f;
 			}
 		}
@@ -159,7 +159,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		{
 			char buffer[ 16 ] = {};
 			snprintf( buffer, sizeof( buffer ), "%dM", ( int )distance );
-			renderer::draw_text( bounds.left + half, bounds.bottom + 1.f + offset, Fonts::SmallFonts, TextFlags::Centered, COL32( 125, 195, 255, 220 ), buffer );
+			renderer::draw_text( bounds.left + half, bounds.bottom + 1.f + offset, fonts::small_fonts, text_flags::centered, COL32( 125, 195, 255, 220 ), buffer );
 		}
 	}
 }
@@ -194,8 +194,8 @@ void draw_esp() {
 		char buffer[ 16 ] = {};
 		snprintf( buffer, sizeof( buffer ), "%dM\n", static_cast< int >( distance ) );
 
-		renderer::draw_text( screen.x, screen.y, Fonts::SmallFonts, TextFlags::Centered, cached_entity.m_visual->m_color, cached_entity.m_visual->m_display_name );
-		renderer::draw_text( screen.x, screen.y + 8.f, Fonts::SmallFonts, TextFlags::Centered, COL32_WHITE, buffer );
+		renderer::draw_text( screen.x, screen.y, fonts::small_fonts, text_flags::centered, cached_entity.m_visual->m_color, cached_entity.m_visual->m_display_name );
+		renderer::draw_text( screen.x, screen.y + 8.f, fonts::small_fonts, text_flags::centered, COL32_WHITE, buffer );
 	}
 
 	draw_players( entities.players );
@@ -212,7 +212,7 @@ void on_render( IDXGISwapChain* swap_chain ) {
 
 	renderer::begin_frame();
 
-	renderer::draw_text( 10.f, 10.f, Fonts::Verdana, TextFlags::DropShadow, COL32( 255, 255, 255, 255 ), "sentian.gg" );
+	renderer::draw_text( 10.f, 10.f, fonts::verdana, text_flags::drop_shadow, COL32( 255, 255, 255, 255 ), "sentian.gg" );
 
 	draw_esp();
 

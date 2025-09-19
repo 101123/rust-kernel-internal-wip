@@ -192,9 +192,9 @@ bool renderer::init( IDXGISwapChain* swapchain ) {
 	font_atlas->TexMinHeight = 1024;
 	ImFontAtlasBuildInit( font_atlas );
 
-	fonts[ Fonts::Verdana ] = create_font( antialiased_verdana_12, 12.f );
-	fonts[ Fonts::Tahoma ] = nullptr;
-	fonts[ Fonts::SmallFonts ] = create_font( outlined_smallfonts_8, 8.f, true );
+	fonts[ fonts::verdana ] = create_font( antialiased_verdana_12, 12.f );
+	fonts[ fonts::tahoma ] = nullptr;
+	fonts[ fonts::small_fonts ] = create_font( outlined_smallfonts_8, 8.f, true );
 
 	ImGui_ImplDX11_UpdateTexture( font_atlas->TexData );
 
@@ -227,9 +227,9 @@ void renderer::destroy() {
 	// IM_DELETE checks the pointer
 	IM_DELETE( font_atlas );
 
-	IM_DELETE( fonts[ Fonts::Verdana ] );
-	IM_DELETE( fonts[ Fonts::Tahoma ] );
-	IM_DELETE( fonts[ Fonts::SmallFonts ] );
+	IM_DELETE( fonts[ fonts::verdana ] );
+	IM_DELETE( fonts[ fonts::tahoma ] );
+	IM_DELETE( fonts[ fonts::small_fonts ] );
 
 	IM_DELETE( shared_data );
 	IM_DELETE( draw_list );
@@ -295,32 +295,32 @@ void renderer::draw_line( float x1, float y1, float x2, float y2, float thicknes
 	draw_list->AddLine( ImVec2( x1, y1 ), ImVec2( x2, y2 ), color, thickness );
 }
 
-void renderer::draw_text( float x, float y, Fonts font_idx, uint32_t flags, uint32_t color, const char* text ) {
-	ImFont* font = fonts[ font_idx ];
-	float size = font->LegacySize;
+void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const char* text ) {
+	ImFont* _font = fonts[ font ];
+	float size = _font->LegacySize;
 
-	if ( flags & TextFlags::Centered ) {
-		ImVec2 bounds = font->CalcTextSizeA( size, FLT_MAX, 0.f, text );
+	if ( flags & text_flags::centered ) {
+		ImVec2 bounds = _font->CalcTextSizeA( size, FLT_MAX, 0.f, text );
 		x -= bounds.x / 2.f;
 	}
 
 	// Small fonts centering "fix"
-	if ( font_idx == Fonts::SmallFonts ) {
+	if ( font == fonts::small_fonts ) {
 		x -= 1.f;
 	}
 
-	if ( flags & TextFlags::DropShadow ) {
-		draw_list->AddText( font, size, ImVec2( x + 1.f, y + 1.f ), IM_COL32( 0, 0, 0, 200 ), text );
+	if ( flags & text_flags::drop_shadow ) {
+		draw_list->AddText( _font, size, ImVec2( x + 1.f, y + 1.f ), IM_COL32( 0, 0, 0, 200 ), text );
 	}
 
-	draw_list->AddText( font, size, ImVec2( x, y ), color, text );
+	draw_list->AddText( _font, size, ImVec2( x, y ), color, text );
 }
 
-void renderer::draw_text( float x, float y, Fonts font_idx, uint32_t flags, uint32_t color, const wchar_t* text ) {
+void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const wchar_t* text ) {
 	char buffer[ 512 ];
 	ImTextStrToUtf8( buffer, sizeof( buffer ), ( ImWchar* )text, ( ImWchar* )( text + wcslen( text ) + 1 ) );
 
-	draw_text( x, y, font_idx, flags, color, buffer );
+	draw_text( x, y, font, flags, color, buffer );
 }
 
 void renderer::push_clip_rect( float x, float y, float width, float height ) {
