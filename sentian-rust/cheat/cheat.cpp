@@ -173,7 +173,7 @@ bool resolve_hooks() {
 	hook try_to_move_hook {
 		.init = false,
 		.flags = hook_flags::vftable | hook_flags::post,
-		.value = ( uintptr_t* )( ( uintptr_t )rust::item_icon::s_klass + 0x368 ),
+		.value = ( uintptr_t* )( ( uintptr_t )rust::item_icon::s_klass + Offsets::ItemIcon::TryToMove_vtableoff ),
 		.original = 0ull,
 		.corrupt = generate_corrupt_value(),
 		.handler = item_icon_try_to_move_hook_handler

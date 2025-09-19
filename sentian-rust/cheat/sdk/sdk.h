@@ -761,7 +761,8 @@ namespace rust {
 
         ENCRYPTED_VALUE( uint64_t, cl_active_item, Offsets::BasePlayer::clActiveItem,
             {
-                values[ i ] = ( ( ( values[ i ] << 9 ) | ( values[ i ] >> 23 ) ) + 2090236210 ) ^ 0xCF2B9AF;
+                values[ i ] = ( ( ( ( ( values[ i ] << 27 ) | ( values[ i ] >> 5 ) ) + 465994002 ) << 12 ) |
+                    ( ( ( ( values[ i ] << 27 ) | ( values[ i ] >> 5 ) ) + 465994002 ) >> 20 ) ) + 1268790804;
             }, {}
         );
 
@@ -902,8 +903,8 @@ namespace rust {
         public:
             ENCRYPTED_VALUE( float, fov, Offsets::ConVar_Graphics_Static::_fov, {},
                 {
-                    values[ i ] = ( ( ( ( values[ i ] ^ 0x6474F8E ) << 10 ) | 
-                        ( ( values[ i ] ^ 0x6474F8Eu ) >> 22 ) ) ^ 0x1640A091 ) + 988246765;
+                    values[ i ] = ( ( ( ( values[ i ] ^ 0x4D3845AE ) << 26 ) | 
+                        ( ( values[ i ] ^ 0x4D3845AEu ) >> 6 ) ) ^ 0x8A3577C6 ) + 363548613;
                 }
             );
         };
