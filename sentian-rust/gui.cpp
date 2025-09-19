@@ -90,9 +90,9 @@ public:
         command.bounds = rect( x, y, 0.f, 0.f );
         command.z_index = current_z_index_;
 
-        int length = min( strlen( text ), sizeof( command.text.buffer ) );
+        int length = min( strlen( text ), sizeof( command.text.buffer ) - 1 );
         memcpy( command.text.buffer, text, length );
-        command.text.buffer[ length - 1 ] = '\0';
+        command.text.buffer[ length ] = '\0';
         command.text.font = font;
         command.text.flags = flags;
         command.text.color = color;
@@ -292,7 +292,7 @@ public:
         { 0.f, 50.f } /* Combobox -> Toggle */
     };
 
-    bool toggle( const char* label, bool& value ) {
+    bool toggle( const char* label, bool* value ) {
         auto& draw_list = gui_draw_list.get();
 
         cursor_ += toggle_movement[ ( int )previous_id_ ];
@@ -306,13 +306,13 @@ public:
         const bool nothing_active = active_hash.previous == 0ull && active_hash.current == 0ull;
 
         if ( hovered && nothing_active && left_mouse_clicked ) {
-            value = !value;
+            *value = !*value;
             active_hash.current = 0ull;
         }
 
         draw_list.add_filled_rect( toggle_bounds.x, toggle_bounds.y, toggle_bounds.w, toggle_bounds.h, COL32( 60, 60, 60, 255 ) );
         draw_list.add_filled_rect( toggle_bounds.x + 1.f, toggle_bounds.y + 1.f, toggle_bounds.w - 2.f, toggle_bounds.h - 2.f, COL32( 38, 38, 38, 255 ) );
-        draw_list.add_filled_rect_multi_color( toggle_bounds.x + 2.f, toggle_bounds.y + 2.f, toggle_bounds.w - 4.f, toggle_bounds.h - 4.f, value ? gradient_on : gradient_off );
+        draw_list.add_filled_rect_multi_color( toggle_bounds.x + 2.f, toggle_bounds.y + 2.f, toggle_bounds.w - 4.f, toggle_bounds.h - 4.f, *value ? gradient_on : gradient_off );
 
         draw_list.add_text( position.x + 18.f, position.y - 1.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
 
@@ -320,10 +320,10 @@ public:
 
         previous_id_ = elements::toggle;
 
-        return value;
+        return *value;
     }
 
-    void color_picker( uint32_t& value ) {
+    void color_picker( uint32_t* value ) {
         auto& draw_list = gui_draw_list.get();
 
         draw_list.push_z_index( 2 );
@@ -351,11 +351,11 @@ public:
         const bool preview_hovered = mouse_in_rect( preview_bounds );
         const bool color_picker_hovered = mouse_in_rect( color_picker_bounds );
 
-        const uint64_t hash = ( uint64_t )&value;
+        const uint64_t hash = ( uint64_t )value;
         const bool active = active_hash.current == hash;
 
         if ( preview_hovered && left_mouse_clicked ) {
-            color_picker_hsv = rgb_to_hsv( value );
+            color_picker_hsv = rgb_to_hsv( *value );
             active_hash.current = hash;
         }
 
@@ -422,16 +422,16 @@ public:
             draw_list.add_filled_rect( hue_cursor_rect.x, hue_cursor_rect.y, hue_cursor_rect.w, hue_cursor_rect.h, COL32( 38, 38, 38, 255 ) );
             draw_list.add_filled_rect( hue_cursor_rect.x + 1.f, hue_cursor_rect.y + 1.f, hue_cursor_rect.w - 2.f, hue_cursor_rect.h - 2.f, gradient_on[ 0 ] );
 
-            value = hsv_to_rgb( color_picker_hsv.x, color_picker_hsv.y, color_picker_hsv.z );
+            *value = hsv_to_rgb( color_picker_hsv.x, color_picker_hsv.y, color_picker_hsv.z );
 
             draw_list.set_floating( false );
         }
 
         uint32_t color_gradient[] = {
-            value,
-            value,
-            value - COL32( 0, 0, 0, 45 ),
-            value - COL32( 0, 0, 0, 45 ),
+            *value,
+            *value,
+            *value - COL32( 0, 0, 0, 45 ),
+            *value - COL32( 0, 0, 0, 45 ),
         };
 
         draw_styled_rect( rect( preview_bounds.x, preview_bounds.y, preview_bounds.w, preview_bounds.h ), color_gradient );
@@ -447,7 +447,7 @@ public:
     };
 
     template <typename T>
-    void slider( const char* label, const char* fmt, T& value, const T& min, const T& max ) {
+    void slider( const char* label, const char* fmt, T* value, const T& min, const T& max ) {
         auto& draw_list = gui_draw_list.get();
 
         static_assert( std::is_arithmetic_v<T> );
@@ -462,7 +462,7 @@ public:
         const bool hovered = mouse_in_rect( slider_bounds );
         const bool nothing_active = active_hash.previous == 0ull && active_hash.current == 0ull;
 
-        const uint64_t hash = ( uint64_t )&value;
+        const uint64_t hash = ( uint64_t )value;
         const bool active = active_hash.current == hash;
 
         if ( hovered && nothing_active && left_mouse_clicked ) {
@@ -470,7 +470,7 @@ public:
         }
 
         else if ( active && left_mouse_held ) {
-            value = static_cast<T>( ( std::clamp( mouse_position.current.x - slider_bounds.x, 0.f, slider_bounds.w - 1 ) / ( slider_bounds.w - 1.f ) ) * ( max - min ) + min );
+            *value = static_cast<T>( ( std::clamp( mouse_position.current.x - slider_bounds.x, 0.f, slider_bounds.w - 1 ) / ( slider_bounds.w - 1.f ) ) * ( max - min ) + min );
         }
 
         else if ( active && !left_mouse_held ) {
@@ -482,7 +482,7 @@ public:
         draw_styled_rect( slider_bounds );
 
         const rect draw_bounds = rect( slider_bounds.x + 3.f, slider_bounds.y + 3.f, slider_bounds.w - 6.f, slider_bounds.h - 6.f );
-        float fill_width = draw_bounds.w * std::clamp( static_cast< float >( value - min ) / static_cast< float >( max - min ), 0.f, 1.f );
+        float fill_width = draw_bounds.w * std::clamp( static_cast< float >( *value - min ) / static_cast< float >( max - min ), 0.f, 1.f );
 
         draw_list.add_filled_rect_multi_color( draw_bounds.x, draw_bounds.y, fill_width, draw_bounds.h, gradient_on );
 
@@ -613,11 +613,6 @@ void draw_gui_background() {
     renderer::draw_filled_rect( bottom_bar.x, bottom_bar.y + 2.f, bottom_bar.w, 18.f, COL32( 50, 50, 50, 255 ) );
 }
 
-bool bool_ = false;
-float float_ = 0.f;
-int int_ = 0;
-uint32_t col = COL32( 255, 255, 255, 0 );
-
 void gui::run() {
     auto& draw_list = gui_draw_list.get();
 
@@ -640,11 +635,12 @@ void gui::run() {
 
     test.begin();
 
-    test.toggle( "This is a toggle", bool_ );
-    test.color_picker( col );
+    test.toggle( "Glow", &glow );
+    test.color_picker( &glow_outline_color );
 
-    if ( bool_ ) {
-        test.slider( "This is a slider", "%.2f", float_, 0.f, 100.f );
+    if ( glow ) {
+        test.slider( "Glow blur scale", "%.2f", &glow_blur_scale, 0.f, 10.f );
+        test.slider( "Glow outline scale", "%.2f", &glow_outline_scale, 0.f, 10.f );
     }
 
     test.end();

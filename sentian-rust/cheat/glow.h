@@ -10,8 +10,6 @@ namespace rust {
 }
 
 namespace glow_manager {
-	inline bool enabled = true;
-
 	bool init( unity::asset_bundle* asset_bundle );
 	void destroy();
 

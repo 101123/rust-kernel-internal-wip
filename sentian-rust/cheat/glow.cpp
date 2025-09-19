@@ -3,6 +3,8 @@
 
 #include "sdk/sdk.h"
 
+#include "vars.h"
+
 #include <vector>
 
 unity::shader* stencil_shader;
@@ -25,11 +27,6 @@ int _StencilTex;
 int _BlurTex;
 int _OutlineScale;
 int _OutlineColor;
-
-size_t num_blurs = 1;
-float blur_scale = 0.75f;
-float outline_scale = 0.5f;
-unity::color outline_color = unity::color( 0.49f, 0.765f, 1.f, 1.f );
 
 util::lazy_initializer<std::vector<rust::skinned_multi_mesh*>> multi_mesh_cache;
 
@@ -150,7 +147,7 @@ void render_stencil() {
 void render_blur() {
 	blur_texture = unity::render_texture::get_temporary( 2560.f, 1440.f, 0 );
 	unity::render_texture* temp = unity::render_texture::get_temporary( 2560.f, 1440.f, 0 );
-	blur_material->set_float( _BlurScale, blur_scale );
+	blur_material->set_float( _BlurScale, glow_blur_scale );
 
 	unity::graphics::blit( stencil_texture, blur_texture, blur_material );
 	unity::graphics::blit( blur_texture, temp, blur_material );
@@ -163,8 +160,8 @@ void render_composite( unity::render_texture* src, unity::render_texture* dest )
 	composite_material->set_texture( _MainTex, src );
 	composite_material->set_texture( _StencilTex, stencil_texture );
 	composite_material->set_texture( _BlurTex, blur_texture );
-	composite_material->set_float( _OutlineScale, outline_scale );
-	composite_material->set_color( _OutlineColor, outline_color );
+	composite_material->set_float( _OutlineScale, glow_outline_scale );
+	composite_material->set_color( _OutlineColor, unity::color( glow_outline_color ) );
 
 	unity::graphics::blit( src, dest, composite_material );
 
@@ -176,7 +173,7 @@ void render_composite( unity::render_texture* src, unity::render_texture* dest )
 }
 
 void glow_manager::on_render_image_hook( unity::render_texture* src, unity::render_texture* dest ) {
-	if ( enabled && multi_mesh_cache.get().size() > 0 ) {
+	if ( glow && multi_mesh_cache.get().size() > 0 ) {
 		render_stencil();
 		render_blur();
 		render_composite( src, dest );

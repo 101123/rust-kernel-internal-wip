@@ -103,8 +103,14 @@ namespace unity {
     struct color {
         float r, g, b, a;
 
-        color() : r( 1.f ), g( 1.f ), b( 1.f ), a( 1.f ) {};
-        color( float _r, float _g, float _b, float _a ) : r( _r ), g( _g ), b( _b ), a( _a ) {};
+        color() 
+            : r( 1.f ), g( 1.f ), b( 1.f ), a( 1.f ) {};
+
+        color( float _r, float _g, float _b, float _a ) 
+            : r( _r ), g( _g ), b( _b ), a( _a ) {};
+
+        color( uint32_t rgba ) : r( ( ( rgba >> 0 ) & 255 ) / 255.f ), g( ( ( rgba >> 8 ) & 255 ) / 255.f ),
+            b( ( ( rgba >> 16 ) & 255 ) / 255.f ), a( ( ( rgba >> 24 ) & 255 ) / 255.f ) {}
     };
 
     struct render_target_identifier {
