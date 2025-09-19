@@ -124,7 +124,9 @@ void deinit_cheat() {
 	hook_manager::remove_hooks();
 	entity_manager::destroy();
 	glow_manager::destroy();
-	renderer::destroy();
+
+	// TODO: Fix bsod when calling this
+	// renderer::destroy();
 
 	if ( asset_bundle ) {
 		asset_bundle->unload( true );
