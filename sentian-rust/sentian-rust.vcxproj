@@ -185,6 +185,7 @@
     <ClCompile Include="cheat\entities.cpp" />
     <ClCompile Include="cheat\glow.cpp" />
     <ClCompile Include="cheat\hooks\hooks.cpp" />
+    <ClCompile Include="gui.cpp" />
     <ClCompile Include="include\imgui\imgui.cpp" />
     <ClCompile Include="include\imgui\imgui_draw.cpp" />
     <ClCompile Include="include\imgui\imgui_impl_dx11.cpp" />
@@ -193,6 +194,7 @@
     <ClCompile Include="math\vec3.cpp" />
     <ClCompile Include="dx.cpp" />
     <ClCompile Include="render.cpp" />
+    <ClCompile Include="renderer.cpp" />
     <ClCompile Include="runtime.cpp" />
     <ClCompile Include="um.cpp" />
   </ItemGroup>
@@ -208,8 +210,10 @@
     <ClInclude Include="cheat\sdk\sdk.h" />
     <ClInclude Include="dx.h" />
     <ClInclude Include="fonts.h" />
+    <ClInclude Include="gui.h" />
     <ClInclude Include="include\imgui\imgui_impl_dx11.h" />
     <ClInclude Include="render.h" />
+    <ClInclude Include="renderer.h" />
     <ClInclude Include="um.h" />
     <ClInclude Include="vars.h" />
     <ClInclude Include="global.h" />
