@@ -96,6 +96,7 @@ void create_networkable_hook_handler( _CONTEXT* context ) {
 			if ( !value->as<rust::base_networkable>() )
 				return false;
 
+			// We don't want any entities with a valid networkable object as we're hooking the creation of it
 			return !is_valid_ptr( value->net );
 		}, true, 0x100 );
 
@@ -246,7 +247,7 @@ void projectile_shoot_write_to_stream_hook_handler( _CONTEXT* context ) {
 				memcpy( class_name, klass->name, sizeof( class_name ) - 1llu );
 
 				// We've found a list, it may or not contain projectile objects
-				return strcmp( class_name, "List`1" ) == 0;
+				return util::hash( class_name ) == H( "List`1" );
 			}, true, 0x100 );
 
 		if ( !search.resolved() )
