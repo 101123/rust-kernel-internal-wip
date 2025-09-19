@@ -93,7 +93,10 @@ void create_networkable_hook_handler( _CONTEXT* context ) {
 			if ( !is_valid_ptr( value ) )
 				return false;
 
-			return value->as<rust::base_networkable>() != nullptr;
+			if ( !value->as<rust::base_networkable>() )
+				return false;
+
+			return !is_valid_ptr( value->net );
 		}, true, 0x100 );
 
 	if ( !search.resolved() )
