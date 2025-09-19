@@ -332,11 +332,12 @@ public:
         const rect preview_bounds = rect( position.x + bounds_.w - 44.f, position.y, 20.f, 10.f );
 
         const float color_picker_padding = 6.f;
-        const float sv_percentage = 0.83f;
+        const float sv_percentage = 0.84f;
 
         const rect color_picker_bounds = rect( preview_bounds.x + preview_bounds.w + 4.f, preview_bounds.y, 200.f, 200.f );
         const rect sv_square_bounds = rect( color_picker_bounds.x + color_picker_padding, color_picker_bounds.y + color_picker_padding, color_picker_bounds.w * sv_percentage, color_picker_bounds.h * sv_percentage );
         const rect hue_bar_bounds = rect( sv_square_bounds.x + sv_square_bounds.w + color_picker_padding - 2.f, sv_square_bounds.y, color_picker_bounds.w - sv_square_bounds.w - ( color_picker_padding * 3.f ) + 2.f, sv_square_bounds.h );
+        const rect alpha_bar_bounds = rect( sv_square_bounds.x, sv_square_bounds.y + sv_square_bounds.h + color_picker_padding - 2.f, sv_square_bounds.w, color_picker_bounds.h - sv_square_bounds.h - ( color_picker_padding * 3.f ) + 2.f );
 
         const static uint32_t hue_colors[ 6 + 1 ] = {
             COL32( 255, 0, 0, 255 ),
@@ -371,6 +372,7 @@ public:
             // Account for 1px black border
             const rect sv_square_bounds_ = rect( sv_square_bounds.x + 1.f, sv_square_bounds.y + 1.f, sv_square_bounds.w - 2.f, sv_square_bounds.h - 2.f );
             const rect hue_bar_bounds_ = rect( hue_bar_bounds.x + 1.f, hue_bar_bounds.y + 1.f, hue_bar_bounds.w - 2.f, hue_bar_bounds.h - 2.f );
+            const rect alpha_bar_bounds_ = rect( alpha_bar_bounds.x + 1.f, alpha_bar_bounds.y + 1.f, alpha_bar_bounds.w - 2.f, alpha_bar_bounds.h - 2.f );
 
             if ( mouse_in_rect( sv_square_bounds_ ) && left_mouse_held ) {
                 color_picker_hsv.y = ImSaturate( ( mouse_position.current.x - sv_square_bounds_.x ) / ( sv_square_bounds_.w ) );
@@ -379,6 +381,10 @@ public:
 
             else if ( mouse_in_rect( hue_bar_bounds_ ) && left_mouse_held ) {
                 color_picker_hsv.x = ImSaturate( ( mouse_position.current.y - hue_bar_bounds_.y ) / ( hue_bar_bounds_.h ) );
+            }
+
+            else if ( mouse_in_rect( alpha_bar_bounds_ ) && left_mouse_held ) {
+                ( ( uint8_t* )value )[ 3 ] = ( uint8_t )( ( ( mouse_position.current.x - alpha_bar_bounds_.x ) / alpha_bar_bounds_.w ) * 255.f );
             }
 
             uint32_t hue_color = hsv_to_rgb( color_picker_hsv.x, 1.f, 1.f );
@@ -401,6 +407,7 @@ public:
             draw_list.add_filled_rect( sv_cursor_rect.x, sv_cursor_rect.y, sv_cursor_rect.w, sv_cursor_rect.h, COL32( 38, 38, 38, 255 ) );
             draw_list.add_filled_rect( sv_cursor_rect.x + 1.f, sv_cursor_rect.y + 1.f, sv_cursor_rect.w - 2.f, sv_cursor_rect.h - 2.f, gradient_on[ 0 ] );
 
+            // Hue bar
             draw_list.add_filled_rect( hue_bar_bounds.x, hue_bar_bounds.y, hue_bar_bounds.w, hue_bar_bounds.h, COL32( 38, 38, 38, 255 ) );
 
             for ( size_t i = 0; i < 6; i++ ) {
@@ -422,7 +429,28 @@ public:
             draw_list.add_filled_rect( hue_cursor_rect.x, hue_cursor_rect.y, hue_cursor_rect.w, hue_cursor_rect.h, COL32( 38, 38, 38, 255 ) );
             draw_list.add_filled_rect( hue_cursor_rect.x + 1.f, hue_cursor_rect.y + 1.f, hue_cursor_rect.w - 2.f, hue_cursor_rect.h - 2.f, gradient_on[ 0 ] );
 
+            // Alpha bar
+            draw_list.add_filled_rect( alpha_bar_bounds.x, alpha_bar_bounds.y, alpha_bar_bounds.w, alpha_bar_bounds.h, COL32( 38, 38, 38, 255 ) );
+            draw_checkerboard( rect( alpha_bar_bounds_.x, alpha_bar_bounds_.y, alpha_bar_bounds_.w, alpha_bar_bounds_.h ), alpha_bar_bounds_.w / 24.f );
+
+            uint32_t colors[] = {
+                *value & ~0xFF000000,
+                *value | 0xFF000000,
+                *value | 0xFF000000,
+                *value & ~0xFF000000
+            };
+
+            draw_list.add_filled_rect_multi_color( alpha_bar_bounds_.x, alpha_bar_bounds_.y, alpha_bar_bounds_.w, alpha_bar_bounds_.h, colors );
+
+            const Vector2 alpha_cursor_pos = Vector2( alpha_bar_bounds_.x + ( ( ( float )( ( uint8_t* )value )[ 3 ] / 255.f ) * alpha_bar_bounds_.w ), alpha_bar_bounds_.y );
+            const rect alpha_cursor_rect = rect( alpha_cursor_pos.x - 2.f, alpha_cursor_pos.y - 2.f, 4.f, alpha_bar_bounds_.h + 4.f );
+
+            draw_list.add_filled_rect( alpha_cursor_rect.x, alpha_cursor_rect.y, alpha_cursor_rect.w, alpha_cursor_rect.h, COL32( 38, 38, 38, 255 ) );
+            draw_list.add_filled_rect( alpha_cursor_rect.x + 1.f, alpha_cursor_rect.y + 1.f, alpha_cursor_rect.w - 2.f, alpha_cursor_rect.h - 2.f, gradient_on[ 0 ] );
+
+            uint8_t backup = ( ( uint8_t* )value )[ 3 ];
             *value = hsv_to_rgb( color_picker_hsv.x, color_picker_hsv.y, color_picker_hsv.z );
+            ( ( uint8_t* )value )[ 3 ] = backup;
 
             draw_list.set_floating( false );
         }
@@ -565,6 +593,34 @@ private:
         background_colors ?
             draw_list.add_filled_rect_multi_color( bounds.x + 2.f, bounds.y + 2.f, bounds.w - 4.f, bounds.h - 4.f, background_colors ) :
             draw_list.add_filled_rect( bounds.x + 2.f, bounds.y + 2.f, bounds.w - 4.f, bounds.h - 4.f, COL32( 54, 54, 54, 255 ) );
+    }
+
+    void draw_checkerboard( const rect& bounds, float step ) {
+        auto& draw_list = gui_draw_list.get();
+
+        const uint32_t light = COL32( 204, 204, 204, 255 );
+        const uint32_t dark = COL32( 128, 128, 128, 255 );
+
+        draw_list.add_filled_rect( bounds.x, bounds.y, bounds.w, bounds.h, light );
+
+        ImVec2 min = ImVec2( bounds.x, bounds.y );
+        ImVec2 max = ImVec2( bounds.x + bounds.w, bounds.y + bounds.h );
+
+        int yi = 0;
+
+        for ( float y = min.y; y < max.y; y += step, yi++ ) {
+            float y1 = ImClamp( y, min.y, max.y ), y2 = ImMin( y + step, max.y );
+            if ( y2 <= y1 )
+                continue;
+
+            for ( float x = min.x + ( yi & 1 ) * step; x < max.x; x += step * 2.f ) {
+                float x1 = ImClamp( x, min.x, max.x ), x2 = ImMin( x + step, max.x );
+                if ( x2 <= x1 )
+                    continue;
+
+                draw_list.add_filled_rect( x1, y1, x2 - x1, y2 - y1, dark );
+            }
+        }
     }
 
     Vector4 rgb_to_hsv( uint32_t rgb ) {
