@@ -84,6 +84,61 @@ namespace unity {
 }
 
 namespace unity {
+    namespace internals {
+        template <typename T>
+        struct dynamic_array {
+        public:
+            T* buffer;
+        private:
+            uint8_t _[ 0x8 ];
+        public:
+            uint64_t size;
+            uint64_t capacity;
+        };
+
+        struct shared_renderer_data {
+        private:
+            uint8_t _[ 0xE8 ];
+            uint32_t __ : 12;
+        public:
+            uint32_t is_visible : 1;
+        };
+
+        class scripting_gc_handle {
+        public:
+            FIELD( il2cpp_object*, object, 0x10 );
+        };
+
+        class object {
+        public:
+            FIELD( scripting_gc_handle, mono_reference, 0x18 );
+        };
+
+        class camera {
+        public:
+            FIELD( Matrix4x4, culling_matrix, 0x30C );
+            FIELD( int, culling_mask, 0x43C );
+            FIELD( Vector3, last_position, 0x454 );
+        };
+
+        class renderer {
+        public:
+            FIELD( shared_renderer_data, renderer_data, 0x40 );
+            FIELD( int, scene_handle, 0x168 );
+
+            bool is_in_scene() {
+                return scene_handle != -1;
+            }
+
+            bool is_visible_in_scene() {
+                // Don't copy the renderer data
+                internals::shared_renderer_data* renderer_data = _address_of_renderer_data();
+
+                return renderer_data->is_visible;
+            }
+        };
+    }
+
     enum key_code {
         a = 97, b = 98, c = 99, d = 100, e = 101,
         f = 102, g = 103, h = 104, i = 105,
@@ -133,6 +188,8 @@ namespace unity {
 
     class object : public il2cpp_object {
     public:
+        FIELD( uintptr_t, cached_ptr, Offsets::Object::m_CachedPtr );
+
         sys::string* get_name() {
             sys::string* ( *get_name )( object* ) = ( decltype( get_name ) )( unity_player + Offsets::Object::GetName );
 
@@ -148,8 +205,6 @@ namespace unity {
 
             return caller( set_hide_flags, this, hide_flags );
         }
-
-        FIELD( uintptr_t, cached_ptr, Offsets::Object::m_CachedPtr );
     };
 
     class game_object : public object {
@@ -226,12 +281,9 @@ namespace unity {
 
     class camera : public object {
     public:
-        class internal {
-        public:
-            FIELD( Matrix4x4, m_CullingMatrix, 0x30C );
-            FIELD( int, m_CullingMask, 0x43C );
-            FIELD( Vector3, m_LastPosition, 0x454 );
-        };
+        internals::camera* get_native_camera() {
+            return ( internals::camera* )cached_ptr;
+        }
     };
 
     class input {
@@ -406,7 +458,7 @@ namespace unity {
         static inline il2cpp_object* s_type_object;
     };
 
-    class renderer {
+    class renderer : object {
     public:
         bool get_enabled() {
             bool ( *get_enabled )( renderer* ) =
@@ -433,6 +485,10 @@ namespace unity {
             um::caller& caller = um::get_caller_for_thread();
 
             return caller( get_material_array, this );
+        }
+
+        internals::renderer* get_native_renderer() {
+            return ( internals::renderer* )cached_ptr;
         }
     };
 

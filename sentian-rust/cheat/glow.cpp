@@ -20,13 +20,16 @@ unity::command_buffer* command_buffer;
 unity::render_texture* stencil_texture;
 unity::render_texture* blur_texture;
 
-// Shader property ids
 int _BlurScale;
 int _MainTex;
 int _StencilTex;
 int _BlurTex;
 int _OutlineScale;
 int _OutlineColor;
+
+unity::shader* gui_text_shader;
+
+int _Color;
 
 util::lazy_initializer<std::vector<rust::skinned_multi_mesh*>> multi_mesh_cache;
 
@@ -48,6 +51,10 @@ bool glow_manager::init( unity::asset_bundle* asset_bundle ) {
 		return false;
 
 	il2cpp_gchandle_new( blur_shader, true );
+
+	gui_text_shader = unity::shader::find( L"GUI/Text Shader" );
+	if ( !gui_text_shader )
+		return false;
 
 	stencil_material = unity::material::ctor( stencil_shader );
 	if ( !stencil_material )
@@ -73,6 +80,7 @@ bool glow_manager::init( unity::asset_bundle* asset_bundle ) {
 	_BlurTex = unity::shader::property_to_id( L"_BlurTex" );
 	_OutlineScale = unity::shader::property_to_id( L"_OutlineScale" );
 	_OutlineColor = unity::shader::property_to_id( L"_OutlineColor" );
+	_Color = unity::shader::property_to_id( L"_Color" );
 
 	multi_mesh_cache.construct();
 
@@ -113,6 +121,10 @@ void glow_manager::remove_player( rust::base_player* player ) {
 	multi_meshes.erase( it );
 }
 
+void glow_manager::update() {
+
+}
+
 void render_stencil() {
 	stencil_texture = unity::render_texture::get_temporary( 2560.f, 1440.f, 0 );
 
@@ -133,8 +145,28 @@ void render_stencil() {
 			if ( !is_valid_ptr( renderer ) )
 				continue;
 
+			unity::internals::renderer* native_renderer = renderer->get_native_renderer();
+			if ( !is_valid_ptr( native_renderer ) )
+				continue;
+
+			// TODO: Move this from here
+			if ( chams ) {
+				sys::array<unity::material*>* materials = renderer->get_materials();
+
+				if ( is_valid_ptr( materials ) ) {
+					for ( size_t i = 0; i < materials->size; i++ ) {
+						unity::material* material = materials->buffer[ i ];
+						if ( !is_valid_ptr( material ) )
+							continue;
+
+						material->set_shader( gui_text_shader );
+						material->set_color( _Color, unity::color( chams_color ) );
+					}
+				}
+			}
+
 			// We only need to check if the renderer is visible
-			if ( !renderer->get_is_visible() )
+			if ( !native_renderer->is_visible_in_scene() )
 				continue;
 
 			command_buffer->draw_renderer( renderer, stencil_material );

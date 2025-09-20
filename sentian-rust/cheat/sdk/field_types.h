@@ -3,13 +3,16 @@
 #include <cstdint>
 
 #define FIELD( Type, Name, Offset ) \
-    Type get_##Name() const { \
-        return *( Type* )( ( uintptr_t )this + Offset ); \
+    Type* _address_of_##Name() const { \
+        return ( Type* )( ( uintptr_t )this + Offset ); \
     } \
-    void set_##Name( Type value ) { \
-        *( Type* )( ( uintptr_t )this + Offset ) = value; \
+    Type _get_##Name() const { \
+        return *_address_of_##Name(); \
     } \
-    __declspec( property( get = get_##Name, put = set_##Name ) ) Type Name;
+    void _set_##Name( Type value ) { \
+        *_address_of_##Name() = value; \
+    } \
+    __declspec( property( get = _get_##Name, put = _set_##Name ) ) Type Name;
 
 #define ENCRYPTED_VALUE( Type, Name, Offset, Decryption, Encryption ) \
     static Type decrypt_##Name( Type value ) { \

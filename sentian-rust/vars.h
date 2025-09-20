@@ -241,6 +241,10 @@ inline cvar instant_loot = cvar( H( "Instant Loot" ), true );
 
 inline cvar omnisprint = cvar( H( "Omnisprint" ), false );
 
+inline cvar chams = cvar( H( "Chams" ), true );
+inline cvar_ui chams_type = cvar_ui( H( "Chams Type" ), 0 );
+inline cvar_ui chams_color = cvar_ui( H( "Chams Color" ), COL32( 255, 255, 255, 255 ) );
+
 inline cvar glow = cvar( H( "Glow" ), true );
 inline cvar_ui glow_outline_color = cvar_ui( H( "Glow Outline Color" ), COL32( 255, 255, 255, 255 ) );
 inline cvar_f glow_blur_scale = cvar_f( H( "Glow Blur Scale" ), 0.75f );

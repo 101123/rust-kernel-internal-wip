@@ -799,6 +799,13 @@ void gui::run() {
 
                     right.begin();
 
+                    right.toggle( "Chams", &chams );
+                    right.color_picker( &chams_color );
+
+                    if (chams ) {
+                        right.combo_box( "Chams type", { "Solid", "Material" }, &chams_type );
+                    }
+
                     right.toggle( "Glow", &glow );
                     right.color_picker( &glow_outline_color );
 

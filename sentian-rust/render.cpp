@@ -174,12 +174,12 @@ void draw_esp() {
 	if ( !is_valid_ptr( main_camera ) )
 		return;
 
-	auto main_camera_internal = ( unity::camera::internal* )main_camera->cached_ptr;
-	if ( !is_valid_ptr( main_camera_internal ) )
+	unity::internals::camera* native_camera = main_camera->get_native_camera();
+	if ( !is_valid_ptr( native_camera ) )
 		return;
 
-	view_matrix = main_camera_internal->m_CullingMatrix;
-	camera_position = main_camera_internal->m_LastPosition;
+	view_matrix = native_camera->culling_matrix;
+	camera_position = native_camera->last_position;
 
 	util::scoped_spinlock lock( &entity_manager::cache_lock );
 
@@ -215,7 +215,8 @@ void on_render( IDXGISwapChain* swap_chain ) {
 
 	renderer::begin_frame();
 
-	renderer::draw_text( 10.f, 10.f, fonts::verdana, text_flags::drop_shadow, COL32( 255, 255, 255, 255 ), "sentian.gg" );
+	renderer::draw_text( 10.f, 10.f, fonts::small_fonts, text_flags::none, COL32( 110, 183, 212, 255 ), "sentian" );
+	renderer::draw_text( 40.f, 10.f, fonts::small_fonts, text_flags::none, COL32( 255, 255, 255, 255 ), ".gg" );
 
 	draw_esp();
 
