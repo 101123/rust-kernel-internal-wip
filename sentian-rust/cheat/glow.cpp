@@ -29,6 +29,10 @@ int _OutlineColor;
 
 unity::shader* gui_text_shader;
 
+unity::material* gui_text_material;
+
+int gui_text_material_instance_id;
+
 int _Color;
 
 util::lazy_initializer<std::vector<rust::skinned_multi_mesh*>> multi_mesh_cache;
@@ -51,10 +55,6 @@ bool glow_manager::init( unity::asset_bundle* asset_bundle ) {
 		return false;
 
 	il2cpp_gchandle_new( blur_shader, true );
-
-	gui_text_shader = unity::shader::find( L"GUI/Text Shader" );
-	if ( !gui_text_shader )
-		return false;
 
 	stencil_material = unity::material::ctor( stencil_shader );
 	if ( !stencil_material )
@@ -80,6 +80,17 @@ bool glow_manager::init( unity::asset_bundle* asset_bundle ) {
 	_BlurTex = unity::shader::property_to_id( L"_BlurTex" );
 	_OutlineScale = unity::shader::property_to_id( L"_OutlineScale" );
 	_OutlineColor = unity::shader::property_to_id( L"_OutlineColor" );
+
+	gui_text_shader = unity::shader::find( L"GUI/Text Shader" );
+	if ( !gui_text_shader )
+		return false;
+
+	gui_text_material = unity::material::ctor( gui_text_shader );
+	if ( !gui_text_material )
+		return false;
+
+	gui_text_material_instance_id = gui_text_material->get_instance_id();
+
 	_Color = unity::shader::property_to_id( L"_Color" );
 
 	multi_mesh_cache.construct();
@@ -121,8 +132,46 @@ void glow_manager::remove_player( rust::base_player* player ) {
 	multi_meshes.erase( it );
 }
 
-void glow_manager::update() {
+// TODO: update_chams and render_stencil run the same code for the most part so it can probably be made into a function
+void update_chams() {
+	gui_text_material->set_color( _Color, unity::color( chams_color ) );
 
+	for ( rust::skinned_multi_mesh* multi_mesh : multi_mesh_cache.get() ) {
+		sys::list<unity::renderer*>* renderers_list = multi_mesh->renderers;
+		if ( !is_valid_ptr( renderers_list ) || !is_valid_ptr( renderers_list->items ) )
+			continue;
+
+		sys::array<unity::renderer*>* renderers = renderers_list->items;
+		if ( !is_valid_ptr( renderers ) )
+			continue;
+
+		for ( size_t i = 0; i < renderers->size; i++ ) {
+			unity::renderer* renderer = renderers->buffer[ i ];
+			if ( !is_valid_ptr( renderer ) )
+				continue;
+
+			unity::internals::renderer* native_renderer = renderer->get_native_renderer();
+			if ( !is_valid_ptr( native_renderer ) )
+				continue;
+
+			if ( !native_renderer->is_visible_in_scene() )
+				continue;
+
+			auto materials = native_renderer->materials;
+			if ( !is_valid_ptr( materials.buffer ) )
+				continue;
+
+			for ( size_t i = 0; i < materials.size; i++ ) {
+				materials.buffer[ i ].instance_id = gui_text_material_instance_id;
+			}
+		}
+	}
+}
+
+void glow_manager::update() {
+	if ( chams ) {
+		update_chams();
+	}
 }
 
 void render_stencil() {
@@ -148,22 +197,6 @@ void render_stencil() {
 			unity::internals::renderer* native_renderer = renderer->get_native_renderer();
 			if ( !is_valid_ptr( native_renderer ) )
 				continue;
-
-			// TODO: Move this from here
-			if ( chams ) {
-				sys::array<unity::material*>* materials = renderer->get_materials();
-
-				if ( is_valid_ptr( materials ) ) {
-					for ( size_t i = 0; i < materials->size; i++ ) {
-						unity::material* material = materials->buffer[ i ];
-						if ( !is_valid_ptr( material ) )
-							continue;
-
-						material->set_shader( gui_text_shader );
-						material->set_color( _Color, unity::color( chams_color ) );
-					}
-				}
-			}
 
 			// We only need to check if the renderer is visible
 			if ( !native_renderer->is_visible_in_scene() )

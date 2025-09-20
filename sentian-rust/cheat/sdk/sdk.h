@@ -86,6 +86,11 @@ namespace unity {
 namespace unity {
     namespace internals {
         template <typename T>
+        struct pptr {
+            int32_t instance_id;
+        };
+
+        template <typename T>
         struct dynamic_array {
         public:
             T* buffer;
@@ -121,9 +126,20 @@ namespace unity {
             FIELD( Vector3, last_position, 0x454 );
         };
 
+        class shader : public object {
+        public:
+
+        };
+
+        class material : public object {
+        public:
+            
+        };
+
         class renderer {
         public:
             FIELD( shared_renderer_data, renderer_data, 0x40 );
+            FIELD( dynamic_array<pptr<material>>, materials, 0x148 );
             FIELD( int, scene_handle, 0x168 );
 
             bool is_in_scene() {
@@ -189,6 +205,14 @@ namespace unity {
     class object : public il2cpp_object {
     public:
         FIELD( uintptr_t, cached_ptr, Offsets::Object::m_CachedPtr );
+
+        int32_t get_instance_id() {
+            int32_t ( *get_instance_id )( object* ) = ( decltype( get_instance_id ) )( game_assembly + Offsets::Object::GetInstanceID );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_instance_id, this );
+        }
 
         sys::string* get_name() {
             sys::string* ( *get_name )( object* ) = ( decltype( get_name ) )( unity_player + Offsets::Object::GetName );

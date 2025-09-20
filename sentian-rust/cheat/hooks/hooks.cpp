@@ -150,6 +150,7 @@ void on_render_image_hook_handler( _CONTEXT* context ) {
 	// Update entities
 	entity_manager::update();
 
+	glow_manager::update();
 	glow_manager::on_render_image_hook( ( unity::render_texture* )context->Rdx, ( unity::render_texture* )context->R8 );
 }
 
