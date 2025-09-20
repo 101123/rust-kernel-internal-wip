@@ -83,6 +83,15 @@ inline method_info* il2cpp_class_get_method_from_name( il2cpp_class* klass, cons
 	return caller( il2cpp_class_get_method_from_name, klass, name_, args_count );
 }
 
+inline il2cpp_class* il2cpp_class_from_system_type( il2cpp_object* type ) {
+	static il2cpp_class* ( *il2cpp_class_from_system_type )( il2cpp_object* ) =
+		( decltype( il2cpp_class_from_system_type ) )( driver_api->find_export( ( void* )game_assembly, H( "il2cpp_class_from_system_type" ) ) );
+
+	um::caller& caller = um::get_caller_for_thread();
+
+	return caller( il2cpp_class_from_system_type, type );
+}
+
 inline il2cpp_type* il2cpp_class_get_type( il2cpp_class* klass ) {
 	return ( il2cpp_type* )( ( uintptr_t )klass + Offsets::Il2CppClass::byval_arg );
 }

@@ -243,6 +243,16 @@ namespace unity {
         }
 
         template <typename T>
+        sys::array<T*>* get_components() {
+            sys::array<T*>* ( *get_components_internal )( game_object*, il2cpp_object*, bool, bool, bool, bool, void* ) =
+                ( decltype( get_components_internal ) )( unity_player + Offsets::GameObject::GetComponentsInternal );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_components_internal, this, T::s_type_object, false, false, true, false, nullptr );
+        }
+
+        template <typename T>
         T* add_component() {
             T* ( *internal_add_component_with_type )( game_object*, il2cpp_object* ) = 
                 ( decltype( internal_add_component_with_type ) )( unity_player + Offsets::GameObject::Internal_AddComponentWithType );
@@ -270,6 +280,29 @@ namespace unity {
 
             return caller( get_transform, this );
         }
+
+        static inline il2cpp_object* s_type_object;
+    };
+
+    class behaviour : public component {
+    public:
+        bool get_enabled() {
+            bool ( *get_enabled )( behaviour* ) = ( decltype( get_enabled ) )( unity_player + Offsets::Behaviour::get_enabled );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_enabled, this );
+        }
+
+        void set_enabled( bool value ) {
+            void ( *set_enabled )( behaviour*, bool ) = ( decltype( set_enabled ) )( unity_player + Offsets::Behaviour::set_enabled );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( set_enabled, this, value );
+        }
+
+        static inline il2cpp_class* s_klass;
     };
 
     class transform : public component {
@@ -303,7 +336,7 @@ namespace unity {
         }
     };
 
-    class camera : public object {
+    class camera : public behaviour {
     public:
         internals::camera* get_native_camera() {
             return ( internals::camera* )cached_ptr;

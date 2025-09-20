@@ -35,6 +35,8 @@ class_lookup class_lookups[] = {
 	{ &unity::render_target_identifier::s_klass, nullptr, nullptr, RenderTargetIdentifier_TypeDefinitionIndex },
 	{ &unity::command_buffer::s_klass, nullptr, nullptr, CommandBuffer_TypeDefinitionIndex },
 	{ nullptr, &unity::shader::s_type_object, nullptr, Shader_TypeDefinitionIndex },
+	{ nullptr, &unity::component::s_type_object, nullptr, Component_TypeDefinitionIndex },
+	{ &unity::behaviour::s_klass, nullptr, nullptr, Behaviour_TypeDefinitionIndex },
 	{ &unity::material::s_klass , &unity::material::s_type_object, nullptr, Material_TypeDefinitionIndex },
 	{ &rust::outline_manager::s_klass, nullptr, nullptr, OutlineManager_TypeDefinitionIndex },
 	{ &rust::held_entity::s_klass, &rust::held_entity::s_type_object, nullptr, HeldEntity_TypeDefinitionIndex },

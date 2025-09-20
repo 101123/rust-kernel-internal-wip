@@ -72,6 +72,7 @@ namespace Offsets {
 	namespace Behaviour {
 
 		// Functions
+		constexpr const static size_t get_enabled = 0xa1cb0;
 		constexpr const static size_t set_enabled = 0xa1de0;
 	}
 
