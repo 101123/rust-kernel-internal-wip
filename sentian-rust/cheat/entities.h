@@ -19,8 +19,8 @@ namespace rust {
 
 class cacher {
 public:
-	using add_to_cache_t = void( * )( cacher*, rust::base_networkable*, visual* );
-	using remove_from_cache_t = void( * )( cacher*, rust::base_networkable*, visual* );
+	using add_to_cache_t = void( * )( cacher*, rust::base_networkable*, cvar_visual* );
+	using remove_from_cache_t = void( * )( cacher*, rust::base_networkable*, cvar_visual* );
 
 	cacher() {};
 	cacher( void* user_data, auto add_to_cache, auto remove_from_cache ) :
@@ -30,11 +30,11 @@ public:
 		return m_user_data;
 	}
 
-	void add_to_cache( rust::base_networkable* entity, visual* visual ) {
+	void add_to_cache( rust::base_networkable* entity, cvar_visual* visual ) {
 		m_add_to_cache( this, entity, visual );
 	}
 
-	void remove_from_cache( rust::base_networkable* entity, visual* visual ) {
+	void remove_from_cache( rust::base_networkable* entity, cvar_visual* visual ) {
 		m_remove_from_cache( this, entity, visual );
 	}
 
@@ -46,15 +46,15 @@ private:
 
 struct cache_specifier {
 	cacher m_cacher;
-	visual* m_visual;
+	cvar_visual* m_visual;
 };
 
 struct cached_entity {
 	rust::base_entity* m_entity;
 	Vector3 m_position;
-	visual* m_visual;
+	cvar_visual* m_visual;
 
-	cached_entity( rust::base_entity* entity, Vector3 position, visual* visual ) : 
+	cached_entity( rust::base_entity* entity, Vector3 position, cvar_visual* visual ) :
 		m_entity( entity ), m_position( position ), m_visual( visual ) {};
 };
 
@@ -62,7 +62,7 @@ struct cached_combat_entity : public cached_entity {
 	int m_lifestate;
 	float m_health;
 
-	cached_combat_entity( rust::base_entity* entity, Vector3 position, visual* visual, int lifestate, float health )
+	cached_combat_entity( rust::base_entity* entity, Vector3 position, cvar_visual* visual, int lifestate, float health )
 		: cached_entity( entity, position, visual ), m_lifestate( lifestate ), m_health( health ) {}
 };
 
@@ -80,6 +80,7 @@ struct cached_bone_data {
 struct cached_player {
 	rust::base_player* entity;
 	bool init;
+	bool scientist;
 	cached_bone_data bone_data;
 	wchar_t name[ 128 ];
 	int active_item;

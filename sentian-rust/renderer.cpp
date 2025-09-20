@@ -193,7 +193,7 @@ bool renderer::init( IDXGISwapChain* swapchain ) {
 	ImFontAtlasBuildInit( font_atlas );
 
 	fonts[ fonts::verdana ] = create_font( antialiased_verdana_12, 12.f );
-	fonts[ fonts::tahoma ] = nullptr;
+	fonts[ fonts::tahoma ] = create_font( antialiased_tahoma_11, 11.f );
 	fonts[ fonts::small_fonts ] = create_font( outlined_smallfonts_8, 8.f, true );
 
 	ImGui_ImplDX11_UpdateTexture( font_atlas->TexData );

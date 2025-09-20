@@ -543,11 +543,12 @@ public:
         const rect options_bounds = rect( combo_bounds.x, combo_bounds.y + 21.f, combo_bounds.w, options.size() * 20.f );
 
         const bool hovered = mouse_in_rect( combo_bounds );
+        const bool nothing_active = active_hash.previous == 0ull && active_hash.current == 0ull;
 
         const uint64_t hash = ( uint64_t )value;
         const bool active = active_hash.current == hash;
 
-        if ( hovered && left_mouse_clicked ) {
+        if ( hovered && nothing_active && left_mouse_clicked ) {
             active_hash.current = hash;
         }
 
@@ -725,6 +726,44 @@ void tab( const char* label, uint32_t value, uint32_t* tab, rect& cursor, float 
     renderer::draw_text( cursor.x + width / 2.f, cursor.y + 3.f, 0, text_flags::centered, selected ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), label );
 }
 
+void visual_impl( group_box& group_box, cvar_visual& visual ) {
+    bool toggled = group_box.toggle( visual.display_name, &visual.enabled );
+    group_box.color_picker( &visual.color );
+
+    if ( toggled ) {
+        group_box.slider( "Max distance", "%dm", &visual.maximum_distance, 0u, 500u );
+    }
+}
+
+void player_visuals_impl( group_box& group_box, cvar_player_visuals& visuals ) {
+    bool is_player_visuals = &visuals == &player_visuals;
+
+    group_box.toggle( "Enabled", &visuals.enabled );
+
+    group_box.toggle( "Bounding box", &visuals.box );
+    group_box.color_picker( &visuals.box_color );
+
+    group_box.toggle( "Skeleton", &visuals.skeleton );
+    group_box.color_picker( &visuals.skeleton_color );
+
+    group_box.toggle( "Name", &visuals.name );
+    group_box.color_picker( &visuals.name_color );
+
+    group_box.toggle( "Held item", &visuals.held_item );
+    group_box.color_picker( &visuals.held_item_color );
+
+    if ( visuals.held_item ) {
+        group_box.combo_box( "Held item type", { "Text", "Icon" }, &visuals.held_item_type );
+    }
+
+    group_box.toggle( "Distance", &visuals.distance );
+    group_box.color_picker( &visuals.distance_color );
+
+    if ( is_player_visuals ) {
+        
+    }
+}
+
 void gui::run() {
     auto& draw_list = gui_draw_list.get();
 
@@ -778,23 +817,8 @@ void gui::run() {
                 case visual_subtabs::players: {
                     left.begin();
                     
-                    left.toggle( "Enabled", &cvar_players.m_enabled );
-                    left.toggle( "Bounding box", &cvar_players.m_box );
-                    left.color_picker( &cvar_players.m_box_color );
-                    left.toggle( "Skeleton", &cvar_players.m_skeleton );
-                    left.color_picker( &cvar_players.m_skeleton_color );
-                    left.toggle( "Name", &cvar_players.m_name );
-                    left.color_picker( &cvar_players.m_name_color );
-                    left.toggle( "Held item", &cvar_players.m_held_item );
-                    left.color_picker( &cvar_players.m_held_item_color );
-
-                    if ( cvar_players.m_held_item ) {
-                        left.combo_box( "Held item type", { "Text", "Icon" }, &cvar_players.m_held_item_type );
-                    }
-
-                    left.toggle( "Distance", &cvar_players.m_distance );
-                    left.color_picker( &cvar_players.m_distance_color );
-
+                    player_visuals_impl( left, player_visuals );
+                    
                     left.end();
 
                     right.begin();
@@ -820,6 +844,129 @@ void gui::run() {
                 }
 
                 case visual_subtabs::scientists: {
+                    left.begin();
+
+                    player_visuals_impl( left, scientist_visuals );
+
+                    left.end();
+
+                    break;
+                }
+
+                case visual_subtabs::world: {
+                    left.begin();
+                    left.end();
+
+                    right.begin();
+                    right.end();
+
+                    break;
+                }
+
+                case visual_subtabs::resources: {
+                    left.begin();
+
+                    visual_impl( left, stone_ore );
+                    visual_impl( left, metal_ore );
+                    visual_impl( left, sulfur_ore );
+
+                    left.end();
+
+                    right.begin();
+
+                    visual_impl( right, hemp );
+                    visual_impl( right, mushroom );
+                    
+                    visual_impl( right, pumpkin );
+                    visual_impl( right, corn );
+                    visual_impl( right, potato );
+                    visual_impl( right, stone );
+                    visual_impl( right, metal );
+                    visual_impl( right, sulfur );
+                    visual_impl( right, wood );
+
+                    right.end();
+
+                    break;
+                }
+
+                case visual_subtabs::deployables: {
+                    left.begin();
+                    left.end();
+
+                    right.begin();
+                    right.end();
+
+                    break;
+                }
+
+                case visual_subtabs::vehicles: {
+                    left.begin();
+
+                    visual_impl( left, rowboat );
+                    visual_impl( left, rhib );
+                    visual_impl( left, minicopter );
+                    visual_impl( left, scrap_helicopter );
+                    visual_impl( left, attack_helicopter );
+                    visual_impl( left, tugboat );
+                    visual_impl( left, submarine );
+                    visual_impl( left, hot_air_balloon );
+                    visual_impl( left, diver_propulsion_vehicle );
+
+                    left.end();
+
+                    right.begin();
+                 
+                    visual_impl( right, patrol_helicopter );
+                    visual_impl( right, bradley );
+
+                    right.end();
+
+                    break;
+                }
+
+                case visual_subtabs::animals: {
+                    left.begin();
+
+                    visual_impl( left, bear );
+                    visual_impl( left, boar );
+                    visual_impl( left, chicken );
+                    visual_impl( left, horse );
+                    visual_impl( left, stag );
+                    visual_impl( left, wolf );
+                    visual_impl( left, shark );
+                    visual_impl( left, bee_swarm );
+                    visual_impl( left, tiger );
+                    visual_impl( left, panther );
+                    visual_impl( left, crocodile );
+                    visual_impl( left, snake );
+
+                    left.end();
+
+                    right.begin();
+
+                    right.end();
+
+                    break;
+                }
+
+                case visual_subtabs::traps: {
+                    left.begin();
+                    left.end();
+
+                    right.begin();
+                    right.end();
+
+                    break;
+                }
+
+                case visual_subtabs::loot: {
+                    left.begin();
+                    left.end();
+
+                    right.begin();
+                    right.end();
+
                     break;
                 }
             }
