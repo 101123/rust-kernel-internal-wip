@@ -698,33 +698,12 @@ namespace rust {
 
     class base_networkable : public unity::component {
     public:
-        class entity_realm {
-        public:
-            typedef sys::list_dictionary<uint64_t, base_networkable*>* T;
-            HIDDEN_VALUE( T, entity_list, Offsets::BaseNetworkable_EntityRealm::entityList,
-                {
-                    values[ i ] = ( ( values[ i ] - 1535577983 ) ^ 0xB11ADB22 ) - 1978993725;
-                }
-            );
-        };
-
-        class static_fields {
-        public:
-            HIDDEN_VALUE( entity_realm*, client_entities, Offsets::BaseNetworkable_Static::clientEntities,
-                {
-                    values[ i ] = ( ( ( ( ( values[ i ] << 19 ) | ( values[ i ] >> 13 ) ) + 911315647 ) << 29 ) | 
-                        ( ( ( ( values[ i ] << 19 ) | ( values[ i ] >> 13 ) ) + 911315647 ) >> 3 ) ) ^ 0x1D9F762B;
-                }
-            );
-        };
-
         FIELD( uint32_t, prefab_id, Offsets::BaseNetworkable::prefabID );
         FIELD( networkable*, net, Offsets::BaseNetworkable::net );
         FIELD( base_entity*, parent_entity, Offsets::BaseNetworkable::parentEntity );
         FIELD( sys::list<base_entity*>*, children, Offsets::BaseNetworkable::children );
         
         static inline il2cpp_class* s_klass;
-        static inline static_fields* s_static_fields;
     };
 
     class model {
@@ -903,31 +882,15 @@ namespace rust {
 
         ENCRYPTED_VALUE( uint64_t, cl_active_item, Offsets::BasePlayer::clActiveItem,
             {
-                values[ i ] = ( ( ( ( ( values[ i ] << 27 ) | ( values[ i ] >> 5 ) ) + 465994002 ) << 12 ) |
-                    ( ( ( ( values[ i ] << 27 ) | ( values[ i ] >> 5 ) ) + 465994002 ) >> 20 ) ) + 1268790804;
+                values[ i ] = ( ( ( values[ i ] - 39167478 ) << 8 ) | 
+                    ( ( unsigned int )( values[ i ] - 39167478 ) >> 24 ) ) - 813727899;
             }, {}
         );
 
         FIELD( rust::model_state*, model_state, Offsets::BasePlayer::modelState );
         FIELD( int, player_flags, Offsets::BasePlayer::playerFlags );
-
-        ENCRYPTED_VALUE( uint64_t, user_id, Offsets::BasePlayer::userID,
-            {
-                values[ i ] = ( ( ( values[ i ] + 2124885473 ) << 16 ) | 
-                    ( ( unsigned int )( values[ i ] + 2124885473 ) >> 16 ) ) + 73061426;
-            }, {}
-        );
-
+        FIELD( sys::string*, user_id_string, Offsets::BasePlayer::UserIDString );
         FIELD( sys::string*, display_name, Offsets::BasePlayer::_displayName );
-
-        float get_speed( float running, float ducking, float crawling ) {
-            float ( *get_speed )( base_player*, float, float, float ) =
-                ( decltype( get_speed ) )( game_assembly + Offsets::BasePlayer::GetSpeed );
-
-            um::caller& caller = um::get_caller_for_thread();
-
-            return caller( get_speed, this, running, ducking, crawling );
-        }
 
         player_eyes* get_eyes() {
             unity::game_object* game_object = get_game_object();
@@ -937,12 +900,28 @@ namespace rust {
             return game_object->get_component<rust::player_eyes>();
         }
 
+        uint64_t get_user_id() {
+            if ( !is_valid_ptr( user_id_string ) )
+                return 0ull;
+
+            return wcstoull( user_id_string->buffer, nullptr, 10 );
+        }
+
         player_inventory* get_inventory() {
             unity::game_object* game_object = get_game_object();
             if ( !is_valid_ptr( game_object ) )
                 return nullptr;
 
             return game_object->get_component<rust::player_inventory>();
+        }
+
+        float get_speed( float running, float ducking, float crawling ) {
+            float ( *get_speed )( base_player*, float, float, float ) =
+                ( decltype( get_speed ) )( game_assembly + Offsets::BasePlayer::GetSpeed );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_speed, this, running, ducking, crawling );
         }
 
         item* get_held_item() {
@@ -1045,8 +1024,8 @@ namespace rust {
         public:
             ENCRYPTED_VALUE( float, fov, Offsets::ConVar_Graphics_Static::_fov, {},
                 {
-                    values[ i ] = ( ( ( ( values[ i ] ^ 0x4D3845AE ) << 26 ) | 
-                        ( ( values[ i ] ^ 0x4D3845AEu ) >> 6 ) ) ^ 0x8A3577C6 ) + 363548613;
+                    values[ i ] = ( ( ( values[ i ] << 22 ) | 
+                        ( values[ i ] >> 10 ) ) ^ 0x5A40F656 ) - 1305720721;
                 }
             );
         };

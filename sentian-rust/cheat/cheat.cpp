@@ -20,7 +20,6 @@ struct parent_lookup {
 };
 
 class_lookup class_lookups[] = {
-	{ nullptr, nullptr, &rust::base_networkable::s_static_fields, BaseNetworkable_Static_TypeDefinitionIndex },
 	{ nullptr, nullptr, &rust::graphics::s_static_fields, ConVar_Graphics_Static_TypeDefinitionIndex },
 	{ &rust::main_camera::s_klass, nullptr, &rust::main_camera::s_static_fields, MainCamera_TypeDefinitionIndex },
 	{ &rust::base_networkable::s_klass, nullptr, nullptr, BaseNetworkable_TypeDefinitionIndex },
