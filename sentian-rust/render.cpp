@@ -148,7 +148,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		}
 
 		if ( visuals.name ) {
-			renderer::draw_text( bounds.left + half, bounds.top - 14.f, fonts::verdana, text_flags::centered | text_flags::drop_shadow, visuals.name_color, "Fredrechster");
+			renderer::draw_text( bounds.left + half, bounds.top - 11.f, fonts::verdana, text_flags::centered | text_flags::drop_shadow, visuals.name_color, cached_player.name );
 		}
 
 		float offset = 0.f;

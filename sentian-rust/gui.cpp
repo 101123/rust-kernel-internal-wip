@@ -314,7 +314,7 @@ public:
         draw_list.add_filled_rect( toggle_bounds.x + 1.f, toggle_bounds.y + 1.f, toggle_bounds.w - 2.f, toggle_bounds.h - 2.f, COL32( 38, 38, 38, 255 ) );
         draw_list.add_filled_rect_multi_color( toggle_bounds.x + 2.f, toggle_bounds.y + 2.f, toggle_bounds.w - 4.f, toggle_bounds.h - 4.f, *value ? gradient_on : gradient_off );
 
-        draw_list.add_text( position.x + 18.f, position.y - 1.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
+        draw_list.add_text( position.x + 18.f, position.y + 2.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
 
         draw_list.pop_z_index();
 
@@ -405,7 +405,7 @@ public:
             const rect sv_cursor_rect = rect( sv_cursor_pos.x - 2.f, sv_cursor_pos.y - 2.f, 4.f, 4.f );
 
             draw_list.add_filled_rect( sv_cursor_rect.x, sv_cursor_rect.y, sv_cursor_rect.w, sv_cursor_rect.h, COL32( 38, 38, 38, 255 ) );
-            draw_list.add_filled_rect( sv_cursor_rect.x + 1.f, sv_cursor_rect.y + 1.f, sv_cursor_rect.w - 2.f, sv_cursor_rect.h - 2.f, gradient_on[ 0 ] );
+            draw_list.add_filled_rect( sv_cursor_rect.x + 1.f, sv_cursor_rect.y + 1.f, sv_cursor_rect.w - 2.f, sv_cursor_rect.h - 2.f, COL32_WHITE );
 
             // Hue bar
             draw_list.add_filled_rect( hue_bar_bounds.x, hue_bar_bounds.y, hue_bar_bounds.w, hue_bar_bounds.h, COL32( 38, 38, 38, 255 ) );
@@ -427,7 +427,7 @@ public:
             const rect hue_cursor_rect = rect( hue_bar_bounds_.x - 2.f, bar0_line_y - 2.f, hue_bar_bounds_.w + 4.f, 4.f );
 
             draw_list.add_filled_rect( hue_cursor_rect.x, hue_cursor_rect.y, hue_cursor_rect.w, hue_cursor_rect.h, COL32( 38, 38, 38, 255 ) );
-            draw_list.add_filled_rect( hue_cursor_rect.x + 1.f, hue_cursor_rect.y + 1.f, hue_cursor_rect.w - 2.f, hue_cursor_rect.h - 2.f, gradient_on[ 0 ] );
+            draw_list.add_filled_rect( hue_cursor_rect.x + 1.f, hue_cursor_rect.y + 1.f, hue_cursor_rect.w - 2.f, hue_cursor_rect.h - 2.f, COL32_WHITE );
 
             // Alpha bar
             draw_list.add_filled_rect( alpha_bar_bounds.x, alpha_bar_bounds.y, alpha_bar_bounds.w, alpha_bar_bounds.h, COL32( 38, 38, 38, 255 ) );
@@ -446,7 +446,7 @@ public:
             const rect alpha_cursor_rect = rect( alpha_cursor_pos.x - 2.f, alpha_cursor_pos.y - 2.f, 4.f, alpha_bar_bounds_.h + 4.f );
 
             draw_list.add_filled_rect( alpha_cursor_rect.x, alpha_cursor_rect.y, alpha_cursor_rect.w, alpha_cursor_rect.h, COL32( 38, 38, 38, 255 ) );
-            draw_list.add_filled_rect( alpha_cursor_rect.x + 1.f, alpha_cursor_rect.y + 1.f, alpha_cursor_rect.w - 2.f, alpha_cursor_rect.h - 2.f, gradient_on[ 0 ] );
+            draw_list.add_filled_rect( alpha_cursor_rect.x + 1.f, alpha_cursor_rect.y + 1.f, alpha_cursor_rect.w - 2.f, alpha_cursor_rect.h - 2.f, COL32_WHITE );
 
             uint8_t backup = ( ( uint8_t* )value )[ 3 ];
             *value = hsv_to_rgb( color_picker_hsv.x, color_picker_hsv.y, color_picker_hsv.z );
@@ -505,7 +505,7 @@ public:
             active_hash.current = 0ull;
         }
 
-        draw_list.add_text( slider_bounds.x, position.y, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
+        draw_list.add_text( slider_bounds.x, position.y + 4.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
 
         draw_styled_rect( slider_bounds );
 
@@ -569,15 +569,15 @@ public:
                     active_hash.current = 0ull;
                 }
 
-                draw_list.add_text( options_bounds.x + 6.f, options_bounds.y + 4.f + ( i * 20.f ), fonts::verdana, text_flags::none, hovered ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), options.begin()[ i ] );
+                draw_list.add_text( options_bounds.x + 6.f, options_bounds.y + 7.f + ( i * 20.f ), fonts::verdana, text_flags::none, hovered ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), options.begin()[ i ] );
             }
         }
 
-        draw_list.add_text( position.x + 18.f, position.y, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
+        draw_list.add_text( position.x + 18.f, position.y + 4.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
 
         draw_styled_rect( combo_bounds );
 
-        draw_list.add_text( position.x + 24.f, position.y + 20.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), options.begin()[ *value ] );
+        draw_list.add_text( position.x + 24.f, position.y + 23.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), options.begin()[ *value ] );
 
         draw_list.pop_z_index();
 
@@ -663,8 +663,8 @@ void draw_gui_background() {
     renderer::draw_filled_rect( top_bar.x, top_bar.y + top_bar.h, top_bar.w, 1.f, COL32( 38, 38, 38, 255 ) );
     renderer::draw_filled_rect( top_bar.x, top_bar.y + top_bar.h + 1.f, top_bar.w, 1.f, COL32( 61, 61, 61, 255 ) );
 
-    renderer::draw_text( top_bar.x + 6.f, top_bar.y + 3.f, 0, 0, gradient_on[ 0 ], "sentian" );
-    renderer::draw_text( top_bar.x + 43.f, top_bar.y + 3.f, 0, 0, COL32( 160, 160, 160, 255 ), ".gg" );
+    renderer::draw_text( top_bar.x + 6.f, top_bar.y + 6.f, 0, 0, gradient_on[ 0 ], "sentian" );
+    renderer::draw_text( top_bar.x + 43.f, top_bar.y + 6.f, 0, 0, COL32( 160, 160, 160, 255 ), ".gg" );
 
     rect bottom_bar = rect( menu_bounds.x + 2.f, menu_bounds.y + ( menu_bounds.h - 18.f ) - 4.f, menu_bounds.w - 4.f, 18.f );
 
@@ -712,6 +712,7 @@ void tab( const char* label, uint32_t value, uint32_t* tab, rect& cursor, float 
     const bool selected = value == *tab;
 
     if ( mouse_in_rect( rect( cursor.x, cursor.y, width, cursor.h ) ) && left_mouse_clicked ) {
+        active_hash.current = 0ull;
         *tab = value;
     }
 
@@ -723,7 +724,7 @@ void tab( const char* label, uint32_t value, uint32_t* tab, rect& cursor, float 
         renderer::draw_filled_rect_with_flags( cursor.x + 2.f, cursor.y + 2.f, width - 4.f, cursor.h, COL32( 54, 54, 54, 255 ), 3.f, draw_flags::round_corners_top );
     }
 
-    renderer::draw_text( cursor.x + width / 2.f, cursor.y + 3.f, 0, text_flags::centered, selected ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), label );
+    renderer::draw_text( cursor.x + width / 2.f, cursor.y + 6.f, 0, text_flags::centered, selected ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), label );
 }
 
 void visual_impl( group_box& group_box, cvar_visual& visual ) {
