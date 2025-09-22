@@ -4,6 +4,16 @@
 
 #include "math/vec2.h"
 
+#define COL32( r, g, b, a ) ( ( ( uint32_t )( a ) << 24 ) | ( ( uint32_t )( b ) << 16 ) | ( ( uint32_t ) ( g ) << 8 ) | ( ( uint32_t )( r ) << 0 ) )
+
+#define COL32_RED COL32( 255, 0, 0, 255 )
+#define COL32_GREEN COL32( 0, 255, 0, 255 )
+#define COL32_BLUE COL32( 0, 255, 255, 255 )
+#define COL32_WHITE COL32( 255, 255, 255, 255 )
+#define COL32_BLACK COL32( 0, 0, 0, 255 )
+
+#define TRUNC( x ) ( ( float )( int )( x ) )
+
 struct IDXGISwapChain;
 
 enum fonts {

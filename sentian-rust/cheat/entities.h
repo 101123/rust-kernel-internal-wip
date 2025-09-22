@@ -37,6 +37,7 @@ struct cached_entity {
 struct cached_combat_entity : public cached_entity {
 	int lifestate;
 	float health;
+	float max_health;
 
 	cached_combat_entity( unity::transform* transform, Vector3 position, cvar_visual* visual, bool update, int lifestate, float health )
 		: cached_entity( transform, position, visual, update ), lifestate( lifestate ), health( health ) {}

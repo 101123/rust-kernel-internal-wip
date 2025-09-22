@@ -784,7 +784,9 @@ void update_entities() {
             continue;
 
         cached_combat_entity.position = cached_combat_entity.transform->get_position();
+        cached_combat_entity.lifestate = cached_combat_entity.lifestate;
         cached_combat_entity.health = combat_entity->health;
+        cached_combat_entity.max_health = combat_entity->max_health;
     }
 }
 
