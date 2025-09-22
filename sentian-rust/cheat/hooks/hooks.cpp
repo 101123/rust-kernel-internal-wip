@@ -162,10 +162,10 @@ void movement_hook( rust::player_walk_movement* player_walk_movement, rust::mode
 
 		if ( !model_state->has_flag( rust::model_state::flag::ducked ) &&
 			!model_state->has_flag( rust::model_state::flag::crawling ) ) {
-			Vector3 current_velocity = player_walk_movement->target_movement;
+			vector3 current_velocity = player_walk_movement->target_movement;
 
-			if ( Vector3::magnitude( current_velocity ) > 0.f ) {
-				player_walk_movement->target_movement = Vector3::normalize( current_velocity ) * owner->get_speed( 1.f, 0.f, 0.f );
+			if ( vector3::magnitude( current_velocity ) > 0.f ) {
+				player_walk_movement->target_movement = vector3::normalize( current_velocity ) * owner->get_speed( 1.f, 0.f, 0.f );
 				model_state->set_flag( rust::model_state::flag::sprinting, true );
 			}
 		}

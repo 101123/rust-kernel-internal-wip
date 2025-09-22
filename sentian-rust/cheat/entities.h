@@ -26,11 +26,11 @@ struct cache_specifier {
 
 struct cached_entity {
 	unity::transform* transform;
-	Vector3 position;
+	vector3 position;
 	cvar_visual* visual;
 	bool update;
 
-	cached_entity( unity::transform* transform, Vector3 position, cvar_visual* visual, bool update ) :
+	cached_entity( unity::transform* transform, vector3 position, cvar_visual* visual, bool update ) :
 		transform( transform ), position( position ), visual( visual ), update( update ) {};
 };
 
@@ -39,7 +39,7 @@ struct cached_combat_entity : public cached_entity {
 	float health;
 	float max_health;
 
-	cached_combat_entity( unity::transform* transform, Vector3 position, cvar_visual* visual, bool update, int lifestate, float health )
+	cached_combat_entity( unity::transform* transform, vector3 position, cvar_visual* visual, bool update, int lifestate, float health )
 		: cached_entity( transform, position, visual, update ), lifestate( lifestate ), health( health ) {}
 };
 
@@ -51,7 +51,7 @@ struct cached_belt_item {
 
 struct cached_bone_data {
 	unity::transform* transforms[ 18 ];
-	Vector3 positions[ 18 ];
+	vector3 positions[ 18 ];
 };
 
 struct cached_player {
@@ -68,7 +68,7 @@ struct cached_player {
 
 struct cached_dropped_item {
 	unity::transform* transform;
-	Vector3 position;
+	vector3 position;
 	wchar_t name[ 128 ];
 	int category;
 };

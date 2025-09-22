@@ -58,5 +58,5 @@ namespace renderer {
 	void push_clip_rect( float x, float y, float width, float height );
 	void pop_clip_rect();
 
-	Vector2 calc_text_size( uint32_t font, const char* text );
+	vector2 calc_text_size( uint32_t font, const char* text );
 }

@@ -7,22 +7,22 @@
 #include "gui.h"
 
 Matrix4x4 view_matrix;
-Vector3 camera_position;
+vector3 camera_position;
 
 struct w2s_result {
 	bool success;
-	Vector2 screen;
+	vector2 screen;
 };
 
-bool w2s( const Vector3& world, Vector2& screen ) {
-	float w = Vector3::dot( Vector3( view_matrix[ 3 ], view_matrix[ 7 ], view_matrix[ 11 ] ), world ) + view_matrix[ 15 ];
+bool w2s( const vector3& world, vector2& screen ) {
+	float w = vector3::dot( vector3( view_matrix[ 3 ], view_matrix[ 7 ], view_matrix[ 11 ] ), world ) + view_matrix[ 15 ];
 	if ( w < 0.098f )
 		return false;
 
-	screen = Vector2(
-		( 2560.f * 0.5f ) * ( 1.f + ( Vector3::dot( Vector3( view_matrix[ 0 ], view_matrix[ 4 ], view_matrix[ 8 ] ), world ) + view_matrix[ 12 ] ) / w ),
-		( 1440.f * 0.5f ) * ( 1.f - ( Vector3::dot( Vector3( view_matrix[ 1 ], view_matrix[ 5 ], view_matrix[ 9 ] ), world ) + view_matrix[ 13 ] ) / w )
-	) + Vector2( 0.f, 0.f );
+	screen = vector2(
+		( 2560.f * 0.5f ) * ( 1.f + ( vector3::dot( vector3( view_matrix[ 0 ], view_matrix[ 4 ], view_matrix[ 8 ] ), world ) + view_matrix[ 12 ] ) / w ),
+		( 1440.f * 0.5f ) * ( 1.f - ( vector3::dot( vector3( view_matrix[ 1 ], view_matrix[ 5 ], view_matrix[ 9 ] ), world ) + view_matrix[ 13 ] ) / w )
+	) + vector2( 0.f, 0.f );
 
 	return true;
 }
@@ -39,7 +39,7 @@ bool get_player_bounds( Bounds& bounds, const w2s_result* w2s, size_t count, flo
 		if ( !w2s[ i ].success )
 			continue;
 
-		const Vector2& position = w2s[ i ].screen;
+		const vector2& position = w2s[ i ].screen;
 
 		if ( position.x < bounds.left )
 			bounds.left = position.x;
@@ -102,7 +102,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 
 		const cached_bone_data& bone_data = cached_player.bone_data;
 
-		float distance = Vector3::distance( camera_position, bone_data.positions[ 17 ] );
+		float distance = vector3::distance( camera_position, bone_data.positions[ 17 ] );
 		if ( distance > visuals.maximum_distance )
 			continue;
 
@@ -116,7 +116,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		w2s_result head_w2s = w2s_results[ 1 ];
 
 		// Get the head result for bounds, where we add a vertical offset so that the bounds are above the players head
-		w2s_results[ 1 ].success = w2s( bone_data.positions[ 1 ] + Vector3( 0.f, 0.105f, 0.f ), w2s_results[ 1 ].screen );
+		w2s_results[ 1 ].success = w2s( bone_data.positions[ 1 ] + vector3( 0.f, 0.105f, 0.f ), w2s_results[ 1 ].screen );
 
 		// Implicit ctor called on bounds
 		Bounds bounds;
@@ -140,8 +140,8 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 				if ( !a_w2s.success || !b_w2s.success )
 					continue;
 
-				const Vector2& a_pos = a_w2s.screen;
-				const Vector2& b_pos = b_w2s.screen;
+				const vector2& a_pos = a_w2s.screen;
+				const vector2& b_pos = b_w2s.screen;
 
 				renderer::draw_line( a_pos.x, a_pos.y, b_pos.x, b_pos.y, 1.f, visuals.skeleton_color );
 			}
@@ -174,11 +174,11 @@ void draw_entities( const entity_vector<rust::base_entity*, cached_entity>& enti
 		if ( !visuals->enabled )
 			continue;
 
-		float distance = Vector3::distance( camera_position, cached_entity.position );
+		float distance = vector3::distance( camera_position, cached_entity.position );
 		if ( distance > visuals->maximum_distance )
 			continue;
 
-		Vector2 screen;
+		vector2 screen;
 		if ( !w2s( cached_entity.position, screen ) )
 			continue;
 
@@ -199,11 +199,11 @@ void draw_combat_entities( const entity_vector<rust::base_combat_entity*, cached
 		if ( !visuals->enabled )
 			continue;
 
-		float distance = Vector3::distance( camera_position, cached_combat_entity.position );
+		float distance = vector3::distance( camera_position, cached_combat_entity.position );
 		if ( distance > visuals->maximum_distance )
 			continue;
 
-		Vector2 screen;
+		vector2 screen;
 		if ( !w2s( cached_combat_entity.position, screen ) )
 			continue;
 

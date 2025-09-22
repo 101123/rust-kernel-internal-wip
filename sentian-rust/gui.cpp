@@ -204,7 +204,7 @@ struct state_history2 {
 util::lazy_initializer<ordered_draw_list> gui_draw_list;
 
 state_history2<bool> left_mouse_state;
-state_history2<Vector2> mouse_position;
+state_history2<vector2> mouse_position;
 state_history2<uint64_t> active_hash;
 
 rect menu_bounds = rect( 400.f, 400.f, 548.f, 480.f );
@@ -212,7 +212,7 @@ rect menu_bounds = rect( 400.f, 400.f, 548.f, 480.f );
 bool left_mouse_clicked;
 bool left_mouse_held;
 
-Vector4 color_picker_hsv;
+vector4 color_picker_hsv;
 
 uint32_t gradient_on[ 4 ] = {
     COL32( 110, 183, 212, 255 ),
@@ -237,7 +237,7 @@ void update_input() {
     left_mouse_clicked = left_mouse_state.current && !left_mouse_state.previous;
     left_mouse_held = left_mouse_state.previous && left_mouse_state.current;
 
-    Vector2 mouse_pos = unity::input::get_mouse_position();
+    vector2 mouse_pos = unity::input::get_mouse_position();
     mouse_pos.y = 1440.f - mouse_pos.y;
 
     mouse_position = {
@@ -247,7 +247,7 @@ void update_input() {
 }
 
 bool mouse_in_rect( const rect& bounds ) {
-    const Vector2& position = mouse_position.current;
+    const vector2& position = mouse_position.current;
 
     return
         position.x >= bounds.x && position.x <= bounds.x + bounds.w &&
@@ -285,7 +285,7 @@ public:
         gui_draw_list.get().pop_clip_rect();
     }
 
-    static inline Vector2 toggle_movement[] = {
+    static inline vector2 toggle_movement[] = {
         { 0.f, 0.f }, /* None */
         { 0.f, 18.f }, /* Toggle -> Toggle */
         { 0.f, 36.f }, /* Slider -> Toggle */
@@ -299,7 +299,7 @@ public:
 
         draw_list.push_z_index( 2 );
 
-        const Vector2 position = Vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
+        const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
         const rect toggle_bounds = rect( position.x, position.y, 10.f, 10.f );
 
         const bool hovered = mouse_in_rect( toggle_bounds );
@@ -328,7 +328,7 @@ public:
 
         draw_list.push_z_index( 2 );
 
-        const Vector2 position = Vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
+        const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
         const rect preview_bounds = rect( position.x + bounds_.w - 44.f, position.y, 20.f, 10.f );
 
         const float color_picker_padding = 6.f;
@@ -442,7 +442,7 @@ public:
 
             draw_list.add_filled_rect_multi_color( alpha_bar_bounds_.x, alpha_bar_bounds_.y, alpha_bar_bounds_.w, alpha_bar_bounds_.h, colors );
 
-            const Vector2 alpha_cursor_pos = Vector2( alpha_bar_bounds_.x + ( ( ( float )( ( uint8_t* )value )[ 3 ] / 255.f ) * alpha_bar_bounds_.w ), alpha_bar_bounds_.y );
+            const vector2 alpha_cursor_pos = vector2( alpha_bar_bounds_.x + ( ( ( float )( ( uint8_t* )value )[ 3 ] / 255.f ) * alpha_bar_bounds_.w ), alpha_bar_bounds_.y );
             const rect alpha_cursor_rect = rect( alpha_cursor_pos.x - 2.f, alpha_cursor_pos.y - 2.f, 4.f, alpha_bar_bounds_.h + 4.f );
 
             draw_list.add_filled_rect( alpha_cursor_rect.x, alpha_cursor_rect.y, alpha_cursor_rect.w, alpha_cursor_rect.h, COL32( 38, 38, 38, 255 ) );
@@ -467,7 +467,7 @@ public:
         draw_list.pop_z_index();
     }
 
-    static inline Vector2 slider_movement[] = {
+    static inline vector2 slider_movement[] = {
         { 0.f, 0.f }, /* None */
         { 0.f, 18.f }, /* Toggle -> Slider */
         { 0.f, 29.f }, /* Slider -> Slider */
@@ -484,7 +484,7 @@ public:
 
         draw_list.push_z_index( 2 );
 
-        const Vector2 position = Vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
+        const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
         const rect slider_bounds = rect( position.x + 18.f, position.y + 16.f, bounds_.w - 60.f, 10.f );
 
         const bool hovered = mouse_in_rect( slider_bounds );
@@ -521,7 +521,7 @@ public:
         previous_id_ = elements::slider;
     }
 
-    static inline Vector2 combo_box_movement[] = {
+    static inline vector2 combo_box_movement[] = {
         { 0.f, 0.f }, /* None */
         { 0.f, 18.f }, /* Toggle -> Combobox */
         { 0.f, 29.f }, /* Slider -> Combobox */
@@ -538,7 +538,7 @@ public:
 
         draw_list.push_z_index( 3 );
 
-        const Vector2 position = Vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
+        const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
         const rect combo_bounds = rect( position.x + 18.f, position.y + 16.f, bounds_.w - 60.f, 20.f );
         const rect options_bounds = rect( combo_bounds.x, combo_bounds.y + 21.f, combo_bounds.w, options.size() * 20.f );
 
@@ -624,11 +624,11 @@ private:
         }
     }
 
-    Vector4 rgb_to_hsv( uint32_t rgb ) {
+    vector4 rgb_to_hsv( uint32_t rgb ) {
         ImVec4 color_as_float = ImGui::ColorConvertU32ToFloat4( rgb );
         ImVec4 hsv;
         ImGui::ColorConvertRGBtoHSV( color_as_float.x, color_as_float.y, color_as_float.z, hsv.x, hsv.y, hsv.z );
-        return Vector4( hsv.x, hsv.y, hsv.z, hsv.w );
+        return vector4( hsv.x, hsv.y, hsv.z, hsv.w );
     }
 
     uint32_t hsv_to_rgb( float h, float s, float v ) {
@@ -638,7 +638,7 @@ private:
     }
 
     rect bounds_;
-    Vector2 cursor_;
+    vector2 cursor_;
     int previous_id_;
 };
 

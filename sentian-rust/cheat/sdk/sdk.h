@@ -123,7 +123,7 @@ namespace unity {
         public:
             FIELD( Matrix4x4, culling_matrix, 0x30C );
             FIELD( int, culling_mask, 0x43C );
-            FIELD( Vector3, last_position, 0x454 );
+            FIELD( vector3, last_position, 0x454 );
         };
 
         class shader : public object {
@@ -325,12 +325,12 @@ namespace unity {
             return caller( get_child_count, this );
         }
 
-        Vector3 get_position() {
-            void ( *get_position_injected )( transform*, Vector3* ) = ( decltype( get_position_injected ) )( unity_player + Offsets::Transform::get_position_Injected );
+        vector3 get_position() {
+            void ( *get_position_injected )( transform*, vector3* ) = ( decltype( get_position_injected ) )( unity_player + Offsets::Transform::get_position_Injected );
 
             um::caller& caller = um::get_caller_for_thread();
 
-            Vector3* position = caller.push<Vector3>();
+            vector3* position = caller.push<vector3>();
             caller( get_position_injected, this, position );
             return *position;
         }
@@ -345,12 +345,12 @@ namespace unity {
 
     class input {
     public:
-        static Vector2 get_mouse_position() {
-            Vector2* ( *get_mouse_position_injected )( Vector2* ) = decltype( get_mouse_position_injected )( unity_player + Offsets::Input::get_mousePosition_Injected );
+        static vector2 get_mouse_position() {
+            vector2* ( *get_mouse_position_injected )( vector2* ) = decltype( get_mouse_position_injected )( unity_player + Offsets::Input::get_mousePosition_Injected );
 
             um::caller& caller = um::get_caller_for_thread();
 
-            Vector2* mouse_position = caller.push<Vector2>();
+            vector2* mouse_position = caller.push<vector2>();
             caller( get_mouse_position_injected, mouse_position );
             return *mouse_position;
         }
@@ -772,7 +772,7 @@ namespace rust {
 
     class base_movement {
     public:
-        FIELD( Vector3, target_movement, Offsets::BaseMovement::TargetMovement );
+        FIELD( vector3, target_movement, Offsets::BaseMovement::TargetMovement );
         FIELD( base_player*, owner, Offsets::BaseMovement::Owner );
     };
 
@@ -1042,8 +1042,8 @@ namespace rust {
     public:
         class projectile {
         public:
-            FIELD( Vector3, start_pos, Offsets::ProtoBuf_ProjectileShoot_Projectile::startPos );
-            FIELD( Vector3, start_vel, Offsets::ProtoBuf_ProjectileShoot_Projectile::startVel );
+            FIELD( vector3, start_pos, Offsets::ProtoBuf_ProjectileShoot_Projectile::startPos );
+            FIELD( vector3, start_vel, Offsets::ProtoBuf_ProjectileShoot_Projectile::startVel );
         };
 
         FIELD( sys::list<projectile*>*, projectiles, Offsets::ProtoBuf_ProjectileShoot::projectiles );
@@ -1054,8 +1054,8 @@ namespace rust {
     class player_projectile_update {
     public:
         FIELD( int, projectile_id, Offsets::ProtoBuf_PlayerProjectileUpdate::projectileID );
-        FIELD( Vector3, cur_position, Offsets::ProtoBuf_PlayerProjectileUpdate::curPosition );
-        FIELD( Vector3, cur_velocity, Offsets::ProtoBuf_PlayerProjectileUpdate::curVelocity );
+        FIELD( vector3, cur_position, Offsets::ProtoBuf_PlayerProjectileUpdate::curPosition );
+        FIELD( vector3, cur_velocity, Offsets::ProtoBuf_PlayerProjectileUpdate::curVelocity );
         FIELD( float, travel_time, Offsets::ProtoBuf_PlayerProjectileUpdate::travelTime );
         FIELD( bool, should_pool, Offsets::ProtoBuf_PlayerProjectileUpdate::ShouldPool );
 
@@ -1075,10 +1075,10 @@ namespace rust {
     class player_tick {
     public:
         FIELD( input_message*, input_state, Offsets::PlayerTick::inputState );
-        FIELD( Vector3, position, Offsets::PlayerTick::position );
+        FIELD( vector3, position, Offsets::PlayerTick::position );
         FIELD( rust::model_state*, model_state, Offsets::PlayerTick::modelState );
         FIELD( uint64_t, active_item, Offsets::PlayerTick::activeItem );
-        FIELD( Vector3, eye_pos, Offsets::PlayerTick::eyePos );
+        FIELD( vector3, eye_pos, Offsets::PlayerTick::eyePos );
         FIELD( uint64_t, parent_id, Offsets::PlayerTick::parentID );
 
         static inline il2cpp_class* s_klass;

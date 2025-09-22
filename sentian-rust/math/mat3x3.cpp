@@ -94,7 +94,7 @@ void GetRotMatrixNormVec( float* out, const float* inVec, float radians )
 #undef M
 }
 
-Matrix3x3& Matrix3x3::set_axis_angle( const Vector3& rotation_axis, float radians ) {
+matrix3x3& matrix3x3::set_axis_angle( const vector3& rotation_axis, float radians ) {
     GetRotMatrixNormVec( data, rotation_axis.get_ptr(), radians );
     return *this;
 }

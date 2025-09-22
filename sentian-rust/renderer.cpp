@@ -423,9 +423,9 @@ void renderer::pop_clip_rect() {
 	draw_list->PopClipRect();
 }
 
-Vector2 renderer::calc_text_size( uint32_t font, const char* text ) {
+vector2 renderer::calc_text_size( uint32_t font, const char* text ) {
 	ImFont* _font = fonts[ font ];
 	ImVec2 size = _font->CalcTextSizeA( _font->LegacySize, FLT_MAX, 0.f, text );
 
-	return Vector2( size.x, size.y );
+	return vector2( size.x, size.y );
 }
