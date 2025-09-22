@@ -66,6 +66,13 @@ struct cached_player {
 	rust::player_inventory* inventory;
 };
 
+struct cached_dropped_item {
+	unity::transform* transform;
+	Vector3 position;
+	wchar_t name[ 128 ];
+	int category;
+};
+
 template <typename K, typename V>
 using entity_vector = const std::vector<std::pair<K, V>>&;
 

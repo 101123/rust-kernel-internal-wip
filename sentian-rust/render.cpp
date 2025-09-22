@@ -168,6 +168,87 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 	}
 }
 
+void draw_entities( const entity_vector<rust::base_entity*, cached_entity>& entities ) {
+	for ( const auto& [ entity, cached_entity ] : entities ) {
+		cvar_visual* visuals = cached_entity.visual;
+		if ( !visuals->enabled )
+			continue;
+
+		float distance = Vector3::distance( camera_position, cached_entity.position );
+		if ( distance > visuals->maximum_distance )
+			continue;
+
+		Vector2 screen;
+		if ( !w2s( cached_entity.position, screen ) )
+			continue;
+
+		char buffer[ 16 ] = {};
+		snprintf( buffer, sizeof( buffer ), "%dM\n", static_cast< int >( distance ) );
+
+		renderer::draw_text( screen.x, screen.y, fonts::small_fonts, text_flags::centered, visuals->color, visuals->display_name );
+		renderer::draw_text( screen.x, screen.y + 8.f, fonts::small_fonts, text_flags::centered, COL32_WHITE, buffer );
+	}
+}
+
+void draw_combat_entities( const entity_vector<rust::base_combat_entity*, cached_combat_entity>& combat_entities ) {
+	for ( const auto& [ combat_entity, cached_combat_entity ] : combat_entities ) {
+		if ( cached_combat_entity.lifestate != rust::lifestate::alive )
+			continue;
+
+		cvar_visual* visuals = cached_combat_entity.visual;
+		if ( !visuals->enabled )
+			continue;
+
+		float distance = Vector3::distance( camera_position, cached_combat_entity.position );
+		if ( distance > visuals->maximum_distance )
+			continue;
+
+		Vector2 screen;
+		if ( !w2s( cached_combat_entity.position, screen ) )
+			continue;
+
+		float x = TRUNC( screen.x );
+		float y = TRUNC( screen.y );
+
+		float width = renderer::calc_text_size( fonts::small_fonts, visuals->display_name ).x;
+		float half = ceilf( width / 2.f );
+
+		renderer::draw_text( x - half, y, fonts::small_fonts, text_flags::none, visuals->color, visuals->display_name );
+
+		float health_width = ( cached_combat_entity.health / cached_combat_entity.max_health ) * ( width - 2.f );
+
+		renderer::draw_filled_rect( x - half, y + 10.f, width, 4.f, COL32_BLACK );
+		renderer::draw_filled_rect( x - half + 1.f, y + 11.f, health_width, 2.f, COL32( 120, 225, 80, 255 ) );
+
+
+		//float x = ( float )( int )( screen.x );
+		//float y = 
+
+		//float width = renderer::calc_text_size( fonts::small_fonts, visuals->display_name ).x;
+		//float half = ceilf( width / 2.f );
+
+		//float rx = ( float )( int )( screen.x );
+		//float ry = ( float )( int )( screen.y );
+
+		//renderer::draw_text( rx - half, ry, fonts::small_fonts, text_flags::none, visuals->color, visuals->display_name );
+
+		//ry += 10.f;
+
+		//renderer::draw_filled_rect( rx - half, ry, width, 4.f, COL32( 120, 225, 80, 255 ) );
+
+		//ry += 10f.;
+
+		////float nig = ( cached_combat_entity.health / cached_combat_entity.max_health ) * width;
+
+		////renderer::draw_filled_rect( rx + 1.f, ry + 1.f, nig, 2.f, COL32( 120, 225, 80, 255 ) );
+
+		//char buffer[ 64 ] = {};
+		//snprintf( buffer, sizeof( buffer ), "%.2f %.2f %.2f %.2f\n", rx, ry, width, half );
+
+		//renderer::draw_text( screen.x, screen.y + 3.f, fonts::small_fonts, text_flags::centered, COL32_WHITE, buffer );
+	}
+}
+
 void draw_esp() {
 	auto static_fields = rust::main_camera::s_static_fields;
 	if ( !is_valid_ptr( static_fields ) )
@@ -186,24 +267,13 @@ void draw_esp() {
 
 	util::scoped_spinlock lock( &entity_manager::cache_lock );
 
-	entity_collection entities = entity_manager::get_entities();
+	entity_collection entity_collection = entity_manager::get_entities();
 
-	for ( const auto& [ entity, cached_entity ] : entities.resources ) {
-		Vector2 screen;
-		if ( !w2s( cached_entity.m_position, screen ) )
-			continue;
-
-		float distance = Vector3::distance( camera_position, cached_entity.m_position );
-
-		char buffer[ 16 ] = {};
-		snprintf( buffer, sizeof( buffer ), "%dM\n", static_cast< int >( distance ) );
-
-		renderer::draw_text( screen.x, screen.y, fonts::small_fonts, text_flags::centered, cached_entity.m_visual->color, cached_entity.m_visual->display_name );
-		renderer::draw_text( screen.x, screen.y + 8.f, fonts::small_fonts, text_flags::centered, COL32_WHITE, buffer );
-	}
+	draw_entities( entity_collection.entities );
+	draw_combat_entities( entity_collection.combat_entities );
 
 	if ( player_visuals.enabled || scientist_visuals.enabled ) {
-		draw_players( entities.players );
+		draw_players( entity_collection.players );
 	}
 }
 
