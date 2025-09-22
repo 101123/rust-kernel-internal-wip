@@ -9,7 +9,9 @@
 #include <imgui/imgui_internal.h>
 #include <imgui/imgui_impl_dx11.h>
 
-#include <algorithm>
+#include <glfn.h>
+
+#include <memory>
 
 ID3D11Device* device;
 ID3D11DeviceContext* device_context;
@@ -80,8 +82,8 @@ public:
 		return buffer;
 	}
 
-	void* read( size_t size ) {
-		void* buffer = ( void* )( buffer_ + position_ );
+	uint8_t* read( size_t size ) {
+		uint8_t* buffer = ( uint8_t* )( buffer_ + position_ );
 		position_ += size;
 		return buffer;
 	}
@@ -96,7 +98,7 @@ ImFont* create_font( uint8_t* font_data, float font_size, bool uppercase = false
 
 	uint32_t width = stream.read<uint32_t>();
 	uint32_t height = stream.read<uint32_t>();
-	void* texture = stream.read( width * height * 4 );
+	uint8_t* texture = stream.read( width * height * 4 );
 
 	ImFontAtlasRectId rect = ImFontAtlasPackAddRect( font_atlas, width, height );
 	if ( rect == ImFontAtlasRectId_Invalid )
@@ -111,7 +113,7 @@ ImFont* create_font( uint8_t* font_data, float font_size, bool uppercase = false
 	texture_data.Width = width;
 	texture_data.Height = height;
 	texture_data.BytesPerPixel = 4;
-	texture_data.Pixels = ( unsigned char* )texture;
+	texture_data.Pixels = texture;
 
 	ImFontAtlasTextureBlockCopy( &texture_data, 0, 0, font_atlas->TexData, texture_rect->x, texture_rect->y, texture_rect->w, texture_rect->h );
 
@@ -163,6 +165,89 @@ ImFont* create_font( uint8_t* font_data, float font_size, bool uppercase = false
 	return font;
 }
 
+ImFont* create_glfn_font( uint8_t* font_data, float font_size ) {
+	stream_reader stream( font_data );
+
+	glf_file_header_s header = stream.read<glf_file_header_s>();
+	glf_texture_header_s texture_header = stream.read<glf_texture_header_s>();
+
+	int width = texture_header.iWidth;
+	int height = texture_header.iHeight;
+
+	uint8_t* grayscale = stream.read( width * height );
+	auto rgba32 = std::make_unique<uint8_t[]>( width * height * 4 );
+
+	// Convert grayscale to rgb
+	for ( size_t i = 0; i < width * height; i++ ) {
+		uint8_t* rgba = &rgba32[ i * 4 ];
+
+		rgba[ 0 ] = 255;
+		rgba[ 1 ] = 255;
+		rgba[ 2 ] = 255;
+		rgba[ 3 ] = grayscale[ i ];
+	}
+
+	ImFontAtlasRectId rect = ImFontAtlasPackAddRect( font_atlas, width, height );
+	if ( rect == ImFontAtlasRectId_Invalid )
+		return nullptr;
+
+	ImTextureRect* texture_rect = ImFontAtlasPackGetRect( font_atlas, rect );
+	if ( !texture_rect ) 
+		return nullptr;
+
+	ImTextureData texture_data = ImTextureData();
+	texture_data.Format = ImTextureFormat_RGBA32;
+	texture_data.Width = width;
+	texture_data.Height = height;
+	texture_data.BytesPerPixel = 4;
+	texture_data.Pixels = rgba32.get();
+
+	ImFontAtlasTextureBlockCopy( &texture_data, 0, 0, font_atlas->TexData, texture_rect->x, texture_rect->y, texture_rect->w, texture_rect->h );
+
+	// Needs to be done otherwise the ImTextureData destructor will attempt to free our data
+	texture_data.Pixels = nullptr;
+
+	ImFont* font = IM_NEW( ImFont );
+	font->ContainerAtlas = font_atlas;
+	font->CurrentRasterizerDensity = 1.f;
+	font->LegacySize = font_size;
+
+	ImFontBaked* baked = font->GetFontBaked( font_size );
+
+	int size = stream.read<int>();
+	int size_read = 0;
+	int codepoint = 0;
+
+	while ( size_read < size ) {
+		glf_glyph_t glyph_info = stream.read<glf_glyph_t>();
+
+		for ( size_t i = 0; i < glyph_info.nKerningPairs; i++ ) {
+			glf_kerning_pair_t kerning_pair = stream.read<glf_kerning_pair_t>();
+			size_read += sizeof( kerning_pair );
+		}
+
+		ImFontGlyph glyph = ImFontGlyph();
+		glyph.Visible = true;
+		glyph.Codepoint = codepoint;
+		glyph.AdvanceX = ( float )glyph_info.iAdvance;
+		glyph.X0 = ( float )glyph_info.iLeftBearing;
+		glyph.Y0 = -( float )glyph_info.iTopBearing;
+		glyph.X1 = glyph.X0 + ( float )glyph_info.iWidth;
+		glyph.Y1 = glyph.Y0 + ( float )glyph_info.iHeight;
+		glyph.U0 = ( ( float )texture_rect->x + ( float )glyph_info.iX ) / ( float )font_atlas->TexData->Width;
+		glyph.V0 = ( ( float )texture_rect->y + ( float )glyph_info.iY ) / ( float )font_atlas->TexData->Height;
+		glyph.U1 = ( ( float )texture_rect->x + ( float )glyph_info.iX + ( float )glyph_info.iWidth ) / ( float )font_atlas->TexData->Width;
+		glyph.V1 = ( ( float )texture_rect->y + ( float )glyph_info.iY + ( float )glyph_info.iHeight ) / ( float )font_atlas->TexData->Height;
+
+		ImFontAtlasBakedAddFontGlyph( font_atlas, baked, nullptr, &glyph );
+
+		size_read += sizeof( glyph_info );
+		codepoint++;
+	}
+
+	return font;
+}
+
 bool renderer::init( IDXGISwapChain* swapchain ) {
 	if ( swapchain->GetDevice( __uuidof( ID3D11Device ), ( void** )&device ) != S_OK )
 		return false;
@@ -192,7 +277,7 @@ bool renderer::init( IDXGISwapChain* swapchain ) {
 	font_atlas->TexMinHeight = 1024;
 	ImFontAtlasBuildInit( font_atlas );
 
-	fonts[ fonts::verdana ] = create_font( antialiased_verdana_12, 12.f );
+	fonts[ fonts::verdana ] = create_glfn_font( antialiased_verdana_12_glfn, 12.f );
 	fonts[ fonts::tahoma ] = create_font( antialiased_tahoma_11, 11.f );
 	fonts[ fonts::small_fonts ] = create_font( outlined_smallfonts_8, 8.f, true );
 
