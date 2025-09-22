@@ -210,7 +210,7 @@ void draw_combat_entities( const entity_vector<rust::base_combat_entity*, cached
 		float x = TRUNC( screen.x );
 		float y = TRUNC( screen.y );
 
-		float width = renderer::calc_text_size( fonts::small_fonts, visuals->display_name ).x;
+		float width = renderer::calc_text_size( fonts::small_fonts, visuals->display_name ).x + 1.f;
 		float half = ceilf( width / 2.f );
 
 		renderer::draw_text( x - half, y, fonts::small_fonts, text_flags::none, visuals->color, visuals->display_name );
