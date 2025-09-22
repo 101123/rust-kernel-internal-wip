@@ -6,44 +6,19 @@
 #include <ankerl/unordered_dense.h>
 #include <md5.h>
 
-using player_map = ankerl::unordered_dense::map<rust::base_player*, cached_player>;
 using entity_map = ankerl::unordered_dense::map<rust::base_entity*, cached_entity>;
 using combat_entity_map = ankerl::unordered_dense::map<rust::base_combat_entity*, cached_combat_entity>;
+using player_map = ankerl::unordered_dense::map<rust::base_player*, cached_player>;
 
 struct cached_entities {
-    entity_map m_resources;
-    entity_map m_collectables;
-    entity_map m_barrels;
-    entity_map m_crates;
-    entity_map m_supply_drops;
-    entity_map m_deployables;
-
-    combat_entity_map m_animals;
-    combat_entity_map m_vehicles;
-    combat_entity_map m_traps;
-
-    player_map m_players;
+    entity_map entities;
+    combat_entity_map combat_entities;
+    player_map players;
 
     // Hackable Crate
     // Tool Cupboard
     // Dropped Items
     // Backpacks/Corpses
-
-    util::array<entity_map*, 16> m_entity_maps;
-    util::array<combat_entity_map*, 16> m_combat_entity_maps;
-
-    cached_entities() {
-        m_entity_maps.add( &m_resources );
-        m_entity_maps.add( &m_collectables );
-        m_entity_maps.add( &m_barrels );
-        m_entity_maps.add( &m_crates );
-        m_entity_maps.add( &m_supply_drops );
-        m_entity_maps.add( &m_deployables );
-
-        m_combat_entity_maps.add( &m_animals );
-        m_combat_entity_maps.add( &m_vehicles );
-        m_combat_entity_maps.add( &m_traps );
-    }
 };
 
 static util::lazy_initializer<cached_entities> entity_cache;
@@ -55,148 +30,119 @@ void entity_manager::init() {
 void entity_manager::destroy() {
     cached_entities& entities = entity_cache.get();
 
-    entity_map entities_temp;
-    for ( auto& map : entities.m_entity_maps ) {
-        map->swap( entities_temp );
-    }
+    entity_map _;
+    entities.entities.swap( _ );
 
-    combat_entity_map combat_entities_temp;
-    for ( auto& map : entities.m_combat_entity_maps ) {
-        map->swap( combat_entities_temp );
-    }
+    combat_entity_map __;
+    entities.combat_entities.swap( __ );
 
-    player_map players_temp;
-    entities.m_players.swap( players_temp );
+    player_map ___;
+    entities.players.swap( ___ );
 }
 
-class entity_cacher {
-public:
-    entity_cacher( entity_map* entities ) : 
-        m_cacher( entities, ( cacher::add_to_cache_t )add_to_cache, ( cacher::remove_from_cache_t )remove_from_cache ) {};
-
-    operator cacher&() {
-        return m_cacher;
-    }
-
-    static void add_to_cache( cacher* cacher, rust::base_entity* entity, cvar_visual* visual ) {
+namespace entity_cacher {
+    void add_to_cache( rust::base_entity* entity, cache_specifier* specifier ) {
         unity::transform* transform = entity->get_transform();
         if ( !is_valid_ptr( transform ) )
             return;
 
-        entity_map* storage = ( entity_map* )cacher->get_user_data();
+        entity_map& entities = entity_cache.get().entities;
 
         // This is most likely unnecessary
-        if ( storage->contains( entity ) )
+        if ( entities.contains( entity ) )
             return;
 
-        storage->insert( { entity, cached_entity( entity, transform->get_position(), visual ) } );
+        entities.insert( { entity, cached_entity( entity, transform, transform->get_position(), specifier->visual, specifier->update ) } );
     }
 
-    static void remove_from_cache( cacher* cacher, rust::base_entity* entity, cvar_visual* visual ) {
-        entity_map* storage = ( entity_map* )cacher->get_user_data();
-        if ( !storage )
+    void remove_from_cache( rust::base_entity* entity, cache_specifier* specifier ) {
+        entity_map& entities = entity_cache.get().entities;
+
+        auto iterator = entities.find( entity );
+        if ( iterator == entities.end() )
             return;
 
-        auto iterator = storage->find( entity );
-        if ( iterator == storage->end() )
-            return;
-
-        storage->erase( iterator );
+        entities.erase( iterator );
     }
 
-private:
-    cacher m_cacher;
-};
-
-class combat_entity_cacher {
-public:
-    combat_entity_cacher( combat_entity_map* entities ) :
-        m_cacher( entities, ( cacher::add_to_cache_t )add_to_cache, ( cacher::remove_from_cache_t )remove_from_cache ) {};
-
-    operator cacher& ( ) {
-        return m_cacher;
-    }
-
-    static void add_to_cache( cacher* cacher, rust::base_combat_entity* entity, cvar_visual* visual ) {
-        unity::transform* transform = entity->get_transform();
-        if ( !is_valid_ptr( transform ) )
-            return;
-
-        combat_entity_map* storage = ( combat_entity_map* )cacher->get_user_data();
-
-        // This is most likely unnecessary
-        if ( storage->contains( entity ) )
-            return;
-
-        storage->insert( { entity, cached_combat_entity( entity, transform->get_position(), visual, entity->lifestate, entity->health ) } );
-    }
-
-    static void remove_from_cache( cacher* cacher, rust::base_combat_entity* entity, cvar_visual* visual ) {
-        combat_entity_map* storage = ( combat_entity_map* )cacher->get_user_data();
-        if ( !storage )
-            return;
-
-        auto iterator = storage->find( entity );
-        if ( iterator == storage->end() )
-            return;
-
-        storage->erase( iterator );
-    }
-
-private:
-    cacher m_cacher;
-};
-
-inline int cached_bones[] = {
-    rust::bones::neck,
-    rust::bones::head,
-    rust::bones::spine1, rust::bones::spine4,
-    rust::bones::l_clavicle, rust::bones::r_clavicle,
-    rust::bones::l_upperarm, rust::bones::r_upperarm,
-    rust::bones::l_forearm, rust::bones::r_forearm,
-    rust::bones::l_hand, rust::bones::r_hand,
-    rust::bones::l_hip, rust::bones::r_hip,
-    rust::bones::l_knee, rust::bones::r_knee,
-    rust::bones::l_foot, rust::bones::r_foot
-};
-
-class player_cacher {
-public:
-    player_cacher( player_map* players ) :
-        m_cacher( players, ( cacher::add_to_cache_t )add_to_cache, ( cacher::remove_from_cache_t )remove_from_cache ) {
+    const void* cache_functions[] = {
+        add_to_cache,
+        remove_from_cache
     };
+}
 
-    operator cacher& ( ) {
-        return m_cacher;
-    }
+namespace combat_entity_cacher {
+    void add_to_cache( rust::base_combat_entity* combat_entity, cache_specifier* specifier ) {
+        unity::transform* transform = combat_entity->get_transform();
+        if ( !is_valid_ptr( transform ) )
+            return;
 
-    static void add_to_cache( cacher* cacher, rust::base_player* player, cvar_visual* visual ) {
-        player_map* storage = ( player_map* )cacher->get_user_data();
+        combat_entity_map& combat_entities = entity_cache.get().combat_entities;
 
         // This is most likely unnecessary
-        if ( storage->contains( player ) )
+        if ( combat_entities.contains( combat_entity ) )
             return;
 
-        storage->insert( { player, {} } );
+        combat_entities.insert( { combat_entity, 
+            cached_combat_entity( combat_entity, transform, transform->get_position(), specifier->visual, specifier->update, combat_entity->lifestate, combat_entity->health ) } );
     }
 
-    static void remove_from_cache( cacher* cacher, rust::base_player* player, cvar_visual* visual ) {
-        player_map* storage = ( player_map* )cacher->get_user_data();
-        if ( !storage )
+    void remove_from_cache( rust::base_entity* entity, cache_specifier* specifier ) {
+        entity_map& entities = entity_cache.get().entities;
+
+        auto iterator = entities.find( entity );
+        if ( iterator == entities.end() )
             return;
 
-        auto iterator = storage->find( player );
-        if ( iterator == storage->end() )
+        entities.erase( iterator );
+    }
+
+    const void* cache_functions[] = {
+        add_to_cache,
+        remove_from_cache
+    };
+}
+
+namespace player_cacher {
+    void add_to_cache( rust::base_player* player, cache_specifier* specifier ) {
+        player_map& players = entity_cache.get().players;
+
+        // This is most likely unnecessary
+        if ( players.contains( player ) )
             return;
 
-        storage->erase( iterator );
+        players.insert( { player, {} } );
+    }
+
+    void remove_from_cache( rust::base_player* player, cache_specifier* specifier ) {
+        player_map& players = entity_cache.get().players;
+
+        auto iterator = players.find( player );
+        if ( iterator == players.end() )
+            return;
+
+        players.erase( iterator );
 
         glow_manager::remove_player( player );
     }
 
-private:
-    cacher m_cacher;
-};
+    const void* cache_functions[] = {
+        add_to_cache,
+        remove_from_cache
+    };
+}
+
+const void** get_entity_cacher() {
+    return entity_cacher::cache_functions;
+}
+
+const void** get_combat_entity_cacher() {
+    return combat_entity_cacher::cache_functions;
+}
+
+const void** get_player_cacher() {
+    return player_cacher::cache_functions;
+}
 
 constexpr uint32_t generate_prefab_id_from_path( const char* path ) {
 	md5::Digest digest = md5::compute( path );
@@ -206,12 +152,10 @@ constexpr uint32_t generate_prefab_id_from_path( const char* path ) {
 #define PREFAB( prefab_path ) generate_prefab_id_from_path( prefab_path )
 
 bool entity_manager::belongs_in_cache( rust::base_networkable* entity, cache_specifier* specifier ) {
-    cached_entities& entities = entity_cache.get();
-
     if ( entity->klass == rust::base_player::s_klass || entity->klass == rust::scientist_npc::s_klass || 
         entity->klass == rust::tunnel_dweller::s_klass || entity->klass == rust::underwater_dweller::s_klass || 
         entity->klass == rust::scarecrow_npc::s_klass || entity->klass == rust::gingerbread_npc::s_klass ) {
-        *specifier = cache_specifier( player_cacher( &entities.m_players ), nullptr );
+        *specifier = cache_specifier( get_player_cacher(), nullptr, true );
         return true;
     }
 
@@ -220,7 +164,7 @@ bool entity_manager::belongs_in_cache( rust::base_networkable* entity, cache_spe
         case PREFAB( "assets/bundled/prefabs/autospawn/resource/ores_sand/stone-ore.prefab" ):
         case PREFAB( "assets/bundled/prefabs/autospawn/resource/ores_snow/stone-ore.prefab" ):
         case PREFAB( "assets/bundled/prefabs/radtown/ore_stone.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_resources ), &stone_ore );
+            *specifier = cache_specifier( get_entity_cacher(), &stone_ore, false );
             return true;
         }
 
@@ -228,7 +172,7 @@ bool entity_manager::belongs_in_cache( rust::base_networkable* entity, cache_spe
         case PREFAB( "assets/bundled/prefabs/autospawn/resource/ores_sand/metal-ore.prefab" ):
         case PREFAB( "assets/bundled/prefabs/autospawn/resource/ores_snow/metal-ore.prefab" ):
         case PREFAB( "assets/bundled/prefabs/radtown/ore_metal.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_resources ), &metal_ore );
+            *specifier = cache_specifier( get_entity_cacher(), &metal_ore, false );
             return true;
         }
 
@@ -236,247 +180,247 @@ bool entity_manager::belongs_in_cache( rust::base_networkable* entity, cache_spe
         case PREFAB( "assets/bundled/prefabs/autospawn/resource/ores_sand/sulfur-ore.prefab" ):
         case PREFAB( "assets/bundled/prefabs/autospawn/resource/ores_snow/sulfur-ore.prefab" ):
         case PREFAB( "assets/bundled/prefabs/radtown/ore_sulfur.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_resources ), &sulfur_ore );
+            *specifier = cache_specifier( get_entity_cacher(), &sulfur_ore, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/resource/wood_log_pile/wood-pile.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_resources ), &wood_pile );
+            *specifier = cache_specifier( get_entity_cacher(), &wood_pile, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/hemp/hemp-collectable.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_collectables ), &hemp );
+            *specifier = cache_specifier( get_entity_cacher(), &hemp, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/mushrooms/mushroom-cluster-5.prefab" ):
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/mushrooms/mushroom-cluster-6.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_collectables ), &mushroom );
+            *specifier = cache_specifier( get_entity_cacher(), &mushroom, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/pumpkin/pumpkin-collectable.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_collectables ), &pumpkin );
+            *specifier = cache_specifier( get_entity_cacher(), &pumpkin, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/corn/corn-collectable.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_collectables ), &corn );
+            *specifier = cache_specifier( get_entity_cacher(), &corn, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/potato/potato-collectable.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_collectables ), &potato );
+            *specifier = cache_specifier( get_entity_cacher(), &potato, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/stone/stone-collectable.prefab" ):
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/stone/halloween/halloween-stone-collectable.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_collectables ), &stone );
+            *specifier = cache_specifier( get_entity_cacher(), &stone, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/stone/metal-collectable.prefab" ):
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/stone/halloween/halloween-metal-collectable.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_collectables ), &metal );
+            *specifier = cache_specifier( get_entity_cacher(), &metal, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/stone/sulfur-collectable.prefab" ):
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/stone/halloween/halloween-sulfur-collectible.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_collectables ), &sulfur );
+            *specifier = cache_specifier( get_entity_cacher(), &sulfur, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/wood/wood-collectable.prefab" ):
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/stone/halloween/halloween-wood-collectable.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_collectables ), &wood );
+            *specifier = cache_specifier( get_entity_cacher(), &wood, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/berry-black/berry-black-collectable.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_collectables ), &black_berry );
+            *specifier = cache_specifier( get_entity_cacher(), &black_berry, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/berry-blue/berry-blue-collectable.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_collectables ), &blue_berry );
+            *specifier = cache_specifier( get_entity_cacher(), &blue_berry, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/berry-green/berry-green-collectable.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_collectables ), &green_berry );
+            *specifier = cache_specifier( get_entity_cacher(), &green_berry, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/berry-red/berry-red-collectable.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_collectables ), &red_berry );
+            *specifier = cache_specifier( get_entity_cacher(), &red_berry, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/berry-white/berry-white-collectable.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_collectables ), &white_berry );
+            *specifier = cache_specifier( get_entity_cacher(), &white_berry, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/collectable/berry-yellow/berry-yellow-collectable.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_collectables ), &yellow_berry );
+            *specifier = cache_specifier( get_entity_cacher(), &yellow_berry, false );
             return true;
         }
 
         case PREFAB( "assets/content/vehicles/boats/rowboat/rowboat.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_vehicles ), &rowboat );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &rowboat, true );
             return true;
         }
 
         case PREFAB( "assets/content/vehicles/boats/rhib/rhib.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_vehicles ), &rhib );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &rhib, true );
             return true;
         }
 
         case PREFAB( "assets/content/vehicles/minicopter/minicopter.entity.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_vehicles ), &minicopter );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &minicopter, true );
             return true;
         }
 
         case PREFAB( "assets/content/vehicles/scrap heli carrier/scraptransporthelicopter.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_vehicles ), &scrap_helicopter );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &scrap_helicopter, true );
             return true;
         }
 
         case PREFAB( "assets/content/vehicles/attackhelicopter/attackhelicopter.entity.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_vehicles ), &attack_helicopter );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &attack_helicopter, true );
             return true;
         }
 
         case PREFAB( "assets/content/vehicles/boats/tugboat/tugboat.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_vehicles ), &tugboat );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &tugboat, true );
             return true;
         }
 
         case PREFAB( "assets/content/vehicles/submarine/submarinesolo.entity.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_vehicles ), &submarine );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &submarine, true );
             return true;
         }
 
         case PREFAB( "assets/content/vehicles/submarine/submarineduo.entity.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_vehicles ), &submarine );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &submarine, true );
             return true;
         }
 
         case PREFAB( "assets/prefabs/deployable/hot air balloon/hotairballoon.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_vehicles ), &hot_air_balloon );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &hot_air_balloon, true );
             return true;
         }
 
         case PREFAB( "assets/content/vehicles/dpv/dpv.deployed.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_vehicles ), &diver_propulsion_vehicle );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &diver_propulsion_vehicle, true );
             return true;
         }
 
         case PREFAB( "assets/prefabs/npc/patrol helicopter/patrolhelicopter.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_vehicles ), &patrol_helicopter );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &patrol_helicopter, true );
             return true;
         }
 
         case PREFAB( "assets/prefabs/npc/m2bradley/bradleyapc.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_vehicles ), &bradley );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &bradley, true );
             return true;
         }
 
         case PREFAB( "assets/rust.ai/agents/bear/bear.prefab" ):
         case PREFAB( "assets/rust.ai/agents/bear/polarbear.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_animals ), &bear );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &bear, true );
             return true;
         }
 
         case PREFAB( "assets/rust.ai/agents/boar/boar.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_animals ), &boar );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &boar, true );
             return true;
         }
 
         case PREFAB( "assets/rust.ai/agents/chicken/chicken.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_animals ), &chicken );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &chicken, true );
             return true;
         }
 
         case PREFAB( "assets/content/vehicles/horse/ridablehorse.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_animals ), &horse );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &horse, true );
             return true;
         }
 
         case PREFAB( "assets/rust.ai/agents/stag/stag.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_animals ), &stag );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &stag, true );
             return true;
         }
 
         case PREFAB( "assets/rust.ai/agents/wolf/wolf2.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_animals ), &wolf );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &wolf, true );
             return true;
         }
 
         case PREFAB( "assets/rust.ai/agents/fish/simpleshark.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_animals ), &shark );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &shark, true );
             return true;
         }
 
         case PREFAB( "assets/prefabs/npc/beeswarm/beeswarm.prefab" ):
         case PREFAB( "assets/prefabs/npc/beeswarm/beemasterswarm.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_animals ), &bee_swarm );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &bee_swarm, true );
             return true;
         }
 
         case PREFAB( "assets/rust.ai/agents/tiger/tiger.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_animals ), &tiger );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &tiger, true );
             return true;
         }
 
         case PREFAB( "assets/rust.ai/agents/panther/panther.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_animals ), &panther );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &panther, true );
             return true;
         }
 
         case PREFAB( "assets/rust.ai/agents/crocodile/crocodile.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_animals ), &crocodile );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &crocodile, true );
             return true;
         }
 
         case PREFAB( "assets/rust.ai/agents/snake/snake.entity.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_animals ), &snake );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &snake, true );
             return true;
         }
 
         case PREFAB( "assets/prefabs/deployable/vendingmachine/vendingmachine.deployed.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_deployables ), &vending_machine );
+            *specifier = cache_specifier( get_entity_cacher(), &vending_machine, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/static/workbench1.static.prefab" ):
         case PREFAB( "assets/prefabs/deployable/tier 1 workbench/workbench1.deployed.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_deployables ), &wb1 );
+            *specifier = cache_specifier( get_entity_cacher(), &wb1, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/static/workbench2.static.prefab" ):
         case PREFAB( "assets/prefabs/deployable/tier 2 workbench/workbench2.deployed.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_deployables ), &wb2 );
+            *specifier = cache_specifier( get_entity_cacher(), &wb2, false );
             return true;
         }
 
         case PREFAB( "assets/prefabs/deployable/tier 3 workbench/workbench3.deployed.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_deployables ), &wb3 );
+            *specifier = cache_specifier( get_entity_cacher(), &wb3, false );
             return true;
         }
 
         case PREFAB( "assets/prefabs/deployable/sleeping bag/sleepingbag_leather_deployed.prefab" ):
         case PREFAB( "assets/prefabs/misc/summer_dlc/beach_towel/beachtowel.deployed.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_deployables ), &sleeping_bag );
+            *specifier = cache_specifier( get_entity_cacher(), &sleeping_bag, false );
             return true;
         }
 
         case PREFAB( "assets/prefabs/deployable/bed/bed_deployed.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_deployables ), &bed );
+            *specifier = cache_specifier( get_entity_cacher(), &bed, false );
             return true;
         }
 
@@ -488,33 +432,33 @@ bool entity_manager::belongs_in_cache( rust::base_networkable* entity, cache_spe
 
         case PREFAB( "assets/bundled/prefabs/autospawn/resource/loot/loot-barrel-1.prefab" ):
         case PREFAB( "assets/bundled/prefabs/radtown/loot_barrel_2.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_barrels ), &red_barrel );
+            *specifier = cache_specifier( get_entity_cacher(), &red_barrel, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/autospawn/resource/loot/loot-barrel-2.prefab" ):
         case PREFAB( "assets/bundled/prefabs/radtown/loot_barrel_1.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_barrels ), &blue_barrel );
+            *specifier = cache_specifier( get_entity_cacher(), &blue_barrel, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/radtown/oil_barrel.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_barrels ), &oil_barrel );
+            *specifier = cache_specifier( get_entity_cacher(), &oil_barrel, false );
             return true;
         }
 
         case PREFAB( "assets/content/structures/excavator/prefabs/diesel_collectable.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_barrels ), &diesel_barrel );
+            *specifier = cache_specifier( get_entity_cacher(), &diesel_barrel, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/radtown/crate_basic.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_crates ), &basic_crate );
+            *specifier = cache_specifier( get_entity_cacher(), &basic_crate, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/radtown/underwater_labs/crate_ammunition.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_crates ), &ammo_crate );
+            *specifier = cache_specifier( get_entity_cacher(), &ammo_crate, false );
             return true;
         }
 
@@ -523,76 +467,76 @@ bool entity_manager::belongs_in_cache( rust::base_networkable* entity, cache_spe
         case PREFAB( "assets/bundled/prefabs/radtown/underwater_labs/crate_food_2.prefab" ):
         case PREFAB( "assets/bundled/prefabs/radtown/crate_normal_2_food.prefab" ):
         case PREFAB( "assets/bundled/prefabs/radtown/foodbox.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_crates ), &food_crate );
+            *specifier = cache_specifier( get_entity_cacher(), &food_crate, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/radtown/underwater_labs/crate_fuel.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_crates ), &fuel_crate );
+            *specifier = cache_specifier( get_entity_cacher(), &fuel_crate, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/radtown/underwater_labs/tech_parts_1.prefab" ):
         case PREFAB( "assets/bundled/prefabs/radtown/underwater_labs/tech_parts_2.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_crates ), &tech_parts );
+            *specifier = cache_specifier( get_entity_cacher(), &tech_parts, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/radtown/underwater_labs/vehicle_parts.prefab" ):
         case PREFAB( "assets/bundled/prefabs/radtown/vehicle_parts.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_crates ), &vehicle_parts );
+            *specifier = cache_specifier( get_entity_cacher(), &vehicle_parts, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/radtown/crate_normal_2.prefab" ):
         case PREFAB( "assets/bundled/prefabs/radtown/underwater_labs/crate_normal.prefab" ):
         case PREFAB( "assets/bundled/prefabs/radtown/underwater_labs/crate_normal_2.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_crates ), &normal_crate );
+            *specifier = cache_specifier( get_entity_cacher(), &normal_crate, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/radtown/crate_underwater_basic.prefab" ):
         case PREFAB( "assets/bundled/prefabs/radtown/crate_underwater_advanced.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_crates ), &underwater_crate );
+            *specifier = cache_specifier( get_entity_cacher(), &underwater_crate, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/radtown/crate_normal_2_medical.prefab" ):
         case PREFAB( "assets/bundled/prefabs/radtown/underwater_labs/crate_medical.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_crates ), &medical_crate );
+            *specifier = cache_specifier( get_entity_cacher(), &medical_crate, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/radtown/crate_tools.prefab" ):
         case PREFAB( "assets/bundled/prefabs/radtown/underwater_labs/crate_tools.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_crates ), &tool_crate );
+            *specifier = cache_specifier( get_entity_cacher(), &tool_crate, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/radtown/crate_normal.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_crates ), &military_crate );
+            *specifier = cache_specifier( get_entity_cacher(), &military_crate, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/radtown/crate_elite.prefab" ):
         case PREFAB( "assets/bundled/prefabs/radtown/underwater_labs/crate_elite.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_crates ), &elite_crate );
+            *specifier = cache_specifier( get_entity_cacher(), &elite_crate, false );
             return true;
         }
 
         case PREFAB( "assets/bundled/prefabs/radtown/minecart.prefab" ):
         case PREFAB( "assets/bundled/prefabs/radtown/crate_mine.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_crates ), &minecart );
+            *specifier = cache_specifier( get_entity_cacher(), &minecart, false );
             return true;
         }
 
         case PREFAB( "assets/prefabs/npc/m2bradley/bradley_crate.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_crates ), &bradley_crate );
+            *specifier = cache_specifier( get_entity_cacher(), &bradley_crate, false );
             return true;
         }
 
         case PREFAB( "assets/prefabs/npc/patrol helicopter/heli_crate.prefab" ): {
-            *specifier = cache_specifier( entity_cacher( &entities.m_crates ), &heli_crate );
+            *specifier = cache_specifier( get_entity_cacher(), &heli_crate, false );
             return true;
         }
 
@@ -607,32 +551,32 @@ bool entity_manager::belongs_in_cache( rust::base_networkable* entity, cache_spe
         }
 
         case PREFAB( "assets/prefabs/deployable/single shot trap/guntrap.deployed.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_traps ), &shotgun_trap );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &shotgun_trap, false );
             return true;
         }
 
         case PREFAB( "assets/prefabs/npc/flame turret/flameturret.deployed.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_traps ), &flame_turret );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &flame_turret, false );
             return true;
         }
 
         case PREFAB( "assets/prefabs/deployable/landmine/landmine.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_traps ), &land_mine );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &land_mine, false );
             return true;
         }
 
         case PREFAB( "assets/prefabs/deployable/bear trap/beartrap.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_traps ), &bear_trap );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &bear_trap, false );
             return true;
         }
 
         case PREFAB( "assets/prefabs/npc/sam_site_turret/sam_site_turret_deployed.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_traps ), &sam_site );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &sam_site, false );
             return true;
         }
 
         case PREFAB( "assets/prefabs/npc/autoturret/autoturret_deployed.prefab" ): {
-            *specifier = cache_specifier( combat_entity_cacher( &entities.m_traps ), &auto_turret );
+            *specifier = cache_specifier( get_combat_entity_cacher(), &auto_turret, false );
             return true;
         }
 
@@ -656,14 +600,33 @@ bool entity_manager::belongs_in_cache( rust::base_networkable* entity, cache_spe
 void entity_manager::add_to_cache( rust::base_networkable* entity, cache_specifier* specifier ) {
     util::scoped_spinlock lock( &cache_lock );
 
-    specifier->m_cacher.add_to_cache( entity, specifier->m_visual );
+    void( *add_to_cache )( rust::base_networkable*, cache_specifier* ) = 
+        ( decltype( add_to_cache ) )( specifier->cache_functions[ 0 ] );
+
+    add_to_cache( entity, specifier );
 }
 
 void entity_manager::remove_from_cache( rust::base_networkable* entity, cache_specifier* specifier ) {
     util::scoped_spinlock lock( &cache_lock );
 
-    specifier->m_cacher.remove_from_cache( entity, specifier->m_visual );
+    void( *remove_from_cache )( rust::base_networkable*, cache_specifier* ) =
+        ( decltype( remove_from_cache ) )( specifier->cache_functions[ 1 ] );
+
+    remove_from_cache( entity, specifier );
 }
+
+const int cached_bones[] = {
+    rust::bones::neck,
+    rust::bones::head,
+    rust::bones::spine1, rust::bones::spine4,
+    rust::bones::l_clavicle, rust::bones::r_clavicle,
+    rust::bones::l_upperarm, rust::bones::r_upperarm,
+    rust::bones::l_forearm, rust::bones::r_forearm,
+    rust::bones::l_hand, rust::bones::r_hand,
+    rust::bones::l_hip, rust::bones::r_hip,
+    rust::bones::l_knee, rust::bones::r_knee,
+    rust::bones::l_foot, rust::bones::r_foot
+};
 
 void update_player_bones( cached_player& cached_player ) {
     auto& bone_data = cached_player.bone_data;
@@ -797,7 +760,7 @@ bool init_player_if_needed( rust::base_player* player, cached_player& cached_pla
 }
 
 void update_players() {
-    for ( auto& [ player, cached_player ] : entity_cache.get().m_players ) {
+    for ( auto& [ player, cached_player ] : entity_cache.get().players ) {
         if ( !init_player_if_needed( player, cached_player ) )
             continue;
 
@@ -806,17 +769,38 @@ void update_players() {
     }
 }
 
+void update_entities() {
+    cached_entities& cached_entities = entity_cache.get();
+
+    for ( auto& [ entity, cached_entity ] : cached_entities.entities ) {
+        if ( !entity->parent_entity && !cached_entity.update )
+            continue;
+
+        cached_entity.position = cached_entity.transform->get_position();
+    }
+
+    for ( auto& [ combat_entity, cached_combat_entity ] : cached_entities.combat_entities ) {
+        if ( !combat_entity->parent_entity && !cached_combat_entity.update )
+            continue;
+
+        cached_combat_entity.position = cached_combat_entity.transform->get_position();
+        cached_combat_entity.health = combat_entity->health;
+    }
+}
+
 void entity_manager::update() {
     util::scoped_spinlock lock( &cache_lock );
 
     update_players();
+    update_entities();
 }
 
 entity_collection entity_manager::get_entities() {
-    cached_entities& entities = entity_cache.get();
+    cached_entities& cached_entities = entity_cache.get();
 
     return entity_collection {
-        .players = entities.m_players.values(),
-        .resources = entities.m_resources.values()
+        .entities = cached_entities.entities.values(),
+        .combat_entities = cached_entities.combat_entities.values(),
+        .players = cached_entities.players.values()
     };
 }
