@@ -6,7 +6,7 @@
 #include "renderer.h"
 #include "gui.h"
 
-Matrix4x4 view_matrix;
+matrix4x4 view_matrix;
 vector3 camera_position;
 
 struct w2s_result {

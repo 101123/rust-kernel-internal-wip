@@ -1,6 +1,6 @@
 #pragma once
 
-class Matrix4x4 {
+class matrix4x4 {
 public:
 	float data[ 4 * 4 ];
 

@@ -121,7 +121,7 @@ namespace unity {
 
         class camera {
         public:
-            FIELD( Matrix4x4, culling_matrix, 0x30C );
+            FIELD( matrix4x4, culling_matrix, 0x30C );
             FIELD( int, culling_mask, 0x43C );
             FIELD( vector3, last_position, 0x454 );
         };

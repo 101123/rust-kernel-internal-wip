@@ -32,7 +32,7 @@ const float vector3::epsilon = 0.00001f;
 //	else if ( dir < -1.f + vector3::epsilon ) {
 //		vector3 lhs_norm = lhs / lhs_mag;
 //		vector3 axis = ortho_normal_vector_fast( lhs_norm );
-//		Matrix3x3 m;
+//		matrix3x3 m;
 //		m.set_axis_angle( axis, 3.14159265358979323846264338327950288419716939937510f * t );
 //		vector3 slerped = m.multiply( lhs_norm );
 //		slerped *= lerped_mag;
@@ -44,7 +44,7 @@ const float vector3::epsilon = 0.00001f;
 //		vector3 lhs_norm = lhs / lhs_mag;
 //		axis = normalize( axis );
 //		float angle = acosf( dir ) * t;
-//		Matrix3x3 m;
+//		matrix3x3 m;
 //		m.set_axis_angle( axis, angle );
 //		vector3 slerped = m.multiply( lhs_norm );
 //		slerped *= lerped_mag;

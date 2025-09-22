@@ -2,15 +2,15 @@
 
 #include "vec3.h"
 
-class Matrix3x3 {
+class matrix3x3 {
 public:
 	union {
 		float data[ 3 * 3 ];
 		vector3 vec[ 3 ];
 	};
 
-	Matrix3x3() {};
-	Matrix3x3( vector3 a, vector3 b, vector3 c ) {
+	matrix3x3() {};
+	matrix3x3( vector3 a, vector3 b, vector3 c ) {
 		vec[ 0 ] = a;
 		vec[ 1 ] = b;
 		vec[ 2 ] = c;
@@ -40,5 +40,5 @@ public:
 		return res;
 	}
 
-	Matrix3x3& set_axis_angle( const vector3& rotation_axis, float radians );
+	matrix3x3& set_axis_angle( const vector3& rotation_axis, float radians );
 };
