@@ -52,7 +52,7 @@ namespace entity_cacher {
         if ( entities.contains( entity ) )
             return;
 
-        entities.insert( { entity, cached_entity( entity, transform, transform->get_position(), specifier->visual, specifier->update ) } );
+        entities.insert( { entity, cached_entity( transform, transform->get_position(), specifier->visual, specifier->update ) } );
     }
 
     void remove_from_cache( rust::base_entity* entity, cache_specifier* specifier ) {
@@ -84,17 +84,17 @@ namespace combat_entity_cacher {
             return;
 
         combat_entities.insert( { combat_entity, 
-            cached_combat_entity( combat_entity, transform, transform->get_position(), specifier->visual, specifier->update, combat_entity->lifestate, combat_entity->health ) } );
+            cached_combat_entity( transform, transform->get_position(), specifier->visual, specifier->update, combat_entity->lifestate, combat_entity->health ) } );
     }
 
-    void remove_from_cache( rust::base_entity* entity, cache_specifier* specifier ) {
-        entity_map& entities = entity_cache.get().entities;
+    void remove_from_cache( rust::base_combat_entity* entity, cache_specifier* specifier ) {
+        combat_entity_map& combat_entities = entity_cache.get().combat_entities;
 
-        auto iterator = entities.find( entity );
-        if ( iterator == entities.end() )
+        auto iterator = combat_entities.find( entity );
+        if ( iterator == combat_entities.end() )
             return;
 
-        entities.erase( iterator );
+        combat_entities.erase( iterator );
     }
 
     const void* cache_functions[] = {

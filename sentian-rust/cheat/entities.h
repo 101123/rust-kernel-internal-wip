@@ -25,22 +25,21 @@ struct cache_specifier {
 };
 
 struct cached_entity {
-	rust::base_entity* entity;
 	unity::transform* transform;
 	Vector3 position;
 	cvar_visual* visual;
 	bool update;
 
-	cached_entity( rust::base_entity* entity, unity::transform* transform, Vector3 position, cvar_visual* visual, bool update ) :
-		entity( entity ), transform( transform ), position( position ), visual( visual ), update( update ) {};
+	cached_entity( unity::transform* transform, Vector3 position, cvar_visual* visual, bool update ) :
+		transform( transform ), position( position ), visual( visual ), update( update ) {};
 };
 
 struct cached_combat_entity : public cached_entity {
 	int lifestate;
 	float health;
 
-	cached_combat_entity( rust::base_entity* entity, unity::transform* transform, Vector3 position, cvar_visual* visual, bool update, int lifestate, float health )
-		: cached_entity( entity, transform, position, visual, update ), lifestate( lifestate ), health( health ) {}
+	cached_combat_entity( unity::transform* transform, Vector3 position, cvar_visual* visual, bool update, int lifestate, float health )
+		: cached_entity( transform, position, visual, update ), lifestate( lifestate ), health( health ) {}
 };
 
 struct cached_belt_item {
