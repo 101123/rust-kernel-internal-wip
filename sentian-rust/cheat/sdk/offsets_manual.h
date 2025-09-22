@@ -16,9 +16,4 @@ namespace Offsets {
     namespace BaseMovement {
         constexpr const static size_t TargetMovement = 0x3C;
     }
-
-    namespace IProto {
-        constexpr const static size_t WriteToStreamDelta_vtableoff = 0x1B8;
-        constexpr const static size_t WriteToStream_vtableoff = 0x1E8;
-    }
 }

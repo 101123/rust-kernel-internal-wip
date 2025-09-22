@@ -165,7 +165,7 @@ bool resolve_hooks() {
 	hook projectile_shoot_hook {
 		.init = false,
 		.flags = hook_flags::vftable,
-		.value = ( uintptr_t* )( ( uintptr_t )rust::projectile_shoot::s_klass + Offsets::IProto::WriteToStream_vtableoff ),
+		.value = ( uintptr_t* )( ( uintptr_t )rust::projectile_shoot::s_klass + Offsets::ProtoBuf_ProjectileShoot::WriteToStream_vtableoff ),
 		.original = 0ull,
 		.corrupt = generate_corrupt_value(),
 		.handler = projectile_shoot_write_to_stream_hook_handler
@@ -183,7 +183,7 @@ bool resolve_hooks() {
 	hook player_tick_hook {
 		.init = false,
 		.flags = hook_flags::vftable,
-		.value = ( uintptr_t* )( ( uintptr_t )rust::player_tick::s_klass + Offsets::IProto::WriteToStreamDelta_vtableoff ),
+		.value = ( uintptr_t* )( ( uintptr_t )rust::player_tick::s_klass + Offsets::PlayerTick::WriteToStreamDelta_vtableoff ),
 		.original = 0ull,
 		.corrupt = generate_corrupt_value(),
 		.handler = player_tick_write_to_stream_delta_hook_handler

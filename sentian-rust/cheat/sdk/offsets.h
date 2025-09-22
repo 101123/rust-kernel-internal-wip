@@ -1127,6 +1127,12 @@ namespace Offsets {
 		constexpr const static size_t parentID = 0x18;
 		constexpr const static size_t position = 0x30;
 		constexpr const static size_t eyePos = 0x4c;
+
+		// Functions
+		constexpr const static size_t WriteToStreamDelta = 0x95de350;
+		constexpr const static size_t WriteToStreamDelta_vtableoff = 0x1b8;
+		constexpr const static size_t WriteToStream = 0x95da5e0;
+		constexpr const static size_t WriteToStream_vtableoff = 0x1d8;
 	}
 
 	// obf name: ::%f8f2949a154d17f3fe62090b49e2d4db4121a59c
@@ -2651,6 +2657,12 @@ namespace Offsets {
 
 		// Offsets
 		constexpr const static size_t projectiles = 0x20;
+
+		// Functions
+		constexpr const static size_t WriteToStreamDelta = 0x94c4a60;
+		constexpr const static size_t WriteToStreamDelta_vtableoff = 0x1b8;
+		constexpr const static size_t WriteToStream = 0x94c5200;
+		constexpr const static size_t WriteToStream_vtableoff = 0x1d8;
 	}
 
 	// obf name: ::%d1c91a6a776a896d6814c8faa3829ec726a967c5
@@ -2683,6 +2695,10 @@ namespace Offsets {
 
 		// Functions
 		constexpr const static size_t Dispose = 0x8c2b040;
+		constexpr const static size_t WriteToStreamDelta = 0x8c20eb0;
+		constexpr const static size_t WriteToStreamDelta_vtableoff = 0x1b8;
+		constexpr const static size_t WriteToStream = 0x8c201c0;
+		constexpr const static size_t WriteToStream_vtableoff = 0x1d8;
 	}
 
 	// obf name: ::%e87ab3cb0d457947879654bf19ca14954bef4bab
@@ -2697,6 +2713,12 @@ namespace Offsets {
 		constexpr const static size_t hitDistance = 0x1c;
 		constexpr const static size_t travelTime = 0x14;
 		constexpr const static size_t playerAttack = 0x30;
+
+		// Functions
+		constexpr const static size_t WriteToStreamDelta = 0x8f6f930;
+		constexpr const static size_t WriteToStreamDelta_vtableoff = 0x1b8;
+		constexpr const static size_t WriteToStream = 0x8f6fa70;
+		constexpr const static size_t WriteToStream_vtableoff = 0x1d8;
 	}
 
 	// obf name: ::%11a73d899a13dd7c9ec6e389254d7db013aceb63
