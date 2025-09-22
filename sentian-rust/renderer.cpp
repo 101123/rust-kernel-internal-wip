@@ -231,7 +231,7 @@ ImFont* create_glfn_font( uint8_t* font_data, float font_size ) {
 		glyph.Codepoint = codepoint;
 		glyph.AdvanceX = ( float )glyph_info.iAdvance;
 		glyph.X0 = ( float )glyph_info.iLeftBearing;
-		glyph.Y0 = -( float )glyph_info.iTopBearing;
+		glyph.Y0 = ( float )( -glyph_info.iTopBearing + header.fm.iAscent );
 		glyph.X1 = glyph.X0 + ( float )glyph_info.iWidth;
 		glyph.Y1 = glyph.Y0 + ( float )glyph_info.iHeight;
 		glyph.U0 = ( ( float )texture_rect->x + ( float )glyph_info.iX ) / ( float )font_atlas->TexData->Width;
