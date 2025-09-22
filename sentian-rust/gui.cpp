@@ -735,33 +735,56 @@ void visual_impl( group_box& group_box, cvar_visual& visual ) {
     }
 }
 
-void player_visuals_impl( group_box& group_box, cvar_player_visuals& visuals ) {
+void player_visuals_impl( group_box& left, group_box& right, cvar_player_visuals& visuals ) {
     bool is_player_visuals = &visuals == &player_visuals;
 
-    group_box.toggle( "Enabled", &visuals.enabled );
+    left.begin();
 
-    group_box.toggle( "Bounding box", &visuals.box );
-    group_box.color_picker( &visuals.box_color );
+    left.toggle( "Enabled", &visuals.enabled );
 
-    group_box.toggle( "Skeleton", &visuals.skeleton );
-    group_box.color_picker( &visuals.skeleton_color );
+    left.toggle( "Bounding box", &visuals.box );
+    left.color_picker( &visuals.box_color );
 
-    group_box.toggle( "Name", &visuals.name );
-    group_box.color_picker( &visuals.name_color );
+    left.toggle( "Skeleton", &visuals.skeleton );
+    left.color_picker( &visuals.skeleton_color );
 
-    group_box.toggle( "Held item", &visuals.held_item );
-    group_box.color_picker( &visuals.held_item_color );
+    left.toggle( "Name", &visuals.name );
+    left.color_picker( &visuals.name_color );
+
+    left.toggle( "Held item", &visuals.held_item );
+    left.color_picker( &visuals.held_item_color );
 
     if ( visuals.held_item ) {
-        group_box.combo_box( "Held item type", { "Text", "Icon" }, &visuals.held_item_type );
+        left.combo_box( "Held item type", { "Text", "Icon" }, &visuals.held_item_type );
     }
 
-    group_box.toggle( "Distance", &visuals.distance );
-    group_box.color_picker( &visuals.distance_color );
+    left.toggle( "Distance", &visuals.distance );
+    left.color_picker( &visuals.distance_color );
 
     if ( is_player_visuals ) {
         
     }
+
+    left.end();
+
+    right.begin();
+
+    right.toggle( "Chams", &chams );
+    right.color_picker( &chams_color );
+
+    if ( chams ) {
+        right.combo_box( "Chams type", { "Solid", "Material" }, &chams_type );
+    }
+
+    right.toggle( "Glow", &glow );
+    right.color_picker( &glow_outline_color );
+
+    if ( glow ) {
+        right.slider( "Glow blur scale", "%.2f", &glow_blur_scale, 0.f, 10.f );
+        right.slider( "Glow outline scale", "%.2f", &glow_outline_scale, 0.f, 10.f );
+    }
+
+    right.end();
 }
 
 void gui::run() {
@@ -815,41 +838,12 @@ void gui::run() {
         case tabs::visuals: {
             switch ( current_subtab[ tabs::visuals ] ) {
                 case visual_subtabs::players: {
-                    left.begin();
-                    
-                    player_visuals_impl( left, player_visuals );
-                    
-                    left.end();
-
-                    right.begin();
-
-                    right.toggle( "Chams", &chams );
-                    right.color_picker( &chams_color );
-
-                    if (chams ) {
-                        right.combo_box( "Chams type", { "Solid", "Material" }, &chams_type );
-                    }
-
-                    right.toggle( "Glow", &glow );
-                    right.color_picker( &glow_outline_color );
-
-                    if ( glow ) {
-                        right.slider( "Glow blur scale", "%.2f", &glow_blur_scale, 0.f, 10.f );
-                        right.slider( "Glow outline scale", "%.2f", &glow_outline_scale, 0.f, 10.f );
-                    }
-
-                    right.end();
-
+                    player_visuals_impl( left, right, player_visuals );
                     break;
                 }
 
                 case visual_subtabs::scientists: {
-                    left.begin();
-
-                    player_visuals_impl( left, scientist_visuals );
-
-                    left.end();
-
+                    player_visuals_impl( left, right, scientist_visuals );
                     break;
                 }
 
