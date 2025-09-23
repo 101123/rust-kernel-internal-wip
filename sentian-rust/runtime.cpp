@@ -136,7 +136,6 @@ extern "C" {
 
     int _vswprintf_l(
         wchar_t* const _Buffer,
-        size_t const _BufferCount,
         wchar_t const* const _Format,
         _locale_t const _Locale,
         va_list _ArgList
@@ -150,7 +149,7 @@ extern "C" {
         _locale_t _Locale,
         va_list _ArgList
     ) {
-        return _vswprintf_l( _Buffer, _BufferCount, _Format, _Locale, _ArgList );
+        return _vswprintf_l( _Buffer, _Format, _Locale, _ArgList );
     }
 }
 
