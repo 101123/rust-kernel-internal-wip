@@ -16,6 +16,7 @@ namespace rust {
 	class base_player;
 	class player_eyes;
 	class player_inventory;
+	class world_item;
 }
 
 struct cache_specifier {
@@ -80,6 +81,7 @@ using entity_vector = const std::vector<std::pair<K, V>>&;
 struct entity_collection {
 	entity_vector<rust::base_entity*, cached_entity> entities;
 	entity_vector<rust::base_combat_entity*, cached_combat_entity> combat_entities;
+	entity_vector<rust::world_item*, cached_dropped_item> dropped_items;
 	entity_vector<rust::base_player*, cached_player> players;
 };
 

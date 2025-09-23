@@ -872,6 +872,7 @@ entity_collection entity_manager::get_entities() {
     return entity_collection {
         .entities = cached_entities.entities.values(),
         .combat_entities = cached_entities.combat_entities.values(),
+        .dropped_items = cached_entities.dropped_items.values(),
         .players = cached_entities.players.values()
     };
 }

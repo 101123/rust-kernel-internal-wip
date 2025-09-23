@@ -249,6 +249,16 @@ void draw_combat_entities( const entity_vector<rust::base_combat_entity*, cached
 	}
 }
 
+void draw_dropped_items( const entity_vector<rust::world_item*, cached_dropped_item>& dropped_items ) {
+	for ( const auto& [ dropped_item, cached_dropped_item ] : dropped_items ) {
+		vector2 screen;
+		if ( !w2s( cached_dropped_item.position, screen ) )
+			continue;
+
+		renderer::draw_text( screen.x, screen.y, fonts::small_fonts, text_flags::centered, COL32_WHITE, cached_dropped_item.name );
+	}
+}
+
 void draw_esp() {
 	auto static_fields = rust::main_camera::s_static_fields;
 	if ( !is_valid_ptr( static_fields ) )
@@ -271,6 +281,7 @@ void draw_esp() {
 
 	draw_entities( entity_collection.entities );
 	draw_combat_entities( entity_collection.combat_entities );
+	draw_dropped_items( entity_collection.dropped_items );
 
 	if ( player_visuals.enabled || scientist_visuals.enabled ) {
 		draw_players( entity_collection.players );
