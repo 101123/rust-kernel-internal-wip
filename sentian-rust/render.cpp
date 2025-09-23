@@ -6,6 +6,73 @@
 #include "renderer.h"
 #include "gui.h"
 
+#include <cstdarg>
+
+uint8_t format_buffer[ 1024 ];
+
+const char* format_string( const char* format, ... ) {
+	char* buffer = ( char* )format_buffer;
+
+	va_list args;
+	va_start( args, format );
+	vsprintf( buffer, format, args );
+	va_end( args );
+
+	return buffer;
+}
+
+const wchar_t* format_string_w( const wchar_t* format, ... ) {
+	wchar_t* buffer = ( wchar_t* )format_buffer;
+	size_t count = sizeof( format_buffer ) / sizeof( wchar_t );
+
+	va_list args;
+	va_start( args, format );
+	vswprintf( buffer, format, args );
+	va_end( args );
+
+	return buffer;
+}
+
+class visual_builder {
+public:
+	visual_builder() = delete;
+	visual_builder( vector2 position ) : position_( position ), vertical_offset_( 0.f ) {};
+
+	visual_builder& set_font( fonts font ) {
+		font_ = font;
+		return *this;
+	}
+
+	visual_builder& set_vertical_spacing( float vertical_spacing ) {
+		vertical_spacing_ = vertical_spacing;
+		return *this;
+	}
+
+	visual_builder& set_flags( uint32_t flags ) {
+		flags_ = flags;
+		return *this;
+	}
+
+	visual_builder& draw_text( const char* text, uint32_t color ) {
+		renderer::draw_text( position_.x, position_.y + vertical_offset_, font_, flags_, color, text );
+		vertical_offset_ += vertical_spacing_;
+		return *this;
+	}
+
+	visual_builder& draw_text( const wchar_t* text, uint32_t color ) {
+		renderer::draw_text( position_.x, position_.y + vertical_offset_, font_, flags_, color, text );
+		vertical_offset_ += vertical_spacing_;
+		return *this;
+	}
+
+private:
+	vector2 position_;
+	float vertical_spacing_;
+	float vertical_offset_;
+	fonts font_;
+	uint32_t flags_;
+};
+
 matrix4x4 view_matrix;
 vector3 camera_position;
 
@@ -182,11 +249,12 @@ void draw_entities( const entity_vector<rust::base_entity*, cached_entity>& enti
 		if ( !w2s( cached_entity.position, screen ) )
 			continue;
 
-		char buffer[ 16 ] = {};
-		snprintf( buffer, sizeof( buffer ), "%dM\n", static_cast< int >( distance ) );
-
-		renderer::draw_text( screen.x, screen.y, fonts::small_fonts, text_flags::centered, visuals->color, visuals->display_name );
-		renderer::draw_text( screen.x, screen.y + 8.f, fonts::small_fonts, text_flags::centered, COL32_WHITE, buffer );
+		visual_builder( screen )
+			.set_font( fonts::small_fonts )
+			.set_vertical_spacing( 8.f )
+			.set_flags( text_flags::centered )
+			.draw_text( visuals->display_name, visuals->color )
+			.draw_text( format_string( "%dm", ( int )distance ), COL32_WHITE );
 	}
 }
 
@@ -255,7 +323,17 @@ void draw_dropped_items( const entity_vector<rust::world_item*, cached_dropped_i
 		if ( !w2s( cached_dropped_item.position, screen ) )
 			continue;
 
-		renderer::draw_text( screen.x, screen.y, fonts::small_fonts, text_flags::centered, COL32_WHITE, cached_dropped_item.name );
+		float distance = vector3::distance( camera_position, cached_dropped_item.position );
+
+		visual_builder( screen )
+			.set_font( fonts::small_fonts )
+			.set_vertical_spacing( 8.f )
+			.set_flags( text_flags::centered )
+			.draw_text( cached_dropped_item.amount > 1 ?
+				format_string_w( L"%ws (%dx)", cached_dropped_item.name, cached_dropped_item.amount ) :
+				format_string_w( L"%ws", cached_dropped_item.name ), 
+				COL32_WHITE )
+			.draw_text( format_string( "%dm", ( int )distance ), COL32_WHITE );
 	}
 }
 
