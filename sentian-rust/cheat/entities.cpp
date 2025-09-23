@@ -8,11 +8,13 @@
 
 using entity_map = ankerl::unordered_dense::map<rust::base_entity*, cached_entity>;
 using combat_entity_map = ankerl::unordered_dense::map<rust::base_combat_entity*, cached_combat_entity>;
+using dropped_item_map = ankerl::unordered_dense::map<rust::world_item*, cached_dropped_item>;
 using player_map = ankerl::unordered_dense::map<rust::base_player*, cached_player>;
 
 struct cached_entities {
     entity_map entities;
     combat_entity_map combat_entities;
+    dropped_item_map dropped_items;
     player_map players;
 
     // Hackable Crate
@@ -30,14 +32,17 @@ void entity_manager::init() {
 void entity_manager::destroy() {
     cached_entities& entities = entity_cache.get();
 
-    entity_map _;
-    entities.entities.swap( _ );
+    entity_map temp_entity_map;
+    entities.entities.swap( temp_entity_map );
 
-    combat_entity_map __;
-    entities.combat_entities.swap( __ );
+    combat_entity_map temp_combat_entity_map;
+    entities.combat_entities.swap( temp_combat_entity_map );
 
-    player_map ___;
-    entities.players.swap( ___ );
+    dropped_item_map temp_dropped_item_map;
+    entities.dropped_items.swap( temp_dropped_item_map );
+
+    player_map temp_player_map;
+    entities.players.swap( temp_player_map );
 }
 
 namespace entity_cacher {
@@ -84,7 +89,7 @@ namespace combat_entity_cacher {
             return;
 
         combat_entities.insert( { combat_entity, 
-            cached_combat_entity( transform, transform->get_position(), specifier->visual, specifier->update, combat_entity->lifestate, combat_entity->health ) } );
+            cached_combat_entity( transform, transform->get_position(), specifier->visual, specifier->update, combat_entity->lifestate, combat_entity->health, combat_entity->max_health ) } );
     }
 
     void remove_from_cache( rust::base_combat_entity* entity, cache_specifier* specifier ) {
@@ -95,6 +100,33 @@ namespace combat_entity_cacher {
             return;
 
         combat_entities.erase( iterator );
+    }
+
+    const void* cache_functions[] = {
+        add_to_cache,
+        remove_from_cache
+    };
+}
+
+namespace dropped_item_cacher {
+    void add_to_cache( rust::world_item* world_item, cache_specifier* specifier ) {
+        dropped_item_map& dropped_items = entity_cache.get().dropped_items;
+
+        // This is most likely unnecessary
+        if ( dropped_items.contains( world_item ) )
+            return;
+
+        dropped_items.insert( { world_item, {} } );
+    }
+
+    void remove_from_cache( rust::world_item* world_item, cache_specifier* specifier ) {
+        dropped_item_map& dropped_items = entity_cache.get().dropped_items;
+
+        auto iterator = dropped_items.find( world_item );
+        if ( iterator == dropped_items.end() )
+            return;
+
+        dropped_items.erase( iterator );
     }
 
     const void* cache_functions[] = {
@@ -138,6 +170,10 @@ const void** get_entity_cacher() {
 
 const void** get_combat_entity_cacher() {
     return combat_entity_cacher::cache_functions;
+}
+
+const void** get_dropped_item_cacher() {
+    return dropped_item_cacher::cache_functions;
 }
 
 const void** get_player_cacher() {
@@ -581,7 +617,8 @@ bool entity_manager::belongs_in_cache( rust::base_networkable* entity, cache_spe
         }
 
         case PREFAB( "assets/prefabs/misc/burlap sack/generic_world.prefab" ): {
-            return false;
+            *specifier = cache_specifier( get_dropped_item_cacher(), nullptr, true );
+            return true;
         }
 
         case PREFAB( "assets/prefabs/player/player_corpse.prefab" ):
@@ -615,6 +652,33 @@ void entity_manager::remove_from_cache( rust::base_networkable* entity, cache_sp
     remove_from_cache( entity, specifier );
 }
 
+bool init_dropped_item_if_needed( rust::world_item* world_item, cached_dropped_item& cached_dropped_item ) {
+    if ( cached_dropped_item.init )
+        return true;
+
+    rust::item* item = world_item->item;
+    if ( !is_valid_ptr( item ) )
+        return false;
+
+    rust::item_definition* info = item->info;
+    if ( !is_valid_ptr( info ) )
+        return false;
+
+    rust::phrase* display_name = info->display_name;
+    if ( !is_valid_ptr( display_name ) )
+        return false;
+
+    sys::string* legacy_english = display_name->legacy_english;
+    if ( !is_valid_ptr( legacy_english ) )
+        return false;
+
+    cached_dropped_item.amount = item->amount;
+    cached_dropped_item.category = info->category;
+    wcscpy_s( cached_dropped_item.name, _countof( cached_dropped_item.name ), legacy_english->buffer );
+
+    return cached_dropped_item.init = true;
+}
+
 const int cached_bones[] = {
     rust::bones::neck,
     rust::bones::head,
@@ -636,7 +700,7 @@ void update_player_bones( cached_player& cached_player ) {
     }
 }
 
-bool update_player_inventory( cached_player& cached_player ) {
+bool update_player_inventory( rust::base_player* player, cached_player& cached_player ) {
     rust::item_container* belt = cached_player.inventory->container_belt;
     if ( !is_valid_ptr( belt ) )
         return false;
@@ -650,7 +714,7 @@ bool update_player_inventory( cached_player& cached_player ) {
         return false;
     
     int active_item = -1;
-    uint64_t active_item_id = cached_player.entity->cl_active_item;
+    uint64_t active_item_id = player->cl_active_item;
 
     for ( size_t i = 0; i < 6; i++ ) {
         // The list contains the actual count, not the underlying array
@@ -696,7 +760,6 @@ bool update_player_inventory( cached_player& cached_player ) {
 }
 
 bool init_player_if_needed( rust::base_player* player, cached_player& cached_player ) {
-    // Check if we've already initialized this player
     if ( cached_player.init )
         return true;
 
@@ -730,8 +793,6 @@ bool init_player_if_needed( rust::base_player* player, cached_player& cached_pla
         cached_player.bone_data.transforms[ i ] = transform;
     }
 
-    cached_player.entity = player;
-
     cached_player.scientist = true;
 
     cached_player.eyes = eyes;
@@ -759,16 +820,6 @@ bool init_player_if_needed( rust::base_player* player, cached_player& cached_pla
     return cached_player.init = true;
 }
 
-void update_players() {
-    for ( auto& [ player, cached_player ] : entity_cache.get().players ) {
-        if ( !init_player_if_needed( player, cached_player ) )
-            continue;
-
-        update_player_bones( cached_player );
-        update_player_inventory( cached_player );
-    }
-}
-
 void update_entities() {
     cached_entities& cached_entities = entity_cache.get();
 
@@ -788,12 +839,26 @@ void update_entities() {
         cached_combat_entity.health = combat_entity->health;
         cached_combat_entity.max_health = combat_entity->max_health;
     }
+
+    for ( auto& [ dropped_item, cached_dropped_item ] : cached_entities.dropped_items ) {
+        if ( !init_dropped_item_if_needed( dropped_item, cached_dropped_item ) )
+            continue;
+
+        cached_dropped_item.position = cached_dropped_item.transform->get_position();
+    }
+
+    for ( auto& [ player, cached_player ] : cached_entities.players ) {
+        if ( !init_player_if_needed( player, cached_player ) )
+            continue;
+
+        update_player_bones( cached_player );
+        update_player_inventory( player, cached_player );
+    }
 }
 
 void entity_manager::update() {
     util::scoped_spinlock lock( &cache_lock );
 
-    update_players();
     update_entities();
 }
 

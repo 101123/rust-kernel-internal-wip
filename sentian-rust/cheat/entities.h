@@ -39,8 +39,8 @@ struct cached_combat_entity : public cached_entity {
 	float health;
 	float max_health;
 
-	cached_combat_entity( unity::transform* transform, vector3 position, cvar_visual* visual, bool update, int lifestate, float health )
-		: cached_entity( transform, position, visual, update ), lifestate( lifestate ), health( health ) {}
+	cached_combat_entity( unity::transform* transform, vector3 position, cvar_visual* visual, bool update, int lifestate, float health, float max_health )
+		: cached_entity( transform, position, visual, update ), lifestate( lifestate ), health( health ), max_health( max_health ) {}
 };
 
 struct cached_belt_item {
@@ -55,7 +55,6 @@ struct cached_bone_data {
 };
 
 struct cached_player {
-	rust::base_player* entity;
 	bool init;
 	bool scientist;
 	cached_bone_data bone_data;
@@ -67,10 +66,12 @@ struct cached_player {
 };
 
 struct cached_dropped_item {
+	bool init;
 	unity::transform* transform;
 	vector3 position;
-	wchar_t name[ 128 ];
+	int amount;
 	int category;
+	wchar_t name[ 128 ];
 };
 
 template <typename K, typename V>

@@ -1113,4 +1113,9 @@ namespace rust {
 
         static inline il2cpp_class* s_klass;
     };
+
+    class world_item : public base_entity {
+    public:
+        FIELD( rust::item*, item, Offsets::WorldItem::item );
+    };
 }
