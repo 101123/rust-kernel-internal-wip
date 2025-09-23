@@ -23,14 +23,134 @@ extern "C" {
     }
 
     int __stdio_common_vsprintf(
-        unsigned __int64 const options,
-        char* const buffer,
-        size_t const buffer_count,
-        char const* const format,
-        _locale_t const locale,
-        va_list const arglist
+        unsigned __int64 _Options,
+        char* _Buffer,
+        size_t _BufferCount,
+        char const* _Format,
+        _locale_t _Locale,
+        va_list _ArgList
     ) {
-        return npf_vsnprintf( buffer, buffer_count, format, arglist );
+        return npf_vsnprintf( _Buffer, _BufferCount, _Format, _ArgList );
+    }
+
+    // This is needed because ntstrsafe.lib doesn't contain it for some reason
+    extern const unsigned char __lookuptable_s[] = {
+        /* ' ' */  0x06,
+        /* '!' */  0x80,
+        /* '"' */  0x80,
+        /* '#' */  0x86,
+        /* '$' */  0x80,
+        /* '%' */  0x81,
+        /* '&' */  0x80,
+        /* ''' */  0x00,
+        /* '(' */  0x00,
+        /* ')' */  0x10,
+        /* '*' */  0x03,
+        /* '+' */  0x86,
+        /* ',' */  0x80,
+        /* '-' */  0x86,
+        /* '.' */  0x82,
+        /* '/' */  0x80,
+        /* '0' */  0x14,
+        /* '1' */  0x05,
+        /* '2' */  0x05,
+        /* '3' */  0x45,
+        /* '4' */  0x45,
+        /* '5' */  0x45,
+        /* '6' */  0x85,
+        /* '7' */  0x85,
+        /* '8' */  0x85,
+        /* '9' */  0x05,
+        /* ':' */  0x00,
+        /* ';' */  0x00,
+        /* '<' */  0x30,
+        /* '=' */  0x30,
+        /* '>' */  0x80,
+        /* '?' */  0x50,
+        /* '@' */  0x80,
+       #if defined (_SAFECRT_IMPL)
+        /* 'A' */  0x80,       // Disable %A format
+       #else  /* defined (_SAFECRT_IMPL) */
+        /* 'A' */  0x88,
+       #endif  /* defined (_SAFECRT_IMPL) */
+        /* 'B' */  0x00,
+        /* 'C' */  0x08,
+        /* 'D' */  0x00,
+        /* 'E' */  0x28,
+        /* 'F' */  0x27,
+        /* 'G' */  0x38,
+        /* 'H' */  0x50,
+        /* 'I' */  0x57,
+        /* 'J' */  0x80,
+        /* 'K' */  0x00,
+        /* 'L' */  0x07,
+        /* 'M' */  0x00,
+        /* 'N' */  0x37,
+        /* 'O' */  0x30,
+        /* 'P' */  0x30,
+        /* 'Q' */  0x50,
+        /* 'R' */  0x50,
+        /* 'S' */  0x88,
+        /* 'T' */  0x00,
+        /* 'U' */  0x00,
+        /* 'V' */  0x00,
+        /* 'W' */  0x20,
+        /* 'X' */  0x28,
+        /* 'Y' */  0x80,
+        /* 'Z' */  0x88,
+        /* '[' */  0x80,
+        /* '\' */  0x80,
+        /* ']' */  0x00,
+        /* '^' */  0x00,
+        /* '_' */  0x00,
+        /* '`' */  0x60,
+       #if defined (_SAFECRT_IMPL)
+        /* 'a' */  0x60,       // Disable %a format
+       #else  /* defined (_SAFECRT_IMPL) */
+        /* 'a' */  0x68,
+       #endif  /* defined (_SAFECRT_IMPL) */
+        /* 'b' */  0x60,
+        /* 'c' */  0x68,
+        /* 'd' */  0x68,
+        /* 'e' */  0x68,
+        /* 'f' */  0x08,
+        /* 'g' */  0x08,
+        /* 'h' */  0x07,
+        /* 'i' */  0x78,
+        /* 'j' */  0x70,
+        /* 'k' */  0x70,
+        /* 'l' */  0x77,
+        /* 'm' */  0x70,
+        /* 'n' */  0x70,
+        /* 'o' */  0x08,
+        /* 'p' */  0x08,
+        /* 'q' */  0x00,
+        /* 'r' */  0x00,
+        /* 's' */  0x08,
+        /* 't' */  0x00,
+        /* 'u' */  0x08,
+        /* 'v' */  0x00,
+        /* 'w' */  0x07,
+        /* 'x' */  0x08
+    };
+
+    int _vswprintf_l(
+        wchar_t* const _Buffer,
+        size_t const _BufferCount,
+        wchar_t const* const _Format,
+        _locale_t const _Locale,
+        va_list _ArgList
+    );
+
+    int __stdio_common_vswprintf(
+        unsigned __int64 _Options,
+        wchar_t* _Buffer,
+        size_t _BufferCount,
+        wchar_t const* _Format,
+        _locale_t _Locale,
+        va_list _ArgList
+    ) {
+        return _vswprintf_l( _Buffer, _BufferCount, _Format, _Locale, _ArgList );
     }
 }
 
