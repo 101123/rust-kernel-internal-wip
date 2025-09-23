@@ -110,13 +110,17 @@ namespace combat_entity_cacher {
 
 namespace dropped_item_cacher {
     void add_to_cache( rust::world_item* world_item, cache_specifier* specifier ) {
+        unity::transform* transform = world_item->get_transform();
+        if ( !is_valid_ptr( transform ) )
+            return;
+
         dropped_item_map& dropped_items = entity_cache.get().dropped_items;
 
         // This is most likely unnecessary
         if ( dropped_items.contains( world_item ) )
             return;
 
-        dropped_items.insert( { world_item, {} } );
+        dropped_items.insert( { world_item, { false, transform, transform->get_position() } } );
     }
 
     void remove_from_cache( rust::world_item* world_item, cache_specifier* specifier ) {
