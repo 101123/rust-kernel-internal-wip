@@ -317,13 +317,34 @@ void draw_combat_entities( const entity_vector<rust::base_combat_entity*, cached
 	}
 }
 
+cvar_visual* dropped_item_visuals[] = {
+	&dropped_weapon, &dropped_construction, &dropped_items,
+	&dropped_resources, &dropped_attire, &dropped_tool,
+	&dropped_medical, &dropped_food, &dropped_ammunition,
+	&dropped_traps, &dropped_misc, nullptr /* All */,
+	nullptr /* Common */, &dropped_component, nullptr /* Search */,
+	nullptr /* Favourite */, &dropped_electrical, &dropped_fun
+};
+
 void draw_dropped_items( const entity_vector<rust::world_item*, cached_dropped_item>& dropped_items ) {
 	for ( const auto& [ dropped_item, cached_dropped_item ] : dropped_items ) {
-		vector2 screen;
-		if ( !w2s( cached_dropped_item.position, screen ) )
+		if ( cached_dropped_item.category < 0 || cached_dropped_item.category >= _countof( dropped_item_visuals ) )
+			continue;
+
+		cvar_visual* visuals = dropped_item_visuals[ cached_dropped_item.category ];
+		if ( !visuals )
+			continue;
+
+		if ( !visuals->enabled )
 			continue;
 
 		float distance = vector3::distance( camera_position, cached_dropped_item.position );
+		if ( distance > visuals->maximum_distance )
+			continue;
+
+		vector2 screen;
+		if ( !w2s( cached_dropped_item.position, screen ) )
+			continue;
 
 		visual_builder( screen )
 			.set_font( fonts::small_fonts )
@@ -332,7 +353,7 @@ void draw_dropped_items( const entity_vector<rust::world_item*, cached_dropped_i
 			.draw_text( cached_dropped_item.amount > 1 ?
 				format_string_w( L"%ws (%dx)", cached_dropped_item.name, cached_dropped_item.amount ) :
 				format_string_w( L"%ws", cached_dropped_item.name ), 
-				COL32_WHITE )
+				visuals->color )
 			.draw_text( format_string( "%dm", ( int )distance ), COL32_WHITE );
 	}
 }

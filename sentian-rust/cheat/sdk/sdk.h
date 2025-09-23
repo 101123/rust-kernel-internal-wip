@@ -696,6 +696,27 @@ namespace rust {
         r_foot = 15
     };
 
+    enum item_category {
+        weapon,
+        construction,
+        items,
+        resources,
+        attire,
+        tool,
+        medical,
+        food,
+        ammunition,
+        traps,
+        misc,
+        all,
+        common,
+        component,
+        search,
+        favourite,
+        electrical,
+        fun
+    };
+
     class base_networkable : public unity::component {
     public:
         FIELD( uint32_t, prefab_id, Offsets::BaseNetworkable::prefabID );

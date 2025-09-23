@@ -727,8 +727,8 @@ void tab( const char* label, uint32_t value, uint32_t* tab, rect& cursor, float 
     renderer::draw_text( cursor.x + width / 2.f, cursor.y + 6.f, 0, text_flags::centered, selected ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), label );
 }
 
-void visual_impl( group_box& group_box, cvar_visual& visual ) {
-    bool toggled = group_box.toggle( visual.display_name, &visual.enabled );
+void visual_impl( group_box& group_box, cvar_visual& visual, const char* label = nullptr ) {
+    bool toggled = group_box.toggle( label ? label : visual.display_name, &visual.enabled );
     group_box.color_picker( &visual.color );
 
     if ( toggled ) {
@@ -853,6 +853,22 @@ void gui::run() {
                     left.end();
 
                     right.begin();
+
+                    visual_impl( right, dropped_weapon, "Weapon" );
+                    visual_impl( right, dropped_construction, "Construction" );
+                    visual_impl( right, dropped_items, "Items" );
+                    visual_impl( right, dropped_resources, "Resources" );
+                    visual_impl( right, dropped_attire, "Attire" );
+                    visual_impl( right, dropped_tool, "Tool" );
+                    visual_impl( right, dropped_medical, "Medical" );
+                    visual_impl( right, dropped_food, "Food" );
+                    visual_impl( right, dropped_ammunition, "Ammunition" );
+                    visual_impl( right, dropped_traps, "Traps" );
+                    visual_impl( right, dropped_misc, "Misc" );
+                    visual_impl( right, dropped_component, "Component" );
+                    visual_impl( right, dropped_electrical, "Electrical" );
+                    visual_impl( right, dropped_fun, "Fun" );
+
                     right.end();
 
                     break;
