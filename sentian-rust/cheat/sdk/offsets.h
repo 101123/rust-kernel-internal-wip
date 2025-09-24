@@ -2257,9 +2257,8 @@ namespace Offsets {
 	namespace Client {
 
 		// Functions
-		constexpr const static size_t OnNetworkMessage = 0x1ec43b0;
-		constexpr const static size_t OnNetworkMessage_vtableoff = 0x1c8;
-		constexpr const static size_t CreateOrUpdateEntity = 0x1ebf480;
+		constexpr const static size_t OnClientDisconnected = 0x1efe3e0;
+		constexpr const static size_t OnClientDisconnected_vtableoff = 0x1b8;
 	}
 
 #define BaseNetworkable_TypeDefinitionIndex 7079

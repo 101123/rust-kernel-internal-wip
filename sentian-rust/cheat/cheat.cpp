@@ -47,7 +47,8 @@ class_lookup class_lookups[] = {
 	{ &rust::player_projectile_attack::s_klass, nullptr, nullptr, ProtoBuf_PlayerProjectileAttack_TypeDefinitionIndex },
 	{ &rust::projectile_shoot::s_klass, nullptr, nullptr, ProtoBuf_ProjectileShoot_TypeDefinitionIndex },
 	{ &rust::player_tick::s_klass, nullptr, nullptr, PlayerTick_TypeDefinitionIndex },
-	{ &rust::item_icon::s_klass, nullptr, nullptr, ItemIcon_TypeDefinitionIndex }
+	{ &rust::item_icon::s_klass, nullptr, nullptr, ItemIcon_TypeDefinitionIndex },
+	{ &rust::client::s_klass, nullptr, nullptr, Client_TypeDefinitionIndex }
 };
 
 bool populate_classes() {
@@ -189,6 +190,15 @@ bool resolve_hooks() {
 		.handler = player_tick_write_to_stream_delta_hook_handler
 	};
 
+	hook on_client_disconnected_hook {
+		.init = false,
+		.flags = hook_flags::vftable,
+		.value = ( uintptr_t* )( ( uintptr_t )rust::client::s_klass + Offsets::Client::OnClientDisconnected_vtableoff ),
+		.original = 0ull,
+		.corrupt = generate_corrupt_value(),
+		.handler = client_on_client_disconnected_hook_handler
+	};
+
 	auto& hooks = hook_manager::hooks;
 
 	hooks.add( create_networkable_hook );
@@ -198,6 +208,7 @@ bool resolve_hooks() {
 	hooks.add( projectile_shoot_hook );
 	hooks.add( try_to_move_hook );
 	hooks.add( player_tick_hook );
+	hooks.add( on_client_disconnected_hook );
 
 	return true;
 }

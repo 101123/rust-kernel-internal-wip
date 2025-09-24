@@ -1139,4 +1139,9 @@ namespace rust {
     public:
         FIELD( rust::item*, item, Offsets::WorldItem::item );
     };
+
+    class client {
+    public:
+        static inline il2cpp_class* s_klass;
+    };
 }

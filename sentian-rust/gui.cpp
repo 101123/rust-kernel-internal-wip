@@ -877,9 +877,9 @@ void gui::run() {
                 case visual_subtabs::resources: {
                     left.begin();
 
-                    visual_impl( left, stone_ore );
-                    visual_impl( left, metal_ore );
-                    visual_impl( left, sulfur_ore );
+                    visual_impl( left, stone_ore, "Stone ore" );
+                    visual_impl( left, metal_ore, "Metal ore" );
+                    visual_impl( left, sulfur_ore, "Sulfur ore" );
 
                     left.end();
 
@@ -917,18 +917,18 @@ void gui::run() {
                     visual_impl( left, rowboat );
                     visual_impl( left, rhib );
                     visual_impl( left, minicopter );
-                    visual_impl( left, scrap_helicopter );
-                    visual_impl( left, attack_helicopter );
+                    visual_impl( left, scrap_helicopter, "Scrap helicopter" );
+                    visual_impl( left, attack_helicopter, "Attack helicopter" );
                     visual_impl( left, tugboat );
                     visual_impl( left, submarine );
-                    visual_impl( left, hot_air_balloon );
-                    visual_impl( left, diver_propulsion_vehicle );
+                    visual_impl( left, hot_air_balloon, "Hot air balloon" );
+                    visual_impl( left, diver_propulsion_vehicle, "Diver propulsion vehicle" );
 
                     left.end();
 
                     right.begin();
                  
-                    visual_impl( right, patrol_helicopter );
+                    visual_impl( right, patrol_helicopter, "Patrol helicopter" );
                     visual_impl( right, bradley );
 
                     right.end();
@@ -946,7 +946,7 @@ void gui::run() {
                     visual_impl( left, stag );
                     visual_impl( left, wolf );
                     visual_impl( left, shark );
-                    visual_impl( left, bee_swarm );
+                    visual_impl( left, bee_swarm, "Bee swarm" );
                     visual_impl( left, tiger );
                     visual_impl( left, panther );
                     visual_impl( left, crocodile );
@@ -963,6 +963,13 @@ void gui::run() {
 
                 case visual_subtabs::traps: {
                     left.begin();
+
+                    visual_impl( left, shotgun_trap, "Shotgun trap" );
+                    visual_impl( left, flame_turret, "Flame turret" );
+                    visual_impl( left, land_mine, "Land mine" );
+                    visual_impl( left, bear_trap, "Bear trap" );
+                    visual_impl( left, sam_site, "SAM site" );
+
                     left.end();
 
                     right.begin();
@@ -973,9 +980,32 @@ void gui::run() {
 
                 case visual_subtabs::loot: {
                     left.begin();
+
+                    visual_impl( left, red_barrel, "Red barrel" );
+                    visual_impl( left, blue_barrel, "Blue barrel" );
+                    visual_impl( left, oil_barrel, "Oil barrel" );
+                    visual_impl( left, diesel_barrel, "Diesel barrel" );
+                    visual_impl( left, minecart, "Minecart" );
+                    visual_impl( left, vehicle_parts, "Vehicle parts" );
+                    visual_impl( left, tech_parts, "Tech parts" );
+
                     left.end();
 
                     right.begin();
+
+                    visual_impl( right, food_crate, "Food crate" );
+                    visual_impl( right, medical_crate, "Medical crate" );
+                    visual_impl( right, tool_crate, "Tool crate" );
+                    visual_impl( right, ammo_crate, "Ammo crate" );
+                    visual_impl( right, fuel_crate, "Fuel crate" );
+                    visual_impl( right, basic_crate, "Basic crate" );
+                    visual_impl( right, normal_crate, "Normal crate" );
+                    visual_impl( right, underwater_crate, "Underwater crate" );
+                    visual_impl( right, military_crate, "Military crate" );
+                    visual_impl( right, elite_crate, "Elite crate" );
+                    visual_impl( right, bradley_crate, "Bradley crate" );
+                    visual_impl( right, heli_crate, "Heli crate" );
+
                     right.end();
 
                     break;

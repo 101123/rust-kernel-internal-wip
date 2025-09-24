@@ -279,3 +279,11 @@ void item_icon_try_to_move_hook( rust::item_icon* item_icon ) {
 void item_icon_try_to_move_hook_handler( _CONTEXT* context ) {
 	item_icon_try_to_move_hook( ( rust::item_icon* )context->Rcx );
 }
+
+void client_on_client_disconnected_hook( rust::client* client, sys::string* reason ) {
+	LOG( "OnClientDisconnected!\n" );
+}
+
+void client_on_client_disconnected_hook_handler( _CONTEXT* context ) {
+	client_on_client_disconnected_hook( ( rust::client* )context->Rcx, ( sys::string* )context->Rdx );
+}

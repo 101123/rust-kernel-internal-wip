@@ -835,13 +835,15 @@ void update_entities() {
     }
 
     for ( auto& [ combat_entity, cached_combat_entity ] : cached_entities.combat_entities ) {
+        cached_combat_entity.lifestate = combat_entity->lifestate;
+        cached_combat_entity.health = combat_entity->health;
+        cached_combat_entity.max_health = combat_entity->max_health;
+
+        // Only update the position if the entity is parented or moves
         if ( !combat_entity->parent_entity && !cached_combat_entity.update )
             continue;
 
         cached_combat_entity.position = cached_combat_entity.transform->get_position();
-        cached_combat_entity.lifestate = cached_combat_entity.lifestate;
-        cached_combat_entity.health = combat_entity->health;
-        cached_combat_entity.max_health = combat_entity->max_health;
     }
 
     for ( auto& [ dropped_item, cached_dropped_item ] : cached_entities.dropped_items ) {
