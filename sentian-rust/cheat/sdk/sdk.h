@@ -964,7 +964,6 @@ namespace rust {
 
             uint64_t active_item_id = cl_active_item;
 
-            // The list contains the actual count, not the underlying array
             for ( size_t i = 0; i < items_list->size; i++ ) {
                 item* item_ = items->buffer[ i ];
                 if ( !is_valid_ptr( item_ ) )

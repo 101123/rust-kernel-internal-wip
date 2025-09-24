@@ -721,7 +721,6 @@ bool update_player_inventory( rust::base_player* player, cached_player& cached_p
     uint64_t active_item_id = player->cl_active_item;
 
     for ( size_t i = 0; i < 6; i++ ) {
-        // The list contains the actual count, not the underlying array
         if ( i < items_list->size ) {
             // None of these pointers should ever be invalid, so fail if so
             rust::item* item = items->buffer[ i ];

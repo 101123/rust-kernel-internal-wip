@@ -31,8 +31,8 @@ public:
 			T value = ( T )registers[ i ];
 
 			if ( callback( value ) ) {
-				m_location = resolved_location::registers;
-				m_offset = i;
+				location_ = resolved_location::registers;
+				position_ = i;
 				return;
 			}
 		}
@@ -43,40 +43,40 @@ public:
 				T value = *( T* )( context->Rsp + offset );
 
 				if ( callback( value ) ) {
-					m_location = resolved_location::stack;
-					m_offset = offset;
+					location_ = resolved_location::stack;
+					position_ = offset;
 					return;
 				}
 			}
 		}
 
-		m_offset = 0;
-		m_location = resolved_location::unresolved;
+		location_ = resolved_location::unresolved;
+		position_ = 0ull;
 	}
 
 	bool resolved() {
-		return m_location != resolved_location::unresolved;
+		return location_ != resolved_location::unresolved;
 	}
 
 	T get( _CONTEXT* context ) {
-		if ( m_location == resolved_location::registers ) {
+		if ( location_ == resolved_location::registers ) {
 			uint64_t* registers = ( uint64_t* )&context->Rax;
-			return ( T )registers[ m_offset ];
+			return ( T )registers[ position_ ];
 		} 
 		
-		else if ( m_location == resolved_location::stack ) {
-			return *( T* )( context->Rsp + m_offset );
+		else if ( location_ == resolved_location::stack ) {
+			return *( T* )( context->Rsp + position_ );
 		}
 
 		return T();
 	}
 
 private:
-	resolved_location m_location;
-	size_t m_offset;
+	resolved_location location_;
+	size_t position_;
 };
 
-void create_networkable_hook( rust::base_networkable* networkable ) {
+void network_client_create_networkable_hook( rust::base_networkable* networkable ) {
 	if ( !is_valid_ptr( networkable ) || !is_valid_ptr( networkable->cached_ptr ) )
 		return;
 
@@ -87,26 +87,7 @@ void create_networkable_hook( rust::base_networkable* networkable ) {
 	entity_manager::add_to_cache( networkable, &specifier );
 }
 
-void create_networkable_hook_handler( _CONTEXT* context ) {
-	static context_search search = context_search<rust::base_networkable*>( context,
-		[]( rust::base_networkable* value ) {
-			if ( !is_valid_ptr( value ) )
-				return false;
-
-			if ( !value->as<rust::base_networkable>() )
-				return false;
-
-			// We don't want any entities with a valid networkable object as we're hooking the creation of it
-			return !is_valid_ptr( value->net );
-		}, true, 0x100 );
-
-	if ( !search.resolved() )
-		return;
-
-	create_networkable_hook( search.get( context ) );
-}
-
-void destroy_networkable_hook( rust::base_networkable* networkable ) {
+void network_client_destroy_networkable_hook( rust::base_networkable* networkable ) {
 	if ( !is_valid_ptr( networkable ) || !is_valid_ptr( networkable->cached_ptr ) )
 		return;
 
@@ -117,44 +98,7 @@ void destroy_networkable_hook( rust::base_networkable* networkable ) {
 	entity_manager::remove_from_cache( networkable, &specifier );
 }
 
-void destroy_networkable_hook_handler( _CONTEXT* context ) {
-	static context_search search = context_search<rust::base_networkable*>( context,
-		[]( rust::base_networkable* value ) {
-			if ( !is_valid_ptr( value ) )
-				return false;
-
-			return value->as<rust::base_networkable>() != nullptr;
-		}, true, 0x100 );
-
-	if ( !search.resolved() )
-		return;
-
-	destroy_networkable_hook( search.get( context ) );
-}
-
-// TODO: Clean up and put asset bundle loading in another place
-
-bool init = false;
-
-void on_render_image_hook_handler( _CONTEXT* context ) {
-	if ( !init ) {
-		asset_bundle = unity::asset_bundle::load_from_file( L"C://assetbundle", 0u, 0ull );
-		glow_manager::init( asset_bundle );
-		init = true;
-	}
-
-	if ( unity::input::get_key_down( unity::key_code::end ) ) {
-		gui::open = !gui::open;
-	}
-
-	// Update entities
-	entity_manager::update();
-
-	glow_manager::update();
-	glow_manager::on_render_image_hook( ( unity::render_texture* )context->Rdx, ( unity::render_texture* )context->R8 );
-}
-
-void movement_hook( rust::player_walk_movement* player_walk_movement, rust::model_state* model_state ) {	
+void player_walk_movement_do_fixed_update_hook( rust::player_walk_movement* player_walk_movement, rust::model_state* model_state ) {
 	if ( omnisprint ) {
 		rust::base_player* owner = player_walk_movement->owner;
 		if ( !owner )
@@ -172,11 +116,7 @@ void movement_hook( rust::player_walk_movement* player_walk_movement, rust::mode
 	}
 }
 
-void movement_hook_handler( _CONTEXT* context ) {
-	movement_hook( ( rust::player_walk_movement* )context->Rcx, ( rust::model_state* )context->Rdx );
-}
-
-void player_tick_write_to_stream_delta_hook( rust::player_tick* player_tick ) {
+void protobuf_player_tick_write_to_stream_delta_hook( rust::player_tick* player_tick ) {
 	if ( !is_valid_ptr( player_tick ) )
 		return;
 
@@ -187,11 +127,7 @@ void player_tick_write_to_stream_delta_hook( rust::player_tick* player_tick ) {
 	model_state->set_flag( rust::model_state::flag::sprinting, true );
 }
 
-void player_tick_write_to_stream_delta_hook_handler( _CONTEXT* context ) {
-	player_tick_write_to_stream_delta_hook( ( rust::player_tick* )context->Rcx );
-}
-
-void projectile_shoot_write_to_stream_hook( sys::list<rust::projectile_shoot::projectile*>* server_projectiles_list, sys::list<rust::projectile*>* created_projectiles_list ) {
+void protobuf_projectile_shoot_write_to_stream_hook( sys::list<rust::projectile_shoot::projectile*>* server_projectiles_list, sys::list<rust::projectile*>* created_projectiles_list ) {
 	if ( !is_valid_ptr( created_projectiles_list ) || !is_valid_ptr( created_projectiles_list->items ) )
 		return;
 
@@ -203,9 +139,6 @@ void projectile_shoot_write_to_stream_hook( sys::list<rust::projectile_shoot::pr
 	if ( !is_valid_ptr( server_projectiles ) )
 		return;
 
-	LOG( "Projectile ct: %d\n", server_projectiles_list->size );
-
-	// The list contains the actual count, not the underlying array
 	for ( size_t i = 0; i < server_projectiles_list->size; i++ ) {
 		rust::projectile_shoot::projectile* server_projectile = server_projectiles->buffer[ i ];
 		if ( !is_valid_ptr( server_projectile ) )
@@ -219,7 +152,91 @@ void projectile_shoot_write_to_stream_hook( sys::list<rust::projectile_shoot::pr
 	}
 }
 
-void projectile_shoot_write_to_stream_hook_handler( _CONTEXT* context ) {
+void item_icon_try_to_move_hook( rust::item_icon* item_icon ) {
+	if ( instant_loot ) {
+		item_icon->run_timed_action();
+	}
+}
+
+void client_on_client_disconnected_hook( rust::client* client, sys::string* reason ) {
+	LOG( "OnClientDisconnected!\n" );
+}
+
+void hook_handlers::network_client_create_networkable( _CONTEXT* context ) {
+	static context_search search = context_search<rust::base_networkable*>( context,
+		[]( rust::base_networkable* value ) {
+			if ( !is_valid_ptr( value ) )
+				return false;
+
+			if ( !value->as<rust::base_networkable>() )
+				return false;
+
+			unity::transform* transform = value->get_transform();
+			if ( is_valid_ptr( transform ) ) {
+				vector3 position = transform->get_position();
+
+				char buffer[ 32 ] = {};
+				snprintf( buffer, 32, "Start Position: %.2f %.2f %.2f\n", position.x, position.y, position.z );
+
+				LOG( buffer );
+			}
+
+			// We don't want any entities with a valid networkable object as we're hooking the creation of it
+			return !is_valid_ptr( value->net );
+		}, true, 0x100 );
+
+	if ( !search.resolved() )
+		return;
+
+	network_client_create_networkable_hook( search.get( context ) );
+}
+
+void hook_handlers::network_client_destroy_networkable( _CONTEXT* context ) {
+	static context_search search = context_search<rust::base_networkable*>( context,
+		[]( rust::base_networkable* value ) {
+			if ( !is_valid_ptr( value ) )
+				return false;
+
+			return value->as<rust::base_networkable>() != nullptr;
+		}, true, 0x100 );
+
+	if ( !search.resolved() )
+		return;
+
+	network_client_destroy_networkable_hook( search.get( context ) );
+}
+
+// TODO: Clean up and put asset bundle loading in another place
+
+bool init = false;
+
+void hook_handlers::outline_manager_on_render_image( _CONTEXT* context ) {
+	if ( !init ) {
+		asset_bundle = unity::asset_bundle::load_from_file( L"C://assetbundle", 0u, 0ull );
+		glow_manager::init( asset_bundle );
+		init = true;
+	}
+
+	if ( unity::input::get_key_down( unity::key_code::end ) ) {
+		gui::open = !gui::open;
+	}
+
+	// Update entities
+	entity_manager::update();
+
+	glow_manager::update();
+	glow_manager::on_render_image_hook( ( unity::render_texture* )context->Rdx, ( unity::render_texture* )context->R8 );
+}
+
+void hook_handlers::player_walk_movement_do_fixed_update( _CONTEXT* context ) {
+	player_walk_movement_do_fixed_update_hook( ( rust::player_walk_movement* )context->Rcx, ( rust::model_state* )context->Rdx );
+}
+
+void hook_handlers::protobuf_player_tick_write_to_stream_delta( _CONTEXT* context ) {
+	protobuf_player_tick_write_to_stream_delta_hook( ( rust::player_tick* )context->Rcx );
+}
+
+void hook_handlers::protobuf_projectile_shoot_write_to_stream( _CONTEXT* context ) {
 	rust::projectile_shoot* projectile_shoot = ( rust::projectile_shoot* )context->Rcx;
 	if ( !is_valid_ptr( projectile_shoot ) || !is_valid_ptr( projectile_shoot->projectiles ) )
 		return;
@@ -254,36 +271,26 @@ void projectile_shoot_write_to_stream_hook_handler( _CONTEXT* context ) {
 		if ( !search.resolved() )
 			return;
 
-		projectile_shoot_write_to_stream_hook( projectile_shoot->projectiles, search.get( context ) );
+		protobuf_projectile_shoot_write_to_stream_hook( projectile_shoot->projectiles, search.get( context ) );
 	}
 
 	else if ( held_entity->as<rust::base_melee>() ) {
-		
+
 	}
 }
 
-void player_projectile_update_write_to_stream_hook_handler( _CONTEXT* context ) {
+void hook_handlers::protobuf_player_projectile_update_write_to_stream( _CONTEXT* context ) {
 
 }
 
-void player_projectile_attack_write_to_stream_hook_handler( _CONTEXT* context ) {
+void hook_handlers::protobuf_player_projectile_attack_write_to_stream( _CONTEXT* context ) {
 
 }
 
-void item_icon_try_to_move_hook( rust::item_icon* item_icon ) {
-	if ( instant_loot ) {
-		item_icon->run_timed_action();
-	}
-}
-
-void item_icon_try_to_move_hook_handler( _CONTEXT* context ) {
+void hook_handlers::item_icon_try_to_move( _CONTEXT* context ) {
 	item_icon_try_to_move_hook( ( rust::item_icon* )context->Rcx );
 }
 
-void client_on_client_disconnected_hook( rust::client* client, sys::string* reason ) {
-	LOG( "OnClientDisconnected!\n" );
-}
-
-void client_on_client_disconnected_hook_handler( _CONTEXT* context ) {
+void hook_handlers::client_on_client_disconnected( _CONTEXT* context ) {
 	client_on_client_disconnected_hook( ( rust::client* )context->Rcx, ( sys::string* )context->Rdx );
 }
