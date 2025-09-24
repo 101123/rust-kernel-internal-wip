@@ -823,7 +823,9 @@ bool init_player_if_needed( rust::base_player* player, cached_player& cached_pla
     return cached_player.init = true;
 }
 
-void update_entities() {
+void entity_manager::update() {
+    util::scoped_spinlock lock( &cache_lock );
+
     cached_entities& cached_entities = entity_cache.get();
 
     for ( auto& [ entity, cached_entity ] : cached_entities.entities ) {
@@ -861,10 +863,15 @@ void update_entities() {
     }
 }
 
-void entity_manager::update() {
+void entity_manager::invalidate_cache() {
     util::scoped_spinlock lock( &cache_lock );
 
-    update_entities();
+    cached_entities& cached_entities = entity_cache.get();
+
+    cached_entities.entities.clear();
+    cached_entities.combat_entities.clear();
+    cached_entities.dropped_items.clear();
+    cached_entities.players.clear();
 }
 
 entity_collection entity_manager::get_entities() {

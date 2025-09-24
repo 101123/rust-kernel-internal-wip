@@ -25,7 +25,7 @@
     <ClCompile Include="cheat\cheat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cheat\hooks.cpp">
+    <ClCompile Include="cheat\hook.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="math\mat3x3.cpp">
@@ -99,7 +99,7 @@
     <ClInclude Include="cheat\sdk\offsets_manual.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cheat\hooks.h">
+    <ClInclude Include="cheat\hook.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\ankerl\unordered_dense.h">

@@ -1,4 +1,4 @@
-#include "hooks.h"
+#include "hook.h"
 #include "global.h"	
 #include "cheat/cheat.h"
 #include "cheat/sdk/sdk.h"
@@ -159,7 +159,8 @@ void item_icon_try_to_move_hook( rust::item_icon* item_icon ) {
 }
 
 void client_on_client_disconnected_hook( rust::client* client, sys::string* reason ) {
-	LOG( "OnClientDisconnected!\n" );
+	entity_manager::invalidate_cache();
+	glow_manager::invalidate_cache();
 }
 
 void hook_handlers::network_client_create_networkable( _CONTEXT* context ) {

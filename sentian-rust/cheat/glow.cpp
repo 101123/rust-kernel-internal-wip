@@ -174,6 +174,10 @@ void glow_manager::update() {
 	}
 }
 
+void glow_manager::invalidate_cache() {
+	multi_mesh_cache.get().clear();
+}
+
 void render_stencil() {
 	stencil_texture = unity::render_texture::get_temporary( 2560.f, 1440.f, 0 );
 

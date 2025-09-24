@@ -92,11 +92,11 @@ namespace entity_manager {
 	void destroy();
 
 	bool belongs_in_cache( rust::base_networkable* entity, cache_specifier* specifier );
-
 	void add_to_cache( rust::base_networkable* entity, cache_specifier* specifier );
 	void remove_from_cache( rust::base_networkable* entity, cache_specifier* specifier );
 
 	void update();
+	void invalidate_cache();
 
 	entity_collection get_entities();
 }

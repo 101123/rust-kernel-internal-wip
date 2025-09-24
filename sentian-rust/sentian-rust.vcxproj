@@ -184,7 +184,7 @@
     <ClCompile Include="cheat\cheat.cpp" />
     <ClCompile Include="cheat\entities.cpp" />
     <ClCompile Include="cheat\glow.cpp" />
-    <ClCompile Include="cheat\hooks.cpp" />
+    <ClCompile Include="cheat\hook.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="include\imgui\imgui.cpp" />
     <ClCompile Include="include\imgui\imgui_draw.cpp" />
@@ -202,7 +202,7 @@
     <ClInclude Include="cheat\cheat.h" />
     <ClInclude Include="cheat\entities.h" />
     <ClInclude Include="cheat\glow.h" />
-    <ClInclude Include="cheat\hooks.h" />
+    <ClInclude Include="cheat\hook.h" />
     <ClInclude Include="cheat\sdk\offsets_manual.h" />
     <ClInclude Include="cheat\sdk\field_types.h" />
     <ClInclude Include="cheat\sdk\il2cpp.h" />
