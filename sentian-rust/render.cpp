@@ -378,6 +378,15 @@ void draw_esp() {
 
 	entity_collection entity_collection = entity_manager::get_entities();
 
+	visual_builder( vector2( 100.f, 100.f ) )
+		.set_font( fonts::verdana )
+		.set_vertical_spacing( 12.f )
+		.set_flags( text_flags::none )
+		.draw_text( format_string( "%d entities", entity_collection.entities.size() ), COL32_WHITE )
+		.draw_text( format_string( "%d combat entities", entity_collection.combat_entities.size() ), COL32_WHITE )
+		.draw_text( format_string( "%d dropped items", entity_collection.dropped_items.size() ), COL32_WHITE )
+		.draw_text( format_string( "%d players", entity_collection.players.size() ), COL32_WHITE );
+
 	draw_entities( entity_collection.entities );
 	draw_combat_entities( entity_collection.combat_entities );
 	draw_dropped_items( entity_collection.dropped_items );
