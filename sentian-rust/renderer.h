@@ -18,8 +18,8 @@ struct IDXGISwapChain;
 
 enum fonts {
 	verdana,
-	tahoma,
-	small_fonts
+	small_fonts,
+	icons
 };
 
 namespace text_flags {

@@ -278,8 +278,8 @@ bool renderer::init( IDXGISwapChain* swapchain ) {
 	ImFontAtlasBuildInit( font_atlas );
 
 	fonts[ fonts::verdana ] = create_glfn_font( antialiased_verdana_12_glfn, 12.f );
-	fonts[ fonts::tahoma ] = create_font( antialiased_tahoma_11, 11.f );
 	fonts[ fonts::small_fonts ] = create_font( outlined_smallfonts_8, 8.f, true );
+	fonts[ fonts::icons ] = create_glfn_font( icons_20, 20.f );
 
 	ImGui_ImplDX11_UpdateTexture( font_atlas->TexData );
 
@@ -313,7 +313,6 @@ void renderer::destroy() {
 	IM_DELETE( font_atlas );
 
 	IM_DELETE( fonts[ fonts::verdana ] );
-	IM_DELETE( fonts[ fonts::tahoma ] );
 	IM_DELETE( fonts[ fonts::small_fonts ] );
 
 	IM_DELETE( shared_data );
