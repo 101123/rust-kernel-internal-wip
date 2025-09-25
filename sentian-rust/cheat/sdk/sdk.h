@@ -186,6 +186,16 @@ namespace unity {
             b( ( ( rgba >> 16 ) & 255 ) / 255.f ), a( ( ( rgba >> 24 ) & 255 ) / 255.f ) {}
     };
 
+    struct gradient_color_key {
+        color color;
+        float time;
+    };
+
+    struct gradient_alpha_key {
+        float alpha;
+        float time;
+    };
+
     struct render_target_identifier {
         static render_target_identifier* ctor( texture* tex ) {
             void( *ctor )( render_target_identifier*, texture* ) = 
@@ -193,13 +203,13 @@ namespace unity {
 
             um::caller& caller = um::get_caller_for_thread();
 
-            render_target_identifier* object = ( render_target_identifier* )il2cpp_object_new( render_target_identifier::s_klass );
+            render_target_identifier* object = ( render_target_identifier* )il2cpp_object_new( render_target_identifier::klass_ );
             caller( ctor, object, tex );
 
             return object;
         }
 
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class object : public il2cpp_object {
@@ -239,7 +249,7 @@ namespace unity {
 
             um::caller& caller = um::get_caller_for_thread();
 
-            return caller( get_component, this, T::s_type_object );
+            return caller( get_component, this, T::type_object_ );
         }
 
         template <typename T>
@@ -249,7 +259,7 @@ namespace unity {
 
             um::caller& caller = um::get_caller_for_thread();
 
-            return caller( get_components_internal, this, T::s_type_object, false, false, true, false, nullptr );
+            return caller( get_components_internal, this, T::type_object_, false, false, true, false, nullptr );
         }
 
         template <typename T>
@@ -259,7 +269,7 @@ namespace unity {
 
             um::caller& caller = um::get_caller_for_thread();
 
-            return caller( internal_add_component_with_type, this, T::s_type_object );
+            return caller( internal_add_component_with_type, this, T::type_object_ );
         }
     };
 
@@ -281,7 +291,7 @@ namespace unity {
             return caller( get_transform, this );
         }
 
-        static inline il2cpp_object* s_type_object;
+        static inline il2cpp_object* type_object_;
     };
 
     class behaviour : public component {
@@ -302,7 +312,7 @@ namespace unity {
             return caller( set_enabled, this, value );
         }
 
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class transform : public component {
@@ -453,7 +463,7 @@ namespace unity {
             return caller( property_to_id, name_ );
         }
 
-        static inline il2cpp_object* s_type_object;
+        static inline il2cpp_object* type_object_;
     };
 
     class material : public object {
@@ -464,7 +474,7 @@ namespace unity {
 
             um::caller& caller = um::get_caller_for_thread();
 
-            material* object = ( material* )il2cpp_object_new( material::s_klass );
+            material* object = ( material* )il2cpp_object_new( material::klass_ );
 
             il2cpp_gchandle_new( object, true );
             caller( create_with_shader, object, shader_ );
@@ -511,8 +521,8 @@ namespace unity {
             return caller( set_shader, this, value );
         }
 
-        static inline il2cpp_class* s_klass;
-        static inline il2cpp_object* s_type_object;
+        static inline il2cpp_class* klass_;
+        static inline il2cpp_object* type_object_;
     };
 
     class renderer : object {
@@ -557,7 +567,7 @@ namespace unity {
 
             um::caller& caller = um::get_caller_for_thread();
 
-            command_buffer* object = ( command_buffer* )il2cpp_object_new( command_buffer::s_klass );
+            command_buffer* object = ( command_buffer* )il2cpp_object_new( command_buffer::klass_ );
             caller( ctor, object );
 
             return object;
@@ -603,7 +613,7 @@ namespace unity {
             return caller( internal_draw_renderer, this, renderer_, material_, 0, -1 );
         }
 
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class graphics {
@@ -658,7 +668,31 @@ namespace unity {
 
             sys::string* name_ = caller.push<sys::string>( name );
 
-            return caller( load_asset_internal, this, name_, T::s_type_object );
+            return caller( load_asset_internal, this, name_, T::type_object_ );
+        }
+    };
+
+    class gradient {
+    public:
+        void set_keys( std::initializer_list<gradient_color_key> color_keys, std::initializer_list<gradient_alpha_key> alpha_keys ) {
+            void ( *set_keys )( gradient*, sys::array<gradient_color_key>*, sys::array<gradient_alpha_key>* ) =
+                ( decltype( set_keys ) )( unity_player + Offsets::Gradient::SetKeys );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            size_t color_keys_size = sizeof( gradient_color_key ) * color_keys.size();
+            size_t alpha_keys_size = sizeof( gradient_alpha_key ) * alpha_keys.size();
+
+            sys::array<gradient_color_key>* _color_keys = ( sys::array<gradient_color_key>* )
+                caller.alloc( sizeof( sys::array<gradient_color_key> ) + color_keys_size, alignof( sys::array<gradient_color_key> ) );
+
+            sys::array<gradient_alpha_key>* _alpha_keys = ( sys::array<gradient_alpha_key>* )
+                caller.alloc( sizeof( sys::array<gradient_alpha_key> ) + alpha_keys_size, alignof( sys::array<gradient_alpha_key> ) );
+
+            memcpy( _color_keys->buffer, color_keys.begin(), color_keys_size );
+            memcpy( _alpha_keys->buffer, alpha_keys.begin(), alpha_keys_size );
+
+            caller( set_keys, this, _color_keys, _alpha_keys );
         }
     };
 }
@@ -717,6 +751,17 @@ namespace rust {
         fun
     };
 
+    template <typename T>
+    class singleton_component {
+    public:
+        class static_fields {
+        public:
+            FIELD( T*, instance, Offsets::SingletonComponent::Instance );
+        };
+
+        static inline static_fields* static_fields_;
+    };
+
     class base_networkable : public unity::component {
     public:
         FIELD( uint32_t, prefab_id, Offsets::BaseNetworkable::prefabID );
@@ -724,7 +769,7 @@ namespace rust {
         FIELD( base_entity*, parent_entity, Offsets::BaseNetworkable::parentEntity );
         FIELD( sys::list<base_entity*>*, children, Offsets::BaseNetworkable::children );
         
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class model {
@@ -745,6 +790,12 @@ namespace rust {
         FIELD( networkable_id, id, Offsets::Network_Networkable::ID );
     };
 
+    class rust_camera {
+    public:
+        FIELD( float, ambient_light_night, Offsets::RustCamera::ambientLightNight );
+        FIELD( float, ambient_light_multiplier, Offsets::RustCamera::ambientLightMultiplier );
+    };
+
     class main_camera {
     public:
         class static_fields {
@@ -752,12 +803,9 @@ namespace rust {
             FIELD( unity::camera*, main_camera, Offsets::MainCamera::mainCamera );
         };
 
-        static inline il2cpp_class* s_klass;
-        static inline static_fields* s_static_fields;
+        static inline il2cpp_class* klass_;
+        static inline static_fields* static_fields_;
     };
-
-
-
 
     enum lifestate : int {
         alive,
@@ -799,7 +847,7 @@ namespace rust {
 
     class player_walk_movement : public base_movement {
     public:
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class model_state {
@@ -843,8 +891,8 @@ namespace rust {
 
     class player_eyes {
     public:
-        static inline il2cpp_class* s_klass;
-        static inline il2cpp_object* s_type_object;
+        static inline il2cpp_class* klass_;
+        static inline il2cpp_object* type_object_;
     };
 
     class phrase {
@@ -890,8 +938,8 @@ namespace rust {
         FIELD( item_container*, container_wear, Offsets::PlayerInventory::containerWear );
         FIELD( player_loot*, loot, Offsets::PlayerInventory::loot );
 
-        static inline il2cpp_class* s_klass;
-        static inline il2cpp_object* s_type_object;
+        static inline il2cpp_class* klass_;
+        static inline il2cpp_object* type_object_;
     };
 
     class base_player : public base_combat_entity {
@@ -989,53 +1037,53 @@ namespace rust {
             return held_entity_->as<held_entity>();
         }
 
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class scientist_npc : public base_player {
     public:
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class tunnel_dweller : public base_player {
     public:
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class underwater_dweller : public base_player {
     public:
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class scarecrow_npc : public base_player {
     public:
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class gingerbread_npc : public base_player {
     public:
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class held_entity : public base_entity {
     public:
-        static inline il2cpp_class* s_klass;
-        static inline il2cpp_object* s_type_object;
+        static inline il2cpp_class* klass_;
+        static inline il2cpp_object* type_object_;
     };
 
     class attack_entity : public held_entity {
     public:
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class base_melee : public attack_entity {
     public:
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class base_projectile : public attack_entity {
     public:
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class graphics {
@@ -1050,12 +1098,12 @@ namespace rust {
             );
         };
 
-        static inline static_fields* s_static_fields;
+        static inline static_fields* static_fields_;
     };
 
     class outline_manager {
     public:
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class projectile_shoot {
@@ -1068,7 +1116,7 @@ namespace rust {
 
         FIELD( sys::list<projectile*>*, projectiles, Offsets::ProtoBuf_ProjectileShoot::projectiles );
 
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class player_projectile_update {
@@ -1079,12 +1127,12 @@ namespace rust {
         FIELD( float, travel_time, Offsets::ProtoBuf_PlayerProjectileUpdate::travelTime );
         FIELD( bool, should_pool, Offsets::ProtoBuf_PlayerProjectileUpdate::ShouldPool );
 
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class player_projectile_attack {
     public:
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class input_message {
@@ -1101,7 +1149,7 @@ namespace rust {
         FIELD( vector3, eye_pos, Offsets::PlayerTick::eyePos );
         FIELD( uint64_t, parent_id, Offsets::PlayerTick::parentID );
 
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class projectile {
@@ -1131,7 +1179,7 @@ namespace rust {
             return caller( run_timed_action, this );
         }
 
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
     };
 
     class world_item : public base_entity {
@@ -1141,6 +1189,31 @@ namespace rust {
 
     class client {
     public:
-        static inline il2cpp_class* s_klass;
+        static inline il2cpp_class* klass_;
+    };
+
+    class tod_night_parameters {
+    public:
+        FIELD( unity::gradient*, ambient_color, Offsets::TOD_NightParameters::AmbientColor );
+    };
+
+    class tod_ambient_parameters {
+    public:
+        FIELD( float, saturation, Offsets::TOD_AmbientParameters::Saturation );
+    };
+
+    class tod_sky {
+    public:
+        FIELD( tod_night_parameters*, night, Offsets::TOD_Sky::Night );
+        FIELD( tod_ambient_parameters*, ambient, Offsets::TOD_Sky::Ambient );
+
+        static tod_sky* get_instance() {
+            tod_sky* ( *get_instance )( ) =
+                ( decltype( get_instance ) )( game_assembly + Offsets::TOD_Sky::get_Instance );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_instance );
+        }
     };
 }

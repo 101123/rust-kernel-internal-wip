@@ -16,4 +16,9 @@ namespace Offsets {
     namespace BaseMovement {
         constexpr const static size_t TargetMovement = 0x3C;
     }
+
+    namespace RustCamera {
+        constexpr const static size_t ambientLightNight = 0xDC;
+        constexpr const static size_t ambientLightMultiplier = 0xE0;
+    }
 }

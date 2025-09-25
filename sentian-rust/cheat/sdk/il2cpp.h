@@ -34,7 +34,7 @@ public:
 		il2cpp_class* current = klass;
 
 		while ( is_valid_ptr( current ) ) {
-			if ( current == T::s_klass ) {
+			if ( current == T::klass_ ) {
 				return ( T* )this;
 			}
 

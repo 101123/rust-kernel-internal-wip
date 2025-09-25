@@ -334,6 +334,14 @@ namespace Offsets {
 		constexpr const static size_t Quit = 0x5d790;
 	}
 
+#define Gradient_TypeDefinitionIndex 16465
+
+	namespace Gradient {
+
+		// Functions
+		constexpr const static size_t SetKeys = 0xeee50;
+	}
+
 #define BaseNetworkable_TypeDefinitionIndex 7079
 
 	namespace BaseNetworkable {

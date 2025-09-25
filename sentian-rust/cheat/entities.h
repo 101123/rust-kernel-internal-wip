@@ -60,7 +60,8 @@ struct cached_player {
 	bool scientist;
 	cached_bone_data bone_data;
 	wchar_t name[ 128 ];
-	int active_item;
+	int active_item_idx;
+	int active_item_id;
 	cached_belt_item belt_items[ 6 ];
 	rust::player_eyes* eyes;
 	rust::player_inventory* inventory;

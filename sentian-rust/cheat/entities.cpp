@@ -192,9 +192,9 @@ constexpr uint32_t generate_prefab_id_from_path( const char* path ) {
 #define PREFAB( prefab_path ) generate_prefab_id_from_path( prefab_path )
 
 bool entity_manager::belongs_in_cache( rust::base_networkable* entity, cache_specifier* specifier ) {
-    if ( entity->klass == rust::base_player::s_klass || entity->klass == rust::scientist_npc::s_klass || 
-        entity->klass == rust::tunnel_dweller::s_klass || entity->klass == rust::underwater_dweller::s_klass || 
-        entity->klass == rust::scarecrow_npc::s_klass || entity->klass == rust::gingerbread_npc::s_klass ) {
+    if ( entity->klass == rust::base_player::klass_ || entity->klass == rust::scientist_npc::klass_ || 
+        entity->klass == rust::tunnel_dweller::klass_ || entity->klass == rust::underwater_dweller::klass_ || 
+        entity->klass == rust::scarecrow_npc::klass_ || entity->klass == rust::gingerbread_npc::klass_ ) {
         *specifier = cache_specifier( get_player_cacher(), nullptr, true );
         return true;
     }
@@ -656,7 +656,7 @@ void entity_manager::remove_from_cache( rust::base_networkable* entity, cache_sp
     remove_from_cache( entity, specifier );
 }
 
-bool init_dropped_item_if_needed( rust::world_item* world_item, cached_dropped_item& cached_dropped_item ) {
+bool cache_dropped_item( rust::world_item* world_item, cached_dropped_item& cached_dropped_item ) {
     if ( cached_dropped_item.init )
         return true;
 
@@ -717,8 +717,8 @@ bool update_player_inventory( rust::base_player* player, cached_player& cached_p
     if ( !is_valid_ptr( items ) )
         return false;
     
-    int active_item = -1;
-    uint64_t active_item_id = player->cl_active_item;
+    int active_item_idx = -1, active_item_id = -1;
+    uint64_t active_item_uid = player->cl_active_item;
 
     for ( size_t i = 0; i < 6; i++ ) {
         if ( i < items_list->size ) {
@@ -739,8 +739,9 @@ bool update_player_inventory( rust::base_player* player, cached_player& cached_p
             if ( !is_valid_ptr( legacy_english ) )
                 return false;
 
-            if ( item->uid == active_item_id ) {
-                active_item = i;
+            if ( item->uid == active_item_uid ) {
+                active_item_idx = i;
+                active_item_id = info->item_id;
             }
 
             cached_belt_item& belt_item = cached_player.belt_items[ i ];
@@ -757,12 +758,13 @@ bool update_player_inventory( rust::base_player* player, cached_player& cached_p
         }
     }
 
-    cached_player.active_item = active_item;
+    cached_player.active_item_idx = active_item_idx;
+    cached_player.active_item_id = active_item_id;
 
     return true;
 }
 
-bool init_player_if_needed( rust::base_player* player, cached_player& cached_player ) {
+bool cache_player( rust::base_player* player, cached_player& cached_player ) {
     if ( cached_player.init )
         return true;
 
@@ -803,16 +805,16 @@ bool init_player_if_needed( rust::base_player* player, cached_player& cached_pla
 
     const wchar_t* name = L"Scientist";
 
-    if ( player->klass == rust::base_player::s_klass && is_valid_ptr( player->display_name ) ) {
+    if ( player->klass == rust::base_player::klass_ && is_valid_ptr( player->display_name ) ) {
         cached_player.scientist = false;
         name = player->display_name->buffer;
-    } else if ( player->klass == rust::tunnel_dweller::s_klass ) {
+    } else if ( player->klass == rust::tunnel_dweller::klass_ ) {
         name = L"Tunnel Dweller";
-    } else if ( player->klass == rust::underwater_dweller::s_klass ) {
+    } else if ( player->klass == rust::underwater_dweller::klass_ ) {
         name = L"Underwater Dweller";
-    } else if ( player->klass == rust::scarecrow_npc::s_klass ) {
+    } else if ( player->klass == rust::scarecrow_npc::klass_ ) {
         name = L"Scarecrow";
-    } else if ( player->klass == rust::gingerbread_npc::s_klass ) {
+    } else if ( player->klass == rust::gingerbread_npc::klass_ ) {
         name = L"Gingerbread";
     }
 
@@ -848,14 +850,14 @@ void entity_manager::update() {
     }
 
     for ( auto& [ dropped_item, cached_dropped_item ] : cached_entities.dropped_items ) {
-        if ( !init_dropped_item_if_needed( dropped_item, cached_dropped_item ) )
+        if ( !cache_dropped_item( dropped_item, cached_dropped_item ) )
             continue;
 
         cached_dropped_item.position = cached_dropped_item.transform->get_position();
     }
 
     for ( auto& [ player, cached_player ] : cached_entities.players ) {
-        if ( !init_player_if_needed( player, cached_player ) )
+        if ( !cache_player( player, cached_player ) )
             continue;
 
         update_player_bones( cached_player );

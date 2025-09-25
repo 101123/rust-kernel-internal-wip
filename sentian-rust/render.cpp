@@ -359,7 +359,7 @@ void draw_dropped_items( const entity_vector<rust::world_item*, cached_dropped_i
 }
 
 void draw_esp() {
-	auto static_fields = rust::main_camera::s_static_fields;
+	auto static_fields = rust::main_camera::static_fields_;
 	if ( !is_valid_ptr( static_fields ) )
 		return;
 

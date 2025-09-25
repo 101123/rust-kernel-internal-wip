@@ -9,43 +9,47 @@ struct class_lookup {
 	uint64_t type_definition_index;
 };
 
-struct parent_lookup {
+struct parent_class_lookup {
 	il2cpp_class** start;
 	il2cpp_class** klass;
 	void* static_fields;
-	int depth;
+	uint32_t depth;
 };
 
 class_lookup class_lookups[] = {
-	{ nullptr, nullptr, &rust::graphics::s_static_fields, ConVar_Graphics_Static_TypeDefinitionIndex },
-	{ &rust::main_camera::s_klass, nullptr, &rust::main_camera::s_static_fields, MainCamera_TypeDefinitionIndex },
-	{ &rust::base_networkable::s_klass, nullptr, nullptr, BaseNetworkable_TypeDefinitionIndex },
-	{ &rust::base_player::s_klass, nullptr, nullptr, BasePlayer_TypeDefinitionIndex },
-	{ &rust::scientist_npc::s_klass, nullptr, nullptr, ScientistNPC_TypeDefinitionIndex },
-	{ &rust::tunnel_dweller::s_klass, nullptr, nullptr, TunnelDweller_TypeDefinitionIndex },
-	{ &rust::underwater_dweller::s_klass, nullptr, nullptr, UnderwaterDweller_TypeDefinitionIndex },
-	{ &rust::scarecrow_npc::s_klass, nullptr, nullptr, ScarecrowNPC_TypeDefinitionIndex },
-	{ &rust::gingerbread_npc::s_klass, nullptr, nullptr, GingerbreadNPC_TypeDefinitionIndex },
-	{ &rust::player_eyes::s_klass, &rust::player_eyes::s_type_object, nullptr, PlayerEyes_TypeDefinitionIndex },
-	{ &rust::player_inventory::s_klass, &rust::player_inventory::s_type_object, nullptr, PlayerInventory_TypeDefinitionIndex },
-	{ &unity::render_target_identifier::s_klass, nullptr, nullptr, RenderTargetIdentifier_TypeDefinitionIndex },
-	{ &unity::command_buffer::s_klass, nullptr, nullptr, CommandBuffer_TypeDefinitionIndex },
-	{ nullptr, &unity::shader::s_type_object, nullptr, Shader_TypeDefinitionIndex },
-	{ nullptr, &unity::component::s_type_object, nullptr, Component_TypeDefinitionIndex },
-	{ &unity::behaviour::s_klass, nullptr, nullptr, Behaviour_TypeDefinitionIndex },
-	{ &unity::material::s_klass , &unity::material::s_type_object, nullptr, Material_TypeDefinitionIndex },
-	{ &rust::outline_manager::s_klass, nullptr, nullptr, OutlineManager_TypeDefinitionIndex },
-	{ &rust::held_entity::s_klass, &rust::held_entity::s_type_object, nullptr, HeldEntity_TypeDefinitionIndex },
-	{ &rust::attack_entity::s_klass, nullptr, nullptr, AttackEntity_TypeDefinitionIndex },
-	{ &rust::base_melee::s_klass, nullptr, nullptr, BaseMelee_TypeDefinitionIndex },
-	{ &rust::base_projectile::s_klass, nullptr, nullptr, BaseProjectile_TypeDefinitionIndex },
-	{ &rust::player_walk_movement::s_klass, nullptr, nullptr, PlayerWalkMovement_TypeDefinitionIndex },
-	{ &rust::player_projectile_update::s_klass, nullptr, nullptr, ProtoBuf_PlayerProjectileUpdate_TypeDefinitionIndex },
-	{ &rust::player_projectile_attack::s_klass, nullptr, nullptr, ProtoBuf_PlayerProjectileAttack_TypeDefinitionIndex },
-	{ &rust::projectile_shoot::s_klass, nullptr, nullptr, ProtoBuf_ProjectileShoot_TypeDefinitionIndex },
-	{ &rust::player_tick::s_klass, nullptr, nullptr, PlayerTick_TypeDefinitionIndex },
-	{ &rust::item_icon::s_klass, nullptr, nullptr, ItemIcon_TypeDefinitionIndex },
-	{ &rust::client::s_klass, nullptr, nullptr, Client_TypeDefinitionIndex }
+	{ nullptr, nullptr, &rust::graphics::static_fields_, ConVar_Graphics_Static_TypeDefinitionIndex },
+	{ &rust::main_camera::klass_, nullptr, &rust::main_camera::static_fields_, MainCamera_TypeDefinitionIndex },
+	{ &rust::base_networkable::klass_, nullptr, nullptr, BaseNetworkable_TypeDefinitionIndex },
+	{ &rust::base_player::klass_, nullptr, nullptr, BasePlayer_TypeDefinitionIndex },
+	{ &rust::scientist_npc::klass_, nullptr, nullptr, ScientistNPC_TypeDefinitionIndex },
+	{ &rust::tunnel_dweller::klass_, nullptr, nullptr, TunnelDweller_TypeDefinitionIndex },
+	{ &rust::underwater_dweller::klass_, nullptr, nullptr, UnderwaterDweller_TypeDefinitionIndex },
+	{ &rust::scarecrow_npc::klass_, nullptr, nullptr, ScarecrowNPC_TypeDefinitionIndex },
+	{ &rust::gingerbread_npc::klass_, nullptr, nullptr, GingerbreadNPC_TypeDefinitionIndex },
+	{ &rust::player_eyes::klass_, &rust::player_eyes::type_object_, nullptr, PlayerEyes_TypeDefinitionIndex },
+	{ &rust::player_inventory::klass_, &rust::player_inventory::type_object_, nullptr, PlayerInventory_TypeDefinitionIndex },
+	{ &unity::render_target_identifier::klass_, nullptr, nullptr, RenderTargetIdentifier_TypeDefinitionIndex },
+	{ &unity::command_buffer::klass_, nullptr, nullptr, CommandBuffer_TypeDefinitionIndex },
+	{ nullptr, &unity::shader::type_object_, nullptr, Shader_TypeDefinitionIndex },
+	{ nullptr, &unity::component::type_object_, nullptr, Component_TypeDefinitionIndex },
+	{ &unity::behaviour::klass_, nullptr, nullptr, Behaviour_TypeDefinitionIndex },
+	{ &unity::material::klass_ , &unity::material::type_object_, nullptr, Material_TypeDefinitionIndex },
+	{ &rust::outline_manager::klass_, nullptr, nullptr, OutlineManager_TypeDefinitionIndex },
+	{ &rust::held_entity::klass_, &rust::held_entity::type_object_, nullptr, HeldEntity_TypeDefinitionIndex },
+	{ &rust::attack_entity::klass_, nullptr, nullptr, AttackEntity_TypeDefinitionIndex },
+	{ &rust::base_melee::klass_, nullptr, nullptr, BaseMelee_TypeDefinitionIndex },
+	{ &rust::base_projectile::klass_, nullptr, nullptr, BaseProjectile_TypeDefinitionIndex },
+	{ &rust::player_walk_movement::klass_, nullptr, nullptr, PlayerWalkMovement_TypeDefinitionIndex },
+	{ &rust::player_projectile_update::klass_, nullptr, nullptr, ProtoBuf_PlayerProjectileUpdate_TypeDefinitionIndex },
+	{ &rust::player_projectile_attack::klass_, nullptr, nullptr, ProtoBuf_PlayerProjectileAttack_TypeDefinitionIndex },
+	{ &rust::projectile_shoot::klass_, nullptr, nullptr, ProtoBuf_ProjectileShoot_TypeDefinitionIndex },
+	{ &rust::player_tick::klass_, nullptr, nullptr, PlayerTick_TypeDefinitionIndex },
+	{ &rust::item_icon::klass_, nullptr, nullptr, ItemIcon_TypeDefinitionIndex },
+	{ &rust::client::klass_, nullptr, nullptr, Client_TypeDefinitionIndex }
+};
+
+parent_class_lookup parent_class_lookups[] = {
+	{ &rust::main_camera::klass_, nullptr, &rust::singleton_component<rust::rust_camera>::static_fields_, 2u }
 };
 
 bool populate_classes() {
@@ -74,6 +78,25 @@ bool populate_classes() {
 
 		if ( class_lookup.static_fields ) {
 			*( uintptr_t* )( class_lookup.static_fields ) = klass->static_fields;
+		}
+	}
+
+	for ( parent_class_lookup& parent_class_lookup : parent_class_lookups ) {
+		il2cpp_class* klass = *parent_class_lookup.start;
+
+		while ( parent_class_lookup.depth-- ) {
+			if ( !is_valid_ptr( klass ) )
+				return false;
+
+			klass = klass->parent;
+		}
+
+		if ( parent_class_lookup.klass ) {
+			*parent_class_lookup.klass = klass;
+		}
+
+		if ( parent_class_lookup.static_fields ) {
+			*( uintptr_t* )( parent_class_lookup.static_fields ) = klass->static_fields;
 		}
 	}
 
@@ -107,7 +130,7 @@ const uint64_t generate_corrupt_value() {
 	return 0xDEADCAFEBEEF0000ull + ( count++ << 16ull );
 }
 
-#define VFUNC( klass, offset ) ( uintptr_t* )( ( uintptr_t )klass::s_klass + offset )
+#define VFUNC( klass, offset ) ( uintptr_t* )( ( uintptr_t )klass::klass_ + offset )
 
 bool resolve_hooks() {
 	uintptr_t facepunch_pool_get_networkable_method = util::find_pattern(
@@ -140,7 +163,7 @@ bool resolve_hooks() {
 		.handler = hook_handlers::network_client_destroy_networkable
 	};
 
-	method_info* outline_manager_on_render_image_method = il2cpp_class_get_method_from_name( rust::outline_manager::s_klass, "OnRenderImage", 2 );
+	method_info* outline_manager_on_render_image_method = il2cpp_class_get_method_from_name( rust::outline_manager::klass_, "OnRenderImage", 2 );
 	if ( !outline_manager_on_render_image_method )
 		return false;
 
