@@ -443,9 +443,9 @@ void draw_esp() {
 
 bool renderer_init;
 
-void on_render( IDXGISwapChain* swap_chain ) {
+void on_render( IDXGISwapChain* swapchain ) {
 	if ( !renderer_init ) {
-		if ( !( renderer_init = renderer::init( swap_chain ) ) ) {
+		if ( !( renderer_init = renderer::init( swapchain ) ) ) {
 			return;
 		}
 	}

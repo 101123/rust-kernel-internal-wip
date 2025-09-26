@@ -165,7 +165,7 @@ bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t
 	return false;
 }
 
-void render_handler( IDXGISwapChain* swap_chain ) {
+void render_handler( IDXGISwapChain* swapchain ) {
 	if ( !cheat_init ) {
 		if ( !( cheat_init = init_cheat() ) ) {
 			return;
@@ -173,11 +173,11 @@ void render_handler( IDXGISwapChain* swap_chain ) {
 	}
 
 	if ( !cheat_deinit ) {
+		render_input.update();
 		hook_manager::place_hooks();
-		on_render( swap_chain );
+		on_render( swapchain );
 
-		// Uses get key instead of get key down because we aren't in a game thread
-		if ( unity::input::get_key( unity::key_code::f11 ) ) {
+		if ( render_input.get_async_key_state( VK_F11 ) ) {
 			user_sdk::set_d3d_render_handler( nullptr );
 			deinit_cheat();
 
