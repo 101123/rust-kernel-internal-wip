@@ -1,5 +1,5 @@
 #include "cheat/cheat.h"
-#include "cheat/hook.h"
+#include "cheat/hooks.h"
 #include "sdk/sdk.h"
 
 struct class_lookup {

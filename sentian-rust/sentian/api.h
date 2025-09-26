@@ -379,3 +379,43 @@ namespace user_sdk {
 		return cmd.return_value;
 	}
 }
+
+class input {
+public:
+	void update() {
+		user_sdk::get_key_states( &key_states_ );
+	}
+
+	uint16_t get_async_key_state( uint8_t key ) {
+#define GET_KS_BYTE( vk ) ( ( vk ) * 2 / 8 )
+#define GET_KS_DOWN_BIT( vk ) ( 1 << ( ( ( vk ) % 4 ) * 2 ) )
+#define IS_KEY_DOWN( ks, vk ) ( ( ( ks )[ GET_KS_BYTE( vk ) ] & GET_KS_DOWN_BIT( vk ) ) ? true : false )
+
+		bool down = IS_KEY_DOWN( key_states_.data, key );
+		bool was_down = recent_key_states_[ key / 8 ] & 1 << key % 8;
+
+		if ( down ) {
+			recent_key_states_[ key / 8 ] |= 1 << key % 8;
+		}
+
+		else {
+			recent_key_states_[ key / 8 ] &= ~( 1 << key % 8 );
+		}
+
+		uint16_t ret = 0;
+
+		if ( down ) {
+			ret |= 0x8000;
+		}
+
+		if ( down && !was_down ) {
+			ret |= 0x1;
+		}
+
+		return ret;
+	}
+
+private:
+	user_sdk::key_states key_states_;
+	uint8_t recent_key_states_[ 32 ];
+};

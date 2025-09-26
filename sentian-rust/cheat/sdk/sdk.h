@@ -414,7 +414,7 @@ namespace unity {
             return caller( get_mouse_button, button );
         }
 
-        static bool get_key_down( int key ) {
+        static bool get_key_down( key_code key ) {
             bool( *get_key_down_int )( int ) = ( decltype( get_key_down_int ) )( unity_player + Offsets::Input::GetKeyDownInt );
 
             um::caller& caller = um::get_caller_for_thread();
@@ -422,7 +422,7 @@ namespace unity {
             return caller( get_key_down_int, key );
         }
 
-        static bool get_key_up( int key ) {
+        static bool get_key_up( key_code key ) {
             bool( *get_key_up_int )( int ) = ( decltype( get_key_up_int ) )( unity_player + Offsets::Input::GetKeyUpInt );
 
             um::caller& caller = um::get_caller_for_thread();
@@ -430,7 +430,7 @@ namespace unity {
             return caller( get_key_up_int, key );
         }
 
-        static bool get_key( int key ) {
+        static bool get_key( key_code key ) {
             bool( *get_key_int )( int ) = ( decltype( get_key_int ) )( unity_player + Offsets::Input::GetKeyInt );
 
             um::caller& caller = um::get_caller_for_thread();
@@ -699,7 +699,7 @@ namespace unity {
 
     class gradient {
     public:
-        void set_keys( std::initializer_list<gradient_color_key> color_keys, std::initializer_list<gradient_alpha_key> alpha_keys ) {
+        void set_keys( const std::initializer_list<gradient_color_key>& color_keys, const std::initializer_list<gradient_alpha_key>& alpha_keys ) {
             void ( *set_keys )( gradient*, sys::array<gradient_color_key>*, sys::array<gradient_alpha_key>* ) =
                 ( decltype( set_keys ) )( unity_player + Offsets::Gradient::SetKeys );
 
@@ -713,6 +713,9 @@ namespace unity {
 
             sys::array<gradient_alpha_key>* _alpha_keys = ( sys::array<gradient_alpha_key>* )
                 caller.alloc( sizeof( sys::array<gradient_alpha_key> ) + alpha_keys_size, alignof( sys::array<gradient_alpha_key> ) );
+
+            _color_keys->size = color_keys.size();
+            _alpha_keys->size = alpha_keys.size();
 
             memcpy( _color_keys->buffer, color_keys.begin(), color_keys_size );
             memcpy( _alpha_keys->buffer, alpha_keys.begin(), alpha_keys_size );

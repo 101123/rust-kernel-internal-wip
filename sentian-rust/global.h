@@ -28,3 +28,6 @@ inline rust::base_player* local_player;
 inline rust::base_player* target_player;
 
 inline unity::asset_bundle* asset_bundle;
+
+inline input game_input;
+inline input render_input;

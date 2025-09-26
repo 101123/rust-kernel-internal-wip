@@ -175,7 +175,7 @@ void render_handler( IDXGISwapChain* swap_chain ) {
 	if ( !cheat_deinit ) {
 		hook_manager::place_hooks();
 		on_render( swap_chain );
-		
+
 		// Uses get key instead of get key down because we aren't in a game thread
 		if ( unity::input::get_key( unity::key_code::f11 ) ) {
 			user_sdk::set_d3d_render_handler( nullptr );
