@@ -158,7 +158,52 @@ int bone_connections[][ 2 ] = {
 	{ 13, 15 }, { 15, 17 }
 };
 
-// Actually draws both players and scientists
+struct visual_item_info {
+	int item_id;
+	char codepoint;
+};
+
+visual_item_info visual_items[] = {
+	{ 1545779598, 'a' }, // rifle.ak
+	{ -1335497659, 'a' }, // rifle.ak.ice
+	{ 472505338, 'a' }, // rifle.ak.med
+	{ -139037392, 'a' }, // rifle.ak.diver
+	{ 2054929933, 'a' }, // rifle.ak.jungle
+	{ -880412831, 'b' }, // blunderbuss
+	{ 1588298435, 'c' }, // rifle.bolt
+	{ 884424049, 'd' }, // bow.compound
+	{ 1965232394, 'e' }, // crossbow
+	{ -765183617, 'f' }, // shotgun.double
+	{ -75944661, 'g' }, // pistol.eoka
+	{ 1914691295, 'h' }, // pistol.prototype17
+	{ -1123473824, 'i' }, // multiplegrenadelauncher
+	{ -92315244, 'j' }, // revolver.hc
+	{ -1214542497, 'k' }, // hmlmg
+	{ -218009552, 'l' }, // homingmissile.launcher
+	{ 2040726127, 'm' }, // knife.combat
+	{ -778367295, 'n' }, // rifle.l96
+	{ -1812555177, 'o' }, // rifle.lr300
+	{ 678698219, 'p' }, // shotgun.m4
+	{ 1673224590, 'q' }, // pistol.semiauto.a.m15
+	{ 28201841, 'r' }, // rifle.m39
+	{ -852563019, 's' }, // pistol.m92
+	{ -2069578888, 't' }, // lmg.m249
+	{ 935606207, 'u' }, // minigun
+	{ 1318558775, 'v' }, // smg.mp5
+	{ 1953903201, 'w' }, // pistol.nailgun
+	{ -1367281941, 'x' }, // shotgun.waterpipe
+	{ 1373971859, 'y' }, // pistol.python
+	{ 649912614, 'z' }, // pistol.revolver
+	{ 442886268, 'A' }, // rocket.launcher,
+	{ 795371088, 'B' }, // shotgun.pump,
+	{ 818877484, 'C' }, // pistol.semiauto,
+	{ -904863145, 'D' }, // rifle.semiauto
+	{ -348232115, 'E' }, // rifle.sks
+	{ 1796682209, 'F' }, // smg.2
+	{ -41440462, 'G' }, // shotgun.spas12
+	{ 2083256995, 'H' }, // t1_smg
+};
+
 void draw_players( const entity_vector<rust::base_player*, cached_player>& players ) {
 	for ( const auto& [ player, cached_player ] : players ) {
 		const cvar_player_visuals& visuals = 
@@ -195,9 +240,9 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 
 		float half = ( bounds.right - bounds.left ) / 2.f;
 
-		if ( visuals.box ) {
+		if ( visuals.bounding_box ) {
 			renderer::draw_rect( bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top, 3.f, COL32( 0, 0, 0, 130 ) );
-			renderer::draw_rect( bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top, 1.f, visuals.box_color );
+			renderer::draw_rect( bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top, 1.f, visuals.bounding_box_color );
 		}
 
 		if ( visuals.skeleton ) {
@@ -220,9 +265,9 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 
 		float offset = 0.f;
 
-		if ( visuals.held_item ) {
-			if ( cached_player.active_item != -1 ) {
-				renderer::draw_text( bounds.left + half, bounds.bottom + 1.f, fonts::small_fonts, text_flags::centered, visuals.held_item_color, cached_player.belt_items[ cached_player.active_item ].name );
+		if ( visuals.held_item && cached_player.active_item_idx != -1 ) {
+			if ( visuals.held_item_text ) {
+				renderer::draw_text( bounds.left + half, bounds.bottom + offset, fonts::small_fonts, text_flags::centered, visuals.held_item_color, cached_player.belt_items[ cached_player.active_item_idx ].name );
 				offset += 8.f + 1.f;
 			}
 		}

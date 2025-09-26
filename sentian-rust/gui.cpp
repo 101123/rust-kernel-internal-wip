@@ -323,7 +323,42 @@ public:
         return *value;
     }
 
-    void color_picker( uint32_t* value ) {
+    void keybind( uint32_t* key ) {
+        auto& draw_list = gui_draw_list.get();
+
+        draw_list.push_z_index( 2 );
+
+        const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
+        const rect bounds = rect( position.x + bounds_.w - 68.f, position.y - 1.f, 20.f, 10.f );
+
+        const bool hovered = mouse_in_rect( bounds );
+        const bool nothing_active = active_hash.previous == 0ull && active_hash.current == 0ull;
+
+        const uint64_t hash = ( uint64_t )key;
+        const bool active = active_hash.current == hash;
+
+        if ( hovered && nothing_active && left_mouse_clicked ) {
+            active_hash.current = hash;
+        }
+
+        if ( active ) {
+            for ( uint8_t i = 0; i < 255; i++ ) {
+                if ( render_input.get_async_key_state( i ) & 0x1 ) {
+                    *key = i;
+                    active_hash.current = 0ull;
+                }
+            }
+        }
+
+        char buffer[ 8 ] = {};
+        snprintf( buffer, sizeof( buffer ), "[%c]", *key );
+
+        draw_list.add_text( bounds.x, bounds.y, fonts::small_fonts, text_flags::none, active ? COL32_RED : COL32( 160, 160, 160, 255 ), buffer );
+
+        draw_list.pop_z_index();
+    }
+
+    void color_picker( uint32_t* value, bool alpha = true ) {
         auto& draw_list = gui_draw_list.get();
 
         draw_list.push_z_index( 2 );
@@ -332,10 +367,10 @@ public:
         const rect preview_bounds = rect( position.x + bounds_.w - 44.f, position.y, 20.f, 10.f );
 
         const float color_picker_padding = 6.f;
-        const float sv_percentage = 0.84f;
+        const vector2 sv_percentage = vector2( 0.84f, alpha ? 0.84f : 0.935f );
 
-        const rect color_picker_bounds = rect( preview_bounds.x + preview_bounds.w + 4.f, preview_bounds.y, 200.f, 200.f );
-        const rect sv_square_bounds = rect( color_picker_bounds.x + color_picker_padding, color_picker_bounds.y + color_picker_padding, color_picker_bounds.w * sv_percentage, color_picker_bounds.h * sv_percentage );
+        const rect color_picker_bounds = rect( preview_bounds.x + preview_bounds.w + 4.f, preview_bounds.y, 200.f, alpha ? 200.f : 180.f );
+        const rect sv_square_bounds = rect( color_picker_bounds.x + color_picker_padding, color_picker_bounds.y + color_picker_padding, color_picker_bounds.w * sv_percentage.x, color_picker_bounds.h * sv_percentage.y );
         const rect hue_bar_bounds = rect( sv_square_bounds.x + sv_square_bounds.w + color_picker_padding - 2.f, sv_square_bounds.y, color_picker_bounds.w - sv_square_bounds.w - ( color_picker_padding * 3.f ) + 2.f, sv_square_bounds.h );
         const rect alpha_bar_bounds = rect( sv_square_bounds.x, sv_square_bounds.y + sv_square_bounds.h + color_picker_padding - 2.f, sv_square_bounds.w, color_picker_bounds.h - sv_square_bounds.h - ( color_picker_padding * 3.f ) + 2.f );
 
@@ -383,7 +418,7 @@ public:
                 color_picker_hsv.x = ImSaturate( ( mouse_position.current.y - hue_bar_bounds_.y ) / ( hue_bar_bounds_.h ) );
             }
 
-            else if ( mouse_in_rect( alpha_bar_bounds_ ) && left_mouse_held ) {
+            else if ( alpha && mouse_in_rect( alpha_bar_bounds_ ) && left_mouse_held ) {
                 ( ( uint8_t* )value )[ 3 ] = ( uint8_t )( ( ( mouse_position.current.x - alpha_bar_bounds_.x ) / alpha_bar_bounds_.w ) * 255.f );
             }
 
@@ -430,23 +465,25 @@ public:
             draw_list.add_filled_rect( hue_cursor_rect.x + 1.f, hue_cursor_rect.y + 1.f, hue_cursor_rect.w - 2.f, hue_cursor_rect.h - 2.f, COL32_WHITE );
 
             // Alpha bar
-            draw_list.add_filled_rect( alpha_bar_bounds.x, alpha_bar_bounds.y, alpha_bar_bounds.w, alpha_bar_bounds.h, COL32( 38, 38, 38, 255 ) );
-            draw_checkerboard( rect( alpha_bar_bounds_.x, alpha_bar_bounds_.y, alpha_bar_bounds_.w, alpha_bar_bounds_.h ), alpha_bar_bounds_.w / 24.f );
+            if ( alpha ) {
+                draw_list.add_filled_rect( alpha_bar_bounds.x, alpha_bar_bounds.y, alpha_bar_bounds.w, alpha_bar_bounds.h, COL32( 38, 38, 38, 255 ) );
+                draw_checkerboard( rect( alpha_bar_bounds_.x, alpha_bar_bounds_.y, alpha_bar_bounds_.w, alpha_bar_bounds_.h ), alpha_bar_bounds_.w / 24.f );
 
-            uint32_t colors[] = {
-                *value & ~0xFF000000,
-                *value | 0xFF000000,
-                *value | 0xFF000000,
-                *value & ~0xFF000000
-            };
+                uint32_t colors[] = {
+                    *value & ~0xFF000000,
+                    *value | 0xFF000000,
+                    *value | 0xFF000000,
+                    *value & ~0xFF000000
+                };
 
-            draw_list.add_filled_rect_multi_color( alpha_bar_bounds_.x, alpha_bar_bounds_.y, alpha_bar_bounds_.w, alpha_bar_bounds_.h, colors );
+                draw_list.add_filled_rect_multi_color( alpha_bar_bounds_.x, alpha_bar_bounds_.y, alpha_bar_bounds_.w, alpha_bar_bounds_.h, colors );
 
-            const vector2 alpha_cursor_pos = vector2( alpha_bar_bounds_.x + ( ( ( float )( ( uint8_t* )value )[ 3 ] / 255.f ) * alpha_bar_bounds_.w ), alpha_bar_bounds_.y );
-            const rect alpha_cursor_rect = rect( alpha_cursor_pos.x - 2.f, alpha_cursor_pos.y - 2.f, 4.f, alpha_bar_bounds_.h + 4.f );
+                const vector2 alpha_cursor_pos = vector2( alpha_bar_bounds_.x + ( ( ( float )( ( uint8_t* )value )[ 3 ] / 255.f ) * alpha_bar_bounds_.w ), alpha_bar_bounds_.y );
+                const rect alpha_cursor_rect = rect( alpha_cursor_pos.x - 2.f, alpha_cursor_pos.y - 2.f, 4.f, alpha_bar_bounds_.h + 4.f );
 
-            draw_list.add_filled_rect( alpha_cursor_rect.x, alpha_cursor_rect.y, alpha_cursor_rect.w, alpha_cursor_rect.h, COL32( 38, 38, 38, 255 ) );
-            draw_list.add_filled_rect( alpha_cursor_rect.x + 1.f, alpha_cursor_rect.y + 1.f, alpha_cursor_rect.w - 2.f, alpha_cursor_rect.h - 2.f, COL32_WHITE );
+                draw_list.add_filled_rect( alpha_cursor_rect.x, alpha_cursor_rect.y, alpha_cursor_rect.w, alpha_cursor_rect.h, COL32( 38, 38, 38, 255 ) );
+                draw_list.add_filled_rect( alpha_cursor_rect.x + 1.f, alpha_cursor_rect.y + 1.f, alpha_cursor_rect.w - 2.f, alpha_cursor_rect.h - 2.f, COL32_WHITE );
+            }
 
             uint8_t backup = ( ( uint8_t* )value )[ 3 ];
             *value = hsv_to_rgb( color_picker_hsv.x, color_picker_hsv.y, color_picker_hsv.z );
@@ -578,6 +615,67 @@ public:
         draw_styled_rect( combo_bounds );
 
         draw_list.add_text( position.x + 24.f, position.y + 23.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), options.begin()[ *value ] );
+
+        draw_list.pop_z_index();
+
+        previous_id_ = elements::combo_box;
+    }
+
+    void multi_combo_box( const char* label, std::initializer_list<std::pair<const char*, bool*>> options) {
+        auto& draw_list = gui_draw_list.get();
+
+        cursor_ += slider_movement[ ( int )previous_id_ ];
+
+        draw_list.push_z_index( 3 );
+
+        const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
+        const rect combo_bounds = rect( position.x + 18.f, position.y + 16.f, bounds_.w - 60.f, 20.f );
+        const rect options_bounds = rect( combo_bounds.x, combo_bounds.y + 21.f, combo_bounds.w, options.size() * 20.f );
+
+        const bool hovered = mouse_in_rect( combo_bounds );
+        const bool nothing_active = active_hash.previous == 0ull && active_hash.current == 0ull;
+
+        const uint64_t hash = ( uint64_t )options.begin()[ 0 ].second;
+        const bool active = active_hash.current == hash;
+
+        if ( hovered && nothing_active && left_mouse_clicked ) {
+            active_hash.current = hash;
+        }
+
+        else if ( active && left_mouse_clicked && !mouse_in_rect( options_bounds ) ) {
+            active_hash.current = 0ull;
+        }
+
+        else if ( active ) {
+            draw_styled_rect( options_bounds );
+
+            for ( size_t i = 0; i < options.size(); i++ ) {
+                const rect option_bounds = rect( options_bounds.x, options_bounds.y + ( i * 20.f ), options_bounds.w, 20.f );
+
+                const char* option = options.begin()[ i ].first;
+                bool* value = options.begin()[ i ].second;
+
+                const bool hovered = mouse_in_rect( option_bounds );
+
+                if ( hovered && left_mouse_clicked ) {
+                    *value = !*value;
+                }
+
+                uint32_t color = COL32( 160, 160, 160, 255 );
+
+                if ( *value ) {
+                    color = COL32( 255, 0, 0, 255 );
+                }
+
+                draw_list.add_text( options_bounds.x + 6.f, options_bounds.y + 7.f + ( i * 20.f ), fonts::verdana, text_flags::none, color, option );
+            }
+        }
+
+        draw_list.add_text( position.x + 18.f, position.y + 4.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
+
+        draw_styled_rect( combo_bounds );
+
+        // draw_list.add_text( position.x + 24.f, position.y + 23.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), options.begin()[ *value ] );
 
         draw_list.pop_z_index();
 
@@ -743,8 +841,8 @@ void player_visuals_impl( group_box& left, group_box& right, cvar_player_visuals
 
     left.toggle( "Enabled", &visuals.enabled );
 
-    left.toggle( "Bounding box", &visuals.box );
-    left.color_picker( &visuals.box_color );
+    left.toggle( "Bounding box", &visuals.bounding_box );
+    left.color_picker( &visuals.bounding_box_color );
 
     left.toggle( "Skeleton", &visuals.skeleton );
     left.color_picker( &visuals.skeleton_color );
@@ -756,7 +854,10 @@ void player_visuals_impl( group_box& left, group_box& right, cvar_player_visuals
     left.color_picker( &visuals.held_item_color );
 
     if ( visuals.held_item ) {
-        left.combo_box( "Held item type", { "Text", "Icon" }, &visuals.held_item_type );
+        left.multi_combo_box( "Held item type", { 
+            { "Icon", &visuals.held_item_icon }, 
+            { "Text", &visuals.held_item_text } 
+        } );
     }
 
     left.toggle( "Distance", &visuals.distance );
@@ -1020,9 +1121,24 @@ void gui::run() {
                 case misc_subtabs::quality_of_life: {
                     left.begin();
                     left.toggle( "Instant loot", &instant_loot );
+
+                    left.toggle( "Override field of view", &override_fov.enabled );
+                    if ( override_fov.enabled ) {
+                        left.slider( "Field of view", "%.0f", &fov, 0.f, 140.f );
+                    }
+
                     left.end();
 
                     right.begin();
+
+                    right.toggle( "Override night", &override_night.enabled );
+                    right.color_picker( &ambient_color, false );
+
+                    if ( override_night.enabled ) {
+                        right.slider( "Ambient multiplier", "%.2fx", &ambient_multiplier, 0.f, 3.f );
+                        right.slider( "Ambient saturation", "%.2f", &ambient_saturation, 0.f, 0.5f );
+                    }
+
                     right.end();
 
                     break;

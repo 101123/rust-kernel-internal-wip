@@ -2,6 +2,7 @@
 
 #include "util.h"
 #include "renderer.h"
+#include "vk.h"
 
 template <typename T>
 struct cvar_t {
@@ -50,16 +51,34 @@ struct cvar_visual {
 	const char* display_name;
 };
 
-#define WRAP_VISUAL( name, enabled, maximum_distance, color ) { \
-    cvar( H( name " Enabled" ), enabled ), \
-	cvar_ui( H( name " Maximum Distance" ), maximum_distance ), \
-    cvar_ui( H( name " Color" ), color ), \
-	name } 
+#define WRAP_VISUAL( Name, Enabled, MaximumDistance, Color ) { \
+    cvar( H( Name " Enabled" ), Enabled ), \
+	cvar_ui( H( Name " Maximum Distance" ), MaximumDistance ), \
+    cvar_ui( H( Name " Color" ), Color ), \
+	Name } 
+
+enum trigger_type {
+	toggle,
+	hold
+};
+
+struct cvar_bind {
+	cvar enabled;
+	cvar_ui trigger_type;
+	cvar_ui key;
+};
+
+#define WRAP_BIND( Name, Enabled, TriggerType, Key ) { \
+    cvar( H( Name " Enabled" ), Enabled ), \
+	cvar_ui( H( Name " Trigger Type" ), TriggerType ), \
+    cvar_ui( H( Name " Key" ), Key ) }
 
 struct cvar_player_visuals {
 	cvar enabled;
-	cvar box;
-	cvar_ui box_color;
+	cvar_ui visible_color;
+	cvar_ui occluded_color;
+	cvar bounding_box;
+	cvar_ui bounding_box_color;
 	cvar skeleton;
 	cvar_ui skeleton_color;
 	cvar name;
@@ -67,7 +86,8 @@ struct cvar_player_visuals {
 	cvar distance;
 	cvar_ui distance_color;
 	cvar held_item;
-	cvar_i held_item_type;
+	cvar held_item_icon;
+	cvar held_item_text;
 	cvar_ui held_item_color;
 	cvar belt;
 	cvar_i belt_type;
@@ -75,23 +95,26 @@ struct cvar_player_visuals {
 	cvar_i maximum_distance;
 };
 
-#define WRAP_PLAYER_CONFIGURATION( name, color ) { \
-	cvar( H( name " Enabled" ), true ), \
-	cvar( H( name " Box" ), true ), \
-	cvar_ui( H( name " Box Color" ), color ), \
-	cvar( H( name " Skeleton" ), true ), \
-	cvar_ui( H( name " Skeleton Color" ), color ), \
-	cvar( H( name " Name" ), true ), \
-	cvar_ui( H( name " Name Color" ), color ), \
-	cvar( H( name " Distance" ), true ), \
-	cvar_ui( H( name " Distance Color" ), color ), \
-	cvar( H( name " Held Item" ), true ), \
-	cvar_i( H( name " Held Item Type" ), 0 ), \
-	cvar_ui( H( name " Held Item Color" ), color ), \
-	cvar( H( name " Belt" ), true ), \
-	cvar_i( H( name " Belt Type" ), 0 ), \
-	cvar_i( H( name " Belt FOV" ), 200 ), \
-	cvar_i( H( name " Maximum Distance" ), 500 ) }
+#define WRAP_PLAYER_CONFIGURATION( Name, Color ) { \
+	cvar( H( Name " Enabled" ), true ), \
+	cvar_ui( H( Name " Visible Color" ), Color ), \
+	cvar_ui( H( Name " Occluded Color" ), Color ), \
+	cvar( H( Name " Bounding Box" ), true ), \
+	cvar_ui( H( Name " Bounding Box Color" ), Color ), \
+	cvar( H( Name " Skeleton" ), true ), \
+	cvar_ui( H( Name " Skeleton Color" ), Color ), \
+	cvar( H( Name " Name" ), true ), \
+	cvar_ui( H( Name " Name Color" ), Color ), \
+	cvar( H( Name " Distance" ), true ), \
+	cvar_ui( H( Name " Distance Color" ), Color ), \
+	cvar( H( Name " Held Item" ), true ), \
+	cvar( H( Name " Held Item Icon" ), true ), \
+	cvar( H( Name " Held Item Text" ), true ), \
+	cvar_ui( H( Name " Held Item Color" ), Color ), \
+	cvar( H( Name " Belt" ), true ), \
+	cvar_i( H( Name " Belt Type" ), 0 ), \
+	cvar_i( H( Name " Belt FOV" ), 200 ), \
+	cvar_i( H( Name " Maximum Distance" ), 500 ) }
 
 inline cvar_player_visuals player_visuals = WRAP_PLAYER_CONFIGURATION( "Players", COL32( 255, 255, 255, 255 ) );
 inline cvar_visual cvar_wounded = WRAP_VISUAL( "Wounded", true, 500, COL32( 255, 0, 0, 255 ) );
@@ -210,6 +233,19 @@ inline cvar_visual dropped_fun = WRAP_VISUAL( "Dropped Fun", false, 500, COL32( 
 inline cvar instant_loot = cvar( H( "Instant Loot" ), true );
 
 inline cvar omnisprint = cvar( H( "Omnisprint" ), false );
+
+inline cvar_bind override_night = WRAP_BIND( "Override Night", true, trigger_type::toggle, 'K' );
+inline cvar_ui ambient_color = cvar_ui( H( "Ambient Color" ), COL32( 85, 50, 75, 255 ) );
+inline cvar_f ambient_multiplier = cvar_f( H( "Ambient Multiplier" ), 2.f );
+inline cvar_f ambient_saturation = cvar_f( H( "Ambient Saturation" ), 0.2f );
+
+inline cvar_bind override_fov = WRAP_BIND( "Override FOV", true, trigger_type::toggle, 0 );
+inline cvar_f fov = cvar_f( H( "FOV" ), 100.f );
+inline float original_fov = -1.f;
+
+inline cvar_bind zoom = WRAP_BIND( "Zoom", true, trigger_type::hold, 'X' );
+inline cvar_f zoom_fov = cvar_f( H( "Zoom FOV" ), 40.f );
+
 
 inline cvar chams = cvar( H( "Chams" ), true );
 inline cvar_ui chams_type = cvar_ui( H( "Chams Type" ), 0 );
