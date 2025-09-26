@@ -156,17 +156,42 @@ namespace unity {
     }
 
     enum key_code {
-        a = 97, b = 98, c = 99, d = 100, e = 101,
+        backspace = 8, _delete = 127, tab = 9, clear = 12,
+        _return = 13, pause = 19, _escape = 27, space = 32,
+        keypad0 = 256, keypad1 = 257, keypad2 = 258, keypad3 = 259,
+        keypad4 = 260, keypad5 = 261, keypad6 = 262, keypad7 = 263,
+        keypad8 = 264, keypad9 = 265, keypad_period = 266, keypad_divide = 267,
+        keypad_multiply = 268, keypad_minus = 269, keypad_plus = 270, keypad_enter = 271,
+        keypad_equals = 272, up_arrow = 273, down_arrow = 274, right_arrow = 275,
+        left_arrow = 276, insert = 277, home = 278, end = 279,
+        page_up = 280, page_down = 281, f1 = 282, f2 = 283,
+        f3 = 284, f4 = 285, f5 = 286, f6 = 287,
+        f7 = 288, f8 = 289, f9 = 290, f10 = 291,
+        f11 = 292, f12 = 293, f13 = 294, f14 = 295,
+        f15 = 296, alpha_0 = 48, alpha1 = 49, alpha_2 = 50,
+        alpha3 = 51, alpha4 = 52, alpha5 = 53, alpha6 = 54,
+        alpha7 = 55, alpha8 = 56, alpha9 = 57, exclaim = 33,
+        double_quote = 34, hash = 35, dollar = 36, percent = 37,
+        ampersand = 38, quote = 39, left_paren = 40, right_paren = 41,
+        asterisk = 42, plus = 43, comma = 44, minus = 45,
+        period = 46, slash = 47, colon = 58, semicolon = 59,
+        less = 60, equals = 61, greater = 62, question = 63,
+        at = 64, left_bracket = 91, backslash = 92, right_bracket = 93,
+        caret = 94, underscore = 95, back_quote = 96, a = 97,
+        b = 98, c = 99, d = 100, e = 101,
         f = 102, g = 103, h = 104, i = 105,
         j = 106, k = 107, l = 108, m = 109,
         n = 110, o = 111, p = 112, q = 113,
         r = 114, s = 115, t = 116, u = 117,
         v = 118, w = 119, x = 120, y = 121,
-        z = 122,
-
-        end = 279,
-
-        f11 = 292
+        z = 122, left_curly_bracket = 123, pipe = 124, right_curly_bracket = 125, tilde = 126,
+        numlock = 300, caps_lock = 301, scroll_lock = 302, right_shift = 303,
+        left_shift = 304, right_control = 305, left_control = 306, right_alt = 307,
+        left_alt = 308, left_command = 310, left_apple = 310, left_windows = 311,
+        right_command = 309, right_apple = 309, right_windows = 312, alt_gr = 313,
+        help = 315, pr = 316, sys_req = 317, break_ = 318,
+        menu = 319, mouse0 = 323, mouse1 = 324, mouse2 = 325,
+        mouse3 = 326, mouse4 = 327, mouse5 = 328, mouse6 = 329
     };
 
     enum hide_flags {
