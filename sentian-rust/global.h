@@ -2,8 +2,13 @@
 
 #define DEBUG
 
-#define LOG( ... ) DbgPrintEx( DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, __VA_ARGS__ )
 #define S( x ) x
+
+#define LOG( Format, ... ) { \
+	char buffer[ 128 ] = {}; \
+	snprintf( buffer, sizeof( buffer ), Format, __VA_ARGS__ ); \
+	DbgPrintEx( DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, buffer ); \
+}
 
 #include "sentian/api.h"
 

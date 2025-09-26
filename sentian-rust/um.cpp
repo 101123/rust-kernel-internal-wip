@@ -3,6 +3,8 @@
 #include "util.h"
 #include "global.h"
 
+#include <stdio.h>
+
 /**/
 
 #pragma pack( push, 1 )

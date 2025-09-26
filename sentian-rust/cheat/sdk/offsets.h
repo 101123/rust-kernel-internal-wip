@@ -1040,6 +1040,7 @@ namespace Offsets {
 		constexpr const static size_t recoil = 0x208;
 		constexpr const static size_t sightAimCone = 0x214;
 		constexpr const static size_t hipAimCone = 0x220;
+		constexpr const static size_t needsOnForEffects = 0x240;
 	}
 
 #define ProjectileWeaponMod_Modifier_TypeDefinitionIndex 5845

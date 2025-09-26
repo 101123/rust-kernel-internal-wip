@@ -53,7 +53,8 @@ class_lookup class_lookups[] = {
 	{ &rust::player_tick::klass_, nullptr, nullptr, PlayerTick_TypeDefinitionIndex },
 	{ &rust::item_icon::klass_, nullptr, nullptr, ItemIcon_TypeDefinitionIndex },
 	{ &rust::client::klass_, nullptr, nullptr, Client_TypeDefinitionIndex },
-	{ &unity::game_object::klass_, nullptr, nullptr, GameObject_TypeDefinitionIndex }
+	{ &unity::game_object::klass_, nullptr, nullptr, GameObject_TypeDefinitionIndex },
+	{ &rust::projectile_weapon_mod::klass_, nullptr, nullptr, ProjectileWeaponMod_TypeDefinitionIndex }
 };
 
 parent_class_lookup parent_class_lookups[] = {

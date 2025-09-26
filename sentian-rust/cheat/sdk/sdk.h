@@ -854,8 +854,47 @@ namespace rust {
 
     class base_entity : public base_networkable {
     public:
+        enum flag {
+            placeholder = 1,
+            on = 2,
+            on_fire = 4,
+            open = 8,
+            locked = 16,
+            debugging = 32,
+            disabled = 64,
+            reserved_1 = 128,
+            reserved_2 = 256,
+            reserved_3 = 512,
+            reserved_4 = 1024,
+            reserved_5 = 2048,
+            broken = 4096,
+            busy = 8192,
+            reserved_6 = 16384,
+            reserved_7 = 32768,
+            reserved_8 = 65536,
+            reserved_9 = 131072,
+            reserved_10 = 262144,
+            reserved_11 = 524288,
+            in_use = 1048576,
+            reserved_12 = 2097152,
+            reserved_13 = 4194304,
+            unused_23 = 8388608,
+            _protected = 16777216,
+            transferring = 33554432,
+            reserved_14 = 67108864,
+            reserved_15 = 134217728,
+            reserved_16 = 268435456,
+            reserved_17 = 536870912,
+            reserved_18 = 1073741824,
+            reserved_19 = -2147483648
+        };
+
         FIELD( rust::model*, model, Offsets::BaseEntity::model );
         FIELD( int, flags, Offsets::BaseEntity::flags );
+
+        bool has_flag( base_entity::flag f ) {
+            return ( flags & f ) == f;
+        }
     };
 
     using networkable_id = uint64_t;
@@ -1439,5 +1478,27 @@ namespace rust {
 
             return caller( guid_to_object, guid );
         }
+    };
+
+    class projectile_weapon_mod : public base_entity {
+    public:
+        struct modifier {
+            bool enabled;
+            float scalar;
+            float offset;
+        };
+
+        FIELD( modifier, repeat_delay, Offsets::ProjectileWeaponMod::repeatDelay );
+        FIELD( modifier, projectile_velocity, Offsets::ProjectileWeaponMod::projectileVelocity );
+        FIELD( modifier, projectile_damage, Offsets::ProjectileWeaponMod::projectileDamage );
+        FIELD( modifier, projectile_distance, Offsets::ProjectileWeaponMod::projectileDistance );
+        FIELD( modifier, aim_sway, Offsets::ProjectileWeaponMod::aimsway );
+        FIELD( modifier, aim_sway_speed, Offsets::ProjectileWeaponMod::aimswaySpeed );
+        FIELD( modifier, recoil, Offsets::ProjectileWeaponMod::recoil );
+        FIELD( modifier, sight_aim_cone, Offsets::ProjectileWeaponMod::sightAimCone );
+        FIELD( modifier, hip_aim_cone, Offsets::ProjectileWeaponMod::hipAimCone );
+        FIELD( bool, needs_on_for_effects, Offsets::ProjectileWeaponMod::needsOnForEffects );
+
+        static inline il2cpp_class* klass_;
     };
 }
