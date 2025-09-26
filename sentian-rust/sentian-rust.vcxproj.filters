@@ -189,5 +189,8 @@
     <ClInclude Include="cheat\features.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\hexrays.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
