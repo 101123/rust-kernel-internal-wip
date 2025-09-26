@@ -1147,7 +1147,10 @@ void gui::run() {
 
                 case misc_subtabs::movement: {
                     left.begin();
+                    left.toggle( "Spider-man", &spider_man );
+                    left.toggle( "Infinite jump", &infinite_jump );
                     left.toggle( "Omnisprint", &omnisprint );
+                    left.toggle( "No attack restrictions", &no_attack_restrictions );
                     left.end();
 
                     right.begin();

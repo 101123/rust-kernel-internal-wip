@@ -5,6 +5,7 @@
 #include "cheat/sdk/field_types.h"
 #include "cheat/sdk/il2cpp.h"
 #include "um.h"
+#include "hexrays.h"
 
 #include "math/vec2.h"
 #include "math/vec3.h"
@@ -375,6 +376,17 @@ namespace unity {
     public:
         internals::camera* get_native_camera() {
             return ( internals::camera* )cached_ptr;
+        }
+    };
+
+    class time {
+    public:
+        static float get_time() {
+            float ( *get_time )() = decltype( get_time )( unity_player + Offsets::Time::get_time );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_time );
         }
     };
 
@@ -867,14 +879,59 @@ namespace rust {
 
     };
 
-    class base_movement {
+    class base_movement : public unity::behaviour {
     public:
-        FIELD( vector3, target_movement, Offsets::BaseMovement::TargetMovement );
+        FIELD( bool, admin_cheat, Offsets::BaseMovement::adminCheat );
         FIELD( base_player*, owner, Offsets::BaseMovement::Owner );
+        FIELD( vector3, target_movement, Offsets::BaseMovement::TargetMovement );
+        FIELD( float, grounded, Offsets::BaseMovement::Grounded );
+    };
+
+    class trigger_ladder {
+    public:
+
     };
 
     class player_walk_movement : public base_movement {
     public:
+        FIELD( trigger_ladder*, ladder, Offsets::PlayerWalkMovement::ladder );
+
+        ENCRYPTED_VALUE( float, ground_time, Offsets::PlayerWalkMovement::groundTime, {},
+            {
+                values[ i ] = ( ( ( ( values[ i ] << 6 ) | ( values[ i ] >> 26 ) ) ^ 0xBECB992 ) << 28 )
+                    | ( ( ( ( values[ i ] << 6 ) | ( values[ i ] >> 26 ) ) ^ 0xBECB992 ) >> 4 );
+            }
+        );
+
+        ENCRYPTED_VALUE( float, jump_time, Offsets::PlayerWalkMovement::jumpTime, {},
+            {
+                int64_t a = 2LL * ( ( ( 16 * values[ i ] ) | ( values[ i ] >> 28 ) ) - 1519640036 );
+
+                values[ i ] = ( ( unsigned int )a | HIDWORD( a ) ) + 1461189103;
+            }
+        );
+
+        ENCRYPTED_VALUE( float, land_time, Offsets::PlayerWalkMovement::landTime, {},
+            {
+                values[ i ] = ( ( ( ( values[ i ] - 1165896616 ) ^ 0x979988FA ) + 1086581408 ) << 31 )
+                    | ( unsigned __int64 )( ( ( ( values[ i ] - 1165896616 ) ^ 0x979988FA ) + 1086581408 ) >> 1 );
+            }
+        );
+
+        ENCRYPTED_VALUE( float, ground_angle_new, Offsets::PlayerWalkMovement::groundAngleNew, {},
+            {
+                uint32_t a = ( ( ( values[ i ] << 9 ) | ( values[ i ] >> 23 ) ) + 1658094625 ) ^ 0xFD09D9DE;
+
+                values[ i ] = ( a << 9 ) | ( a >> 23 );
+            }
+        );
+
+        ENCRYPTED_VALUE( float, next_sprint_time, Offsets::PlayerWalkMovement::nextSprintTime, {},
+            {
+                values[ i ] = ( ( ( values[ i ] << 22 ) | ( values[ i ] >> 10 ) ) ^ 0xBE426B50 ) + 1940450374;
+            }
+        );
+
         static inline il2cpp_class* klass_;
     };
 
@@ -902,6 +959,8 @@ namespace rust {
             catching = 262144
         };
 
+        FIELD( float, water_level, Offsets::ModelState::waterLevel );
+        FIELD( vector3, look_direction, Offsets::ModelState::lookDir );
         FIELD( int, flags, Offsets::ModelState::flags );
 
         bool has_flag( model_state::flag f ) {
@@ -1068,6 +1127,23 @@ namespace rust {
                 return nullptr;
 
             return held_entity_->as<held_entity>();
+        }
+
+        // This works completely differently from the actual BasePlayer.OnLadder
+        bool on_ladder() {
+            player_walk_movement* _movement = movement->as<player_walk_movement>();
+            if ( !_movement )
+                return false;
+
+            return _movement->ladder != nullptr;
+        }
+
+        // This may only work for the local player, but that's we need it to work for
+        bool is_swimming() {
+            if ( !is_valid_ptr( model_state ) )
+                return false;
+
+            return model_state->water_level > 0.65f;
         }
 
         static inline il2cpp_class* klass_;

@@ -232,6 +232,11 @@ inline cvar_visual dropped_fun = WRAP_VISUAL( "Dropped Fun", false, 500, COL32( 
 
 inline cvar instant_loot = cvar( H( "Instant Loot" ), true );
 
+inline cvar no_attack_restrictions = cvar( H( "No Attack Restrictions" ), true );
+inline bool previous_admin_cheat;
+
+inline cvar spider_man = cvar( H( "Spider-Man" ), false );
+inline cvar infinite_jump = cvar( H( "Infinite Jump" ), false );
 inline cvar omnisprint = cvar( H( "Omnisprint" ), false );
 
 inline cvar_bind override_night = WRAP_BIND( "Override Night", true, trigger_type::toggle, 'K' );

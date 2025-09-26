@@ -98,25 +98,55 @@ void network_client_destroy_networkable_hook( rust::base_networkable* networkabl
 	entity_manager::remove_from_cache( networkable, &specifier );
 }
 
-void player_walk_movement_do_fixed_update_hook( rust::player_walk_movement* player_walk_movement, rust::model_state* model_state ) {
-	if ( omnisprint ) {
-		rust::base_player* owner = player_walk_movement->owner;
-		if ( !owner )
-			return;
+void player_walk_movement_client_input_pre_hook( rust::player_walk_movement* player_walk_movement, rust::input_state* input_state, rust::model_state* model_state ) {
+	if ( !is_valid_ptr( player_walk_movement ) || !is_valid_ptr( input_state ) || !is_valid_ptr( model_state ) )
+		return;
 
+	if ( player_walk_movement->owner != local_player )
+		return;
+
+	if ( no_attack_restrictions ) {
+		player_walk_movement->admin_cheat = previous_admin_cheat;
+	}
+}
+
+void player_walk_movement_client_input_post_hook( rust::player_walk_movement* player_walk_movement, rust::input_state* input_state, rust::model_state* model_state ) {
+	if ( !is_valid_ptr( player_walk_movement ) || !is_valid_ptr( input_state ) || !is_valid_ptr( model_state ) )
+		return;
+
+	if ( player_walk_movement->owner != local_player )
+		return;
+
+	if ( model_state->has_flag( rust::model_state::flag::flying ) )
+		return;
+
+	if ( spider_man ) {
+		player_walk_movement->ground_angle_new = 0.f;
+	}
+
+	if ( infinite_jump ) {
+		float time = unity::time::get_time();
+
+		player_walk_movement->ground_time = time + 0.2f;
+		player_walk_movement->jump_time = time - 1.f;
+		player_walk_movement->land_time = time - 0.4f;
+	}
+
+	if ( omnisprint ) {
 		if ( !model_state->has_flag( rust::model_state::flag::ducked ) &&
-			!model_state->has_flag( rust::model_state::flag::crawling ) ) {
+			!model_state->has_flag( rust::model_state::flag::crawling ) &&
+			model_state->water_level < 0.65f && !player_walk_movement->ladder ) {
 			vector3 current_velocity = player_walk_movement->target_movement;
 
 			if ( vector3::magnitude( current_velocity ) > 0.f ) {
-				player_walk_movement->target_movement = vector3::normalize( current_velocity ) * owner->get_speed( 1.f, 0.f, 0.f );
+				player_walk_movement->target_movement = vector3::normalize( current_velocity ) * local_player->get_speed( 1.f, 0.f, 0.f );
 				model_state->set_flag( rust::model_state::flag::sprinting, true );
 			}
 		}
 	}
 }
 
-void protobuf_player_tick_write_to_stream_delta_hook( rust::player_tick* player_tick ) {
+void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* player_tick ) {
 	if ( !is_valid_ptr( player_tick ) )
 		return;
 
@@ -152,13 +182,13 @@ void protobuf_projectile_shoot_write_to_stream_hook( sys::list<rust::projectile_
 	}
 }
 
-void item_icon_try_to_move_hook( rust::item_icon* item_icon ) {
+void item_icon_try_to_move_post_hook( rust::item_icon* item_icon ) {
 	if ( instant_loot ) {
 		item_icon->run_timed_action();
 	}
 }
 
-void client_on_client_disconnected_hook( rust::client* client, sys::string* reason ) {
+void client_on_client_disconnected_pre_hook( rust::client* client, sys::string* reason ) {
 	entity_manager::invalidate_cache();
 	glow_manager::invalidate_cache();
 
@@ -166,8 +196,21 @@ void client_on_client_disconnected_hook( rust::client* client, sys::string* reas
 	target_player = nullptr;
 }
 
-void base_player_client_input_hook( rust::base_player* base_player, rust::input_state* state ) {
+void base_player_client_input_pre_hook( rust::base_player* base_player, rust::input_state* state ) {
+	if ( !is_valid_ptr( base_player ) || !is_valid_ptr( state ) )
+		return;
+
 	local_player = base_player;
+
+	// BasePlayer.CanAttack checks if adminCheat is true, and if so returns an early true. We set it here and then unset it before PlayerWalkMovement.ClientInput runs
+	if ( no_attack_restrictions ) {
+		rust::base_movement* movement = base_player->movement;
+
+		if ( is_valid_ptr( movement ) ) {
+			previous_admin_cheat = movement->admin_cheat;
+			movement->admin_cheat = true;
+		}
+	}
 }
 
 void hook_handlers::network_client_create_networkable( _CONTEXT* context ) {
@@ -218,7 +261,7 @@ void hook_handlers::network_client_destroy_networkable( _CONTEXT* context ) {
 
 bool init = false;
 
-void hook_handlers::outline_manager_on_render_image( _CONTEXT* context ) {
+void hook_handlers::post_outline_manager_on_render_image( _CONTEXT* context ) {
 	if ( !init ) {
 		asset_bundle = unity::asset_bundle::load_from_file( L"C://assetbundle", 0u, 0ull );
 		glow_manager::init( asset_bundle );
@@ -236,15 +279,19 @@ void hook_handlers::outline_manager_on_render_image( _CONTEXT* context ) {
 	glow_manager::on_render_image_hook( ( unity::render_texture* )context->Rdx, ( unity::render_texture* )context->R8 );
 }
 
-void hook_handlers::player_walk_movement_do_fixed_update( _CONTEXT* context ) {
-	player_walk_movement_do_fixed_update_hook( ( rust::player_walk_movement* )context->Rcx, ( rust::model_state* )context->Rdx );
+void hook_handlers::pre_player_walk_movement_client_input( _CONTEXT* context ) {
+	player_walk_movement_client_input_pre_hook( ( rust::player_walk_movement* )context->Rcx, ( rust::input_state* )context->Rdx, ( rust::model_state* )context->R8 );
 }
 
-void hook_handlers::protobuf_player_tick_write_to_stream_delta( _CONTEXT* context ) {
-	protobuf_player_tick_write_to_stream_delta_hook( ( rust::player_tick* )context->Rcx );
+void hook_handlers::post_player_walk_movement_client_input( _CONTEXT* context ) {
+	player_walk_movement_client_input_post_hook( ( rust::player_walk_movement* )context->Rcx, ( rust::input_state* )context->Rdx, ( rust::model_state* )context->R8 );
 }
 
-void hook_handlers::protobuf_projectile_shoot_write_to_stream( _CONTEXT* context ) {
+void hook_handlers::pre_protobuf_player_tick_write_to_stream_delta( _CONTEXT* context ) {
+	protobuf_player_tick_write_to_stream_delta_pre_hook( ( rust::player_tick* )context->Rcx );
+}
+
+void hook_handlers::pre_protobuf_projectile_shoot_write_to_stream( _CONTEXT* context ) {
 	rust::projectile_shoot* projectile_shoot = ( rust::projectile_shoot* )context->Rcx;
 	if ( !is_valid_ptr( projectile_shoot ) || !is_valid_ptr( projectile_shoot->projectiles ) )
 		return;
@@ -287,22 +334,22 @@ void hook_handlers::protobuf_projectile_shoot_write_to_stream( _CONTEXT* context
 	}
 }
 
-void hook_handlers::protobuf_player_projectile_update_write_to_stream( _CONTEXT* context ) {
+void hook_handlers::pre_protobuf_player_projectile_update_write_to_stream( _CONTEXT* context ) {
 
 }
 
-void hook_handlers::protobuf_player_projectile_attack_write_to_stream( _CONTEXT* context ) {
+void hook_handlers::pre_protobuf_player_projectile_attack_write_to_stream( _CONTEXT* context ) {
 
 }
 
-void hook_handlers::item_icon_try_to_move( _CONTEXT* context ) {
-	item_icon_try_to_move_hook( ( rust::item_icon* )context->Rcx );
+void hook_handlers::post_item_icon_try_to_move( _CONTEXT* context ) {
+	item_icon_try_to_move_post_hook( ( rust::item_icon* )context->Rcx );
 }
 
-void hook_handlers::client_on_client_disconnected( _CONTEXT* context ) {
-	client_on_client_disconnected_hook( ( rust::client* )context->Rcx, ( sys::string* )context->Rdx );
+void hook_handlers::pre_client_on_client_disconnected( _CONTEXT* context ) {
+	client_on_client_disconnected_pre_hook( ( rust::client* )context->Rcx, ( sys::string* )context->Rdx );
 }
 
-void hook_handlers::base_player_client_input( _CONTEXT* context ) {
-	base_player_client_input_hook( ( rust::base_player* )context->Rcx, ( rust::input_state* )context->Rdx );
+void hook_handlers::pre_base_player_client_input( _CONTEXT* context ) {
+	base_player_client_input_pre_hook( ( rust::base_player* )context->Rcx, ( rust::input_state* )context->Rdx );
 }

@@ -13,12 +13,21 @@ namespace Offsets {
         constexpr const static size_t static_fields = 0xB8;
     }
 
-    namespace BaseMovement {
-        constexpr const static size_t TargetMovement = 0x3C;
-    }
-
     namespace RustCamera {
         constexpr const static size_t ambientLightNight = 0xDC;
         constexpr const static size_t ambientLightMultiplier = 0xE0;
+    }
+
+    namespace BaseMovement {
+        constexpr const static size_t TargetMovement = 0x3C;
+        constexpr const static size_t Grounded = 0x54;
+    }
+
+    namespace PlayerWalkMovement {
+        constexpr const static size_t groundTime = 0x110;
+        constexpr const static size_t jumpTime = 0x118;
+        constexpr const static size_t landTime = 0x120;
+        constexpr const static size_t groundAngleNew = 0x108;
+        constexpr const static size_t nextSprintTime = 0x198;
     }
 }
