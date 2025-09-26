@@ -290,3 +290,92 @@ namespace sentian {
 }
 
 #pragma pack( pop )
+
+inline sentian::driver_api* driver_api;
+
+#define is_valid_ptr( x ) driver_api->is_valid_ptr( ( void* )x )
+
+namespace user_sdk {
+#pragma pack( push, 1 )
+	enum class command_id : uint8_t {
+		get_key_states,
+		set_wnd_proc_handler,
+		set_d3d_render_handler,
+		set_d3d_resize_handler,
+		max
+	};
+
+	struct command {
+		command_id id;
+		void* data;
+		uint32_t data_size;
+		uint64_t return_value;
+	};
+
+	struct key_states {
+		uint8_t data[ 64 ];
+	};
+#pragma pack( pop )
+
+	inline void execute_command( command* cmd ) {
+		sentian::driver_slot* slot = &driver_api->slots[ uint8_t( sentian::driver_slot_type::sockets ) ];
+		if ( !slot->enabled || !slot->context )
+			return;
+
+		sentian::context_header header {
+			.data = ( uint8_t* )cmd->data,
+			.data_size = cmd->data_size,
+			.arg1 = ( uint64_t )cmd->id,
+		};
+
+		cmd->return_value = slot->context( &header );
+	}
+
+	inline uint64_t set_d3d_resize_handler( void* handler ) {
+		command cmd {
+			.id = command_id::set_d3d_resize_handler,
+			.data = handler,
+			.data_size = sizeof( handler )
+		};
+
+		execute_command( &cmd );
+
+		return cmd.return_value;
+	}
+
+	inline uint64_t set_d3d_render_handler( void* handler ) {
+		command cmd {
+			.id = command_id::set_d3d_render_handler,
+			.data = handler,
+			.data_size = sizeof( handler )
+		};
+
+		execute_command( &cmd );
+
+		return cmd.return_value;
+	}
+
+	inline uint64_t set_wnd_proc_handler( void* handler ) {
+		command cmd {
+			.id = command_id::set_wnd_proc_handler,
+			.data = handler,
+			.data_size = sizeof( handler )
+		};
+
+		execute_command( &cmd );
+
+		return cmd.return_value;
+	}
+
+	inline uint64_t get_key_states( key_states* key_states ) {
+		command cmd {
+			.id = command_id::get_key_states,
+			.data = key_states,
+			.data_size = sizeof( *key_states )
+		};
+
+		execute_command( &cmd );
+
+		return cmd.return_value;
+	}
+}

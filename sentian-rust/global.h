@@ -12,9 +12,11 @@ namespace unity {
 	class asset_bundle;
 }
 
-struct _KPROCESS;
+namespace rust {
+	class base_player;
+}
 
-inline sentian::driver_api* driver_api;
+struct _KPROCESS;
 
 inline _KPROCESS* rust_process;
 inline void* rust_pid;
@@ -22,6 +24,7 @@ inline void* rust_pid;
 inline uintptr_t game_assembly;
 inline uintptr_t unity_player;
 
-inline unity::asset_bundle* asset_bundle;
+inline rust::base_player* local_player;
+inline rust::base_player* target_player;
 
-#define is_valid_ptr( x ) driver_api->is_valid_ptr( ( void* )x )
+inline unity::asset_bundle* asset_bundle;

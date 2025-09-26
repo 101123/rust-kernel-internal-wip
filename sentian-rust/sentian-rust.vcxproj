@@ -236,6 +236,7 @@
     <ClInclude Include="util.h" />
     <ClInclude Include="nt.h" />
     <ClInclude Include="sentian\api.h" />
+    <ClInclude Include="vk.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

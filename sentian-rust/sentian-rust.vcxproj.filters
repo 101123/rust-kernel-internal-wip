@@ -180,5 +180,8 @@
     <ClInclude Include="include\glfn.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="vk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
