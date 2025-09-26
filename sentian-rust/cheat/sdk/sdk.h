@@ -297,6 +297,8 @@ namespace unity {
 
             return caller( internal_add_component_with_type, this, T::type_object_ );
         }
+
+        static inline il2cpp_class* klass_;
     };
 
     class component : public object {
@@ -769,26 +771,47 @@ namespace rust {
         l_foot = 3,
         r_foot = 15
     };
+    
+    namespace item_category {
+        enum : int {
+            weapon,
+            construction,
+            items,
+            resources,
+            attire,
+            tool,
+            medical,
+            food,
+            ammunition,
+            traps,
+            misc,
+            all,
+            common,
+            component,
+            search,
+            favourite,
+            electrical,
+            fun
+        };
+    }
 
-    enum item_category {
-        weapon,
-        construction,
-        items,
-        resources,
-        attire,
-        tool,
-        medical,
-        food,
-        ammunition,
-        traps,
-        misc,
-        all,
-        common,
-        component,
-        search,
-        favourite,
-        electrical,
-        fun
+    enum ammo_types {
+        pistol_9mm = 1,
+        rifle_556mm = 2,
+        shotgun_12gauge = 4,
+        bow_arrow = 8,
+        handmade_shell = 16,
+        rocket = 32,
+        nails = 64,
+        ammo_40mm = 128,
+        snowball = 256,
+        speargun_bolt = 512,
+        torpedo = 1024,
+        mlrs_rocket = 2048,
+        missile_seeking = 4096,
+        catapult_boulder = 8192,
+        ballista_arrow = 16384,
+        dart = 32768,
     };
 
     template <typename T>
@@ -800,6 +823,18 @@ namespace rust {
         };
 
         static inline static_fields* static_fields_;
+    };
+
+    template <typename T>
+    class resource_ref {
+    public:
+        FIELD( sys::string*, guid, 0x10 );
+        FIELD( T*, cached_object, 0x18 )
+    };
+
+    class game_object_ref : public resource_ref<unity::game_object> {
+    public:
+
     };
 
     class base_networkable : public unity::component {
@@ -987,7 +1022,7 @@ namespace rust {
         FIELD( sys::string*, legacy_english, Offsets::Translate_Phrase::legacyEnglish );
     };
 
-    class item_definition {
+    class item_definition : public unity::behaviour {
     public:
         FIELD( int, item_id, Offsets::ItemDefinition::itemid );
         FIELD( phrase*, display_name, Offsets::ItemDefinition::displayName );
@@ -1122,11 +1157,11 @@ namespace rust {
             if ( !held_item )
                 return nullptr;
 
-            base_entity* held_entity_ = held_item->held_entity;
-            if ( !is_valid_ptr( held_entity_ ) )
+            base_entity* _held_entity = held_item->held_entity;
+            if ( !is_valid_ptr( _held_entity ) )
                 return nullptr;
 
-            return held_entity_->as<held_entity>();
+            return _held_entity->as<held_entity>();
         }
 
         // This works completely differently from the actual BasePlayer.OnLadder
@@ -1190,7 +1225,64 @@ namespace rust {
         static inline il2cpp_class* klass_;
     };
 
+    class recoil_properties {
+    public:
+        FIELD( float, recoil_yaw_min, Offsets::RecoilProperties::recoilYawMin );
+        FIELD( float, recoil_yaw_max, Offsets::RecoilProperties::recoilYawMax );
+        FIELD( float, recoil_pitch_min, Offsets::RecoilProperties::recoilPitchMin );
+        FIELD( float, recoil_pitch_max, Offsets::RecoilProperties::recoilPitchMax );
+        FIELD( recoil_properties*, new_recoil_override, Offsets::RecoilProperties::newRecoilOverride );
+    };
+
     class base_projectile : public attack_entity {
+    public:
+        class magazine {
+        public:
+            FIELD( int, capacity, Offsets::BaseProjectile_Magazine::capacity );
+            FIELD( int, contents, Offsets::BaseProjectile_Magazine::contents );
+            FIELD( item_definition*, ammo_type, Offsets::BaseProjectile_Magazine::ammoType );
+        };
+
+        FIELD( float, projectile_velocity_scale, Offsets::BaseProjectile::projectileVelocityScale );
+        FIELD( bool, automatic, Offsets::BaseProjectile::automatic );
+        FIELD( magazine*, primary_magazine, Offsets::BaseProjectile::primaryMagazine );
+        FIELD( float, aim_sway, Offsets::BaseProjectile::aimSway );
+        FIELD( float, aim_sway_speed, Offsets::BaseProjectile::aimSwaySpeed );
+        FIELD( recoil_properties*, recoil, Offsets::BaseProjectile::recoil );;
+        FIELD( float, aim_cone, Offsets::BaseProjectile::aimCone );
+        FIELD( uint32_t, cached_mod_hash, Offsets::BaseProjectile::cachedModHash );
+        FIELD( float, hip_aim_cone_offset, Offsets::BaseProjectile::hipAimConeOffset );
+        FIELD( float, hip_aim_cone_scale, Offsets::BaseProjectile::hipAimConeScale );
+        FIELD( float, sight_aim_cone_offset, Offsets::BaseProjectile::sightAimConeOffset );
+        FIELD( float, sight_aim_cone_scale, Offsets::BaseProjectile::sightAimConeScale );
+
+        static inline il2cpp_class* klass_;
+    };
+
+    class bow_weapon : public base_projectile {
+    public:
+        static inline il2cpp_class* klass_;
+    };
+
+    class crossbow_weapon : public base_projectile {
+    public:
+        static inline il2cpp_class* klass_;
+    };
+
+    class mini_crossbow : public base_projectile {
+    public:
+        static inline il2cpp_class* klass_;
+    };
+
+    class flint_strike_weapon : public base_projectile {
+    public:
+        FIELD( recoil_properties*, strike_recoil, Offsets::FlintStrikeWeapon::strikeRecoil );
+        FIELD( bool, did_spark_this_frame, Offsets::FlintStrikeWeapon::_didSparkThisFrame );
+
+        static inline il2cpp_class* klass_;
+    };
+
+    class spin_up_weapon : public base_projectile {
     public:
         static inline il2cpp_class* klass_;
     };
@@ -1263,7 +1355,7 @@ namespace rust {
 
     class projectile {
     public:
-
+        static inline il2cpp_object* type_object_;
     };
 
     class local_player {
@@ -1323,6 +1415,29 @@ namespace rust {
             um::caller& caller = um::get_caller_for_thread();
 
             return caller( get_instance );
+        }
+    };
+
+    class item_mod_projectile {
+    public:
+        FIELD( game_object_ref*, projectile_object, Offsets::ItemModProjectile::projectileObject );
+        FIELD( int, ammo_type, Offsets::ItemModProjectile::ammoType );
+        FIELD( float, projectile_spread, Offsets::ItemModProjectile::projectileSpread );
+        FIELD( float, projectile_velocity, Offsets::ItemModProjectile::projectileVelocity );
+        FIELD( float, projectile_velocity_spread, Offsets::ItemModProjectile::projectileVelocitySpread );
+
+        static inline il2cpp_object* type_object_;
+    };
+
+    class game_manifest {
+    public:
+        static unity::object* guid_to_object( sys::string* guid ) {
+            unity::object* ( *guid_to_object )( sys::string* ) =
+                ( decltype( guid_to_object ) )( game_assembly + Offsets::GameManifest::GUIDToObject );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( guid_to_object, guid );
         }
     };
 }

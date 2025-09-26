@@ -11,6 +11,8 @@ namespace Offsets {
         constexpr const static size_t byval_arg = 0x20;
         constexpr const static size_t parent = 0x58;
         constexpr const static size_t static_fields = 0xB8;
+        constexpr const static size_t typeHierarchy = 0xC8;
+        constexpr const static size_t typeHierarchyDepth = 0x120;
     }
 
     namespace RustCamera {

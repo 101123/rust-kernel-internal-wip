@@ -32,6 +32,8 @@ class_lookup class_lookups[] = {
 	{ &unity::command_buffer::klass_, nullptr, nullptr, CommandBuffer_TypeDefinitionIndex },
 	{ nullptr, &unity::shader::type_object_, nullptr, Shader_TypeDefinitionIndex },
 	{ nullptr, &unity::component::type_object_, nullptr, Component_TypeDefinitionIndex },
+	{ nullptr, &rust::item_mod_projectile::type_object_, nullptr, ItemModProjectile_TypeDefinitionIndex },
+	{ nullptr, &rust::projectile::type_object_, nullptr, Projectile_TypeDefinitionIndex },
 	{ &unity::behaviour::klass_, nullptr, nullptr, Behaviour_TypeDefinitionIndex },
 	{ &unity::material::klass_ , &unity::material::type_object_, nullptr, Material_TypeDefinitionIndex },
 	{ &rust::outline_manager::klass_, nullptr, nullptr, OutlineManager_TypeDefinitionIndex },
@@ -39,13 +41,19 @@ class_lookup class_lookups[] = {
 	{ &rust::attack_entity::klass_, nullptr, nullptr, AttackEntity_TypeDefinitionIndex },
 	{ &rust::base_melee::klass_, nullptr, nullptr, BaseMelee_TypeDefinitionIndex },
 	{ &rust::base_projectile::klass_, nullptr, nullptr, BaseProjectile_TypeDefinitionIndex },
+	{ &rust::bow_weapon::klass_, nullptr, nullptr, BowWeapon_TypeDefinitionIndex },
+	{ &rust::crossbow_weapon::klass_, nullptr, nullptr, CrossbowWeapon_TypeDefinitionIndex },
+	{ &rust::mini_crossbow::klass_, nullptr, nullptr, MiniCrossbow_TypeDefinitionIndex },
+	{ &rust::flint_strike_weapon::klass_, nullptr, nullptr, FlintStrikeWeapon_TypeDefinitionIndex },
+	{ &rust::spin_up_weapon::klass_, nullptr, nullptr, SpinUpWeapon_TypeDefinitionIndex },
 	{ &rust::player_walk_movement::klass_, nullptr, nullptr, PlayerWalkMovement_TypeDefinitionIndex },
 	{ &rust::player_projectile_update::klass_, nullptr, nullptr, ProtoBuf_PlayerProjectileUpdate_TypeDefinitionIndex },
 	{ &rust::player_projectile_attack::klass_, nullptr, nullptr, ProtoBuf_PlayerProjectileAttack_TypeDefinitionIndex },
 	{ &rust::projectile_shoot::klass_, nullptr, nullptr, ProtoBuf_ProjectileShoot_TypeDefinitionIndex },
 	{ &rust::player_tick::klass_, nullptr, nullptr, PlayerTick_TypeDefinitionIndex },
 	{ &rust::item_icon::klass_, nullptr, nullptr, ItemIcon_TypeDefinitionIndex },
-	{ &rust::client::klass_, nullptr, nullptr, Client_TypeDefinitionIndex }
+	{ &rust::client::klass_, nullptr, nullptr, Client_TypeDefinitionIndex },
+	{ &unity::game_object::klass_, nullptr, nullptr, GameObject_TypeDefinitionIndex }
 };
 
 parent_class_lookup parent_class_lookups[] = {

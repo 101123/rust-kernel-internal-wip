@@ -805,16 +805,16 @@ bool cache_player( rust::base_player* player, cached_player& cached_player ) {
 
     const wchar_t* name = L"Scientist";
 
-    if ( player->klass == rust::base_player::klass_ && is_valid_ptr( player->display_name ) ) {
+    if ( player->is<rust::base_player>() && is_valid_ptr( player->display_name ) ) {
         cached_player.scientist = false;
         name = player->display_name->buffer;
-    } else if ( player->klass == rust::tunnel_dweller::klass_ ) {
+    } else if ( player->is<rust::tunnel_dweller>() ) {
         name = L"Tunnel Dweller";
-    } else if ( player->klass == rust::underwater_dweller::klass_ ) {
+    } else if ( player->is<rust::underwater_dweller>() ) {
         name = L"Underwater Dweller";
-    } else if ( player->klass == rust::scarecrow_npc::klass_ ) {
+    } else if ( player->is<rust::scarecrow_npc>() ) {
         name = L"Scarecrow";
-    } else if ( player->klass == rust::gingerbread_npc::klass_ ) {
+    } else if ( player->is<rust::gingerbread_npc>() ) {
         name = L"Gingerbread";
     }
 

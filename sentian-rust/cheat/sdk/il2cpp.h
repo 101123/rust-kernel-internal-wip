@@ -8,6 +8,8 @@
 #include "util.h"
 #include "um.h"
 
+// #define FAST_HIERARCHY_CHECKS
+
 struct method_info {
 	void* method_ptr;
 	// ...
@@ -23,6 +25,8 @@ public:
 	FIELD( const char*, namespaze, Offsets::Il2CppClass::namespaze );
 	FIELD( il2cpp_class*, parent, Offsets::Il2CppClass::parent );
 	FIELD( uintptr_t, static_fields, Offsets::Il2CppClass::static_fields );
+	FIELD( il2cpp_class**, type_hierarchy, Offsets::Il2CppClass::typeHierarchy );
+	FIELD( uint8_t, type_hierarchy_depth, Offsets::Il2CppClass::typeHierarchyDepth );
 };
 
 class il2cpp_object {
@@ -31,6 +35,17 @@ public:
 
 	template <typename T>
 	T* as() {
+#ifdef FAST_HIERARCHY_CHECKS
+		if ( !is_valid_ptr( klass->type_hierarchy ) )
+			return nullptr;
+
+		if ( klass->type_hierarchy_depth >= T::klass_->type_hierarchy_depth &&
+			klass->type_hierarchy[ T::klass_->type_hierarchy_depth - 1llu ] == T::klass_ ) {
+			return ( T* )this;
+		}
+
+		return nullptr;
+#else
 		il2cpp_class* current = klass;
 
 		while ( is_valid_ptr( current ) ) {
@@ -42,6 +57,12 @@ public:
 		}
 
 		return nullptr;
+#endif
+	}
+
+	template <typename T>
+	bool is() {
+		return klass == T::klass_;
 	}
 };
 

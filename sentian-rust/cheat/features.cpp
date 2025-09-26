@@ -40,3 +40,7 @@ void features::bright_night() {
 		gradient->set_keys( color_keys, alpha_keys );
 	}
 }
+
+void features::weapon_modifier() {
+
+}

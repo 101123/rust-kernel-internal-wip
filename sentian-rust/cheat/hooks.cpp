@@ -102,7 +102,7 @@ void player_walk_movement_client_input_pre_hook( rust::player_walk_movement* pla
 	if ( !is_valid_ptr( player_walk_movement ) || !is_valid_ptr( input_state ) || !is_valid_ptr( model_state ) )
 		return;
 
-	if ( player_walk_movement->owner != local_player )
+	if ( player_walk_movement->owner != local_player.entity )
 		return;
 
 	if ( no_attack_restrictions ) {
@@ -114,7 +114,7 @@ void player_walk_movement_client_input_post_hook( rust::player_walk_movement* pl
 	if ( !is_valid_ptr( player_walk_movement ) || !is_valid_ptr( input_state ) || !is_valid_ptr( model_state ) )
 		return;
 
-	if ( player_walk_movement->owner != local_player )
+	if ( player_walk_movement->owner != local_player.entity )
 		return;
 
 	if ( model_state->has_flag( rust::model_state::flag::flying ) )
@@ -122,6 +122,10 @@ void player_walk_movement_client_input_post_hook( rust::player_walk_movement* pl
 
 	if ( spider_man ) {
 		player_walk_movement->ground_angle_new = 0.f;
+	}
+
+	if ( no_fall_damage ) {
+		
 	}
 
 	if ( infinite_jump ) {
@@ -139,7 +143,7 @@ void player_walk_movement_client_input_post_hook( rust::player_walk_movement* pl
 			vector3 current_velocity = player_walk_movement->target_movement;
 
 			if ( vector3::magnitude( current_velocity ) > 0.f ) {
-				player_walk_movement->target_movement = vector3::normalize( current_velocity ) * local_player->get_speed( 1.f, 0.f, 0.f );
+				player_walk_movement->target_movement = vector3::normalize( current_velocity ) * local_player.entity->get_speed( 1.f, 0.f, 0.f );
 				model_state->set_flag( rust::model_state::flag::sprinting, true );
 			}
 		}
@@ -192,15 +196,81 @@ void client_on_client_disconnected_pre_hook( rust::client* client, sys::string* 
 	entity_manager::invalidate_cache();
 	glow_manager::invalidate_cache();
 
-	local_player = nullptr;
-	target_player = nullptr;
+	local_player.entity = nullptr;
+}
+
+void cache_held_entity( rust::base_player* base_player ) {
+	rust::item* held_item = base_player->get_held_item();
+	if ( !held_item )
+		return;
+
+	rust::base_entity* held_entity = held_item->held_entity;
+	if ( !is_valid_ptr( held_entity ) )
+		return;
+
+	unity::game_object* container = nullptr;
+
+	if ( auto base_projectile = held_entity->as<rust::base_projectile>() ) {
+		rust::base_projectile::magazine* magazine = base_projectile->primary_magazine;
+		if ( !is_valid_ptr( magazine ) )
+			return;
+
+		rust::item_definition* ammo_type = magazine->ammo_type;
+		if ( !is_valid_ptr( ammo_type ) )
+			return;
+
+		container = ammo_type->get_game_object();
+	}
+
+	else if ( auto base_melee = held_entity->as<rust::base_melee>() ) {
+		rust::item_definition* info = held_item->info;
+		if ( !is_valid_ptr( info ) )
+			return;
+
+		container = info->get_game_object();
+	}
+
+	if ( !is_valid_ptr( container ) )
+		return;
+
+	auto item_mod_projectile = container->get_component<rust::item_mod_projectile>();
+	if ( !is_valid_ptr( item_mod_projectile ) )
+		return;
+
+	rust::game_object_ref* projectile_object = item_mod_projectile->projectile_object;
+	if ( !is_valid_ptr( projectile_object ) )
+		return;
+
+	unity::game_object* projectile_container = projectile_object->cached_object;
+
+	// If the reference hasn't been set yet, we can set it ourselves
+	if ( !is_valid_ptr( projectile_container ) ) {
+		sys::string* guid = projectile_object->guid;
+		
+		if ( is_valid_ptr( guid ) ) {
+			unity::object* object = rust::game_manifest::guid_to_object( guid );
+
+			if ( is_valid_ptr( object ) ) {
+				projectile_object->cached_object = projectile_container = object->as<unity::game_object>();
+			}
+		}
+	}
+
+	if ( !is_valid_ptr( projectile_container ) )
+		return;
+
+	auto projectile = projectile_container->get_component<rust::projectile>();
+	if ( !is_valid_ptr( projectile ) )
+		return;
+
+
 }
 
 void base_player_client_input_pre_hook( rust::base_player* base_player, rust::input_state* state ) {
 	if ( !is_valid_ptr( base_player ) || !is_valid_ptr( state ) )
 		return;
 
-	local_player = base_player;
+	local_player.entity = base_player;
 
 	// BasePlayer.CanAttack checks if adminCheat is true, and if so returns an early true. We set it here and then unset it before PlayerWalkMovement.ClientInput runs
 	if ( no_attack_restrictions ) {
@@ -211,6 +281,8 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 			movement->admin_cheat = true;
 		}
 	}
+
+	cache_held_entity( base_player );
 }
 
 void hook_handlers::network_client_create_networkable( _CONTEXT* context ) {

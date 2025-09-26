@@ -4,6 +4,11 @@
 #include "renderer.h"
 #include "vk.h"
 
+namespace rust {
+	class base_player;
+	class base_projectile;
+}
+
 template <typename T>
 struct cvar_t {
 	static inline cvar_t* s_instances[ 256 ];
@@ -230,14 +235,46 @@ inline cvar_visual dropped_component = WRAP_VISUAL( "Dropped Component", false, 
 inline cvar_visual dropped_electrical = WRAP_VISUAL( "Dropped Electrical", false, 500, COL32( 231, 76, 60, 255 ) );
 inline cvar_visual dropped_fun = WRAP_VISUAL( "Dropped Fun", false, 500, COL32( 142, 68, 173, 255 ) );
 
+#define DEFINE_CONTEXT( Name, Variables ) \
+    struct Name##_context { \
+        Variables \
+    }; \
+    inline Name##_context Name;
+
+DEFINE_CONTEXT( local_player,
+	rust::base_player* entity;
+);
+
+DEFINE_CONTEXT( prediction_data,
+	float velocity;
+	float drag;
+	float gravity_modifier;
+	float initial_distance;
+);
+
+DEFINE_CONTEXT( recoil_modifier,
+	cvar enabled = cvar( H( "Recoil Modifier" ), true );
+	cvar_f yaw_scale = cvar_f( H( "Recoil Yaw Scale" ), 1.f );
+	cvar_f pitch_scale = cvar_f( H( "Recoil Pitch Scale" ), 1.f );
+);
+
+DEFINE_CONTEXT( spread_modifier,
+	cvar enabled = cvar( H( "Spread Modifier" ), true );
+	cvar_f scale = cvar_f( H( "Spread Scale" ), 1.f );
+);
+
+inline cvar instant_eoka = cvar( H( "Instant Eoka" ), false );
+
 inline cvar instant_loot = cvar( H( "Instant Loot" ), true );
 
 inline cvar no_attack_restrictions = cvar( H( "No Attack Restrictions" ), true );
 inline bool previous_admin_cheat;
 
 inline cvar spider_man = cvar( H( "Spider-Man" ), false );
+inline cvar no_fall_damage = cvar( H( "No Fall Damage" ), false );
 inline cvar infinite_jump = cvar( H( "Infinite Jump" ), false );
 inline cvar omnisprint = cvar( H( "Omnisprint" ), false );
+inline cvar on_ladder = cvar( H( "On Ladder" ), false );
 
 inline cvar_bind override_night = WRAP_BIND( "Override Night", true, trigger_type::toggle, 'K' );
 inline cvar_ui ambient_color = cvar_ui( H( "Ambient Color" ), COL32( 85, 50, 75, 255 ) );

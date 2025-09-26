@@ -293,7 +293,19 @@ namespace sentian {
 
 inline sentian::driver_api* driver_api;
 
-#define is_valid_ptr( x ) driver_api->is_valid_ptr( ( void* )x )
+inline bool is_valid_ptr( const void* address ) {
+	if ( !address )
+		return false;
+
+	return driver_api->is_valid_ptr( ( void* )address );
+}
+
+inline bool is_valid_ptr( const uintptr_t address ) {
+	if ( !address )
+		return false;
+
+	return driver_api->is_valid_ptr( ( void* )address );
+}
 
 namespace user_sdk {
 #pragma pack( push, 1 )

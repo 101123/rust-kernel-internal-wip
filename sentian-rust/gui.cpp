@@ -914,7 +914,7 @@ void gui::run() {
 
     switch ( current_tab ) {
         case tabs::combat:
-            tab( "Main", combat_subtabs::aimbot, &current_subtab[ tabs::combat ], subtabs_cursor, 19.f, true );
+            tab( "Aimbot", combat_subtabs::aimbot, &current_subtab[ tabs::combat ], subtabs_cursor, 19.f, true );
             break;
         case tabs::visuals:
             tab( "Loot", visual_subtabs::loot, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
@@ -937,6 +937,35 @@ void gui::run() {
     group_box right = group_box( rect( menu_bounds.x + 10.f + 260.f + 8.f, menu_bounds.y + 50.f, 260.f, 400.f ) );
 
     switch ( current_tab ) {
+        case tabs::combat: {
+            switch ( current_subtab[ tabs::combat ] ) {
+                case combat_subtabs::aimbot: {
+                    left.begin();
+                    left.end();
+
+                    right.begin();
+
+                    right.toggle( S( "Recoil modifier" ), &recoil_modifier.enabled );
+                    if ( recoil_modifier.enabled ) {
+                        right.slider( S( "Yaw scale" ), S( "%.2f" ), &recoil_modifier.yaw_scale, 0.f, 1.f );
+                        right.slider( S( "Pitch scale" ), S( "%.2f" ), &recoil_modifier.pitch_scale, 0.f, 1.f );
+                    }
+
+                    right.toggle( S( "Spread modifier" ), &spread_modifier.enabled );
+                    if ( spread_modifier.enabled ) {
+                        right.slider( S( "Spread scale" ), S( "%.2f" ), &spread_modifier.scale, 0.f, 1.f );
+                    }
+
+                    right.toggle( S( "Instant eoka" ), &instant_eoka );
+
+                    right.end();
+                    break;
+                }
+            }
+
+            break;
+        }
+
         case tabs::visuals: {
             switch ( current_subtab[ tabs::visuals ] ) {
                 case visual_subtabs::players: {
