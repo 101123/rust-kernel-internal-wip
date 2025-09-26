@@ -153,11 +153,24 @@ bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t
 			if ( !is_exception_hook( context, hook.corrupt, hook.original ) )
 				continue;
 
-			if ( ( hook.flags & hook_flags::post_compatible ) == hook_flags::post_compatible ) {
-				post_hook_impl( context );
+			if ( hook.type == hook_type::method_info ) {
+				hook.method_info.handler( context );
 			}
 
-			hook.handler( context );
+			else if ( hook.type == hook_type::vftable ) {
+				if ( hook.vftable.pre_handler ) {
+					hook.vftable.pre_handler( context );
+				}
+
+				if ( hook.vftable.post_handler ) {
+					// Call the original function
+					post_hook_impl( context );
+
+					// Call the post handler
+					hook.vftable.post_handler( context );
+				}
+			}
+
 			return true;
 		}
 	}

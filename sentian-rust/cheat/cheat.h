@@ -4,23 +4,30 @@
 
 struct _CONTEXT;
 
-namespace hook_flags {
+namespace hook_type {
 	enum : int {
 		method_info = 1,
 		vftable = 2,
-		post = 4
 	};
-
-	constexpr int post_compatible = vftable | post;
 }
 
 struct hook {
 	bool init;
-	int flags;
+	int type;
 	uintptr_t* value;
 	uintptr_t original;
 	uint64_t corrupt;
-	void( *handler )( _CONTEXT* );
+
+	union {
+		struct {
+			void( *handler )( _CONTEXT* );
+		} method_info;
+
+		struct {
+			void( *pre_handler )( _CONTEXT* );
+			void( *post_handler )( _CONTEXT* );
+		} vftable;
+	};
 };
 
 namespace bootstrap {
