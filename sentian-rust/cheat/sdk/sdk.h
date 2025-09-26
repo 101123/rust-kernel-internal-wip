@@ -970,6 +970,11 @@ namespace rust {
         static inline il2cpp_object* type_object_;
     };
 
+    class input_state {
+    public:
+
+    };
+
     class base_player : public base_combat_entity {
     public:
         FIELD( rust::player_model*, player_model, Offsets::BasePlayer::playerModel );

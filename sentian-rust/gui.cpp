@@ -1133,6 +1133,7 @@ void gui::run() {
 
                     right.toggle( "Override night", &override_night.enabled );
                     right.color_picker( &ambient_color, false );
+                    right.keybind( &override_night.key );
 
                     if ( override_night.enabled ) {
                         right.slider( "Ambient multiplier", "%.2fx", &ambient_multiplier, 0.f, 3.f );

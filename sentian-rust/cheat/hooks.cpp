@@ -161,6 +161,13 @@ void item_icon_try_to_move_hook( rust::item_icon* item_icon ) {
 void client_on_client_disconnected_hook( rust::client* client, sys::string* reason ) {
 	entity_manager::invalidate_cache();
 	glow_manager::invalidate_cache();
+
+	local_player = nullptr;
+	target_player = nullptr;
+}
+
+void base_player_client_input_hook( rust::base_player* base_player, rust::input_state* state ) {
+	local_player = base_player;
 }
 
 void hook_handlers::network_client_create_networkable( _CONTEXT* context ) {
@@ -294,4 +301,8 @@ void hook_handlers::item_icon_try_to_move( _CONTEXT* context ) {
 
 void hook_handlers::client_on_client_disconnected( _CONTEXT* context ) {
 	client_on_client_disconnected_hook( ( rust::client* )context->Rcx, ( sys::string* )context->Rdx );
+}
+
+void hook_handlers::base_player_client_input( _CONTEXT* context ) {
+	base_player_client_input_hook( ( rust::base_player* )context->Rcx, ( rust::input_state* )context->Rdx );
 }

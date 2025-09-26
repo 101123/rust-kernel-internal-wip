@@ -221,6 +221,15 @@ bool resolve_hooks() {
 		.handler = hook_handlers::client_on_client_disconnected
 	};
 
+	hook base_player_client_input_hook {
+		.init = false,
+		.flags = hook_flags::vftable,
+		.value = VFUNC( rust::base_player, Offsets::BasePlayer::ClientInput_vtableoff ),
+		.original = 0ull,
+		.corrupt = generate_corrupt_value(),
+		.handler = hook_handlers::base_player_client_input
+	};
+
 	auto& hooks = hook_manager::hooks;
 
 	hooks.add( network_client_create_networkable_hook );
@@ -231,6 +240,7 @@ bool resolve_hooks() {
 	hooks.add( item_icon_try_to_move_hook );
 	hooks.add( protobuf_player_tick_write_to_stream_delta_hook );
 	hooks.add( client_on_client_disconnected_hook );
+	hooks.add( base_player_client_input_hook );
 
 	return true;
 }
