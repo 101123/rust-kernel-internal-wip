@@ -245,7 +245,7 @@ DEFINE_CONTEXT( local_player,
 	rust::base_player* entity;
 );
 
-DEFINE_CONTEXT( weapon_data,
+DEFINE_CONTEXT( held_weapon,
 	struct {
 		float projectile_velocity_scale;
 		float aim_sway_scale;
