@@ -208,50 +208,59 @@ void cache_held_entity( rust::base_player* base_player ) {
 	if ( !is_valid_ptr( held_entity ) )
 		return;
 
-	unity::game_object* container = nullptr;
+	rust::item_definition* projectile_item_info = nullptr;
+	float velocity_scale = 1.f;
 
 	if ( auto base_projectile = held_entity->as<rust::base_projectile>() ) {
-		float projectile_velocity_scale = 1.f, recoil_scale = 1.f, sight_aim_cone_scale = 1.f, hip_aim_cone_scale = 1.f;
+		if ( base_projectile->cached_mod_hash != weapon_data.mods.hash ) {
+			sys::list<rust::base_entity*>* children_list = base_projectile->children;
 
-		sys::list<rust::base_entity*>* children_list = base_projectile->children;
+			if ( is_valid_ptr( children_list ) ) {
+				sys::array<rust::base_entity*>* children = children_list->items;
 
-		if ( is_valid_ptr( children_list ) ) {
-			sys::array<rust::base_entity*>* children = children_list->items;
+				if ( is_valid_ptr( children ) ) {
+					float projectile_velocity_scale = 1.f, recoil_scale = 1.f, sight_aim_cone_scale = 1.f, hip_aim_cone_scale = 1.f;
 
-			if ( is_valid_ptr( children ) ) {
-				for ( size_t i = 0; i < children_list->size; i++ ) {
-					rust::base_entity* child = children->buffer[ i ];
-					if ( !is_valid_ptr( child ) )
-						continue;
+					for ( size_t i = 0; i < children_list->size; i++ ) {
+						rust::base_entity* child = children->buffer[ i ];
+						if ( !is_valid_ptr( child ) )
+							continue;
 
-					auto projectile_weapon_mod = child->as<rust::projectile_weapon_mod>();
-					if ( !projectile_weapon_mod )
-						continue;
+						auto projectile_weapon_mod = child->as<rust::projectile_weapon_mod>();
+						if ( !projectile_weapon_mod )
+							continue;
 
-					if ( projectile_weapon_mod->needs_on_for_effects && 
-						!projectile_weapon_mod->has_flag( rust::base_entity::flag::on ) )
-						continue;
+						if ( projectile_weapon_mod->needs_on_for_effects &&
+							!projectile_weapon_mod->has_flag( rust::base_entity::flag::on ) )
+							continue;
 
-					rust::projectile_weapon_mod::modifier projectile_velocity = projectile_weapon_mod->projectile_velocity;
-					rust::projectile_weapon_mod::modifier recoil = projectile_weapon_mod->recoil;
-					rust::projectile_weapon_mod::modifier sight_aim_cone = projectile_weapon_mod->sight_aim_cone;
-					rust::projectile_weapon_mod::modifier hip_aim_cone = projectile_weapon_mod->hip_aim_cone;
+						rust::projectile_weapon_mod::modifier projectile_velocity = projectile_weapon_mod->projectile_velocity;
+						rust::projectile_weapon_mod::modifier recoil = projectile_weapon_mod->recoil;
+						rust::projectile_weapon_mod::modifier sight_aim_cone = projectile_weapon_mod->sight_aim_cone;
+						rust::projectile_weapon_mod::modifier hip_aim_cone = projectile_weapon_mod->hip_aim_cone;
 
-					if ( projectile_velocity.enabled ) {
-						projectile_velocity_scale *= projectile_velocity.scalar;
+						if ( projectile_velocity.enabled ) {
+							projectile_velocity_scale *= projectile_velocity.scalar;
+						}
+
+						if ( recoil.enabled ) {
+							recoil_scale *= recoil.scalar;
+						}
+
+						if ( sight_aim_cone.enabled ) {
+							sight_aim_cone_scale *= sight_aim_cone.scalar;
+						}
+
+						if ( hip_aim_cone.enabled ) {
+							hip_aim_cone_scale *= hip_aim_cone.scalar;
+						}
 					}
 
-					if ( recoil.enabled ) {
-						recoil_scale *= recoil.scalar;
-					}
-
-					if ( sight_aim_cone.enabled ) {
-						sight_aim_cone_scale *= sight_aim_cone.scalar;
-					}
-
-					if ( hip_aim_cone.enabled ) {
-						hip_aim_cone_scale *= hip_aim_cone.scalar;
-					}
+					weapon_data.mods.projectile_velocity_scale = projectile_velocity_scale;
+					weapon_data.mods.recoil_scale = recoil_scale;
+					weapon_data.mods.sight_aim_cone_scale = sight_aim_cone_scale;
+					weapon_data.mods.hip_aim_cone_scale = hip_aim_cone_scale;
+					weapon_data.mods.hash = base_projectile->cached_mod_hash;
 				}
 			}
 		}
@@ -264,7 +273,8 @@ void cache_held_entity( rust::base_player* base_player ) {
 		if ( !is_valid_ptr( ammo_type ) )
 			return;
 
-		container = ammo_type->get_game_object();
+		projectile_item_info = ammo_type;
+		velocity_scale = base_projectile->projectile_velocity_scale * weapon_data.mods.projectile_velocity_scale;
 	}
 
 	else if ( auto base_melee = held_entity->as<rust::base_melee>() ) {
@@ -272,13 +282,17 @@ void cache_held_entity( rust::base_player* base_player ) {
 		if ( !is_valid_ptr( info ) )
 			return;
 
-		container = info->get_game_object();
+		projectile_item_info = info;
 	}
 
-	if ( !is_valid_ptr( container ) )
+	if ( !projectile_item_info || ( held_entity->prefab_id == weapon_data.prefab_id && projectile_item_info->item_id == weapon_data.item_id ) )
 		return;
 
-	auto item_mod_projectile = container->get_component<rust::item_mod_projectile>();
+	unity::game_object* item_mod_projectile_container = projectile_item_info->get_game_object();
+	if ( !is_valid_ptr( item_mod_projectile_container ) )
+		return;
+
+	auto item_mod_projectile = item_mod_projectile_container->get_component<rust::item_mod_projectile>();
 	if ( !is_valid_ptr( item_mod_projectile ) )
 		return;
 
@@ -307,6 +321,13 @@ void cache_held_entity( rust::base_player* base_player ) {
 	auto projectile = projectile_container->get_component<rust::projectile>();
 	if ( !is_valid_ptr( projectile ) )
 		return;
+
+	weapon_data.velocity = item_mod_projectile->projectile_velocity * velocity_scale;
+	weapon_data.drag = projectile->drag;
+	weapon_data.gravity_modifier = projectile->gravity_modifier;
+	weapon_data.initial_distance = projectile->initial_distance;
+	weapon_data.prefab_id = held_entity->prefab_id;
+	weapon_data.item_id = projectile_item_info->item_id;
 }
 
 void base_player_client_input_pre_hook( rust::base_player* base_player, rust::input_state* state ) {

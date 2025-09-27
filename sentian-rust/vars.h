@@ -245,11 +245,23 @@ DEFINE_CONTEXT( local_player,
 	rust::base_player* entity;
 );
 
-DEFINE_CONTEXT( prediction_data,
+DEFINE_CONTEXT( weapon_data,
+	struct {
+		float projectile_velocity_scale;
+		float recoil_scale;
+		float sight_aim_cone_scale;
+		float hip_aim_cone_scale;
+
+		uint32_t hash;
+	} mods;
+
 	float velocity;
 	float drag;
 	float gravity_modifier;
 	float initial_distance;
+
+	uint32_t prefab_id;
+	int item_id;
 );
 
 DEFINE_CONTEXT( recoil_modifier,

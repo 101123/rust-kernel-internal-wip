@@ -1394,6 +1394,29 @@ namespace rust {
 
     class projectile {
     public:
+        FIELD( vector3, initial_velocity, Offsets::Projectile::initialVelocity );
+        FIELD( float, drag, Offsets::Projectile::drag );
+        FIELD( float, gravity_modifier, Offsets::Projectile::gravityModifier );
+        FIELD( float, thickness, Offsets::Projectile::thickness );
+        FIELD( float, initial_distance, Offsets::Projectile::initialDistance );
+        FIELD( vector3, swim_scale, Offsets::Projectile::swimScale );
+        FIELD( vector3, swim_speed, Offsets::Projectile::swimSpeed );
+        FIELD( base_player*, owner, Offsets::Projectile::owner );
+        FIELD( projectile*, source_projectile_prefab, Offsets::Projectile::sourceProjectilePrefab );
+        // FIELD( rust::hit_test*, hit_test );
+        FIELD( float, integrity, Offsets::Projectile::integrity );
+        FIELD( float, max_distance, Offsets::Projectile::maxDistance );
+        FIELD( vector3, current_velocity, Offsets::Projectile::currentVelocity );
+        FIELD( vector3, current_position, Offsets::Projectile::currentPosition );
+        FIELD( float, traveled_distance, Offsets::Projectile::traveledDistance );
+        FIELD( float, traveled_time, Offsets::Projectile::traveledTime );
+        FIELD( float, launch_time, Offsets::Projectile::launchTime );
+        FIELD( vector3, previous_position, Offsets::Projectile::previousPosition );
+        FIELD( vector3, previous_velocity, Offsets::Projectile::previousVelocity );
+        FIELD( float, previous_traveled_time, Offsets::Projectile::previousTraveledTime );
+        // FIELD( int, projectile_id, Offsets::Projectile::projectileID );
+        FIELD( vector3, sent_position, Offsets::Projectile::sentPosition );
+
         static inline il2cpp_object* type_object_;
     };
 
@@ -1464,6 +1487,10 @@ namespace rust {
         FIELD( float, projectile_spread, Offsets::ItemModProjectile::projectileSpread );
         FIELD( float, projectile_velocity, Offsets::ItemModProjectile::projectileVelocity );
         FIELD( float, projectile_velocity_spread, Offsets::ItemModProjectile::projectileVelocitySpread );
+
+        float get_max_velocity() {
+            return projectile_velocity_spread + projectile_velocity;
+        }
 
         static inline il2cpp_object* type_object_;
     };

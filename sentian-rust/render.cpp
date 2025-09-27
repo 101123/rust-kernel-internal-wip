@@ -427,6 +427,18 @@ void draw_esp() {
 		.set_font( fonts::verdana )
 		.set_vertical_spacing( 12.f )
 		.set_flags( text_flags::none )
+		.draw_text( format_string( "[%.2f %.2f %.2f %.2f] %.2f %.2f %.2f %.2f (%u)",
+			weapon_data.velocity,
+			weapon_data.drag,
+			weapon_data.gravity_modifier,
+			weapon_data.initial_distance,
+			weapon_data.mods.projectile_velocity_scale, 
+			weapon_data.mods.recoil_scale,
+			weapon_data.mods.sight_aim_cone_scale,
+			weapon_data.mods.hip_aim_cone_scale,
+			weapon_data.mods.hash ),
+			COL32_WHITE )
+
 		.draw_text( format_string( "%d entities", entity_collection.entities.size() ), COL32_WHITE )
 		.draw_text( format_string( "%d combat entities", entity_collection.combat_entities.size() ), COL32_WHITE )
 		.draw_text( format_string( "%d dropped items", entity_collection.dropped_items.size() ), COL32_WHITE )
