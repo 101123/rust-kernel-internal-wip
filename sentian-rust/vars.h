@@ -275,6 +275,11 @@ DEFINE_CONTEXT( spread_modifier,
 	cvar_f scale = cvar_f( H( "Spread Scale" ), 1.f );
 );
 
+DEFINE_CONTEXT( thick_bullet,
+	cvar enabled = cvar( H( "Thick Bullet" ), false );
+	cvar_f thickness = cvar_f( H( "Thickness" ), 1.f );
+);
+
 inline cvar instant_eoka = cvar( H( "Instant Eoka" ), false );
 
 inline cvar instant_loot = cvar( H( "Instant Loot" ), true );

@@ -41,6 +41,73 @@ void features::bright_night() {
 	}
 }
 
-void features::weapon_modifier() {
+struct recoil_data {
+	uint32_t prefab_id;
+	float yaw_min;
+	float yaw_max;
+	float pitch_min;
+	float pitch_max;
+};
 
+util::array<recoil_data, 64> weapon_recoil;
+
+const recoil_data* get_recoil_data( rust::base_projectile* base_projectile ) {
+	for ( const auto& recoil_data : weapon_recoil ) {
+		if ( recoil_data.prefab_id == base_projectile->prefab_id ) {
+			return &recoil_data;
+		}
+	}
+	
+	return nullptr;
+}
+
+void features::weapon_modifiers( rust::base_projectile* base_projectile ) {
+	rust::recoil_properties* recoil = base_projectile->is<rust::flint_strike_weapon>() ?
+		( ( rust::flint_strike_weapon* )base_projectile )->strike_recoil : base_projectile->recoil;
+
+	if ( is_valid_ptr( recoil ) ) {
+		recoil = is_valid_ptr( recoil->new_recoil_override ) ? recoil->new_recoil_override : recoil;
+
+		const recoil_data* recoil_data = get_recoil_data( base_projectile );
+
+		if ( !recoil_data ) {
+			recoil_data = weapon_recoil.add( { base_projectile->prefab_id,
+				recoil->recoil_yaw_min, recoil->recoil_yaw_max, recoil->recoil_pitch_min, recoil->recoil_pitch_max } );
+		}
+
+		// What the fuck?
+		if ( !recoil_data )
+			return;
+
+		float yaw_modifier = weapon_data.mods.recoil_scale;
+		float pitch_modifier = weapon_data.mods.recoil_scale;
+
+		if ( recoil_modifier.enabled ) {
+			yaw_modifier *= recoil_modifier.yaw_scale;
+			pitch_modifier *= recoil_modifier.pitch_scale;
+		}
+
+		recoil->recoil_yaw_min = recoil_data->yaw_min * yaw_modifier;
+		recoil->recoil_yaw_max = recoil_data->yaw_max * yaw_modifier;
+		recoil->recoil_pitch_min = recoil_data->pitch_min * pitch_modifier;
+		recoil->recoil_pitch_max = recoil_data->pitch_max * pitch_modifier;
+	}
+
+	// TODO: Bow spread comes from BaseProjectile.aimCone
+	if ( base_projectile->is<rust::bow_weapon>() ) {
+
+	}
+
+	else {
+		float sight_aim_cone_scale = weapon_data.mods.sight_aim_cone_scale;
+		float hip_aim_cone_scale = weapon_data.mods.hip_aim_cone_scale;
+
+		if ( spread_modifier.enabled ) {
+			sight_aim_cone_scale *= spread_modifier.scale;
+			hip_aim_cone_scale *= spread_modifier.scale;
+		}
+
+		base_projectile->sight_aim_cone_scale = sight_aim_cone_scale;
+		base_projectile->hip_aim_cone_scale = hip_aim_cone_scale;
+	}
 }

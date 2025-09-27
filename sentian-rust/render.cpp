@@ -267,7 +267,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 
 		if ( visuals.held_item && cached_player.active_item_idx != -1 ) {
 			if ( visuals.held_item_text ) {
-				renderer::draw_text( bounds.left + half, bounds.bottom + offset, fonts::small_fonts, text_flags::centered, visuals.held_item_color, cached_player.belt_items[ cached_player.active_item_idx ].name );
+				renderer::draw_text( bounds.left + half, bounds.bottom + offset + 1.f, fonts::small_fonts, text_flags::centered, visuals.held_item_color, cached_player.belt_items[ cached_player.active_item_idx ].name );
 				offset += 8.f + 1.f;
 			}
 		}

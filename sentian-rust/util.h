@@ -52,7 +52,7 @@ namespace util {
 				return &m_buffer[ index ];
 			}
 
-			return nullptr;;
+			return nullptr;
 		}
 
 	private:

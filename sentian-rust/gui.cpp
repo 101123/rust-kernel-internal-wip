@@ -956,6 +956,11 @@ void gui::run() {
                         right.slider( S( "Spread scale" ), S( "%.2f" ), &spread_modifier.scale, 0.f, 1.f );
                     }
 
+                    right.toggle( "Thick bullet", &thick_bullet.enabled );
+                    if ( thick_bullet.enabled ) {
+                        right.slider( S( "Thickness" ), S( "%.2fm" ), &thick_bullet.thickness, 0.05f, 1.f );
+                    }
+
                     right.toggle( S( "Instant eoka" ), &instant_eoka );
 
                     right.end();

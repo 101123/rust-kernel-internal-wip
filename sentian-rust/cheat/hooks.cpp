@@ -6,6 +6,7 @@
 #include "cheat/entities.h"
 #include "cheat/glow.h"
 #include "gui.h"
+#include "features.h"
 
 #include <cstddef>
 
@@ -161,7 +162,7 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 	model_state->set_flag( rust::model_state::flag::sprinting, true );
 }
 
-void protobuf_projectile_shoot_write_to_stream_hook( sys::list<rust::projectile_shoot::projectile*>* server_projectiles_list, sys::list<rust::projectile*>* created_projectiles_list ) {
+void protobuf_projectile_shoot_write_to_stream_pre_hook( sys::list<rust::projectile_shoot::projectile*>* server_projectiles_list, sys::list<rust::projectile*>* created_projectiles_list ) {
 	if ( !is_valid_ptr( created_projectiles_list ) || !is_valid_ptr( created_projectiles_list->items ) )
 		return;
 
@@ -182,7 +183,17 @@ void protobuf_projectile_shoot_write_to_stream_hook( sys::list<rust::projectile_
 		if ( !is_valid_ptr( client_projectile ) )
 			continue;
 
-		LOG( "Server: %p, Client: %p\n", server_projectile, client_projectile );
+		rust::projectile* source_projectile = client_projectile->source_projectile_prefab;
+
+		if ( is_valid_ptr( source_projectile ) ) {
+			float thickness = source_projectile->thickness;
+
+			if ( thick_bullet.enabled ) {
+				thickness = thick_bullet.thickness;
+			}
+
+			client_projectile->thickness = thickness;
+		}
 	}
 }
 
@@ -199,15 +210,7 @@ void client_on_client_disconnected_pre_hook( rust::client* client, sys::string* 
 	local_player.entity = nullptr;
 }
 
-void cache_held_entity( rust::base_player* base_player ) {
-	rust::item* held_item = base_player->get_held_item();
-	if ( !held_item )
-		return;
-
-	rust::base_entity* held_entity = held_item->held_entity;
-	if ( !is_valid_ptr( held_entity ) )
-		return;
-
+void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) {
 	rust::item_definition* projectile_item_info = nullptr;
 	float velocity_scale = 1.f;
 
@@ -288,11 +291,11 @@ void cache_held_entity( rust::base_player* base_player ) {
 	if ( !projectile_item_info || ( held_entity->prefab_id == weapon_data.prefab_id && projectile_item_info->item_id == weapon_data.item_id ) )
 		return;
 
-	unity::game_object* item_mod_projectile_container = projectile_item_info->get_game_object();
-	if ( !is_valid_ptr( item_mod_projectile_container ) )
+	unity::game_object* container = projectile_item_info->get_game_object();
+	if ( !is_valid_ptr( container ) )
 		return;
 
-	auto item_mod_projectile = item_mod_projectile_container->get_component<rust::item_mod_projectile>();
+	auto item_mod_projectile = container->get_component<rust::item_mod_projectile>();
 	if ( !is_valid_ptr( item_mod_projectile ) )
 		return;
 
@@ -346,7 +349,19 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 		}
 	}
 
-	cache_held_entity( base_player );
+	rust::item* held_item = base_player->get_held_item();
+
+	if ( is_valid_ptr( held_item ) ) {
+		rust::base_entity* held_entity = held_item->held_entity;
+
+		if ( is_valid_ptr( held_entity ) ) {
+			cache_held_entity( held_item, held_entity );
+
+			if ( auto base_projectile = held_entity->as<rust::base_projectile>() ) {
+				features::weapon_modifiers( base_projectile );
+			}
+		}
+	}
 }
 
 void hook_handlers::network_client_create_networkable( _CONTEXT* context ) {
@@ -359,14 +374,8 @@ void hook_handlers::network_client_create_networkable( _CONTEXT* context ) {
 				return false;
 
 			unity::transform* transform = value->get_transform();
-			if ( is_valid_ptr( transform ) ) {
-				vector3 position = transform->get_position();
-
-				char buffer[ 32 ] = {};
-				snprintf( buffer, 32, "Start Position: %.2f %.2f %.2f\n", position.x, position.y, position.z );
-
-				LOG( buffer );
-			}
+			if ( !is_valid_ptr( transform ) )
+				return false;
 
 			// We don't want any entities with a valid networkable object as we're hooking the creation of it
 			return !is_valid_ptr( value->net );
@@ -462,7 +471,7 @@ void hook_handlers::pre_protobuf_projectile_shoot_write_to_stream( _CONTEXT* con
 		if ( !search.resolved() )
 			return;
 
-		protobuf_projectile_shoot_write_to_stream_hook( projectile_shoot->projectiles, search.get( context ) );
+		protobuf_projectile_shoot_write_to_stream_pre_hook( projectile_shoot->projectiles, search.get( context ) );
 	}
 
 	else if ( held_entity->as<rust::base_melee>() ) {
@@ -487,5 +496,7 @@ void hook_handlers::pre_client_on_client_disconnected( _CONTEXT* context ) {
 }
 
 void hook_handlers::pre_base_player_client_input( _CONTEXT* context ) {
+	game_input.update();
+
 	base_player_client_input_pre_hook( ( rust::base_player* )context->Rcx, ( rust::input_state* )context->Rdx );
 }
