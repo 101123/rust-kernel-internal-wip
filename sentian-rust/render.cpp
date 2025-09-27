@@ -427,12 +427,13 @@ void draw_esp() {
 		.set_font( fonts::verdana )
 		.set_vertical_spacing( 12.f )
 		.set_flags( text_flags::none )
-		.draw_text( format_string( "[%.2f %.2f %.2f %.2f] %.2f %.2f %.2f %.2f (%u)",
+		.draw_text( format_string( "Velocity: %.2f, Drag: %.2f, Gravity Modifier: %.2f, Initial Distance: %.2f, Projectile Velocity Scale: %.2f, Aim Sway Scale: %.2f, Recoil Scale: %.2f, Sight Aim Cone Scale: %.2f, Hip Aim Cone Scale: %.2f, Hash: %u",
 			weapon_data.velocity,
 			weapon_data.drag,
 			weapon_data.gravity_modifier,
 			weapon_data.initial_distance,
 			weapon_data.mods.projectile_velocity_scale, 
+			weapon_data.mods.aim_sway_scale,
 			weapon_data.mods.recoil_scale,
 			weapon_data.mods.sight_aim_cone_scale,
 			weapon_data.mods.hip_aim_cone_scale,

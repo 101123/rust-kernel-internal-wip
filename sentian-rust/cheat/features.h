@@ -7,5 +7,5 @@ namespace rust {
 namespace features {
 	void graphics();
 	void bright_night();
-	void weapon_modifiers( rust::base_projectile* base_projectile );
+	void weapon_modifiers( rust::base_projectile* weapon );
 }

@@ -41,63 +41,65 @@ void features::bright_night() {
 	}
 }
 
-struct recoil_data {
+struct cached_weapon_data {
 	uint32_t prefab_id;
+	bool automatic;
+	float aim_sway;
+	float aim_cone;
 	float yaw_min;
 	float yaw_max;
 	float pitch_min;
 	float pitch_max;
 };
 
-util::array<recoil_data, 64> weapon_recoil;
+util::array<cached_weapon_data, 64> weapon_data_cache;
 
-const recoil_data* get_recoil_data( rust::base_projectile* base_projectile ) {
-	for ( const auto& recoil_data : weapon_recoil ) {
-		if ( recoil_data.prefab_id == base_projectile->prefab_id ) {
-			return &recoil_data;
+const cached_weapon_data* get_weapon_data( rust::base_projectile* base_projectile ) {
+	for ( const auto& weapon_data : weapon_data_cache ) {
+		if ( weapon_data.prefab_id == base_projectile->prefab_id ) {
+			return &weapon_data;
 		}
 	}
 	
 	return nullptr;
 }
 
-void features::weapon_modifiers( rust::base_projectile* base_projectile ) {
-	rust::recoil_properties* recoil = base_projectile->is<rust::flint_strike_weapon>() ?
-		( ( rust::flint_strike_weapon* )base_projectile )->strike_recoil : base_projectile->recoil;
+void features::weapon_modifiers( rust::base_projectile* weapon ) {
+	rust::recoil_properties* recoil = weapon->is<rust::flint_strike_weapon>() ?
+		( ( rust::flint_strike_weapon* )weapon )->strike_recoil : weapon->recoil;
 
-	if ( is_valid_ptr( recoil ) ) {
-		recoil = is_valid_ptr( recoil->new_recoil_override ) ? recoil->new_recoil_override : recoil;
+	if ( !is_valid_ptr( recoil ) )
+		return;
 
-		const recoil_data* recoil_data = get_recoil_data( base_projectile );
+	recoil = is_valid_ptr( recoil->new_recoil_override ) ? recoil->new_recoil_override : recoil;
 
-		if ( !recoil_data ) {
-			recoil_data = weapon_recoil.add( { base_projectile->prefab_id,
-				recoil->recoil_yaw_min, recoil->recoil_yaw_max, recoil->recoil_pitch_min, recoil->recoil_pitch_max } );
-		}
+	const cached_weapon_data* cached_weapon_data = get_weapon_data( weapon );
 
-		// What the fuck?
-		if ( !recoil_data )
-			return;
-
-		float yaw_modifier = weapon_data.mods.recoil_scale;
-		float pitch_modifier = weapon_data.mods.recoil_scale;
-
-		if ( recoil_modifier.enabled ) {
-			yaw_modifier *= recoil_modifier.yaw_scale;
-			pitch_modifier *= recoil_modifier.pitch_scale;
-		}
-
-		recoil->recoil_yaw_min = recoil_data->yaw_min * yaw_modifier;
-		recoil->recoil_yaw_max = recoil_data->yaw_max * yaw_modifier;
-		recoil->recoil_pitch_min = recoil_data->pitch_min * pitch_modifier;
-		recoil->recoil_pitch_max = recoil_data->pitch_max * pitch_modifier;
+	if ( !cached_weapon_data ) {
+		cached_weapon_data = weapon_data_cache.add( {
+			weapon->prefab_id, weapon->automatic, weapon->aim_sway, weapon->aim_cone, recoil->recoil_yaw_min, recoil->recoil_yaw_max, recoil->recoil_pitch_min, recoil->recoil_pitch_max, } );
 	}
 
-	// TODO: Bow spread comes from BaseProjectile.aimCone
-	if ( base_projectile->is<rust::bow_weapon>() ) {
+	// What the fuck?
+	if ( !cached_weapon_data )
+		return;
 
+	float yaw_scale = recoil_modifier.enabled ? recoil_modifier.yaw_scale.value : 1.f;
+	float pitch_scale = recoil_modifier.enabled ? recoil_modifier.pitch_scale.value : 1.f;
+
+	// Recoil properties are static values, so we can just multiply the default values by our scale
+	recoil->recoil_yaw_min = cached_weapon_data->yaw_min * yaw_scale;
+	recoil->recoil_yaw_max = cached_weapon_data->yaw_max * yaw_scale;
+	recoil->recoil_pitch_min = cached_weapon_data->pitch_min * pitch_scale;
+	recoil->recoil_pitch_max = cached_weapon_data->pitch_max * pitch_scale;
+
+	// Bow spread is derived from BaseProjectile.aimCone, which is static so we can do the same thing
+	if ( weapon->is<rust::bow_weapon>() ) {
+		weapon->aim_cone = cached_weapon_data->aim_cone *
+			( spread_modifier.enabled ? spread_modifier.scale.value : 1.f );
 	}
 
+	// BaseProjectile.sightAimConeScale/hipAimConeScale is the absolute spread scale derived from the attachments, and is dynamic, so to get the starting scale, you must calculate it 
 	else {
 		float sight_aim_cone_scale = weapon_data.mods.sight_aim_cone_scale;
 		float hip_aim_cone_scale = weapon_data.mods.hip_aim_cone_scale;
@@ -107,7 +109,13 @@ void features::weapon_modifiers( rust::base_projectile* base_projectile ) {
 			hip_aim_cone_scale *= spread_modifier.scale;
 		}
 
-		base_projectile->sight_aim_cone_scale = sight_aim_cone_scale;
-		base_projectile->hip_aim_cone_scale = hip_aim_cone_scale;
+		// Don't multiply by default values as these are absolute
+		weapon->sight_aim_cone_scale = sight_aim_cone_scale;
+		weapon->hip_aim_cone_scale = hip_aim_cone_scale;
 	}
+	
+	weapon->aim_sway = cached_weapon_data->aim_sway * 
+		( sway_modifier.enabled ? sway_modifier.scale.value : 1.f );
+
+	weapon->automatic = force_automatic ? true : cached_weapon_data->automatic;
 }

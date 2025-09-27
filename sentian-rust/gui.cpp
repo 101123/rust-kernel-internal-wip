@@ -956,6 +956,13 @@ void gui::run() {
                         right.slider( S( "Spread scale" ), S( "%.2f" ), &spread_modifier.scale, 0.f, 1.f );
                     }
 
+                    right.toggle( S( "Sway modifier" ), &sway_modifier.enabled );
+                    if ( sway_modifier.enabled ) {
+                        right.slider( S( "Sway scale" ), S( "%.2f" ), &sway_modifier.scale, 0.f, 1.f );
+                    }
+
+                    right.toggle( S( "Force automatic" ), &force_automatic );
+
                     right.toggle( "Thick bullet", &thick_bullet.enabled );
                     if ( thick_bullet.enabled ) {
                         right.slider( S( "Thickness" ), S( "%.2fm" ), &thick_bullet.thickness, 0.05f, 1.f );

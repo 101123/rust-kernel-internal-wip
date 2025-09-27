@@ -19,12 +19,12 @@ struct cvar_t {
 	void operator=( const cvar_t& ) = delete;
 	void operator=( cvar_t& ) = delete;
 
-	cvar_t( uint64_t hash, T value = 0 ) : m_hash( hash ), m_value( value ), m_default_value( value ) {
+	cvar_t( uint64_t hash, T value = 0 ) : hash( hash ), value( value ), default_value( value ) {
 		s_instances[ s_count++ ] = this;
 	}
 
 	T* operator&() {
-		return &m_value;
+		return &value;
 	}
 
 	cvar_t* operator*() {
@@ -32,16 +32,16 @@ struct cvar_t {
 	}
 
 	operator T() const {
-		return m_value;
+		return value;
 	}
 
-	T operator=( T value ) {
-		return m_value = value;
+	T operator=( T new_value ) {
+		return value = new_value;
 	}
 
-	uint64_t m_hash;
-	T m_value;
-	T m_default_value;
+	uint64_t hash;
+	T value;
+	T default_value;
 };
 
 using cvar = cvar_t<bool>;
@@ -248,6 +248,7 @@ DEFINE_CONTEXT( local_player,
 DEFINE_CONTEXT( weapon_data,
 	struct {
 		float projectile_velocity_scale;
+		float aim_sway_scale;
 		float recoil_scale;
 		float sight_aim_cone_scale;
 		float hip_aim_cone_scale;
@@ -275,10 +276,17 @@ DEFINE_CONTEXT( spread_modifier,
 	cvar_f scale = cvar_f( H( "Spread Scale" ), 1.f );
 );
 
+DEFINE_CONTEXT( sway_modifier,
+	cvar enabled = cvar( H( "Sway Modifier" ), true );
+	cvar_f scale = cvar_f( H( "Sway Scale" ), 1.f );
+);
+
 DEFINE_CONTEXT( thick_bullet,
 	cvar enabled = cvar( H( "Thick Bullet" ), false );
 	cvar_f thickness = cvar_f( H( "Thickness" ), 1.f );
 );
+
+inline cvar force_automatic = cvar( H( "Force Automatic" ), false );
 
 inline cvar instant_eoka = cvar( H( "Instant Eoka" ), false );
 

@@ -222,7 +222,7 @@ void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) 
 				sys::array<rust::base_entity*>* children = children_list->items;
 
 				if ( is_valid_ptr( children ) ) {
-					float projectile_velocity_scale = 1.f, recoil_scale = 1.f, sight_aim_cone_scale = 1.f, hip_aim_cone_scale = 1.f;
+					float projectile_velocity_scale = 1.f, aim_sway_scale = 1.f, recoil_scale = 1.f, sight_aim_cone_scale = 1.f, hip_aim_cone_scale = 1.f;
 
 					for ( size_t i = 0; i < children_list->size; i++ ) {
 						rust::base_entity* child = children->buffer[ i ];
@@ -238,12 +238,17 @@ void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) 
 							continue;
 
 						rust::projectile_weapon_mod::modifier projectile_velocity = projectile_weapon_mod->projectile_velocity;
+						rust::projectile_weapon_mod::modifier aim_sway = projectile_weapon_mod->aim_sway;
 						rust::projectile_weapon_mod::modifier recoil = projectile_weapon_mod->recoil;
 						rust::projectile_weapon_mod::modifier sight_aim_cone = projectile_weapon_mod->sight_aim_cone;
 						rust::projectile_weapon_mod::modifier hip_aim_cone = projectile_weapon_mod->hip_aim_cone;
 
 						if ( projectile_velocity.enabled ) {
 							projectile_velocity_scale *= projectile_velocity.scalar;
+						}
+
+						if ( aim_sway.enabled ) {
+							aim_sway_scale *= aim_sway.scalar;
 						}
 
 						if ( recoil.enabled ) {
@@ -260,6 +265,7 @@ void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) 
 					}
 
 					weapon_data.mods.projectile_velocity_scale = projectile_velocity_scale;
+					weapon_data.mods.aim_sway_scale = aim_sway_scale;
 					weapon_data.mods.recoil_scale = recoil_scale;
 					weapon_data.mods.sight_aim_cone_scale = sight_aim_cone_scale;
 					weapon_data.mods.hip_aim_cone_scale = hip_aim_cone_scale;

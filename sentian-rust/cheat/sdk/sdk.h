@@ -1290,10 +1290,10 @@ namespace rust {
         FIELD( recoil_properties*, recoil, Offsets::BaseProjectile::recoil );;
         FIELD( float, aim_cone, Offsets::BaseProjectile::aimCone );
         FIELD( uint32_t, cached_mod_hash, Offsets::BaseProjectile::cachedModHash );
-        FIELD( float, hip_aim_cone_offset, Offsets::BaseProjectile::hipAimConeOffset );
-        FIELD( float, hip_aim_cone_scale, Offsets::BaseProjectile::hipAimConeScale );
-        FIELD( float, sight_aim_cone_offset, Offsets::BaseProjectile::sightAimConeOffset );
         FIELD( float, sight_aim_cone_scale, Offsets::BaseProjectile::sightAimConeScale );
+        FIELD( float, sight_aim_cone_offset, Offsets::BaseProjectile::sightAimConeOffset );
+        FIELD( float, hip_aim_cone_scale, Offsets::BaseProjectile::hipAimConeScale );
+        FIELD( float, hip_aim_cone_offset, Offsets::BaseProjectile::hipAimConeOffset );
 
         static inline il2cpp_class* klass_;
     };
