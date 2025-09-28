@@ -340,7 +340,7 @@ void renderer::begin_frame() {
 	ImGui_ImplDX11_NewFrame();
 
 	draw_list->_ResetForNewFrame();
-	draw_list->PushClipRect( ImVec2( 0.f, 0.f ), ImVec2( 2560.f, 1440.f ) );
+	draw_list->PushClipRect( ImVec2( 0.f, 0.f ), ImVec2( ( float )screen_width, ( float )screen_height ) );
 	draw_list->PushTexture( font_atlas->TexRef );
 }
 
@@ -348,7 +348,7 @@ void renderer::end_frame() {
 	draw_data->TotalIdxCount = draw_list->IdxBuffer.size();
 	draw_data->TotalVtxCount = draw_list->VtxBuffer.size();
 	draw_data->DisplayPos = ImVec2( 0.f, 0.f );
-	draw_data->DisplaySize = ImVec2( 2560.f, 1440.f );
+	draw_data->DisplaySize = ImVec2( ( float )screen_width, ( float )screen_height );
 
 	device_context->OMSetRenderTargets( 1, &render_target_view, nullptr );
 

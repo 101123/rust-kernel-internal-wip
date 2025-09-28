@@ -87,8 +87,8 @@ bool w2s( const vector3& world, vector2& screen ) {
 		return false;
 
 	screen = vector2(
-		( 2560.f * 0.5f ) * ( 1.f + ( vector3::dot( vector3( view_matrix[ 0 ], view_matrix[ 4 ], view_matrix[ 8 ] ), world ) + view_matrix[ 12 ] ) / w ),
-		( 1440.f * 0.5f ) * ( 1.f - ( vector3::dot( vector3( view_matrix[ 1 ], view_matrix[ 5 ], view_matrix[ 9 ] ), world ) + view_matrix[ 13 ] ) / w )
+		( ( float )screen_width * 0.5f ) * ( 1.f + ( vector3::dot( vector3( view_matrix[ 0 ], view_matrix[ 4 ], view_matrix[ 8 ] ), world ) + view_matrix[ 12 ] ) / w ),
+		( ( float )screen_height * 0.5f ) * ( 1.f - ( vector3::dot( vector3( view_matrix[ 1 ], view_matrix[ 5 ], view_matrix[ 9 ] ), world ) + view_matrix[ 13 ] ) / w )
 	) + vector2( 0.f, 0.f );
 
 	return true;

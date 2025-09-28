@@ -187,7 +187,12 @@ void render_handler( IDXGISwapChain* swapchain ) {
 
 	if ( !cheat_deinit ) {
 		render_input.update();
+
+		screen_width = unity::screen::get_width();
+		screen_height = unity::screen::get_height();
+
 		hook_manager::place_hooks();
+
 		on_render( swapchain );
 
 		if ( render_input.get_async_key_state( VK_F11 ) ) {

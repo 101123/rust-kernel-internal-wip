@@ -179,7 +179,7 @@ void glow_manager::invalidate_cache() {
 }
 
 void render_stencil() {
-	stencil_texture = unity::render_texture::get_temporary( 2560.f, 1440.f, 0 );
+	stencil_texture = unity::render_texture::get_temporary( screen_width, screen_height, 0 );
 
 	command_buffer->set_render_target( unity::render_target_identifier::ctor( stencil_texture ) );
 	command_buffer->clear_render_target( true, true, unity::color( 0.f, 0.f, 0.f, 0.f ) );
@@ -214,8 +214,8 @@ void render_stencil() {
 }
 
 void render_blur() {
-	blur_texture = unity::render_texture::get_temporary( 2560.f, 1440.f, 0 );
-	unity::render_texture* temp = unity::render_texture::get_temporary( 2560.f, 1440.f, 0 );
+	blur_texture = unity::render_texture::get_temporary( screen_width, screen_height, 0 );
+	unity::render_texture* temp = unity::render_texture::get_temporary( screen_width, screen_height, 0 );
 	blur_material->set_float( _BlurScale, glow_blur_scale );
 
 	unity::graphics::blit( stencil_texture, blur_texture, blur_material );

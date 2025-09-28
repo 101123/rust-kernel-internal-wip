@@ -453,6 +453,25 @@ namespace unity {
         }
     };
 
+    class screen {
+    public:
+        static int get_width() {
+            int( *get_width )( ) = ( decltype( get_width ) )( unity_player + Offsets::Screen::get_width );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_width );
+        }
+
+        static int get_height() {
+            int( *get_height )( ) = ( decltype( get_height ) )( unity_player + Offsets::Screen::get_height );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_height );
+        }
+    };
+
     class texture {
     public:
     };

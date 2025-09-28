@@ -32,5 +32,8 @@ inline uintptr_t unity_player;
 
 inline unity::asset_bundle* asset_bundle;
 
+inline int screen_width;
+inline int screen_height;
+
 inline input game_input;
 inline input render_input;
