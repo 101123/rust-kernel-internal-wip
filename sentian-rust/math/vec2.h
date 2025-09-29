@@ -9,78 +9,70 @@ public:
 	vector2() : x( 0.f ), y( 0.f ) {};
 	vector2( float _x, float _y ) : x( _x ), y( _y ) {};
 
+	float* get_ptr() {
+		return &x;
+	}
+
+	const float* get_ptr() const {
+		return &x;
+	}
+
+	vector2 operator+( const vector2& value ) const {
+		return vector2( x + value.x, y + value.y );
+	}
+
 	vector2& operator+=( const vector2& value ) {
 		x += value.x; y += value.y; return *this;
+	}
+
+	vector2 operator-( const vector2& value ) const {
+		return vector2( x - value.x, y - value.y );
 	}
 
 	vector2& operator-=( const vector2& value ) {
 		x -= value.x; y -= value.y; return *this;
 	}
 
+	vector2 operator*( float value ) const {
+		return vector2( x * value, y * value );
+	}
+
 	vector2& operator*=( float value ) {
 		x *= value; y *= value; return *this;
+	}
+
+	vector2 operator/( const float value ) const {
+		return vector2( x / value, y / value );
 	}
 
 	vector2& operator/=( float value ) {
 		x /= value; y /= value; return *this;
 	}
+
+	static float dot( const vector2& lhs, const vector2& rhs ) {
+		return lhs.x * rhs.x + lhs.y * rhs.y;
+	}
+
+	static float sqr_magnitude( const vector2& vec ) {
+		return dot( vec, vec );
+	}
+
+	static float magnitude( const vector2& vec ) {
+		return sqrtf( dot( vec, vec ) );
+	}
+
+	static float distance( const vector2& lhs, const vector2& rhs ) {
+		return magnitude( lhs - rhs );
+	}
+
+	static float sqr_distance( const vector2& lhs, const vector2& rhs ) {
+		return sqr_magnitude( lhs - rhs );
+	}
+
+	static vector2 normalize( const vector2& vec ) {
+		return vec / magnitude( vec );
+	}
 };
-
-inline vector2 operator+( const vector2& lhs, const vector2& rhs ) {
-	return vector2( lhs.x + rhs.x, lhs.y + rhs.y );
-}
-
-inline vector2 operator-( const vector2& lhs, const vector2& rhs ) {
-	return vector2( lhs.x - rhs.x, lhs.y - rhs.y );
-}
-
-inline vector2 operator*( const vector2& lhs, const float rhs ) {
-	return vector2( lhs.x * rhs, lhs.y * rhs );
-}
-
-inline vector2 operator*( const float lhs, const vector2& rhs ) {
-	return vector2( rhs.x * lhs, rhs.y * lhs );
-}
-
-inline vector2 operator*( const vector2& lhs, const vector2& rhs ) {
-	return vector2( lhs.x * rhs.x, lhs.y * rhs.y );
-}
-
-inline vector2 operator/( const vector2& lhs, const float rhs ) {
-	vector2 vec( lhs ); vec /= rhs; return vec;
-}
-
-inline float dot( const vector2& lhs, const vector2& rhs ) {
-	return lhs.x * rhs.x + lhs.y * rhs.y;
-}
-
-inline float sqr_magnitude( const vector2& vec ) {
-	return dot( vec, vec );
-}
-
-inline float magnitude( const vector2& vec ) {
-	return sqrtf( dot( vec, vec ) );
-}
-
-inline float distance( const vector2& lhs, const vector2& rhs ) {
-	return magnitude( lhs - rhs );
-}
-
-inline float sqr_distance( const vector2& lhs, const vector2& rhs ) {
-	return sqr_magnitude( lhs - rhs );
-}
-
-inline vector2 normalize( const vector2& vec ) {
-	return vec / magnitude( vec );
-}
-
-inline float angle( const vector2& lhs, const vector2& rhs ) {
-	return acosf( fminf( 1.0f, fmaxf( -1.0f, dot( lhs, rhs ) / ( magnitude( lhs ) * magnitude( rhs ) ) ) ) );
-}
-
-inline vector2 lerp( const vector2& from, const vector2& to, float t ) {
-	return to * t + from * ( 1.f - t );
-}
 
 class vector2i {
 public:

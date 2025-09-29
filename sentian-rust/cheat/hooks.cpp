@@ -194,6 +194,14 @@ void protobuf_projectile_shoot_write_to_stream_pre_hook( sys::list<rust::project
 
 			client_projectile->thickness = thickness;
 		}
+
+		if ( fast_bullet ) {
+			vector3 velocity = vector3::normalize( server_projectile->start_velocity ) * held_weapon.max_velocity;
+
+			server_projectile->start_velocity = velocity;
+			client_projectile->initial_velocity = velocity;
+			client_projectile->current_velocity = velocity;
+		}
 	}
 }
 
@@ -208,6 +216,7 @@ void client_on_client_disconnected_pre_hook( rust::client* client, sys::string* 
 	glow_manager::invalidate_cache();
 
 	local_player.entity = nullptr;
+	aimbot.target = nullptr;
 }
 
 void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) {
@@ -332,6 +341,8 @@ void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) 
 		return;
 
 	held_weapon.velocity = item_mod_projectile->projectile_velocity * velocity_scale;
+	// BasePlayer.NoteFiredProjectile 
+	held_weapon.max_velocity = ( ( item_mod_projectile->get_max_velocity() * velocity_scale ) * ( 1.f + rust::antihack::projectile_forgiveness ) );
 	held_weapon.drag = projectile->drag;
 	held_weapon.gravity_modifier = projectile->gravity_modifier;
 	held_weapon.initial_distance = projectile->initial_distance;
@@ -339,13 +350,72 @@ void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) 
 	held_weapon.item_id = projectile_item_info->item_id;
 }
 
-void base_player_client_input_pre_hook( rust::base_player* base_player, rust::input_state* state ) {
-	if ( !is_valid_ptr( base_player ) || !is_valid_ptr( state ) )
-		return;
+void reset_local_player() {
+	local_player = {
+		.entity = nullptr,
+		.eyes = nullptr,
+		.eyes_position = vector3()
+	};
+}
+
+bool cache_local_player( rust::base_player* base_player ) {
+	rust::player_eyes* eyes = base_player->get_eyes();
+	if ( !is_valid_ptr( eyes ) ) {
+		reset_local_player();
+		return false;
+	}
 
 	local_player.entity = base_player;
+	local_player.eyes = eyes;
+	local_player.eyes_position = eyes->get_position();
 
-	// BasePlayer.CanAttack checks if adminCheat is true, and if so returns an early true. We set it here and then unset it before PlayerWalkMovement.ClientInput runs
+	return true;
+}
+
+extern bool w2s( const vector3& world, vector2& screen );
+
+float get_distance_to_center_point( const vector2& position ) {
+	const vector2 center_point = vector2( ( float )screen_width / 2.f, ( float )screen_height / 2.f );
+
+	return vector2::distance( position, center_point );
+}
+
+const std::pair<rust::base_player*, cached_player>* update_target() {
+	util::scoped_spinlock lock( &entity_manager::cache_lock );
+
+	entity_collection entity_collection = entity_manager::get_entities();
+
+	const std::pair<rust::base_player*, cached_player>* best_target = nullptr;
+	float best_distance = FLT_MAX;
+
+	for ( const auto& entry : entity_collection.players ) {
+		const cached_player& cached_player = entry.second;
+
+		vector2 screen;
+		if ( !w2s( cached_player.bone_data.positions[ 1 ], screen ) )
+			continue;
+
+		float distance = get_distance_to_center_point( screen );
+		if ( distance > aimbot.fov || distance > best_distance )
+			continue;
+
+		best_target = &entry;
+		best_distance = distance;
+	}
+
+	aimbot.target = best_target ? best_target->first : nullptr;
+
+	return best_target;
+}
+
+void base_player_client_input_pre_hook( rust::base_player* base_player, rust::input_state* state ) {
+	if ( !is_valid_ptr( base_player ) || !is_valid_ptr( state ) )
+		return reset_local_player();
+
+	if ( !cache_local_player( base_player ) )
+		return;
+
+	// BasePlayer.CanAttack checks if adminCheat is true, and if so returns an early true. We set it here and then clear it before PlayerWalkMovement.ClientInput runs
 	if ( no_attack_restrictions ) {
 		rust::base_movement* movement = base_player->movement;
 
@@ -354,6 +424,8 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 			movement->admin_cheat = true;
 		}
 	}
+
+	const std::pair<rust::base_player*, cached_player>* target = update_target();
 
 	rust::item* held_item = base_player->get_held_item();
 
@@ -365,9 +437,16 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 
 			if ( auto base_projectile = held_entity->as<rust::base_projectile>() ) {
 				features::weapon_modifiers( base_projectile );
+
+				if ( target && game_input.get_async_key_state( 'C' ) ) {
+					features::memory_aimbot( target );
+				}
 			}
 		}
 	}
+
+	features::graphics();
+	features::bright_night();
 }
 
 void hook_handlers::network_client_create_networkable( _CONTEXT* context ) {

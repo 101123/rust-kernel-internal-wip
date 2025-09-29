@@ -427,12 +427,13 @@ void draw_esp() {
 		.set_font( fonts::verdana )
 		.set_vertical_spacing( 12.f )
 		.set_flags( text_flags::none )
-		.draw_text( format_string( "Velocity: %.2f, Drag: %.2f, Gravity Modifier: %.2f, Initial Distance: %.2f, Projectile Velocity Scale: %.2f, Aim Sway Scale: %.2f, Recoil Scale: %.2f, Sight Aim Cone Scale: %.2f, Hip Aim Cone Scale: %.2f, Hash: %u",
+		.draw_text( format_string( "Velocity: %.2f [%.2f], Drag: %.2f, Gravity Modifier: %.2f, Initial Distance: %.2f, Projectile Velocity Scale: %.2f, Aim Sway Scale: %.2f, Recoil Scale: %.2f, Sight Aim Cone Scale: %.2f, Hip Aim Cone Scale: %.2f, Hash: %u",
 			held_weapon.velocity,
+			held_weapon.max_velocity,
 			held_weapon.drag,
 			held_weapon.gravity_modifier,
 			held_weapon.initial_distance,
-			held_weapon.mods.projectile_velocity_scale, 
+			held_weapon.mods.projectile_velocity_scale,
 			held_weapon.mods.aim_sway_scale,
 			held_weapon.mods.recoil_scale,
 			held_weapon.mods.sight_aim_cone_scale,
@@ -467,6 +468,8 @@ void on_render( IDXGISwapChain* swapchain ) {
 
 	renderer::draw_text( 8.f, 5.f, fonts::small_fonts, text_flags::none, COL32( 110, 183, 212, 255 ), "sentian" );
 	renderer::draw_text( 38.f, 5.f, fonts::small_fonts, text_flags::none, COL32( 255, 255, 255, 255 ), ".gg" );
+
+	renderer::draw_circle( ( float )screen_width / 2.f, ( float )screen_height / 2.f, ( float )aimbot.fov, 1.f, COL32_WHITE );
 
 	draw_esp();
 

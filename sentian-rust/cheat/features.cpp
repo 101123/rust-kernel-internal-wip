@@ -1,9 +1,13 @@
 #include "features.h"
 #include "sdk/sdk.h"
 #include "vars.h"
+#include "entities.h"
 
 void features::graphics() {
-	
+	if ( fov_modifier.enabled || fov_modifier.dirty ) {
+		rust::graphics::static_fields_->fov = fov_modifier.enabled ? ( float )fov_modifier.fov : 90.f;
+		fov_modifier.dirty = fov_modifier.enabled;
+	}
 }
 
 void features::bright_night() {
@@ -118,4 +122,30 @@ void features::weapon_modifiers( rust::base_projectile* weapon ) {
 		( sway_modifier.enabled ? sway_modifier.scale.value : 1.f );
 
 	weapon->automatic = force_automatic ? true : weapon_data->automatic;
+}
+
+bool calc_angle( const vector3& src, const vector3& dst, vector3& result ) {
+	vector3 direction = dst - src;
+	if ( vector3::sqr_magnitude( direction ) < 0.001f )
+		return false;
+
+	result = vector3( 
+		math::rad2deg( -asinf( direction.y / vector3::magnitude( direction ) ) ), 
+		math::rad2deg( atan2f( direction.x, direction.z ) ), 
+		0.f 
+	);
+
+	return true;
+}
+
+void features::memory_aimbot( const std::pair<rust::base_player*, cached_player>* target ) {
+	rust::player_input* input = local_player.entity->input;
+	if ( !is_valid_ptr( input ) )
+		return;
+
+	vector3 angle;
+	if ( !calc_angle( local_player.eyes_position, target->second.bone_data.positions[ 1 ], angle ) )
+		return;
+
+	input->body_angles = vector2( angle.x, angle.y );
 }

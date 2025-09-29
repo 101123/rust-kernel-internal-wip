@@ -3,11 +3,8 @@
 #include "util.h"
 #include "renderer.h"
 #include "vk.h"
-
-namespace rust {
-	class base_player;
-	class base_projectile;
-}
+#include "cheat/sdk/declare.h"
+#include "math/vec3.h"
 
 template <typename T>
 struct cvar_t {
@@ -243,6 +240,8 @@ inline cvar_visual dropped_fun = WRAP_VISUAL( "Dropped Fun", false, 500, COL32( 
 
 DEFINE_CONTEXT( local_player,
 	rust::base_player* entity;
+	rust::player_eyes* eyes;
+	vector3 eyes_position;
 );
 
 DEFINE_CONTEXT( held_weapon,
@@ -257,12 +256,29 @@ DEFINE_CONTEXT( held_weapon,
 	} mods;
 
 	float velocity;
+	float max_velocity;
 	float drag;
 	float gravity_modifier;
 	float initial_distance;
 
 	uint32_t prefab_id;
 	int item_id;
+);
+
+namespace aimbot_type {
+	enum : uint32_t {
+		memory,
+		silent,
+		manipulation
+	};
+}
+
+DEFINE_CONTEXT( aimbot,
+	cvar enabled = cvar( H( "Aimbot" ), true );
+	cvar_ui type = cvar_ui( H( "Aimbot Type" ), aimbot_type::memory );
+	cvar_ui fov = cvar_ui( H( "Aimbot FOV" ), 120 );
+
+	rust::base_player* target;
 );
 
 DEFINE_CONTEXT( recoil_modifier,
@@ -290,10 +306,14 @@ inline cvar force_automatic = cvar( H( "Force Automatic" ), false );
 
 inline cvar instant_eoka = cvar( H( "Instant Eoka" ), false );
 
+inline cvar fast_bullet = cvar( H( "Fast Bullet" ), false );
+
 inline cvar instant_loot = cvar( H( "Instant Loot" ), true );
 
 inline cvar no_attack_restrictions = cvar( H( "No Attack Restrictions" ), true );
 inline bool previous_admin_cheat;
+
+inline cvar draw_rocket_trajectory = cvar( H( "Draw Rocket Trajectory" ), false );
 
 inline cvar spider_man = cvar( H( "Spider-Man" ), false );
 inline cvar no_fall_damage = cvar( H( "No Fall Damage" ), false );
@@ -306,9 +326,12 @@ inline cvar_ui ambient_color = cvar_ui( H( "Ambient Color" ), COL32( 85, 50, 75,
 inline cvar_f ambient_multiplier = cvar_f( H( "Ambient Multiplier" ), 2.f );
 inline cvar_f ambient_saturation = cvar_f( H( "Ambient Saturation" ), 0.2f );
 
-inline cvar_bind override_fov = WRAP_BIND( "Override FOV", true, trigger_type::toggle, 0 );
-inline cvar_f fov = cvar_f( H( "FOV" ), 100.f );
-inline float original_fov = -1.f;
+DEFINE_CONTEXT( fov_modifier,
+	cvar enabled = cvar( H( "FOV Modifier" ), false );
+	cvar_f fov = cvar_f( H( "FOV" ), 100.f );
+
+	bool dirty;
+);
 
 inline cvar_bind zoom = WRAP_BIND( "Zoom", true, trigger_type::hold, 'X' );
 inline cvar_f zoom_fov = cvar_f( H( "Zoom FOV" ), 40.f );

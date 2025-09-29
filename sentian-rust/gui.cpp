@@ -778,9 +778,11 @@ enum tabs {
     settings
 };
 
-enum combat_subtabs {
-    aimbot
-};
+namespace combat_subtabs {
+    enum : uint32_t {
+        aimbot
+    };
+}
 
 enum visual_subtabs {
     players,
@@ -941,6 +943,15 @@ void gui::run() {
             switch ( current_subtab[ tabs::combat ] ) {
                 case combat_subtabs::aimbot: {
                     left.begin();
+
+                    left.toggle( S( "Aimbot" ), &aimbot.enabled );
+
+                    if ( aimbot.enabled ) {
+                        left.combo_box( S( "Aimbot type" ), { S( "Memory" ), S( "Silent" ), S( "Manipulation" ) }, &aimbot.type );
+                    }
+
+                    left.slider( S( "Field of view" ), S( "%dpx" ), &aimbot.fov, 0u, 800u );
+
                     left.end();
 
                     right.begin();
@@ -967,6 +978,8 @@ void gui::run() {
                     if ( thick_bullet.enabled ) {
                         right.slider( S( "Thickness" ), S( "%.2fm" ), &thick_bullet.thickness, 0.05f, 1.f );
                     }
+
+                    right.toggle( "Faster bullets", &fast_bullet );
 
                     right.toggle( S( "Instant eoka" ), &instant_eoka );
 
@@ -1163,9 +1176,9 @@ void gui::run() {
                     left.begin();
                     left.toggle( "Instant loot", &instant_loot );
 
-                    left.toggle( "Override field of view", &override_fov.enabled );
-                    if ( override_fov.enabled ) {
-                        left.slider( "Field of view", "%.0f", &fov, 0.f, 140.f );
+                    left.toggle( "Field of view modifier", &fov_modifier.enabled );
+                    if ( fov_modifier.enabled ) {
+                        left.slider( "Field of view", "%.0f", &fov_modifier.fov, 0.f, 140.f );
                     }
 
                     left.end();

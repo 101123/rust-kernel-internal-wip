@@ -969,7 +969,8 @@ namespace rust {
     };
 
     class player_input {
-
+    public:
+        FIELD( vector2, body_angles, Offsets::PlayerInput::bodyAngles );
     };
 
     class base_movement : public unity::behaviour {
@@ -1071,6 +1072,17 @@ namespace rust {
 
     class player_eyes {
     public:
+        vector3 get_position() {
+            // Yes, this is flipped and correct
+            void ( *get_position )( vector3*, player_eyes* ) = ( decltype( get_position ) )( game_assembly + Offsets::PlayerEyes::get_position );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            vector3* position = caller.push<vector3>();
+            caller( get_position, position, this );
+            return *position;
+        }
+
         static inline il2cpp_class* klass_;
         static inline il2cpp_object* type_object_;
     };
@@ -1369,8 +1381,8 @@ namespace rust {
     public:
         class projectile {
         public:
-            FIELD( vector3, start_pos, Offsets::ProtoBuf_ProjectileShoot_Projectile::startPos );
-            FIELD( vector3, start_vel, Offsets::ProtoBuf_ProjectileShoot_Projectile::startVel );
+            FIELD( vector3, start_position, Offsets::ProtoBuf_ProjectileShoot_Projectile::startPos );
+            FIELD( vector3, start_velocity, Offsets::ProtoBuf_ProjectileShoot_Projectile::startVel );
         };
 
         FIELD( sys::list<projectile*>*, projectiles, Offsets::ProtoBuf_ProjectileShoot::projectiles );
@@ -1508,7 +1520,7 @@ namespace rust {
         FIELD( float, projectile_velocity_spread, Offsets::ItemModProjectile::projectileVelocitySpread );
 
         float get_max_velocity() {
-            return projectile_velocity_spread + projectile_velocity;
+            return projectile_velocity + projectile_velocity_spread;
         }
 
         static inline il2cpp_object* type_object_;
@@ -1546,5 +1558,15 @@ namespace rust {
         FIELD( bool, needs_on_for_effects, Offsets::ProjectileWeaponMod::needsOnForEffects );
 
         static inline il2cpp_class* klass_;
+    };
+    
+    class game_physics {
+    public:
+
+    };
+
+    class antihack {
+    public:
+        static inline float projectile_forgiveness = 0.495f; /* 0.5f */
     };
 }
