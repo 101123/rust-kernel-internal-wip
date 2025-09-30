@@ -116,7 +116,7 @@ bool cache_local_player( rust::base_player* base_player ) {
 
 void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) {
 	rust::item_definition* projectile_item_info = nullptr;
-	float velocity_scale = 1.f;
+	float velocity_scale = 1.f, max_velocity_scale = 1.f;
 
 	if ( auto base_projectile = held_entity->as<rust::base_projectile>() ) {
 		if ( base_projectile->cached_mod_hash != held_weapon.mods.hash ) {
@@ -147,6 +147,7 @@ void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) 
 						rust::projectile_weapon_mod::modifier sight_aim_cone = projectile_weapon_mod->sight_aim_cone;
 						rust::projectile_weapon_mod::modifier hip_aim_cone = projectile_weapon_mod->hip_aim_cone;
 
+						// TODO: Fix this as it is probably incorrect - the game doesn't use ProjectileWeaponMod.Mult for all of these modifiers
 						if ( projectile_velocity.enabled ) {
 							projectile_velocity_scale *= projectile_velocity.scalar;
 						}
@@ -188,8 +189,12 @@ void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) 
 
 		projectile_item_info = ammo_type;
 
-		// This is not correct for the compound bow as the velocity of it changes dynamically
+		// We don't use the compound bow function here as this caching code only runs once and the compound bow velocity scale is dynamic
 		velocity_scale = base_projectile->get_projectile_velocity_scale() * held_weapon.mods.projectile_velocity_scale;
+
+		// Maximum velocity scale is a static number, so it's fine to use the compound bow function here
+		max_velocity_scale = base_projectile->is<rust::compound_bow_weapon>() ?
+			( ( rust::compound_bow_weapon* )base_projectile )->get_projectile_velocity_scale( true ) : base_projectile->get_projectile_velocity_scale();
 	}
 
 	else if ( auto base_melee = held_entity->as<rust::base_melee>() ) {
@@ -237,16 +242,20 @@ void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) 
 	if ( !is_valid_ptr( projectile ) )
 		return;
 	
-	// Cache unscaled velocity so we can calculate correct compound bow velocity
+	// Cache unscaled velocity so we can calculate the correct velocity for compound bows 
 	held_weapon.unscaled_velocity = item_mod_projectile->projectile_velocity;
 	held_weapon.velocity = item_mod_projectile->projectile_velocity * velocity_scale;
 	// BasePlayer.NoteFiredProjectile 
-	held_weapon.max_velocity = ( ( item_mod_projectile->get_max_velocity() * velocity_scale ) * ( 1.f + rust::antihack::projectile_forgiveness ) );
+	held_weapon.max_velocity = ( ( item_mod_projectile->get_max_velocity() * max_velocity_scale ) * ( 1.f + rust::antihack::projectile_forgiveness ) );
 	held_weapon.drag = projectile->drag;
 	held_weapon.gravity_modifier = projectile->gravity_modifier;
 	held_weapon.initial_distance = projectile->initial_distance;
 	held_weapon.prefab_id = held_entity->prefab_id;
 	held_weapon.item_id = projectile_item_info->item_id;
+}
+
+void update_velocity_for_compound_bow( rust::compound_bow_weapon* compound_bow ) {
+	held_weapon.velocity = held_weapon.unscaled_velocity * compound_bow->get_projectile_velocity_scale() * held_weapon.mods.projectile_velocity_scale;
 }
 
 extern bool w2s( const vector3& world, vector2& screen );
@@ -455,6 +464,10 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 
 			if ( target && game_input.get_async_key_state( 'C' ) ) {
 				features::memory_aimbot( target );
+			}
+
+			if ( base_projectile->is<rust::compound_bow_weapon>() ) {
+				update_velocity_for_compound_bow( ( rust::compound_bow_weapon* )base_projectile );
 			}
 		}
 	}
