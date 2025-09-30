@@ -1,5 +1,7 @@
 #pragma once
 
+#include "declare.h"
+
 #include "global.h"
 #include "cheat/sdk/offsets.h"
 #include "cheat/sdk/field_types.h"
@@ -71,18 +73,6 @@ namespace sys {
     public:
         FIELD( buffer_list<V>*, vals, Offsets::System_ListDictionary::vals );
     };
-}
-
-namespace unity_internal {
-
-}
-
-namespace unity {
-    class object;
-    class game_object;
-    class component;
-    class transform;
-    class texture;
 }
 
 namespace unity {
@@ -827,16 +817,6 @@ namespace unity {
 }
 
 namespace rust {
-    class base_networkable;
-    class model;
-    class base_entity;
-    class networkable;
-    class item_container;
-    class base_player;
-    class held_entity;
-}
-
-namespace rust {
     enum bones {
         neck = 46,
         head = 47,
@@ -899,6 +879,12 @@ namespace rust {
         catapult_boulder = 8192,
         ballista_arrow = 16384,
         dart = 32768,
+    };
+
+    struct entity_ref {
+    public:
+        base_entity* ent_cached;
+        networkable_id id_cached;
     };
 
     template <typename T>
@@ -983,8 +969,6 @@ namespace rust {
             return ( flags & f ) == f;
         }
     };
-
-    using networkable_id = uint64_t;
 
     class networkable {
     public:
@@ -1190,8 +1174,8 @@ namespace rust {
         FIELD( int, amount, Offsets::Item::amount );
         FIELD( int, position, Offsets::Item::position );
         FIELD( item_container*, contents, Offsets::Item::contents );
-        FIELD( base_entity*, world_entity, Offsets::Item::worldEnt );
-        FIELD( base_entity*, held_entity, Offsets::Item::heldEntity );
+        FIELD( entity_ref, world_entity, Offsets::Item::worldEnt );
+        FIELD( entity_ref, held_entity, Offsets::Item::heldEntity );
     };
 
     class item_container {
@@ -1292,12 +1276,12 @@ namespace rust {
             uint64_t active_item_id = cl_active_item;
 
             for ( size_t i = 0; i < items_list->size; i++ ) {
-                item* item_ = items->buffer[ i ];
-                if ( !is_valid_ptr( item_ ) )
+                item* _item = items->buffer[ i ];
+                if ( !is_valid_ptr( _item ) )
                     continue;
 
-                if ( item_->uid == active_item_id ) {
-                    return item_;
+                if ( _item->uid == active_item_id ) {
+                    return _item;
                 }
             }
 
@@ -1309,7 +1293,7 @@ namespace rust {
             if ( !held_item )
                 return nullptr;
 
-            base_entity* _held_entity = held_item->held_entity;
+            base_entity* _held_entity = held_item->held_entity.ent_cached;
             if ( !is_valid_ptr( _held_entity ) )
                 return nullptr;
 
@@ -1408,11 +1392,37 @@ namespace rust {
         FIELD( float, hip_aim_cone_scale, Offsets::BaseProjectile::hipAimConeScale );
         FIELD( float, hip_aim_cone_offset, Offsets::BaseProjectile::hipAimConeOffset );
 
+        float get_projectile_velocity_scale() {
+            return projectile_velocity_scale;
+        }
+
         static inline il2cpp_class* klass_;
     };
 
     class bow_weapon : public base_projectile {
     public:
+        static inline il2cpp_class* klass_;
+    };
+
+    class compound_bow_weapon : public bow_weapon {
+    public:
+        FIELD( float, string_hold_duration_max, Offsets::CompoundBowWeapon::stringHoldDurationMax );		
+        FIELD( float, string_bonus_velocity, Offsets::CompoundBowWeapon::stringBonusVelocity );
+        
+        float get_string_bonus_scale() {
+            float ( *get_string_bonus_scale )( compound_bow_weapon* ) =
+                ( decltype( get_string_bonus_scale ) )( game_assembly + Offsets::CompoundBowWeapon::GetStringBonusScale );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_string_bonus_scale, this );
+        }
+
+        float get_projectile_velocity_scale( bool get_max = false ) {
+            float scale = get_max ? 1.f : get_string_bonus_scale();
+            return projectile_velocity_scale + string_bonus_velocity * scale;
+        }
+
         static inline il2cpp_class* klass_;
     };
 

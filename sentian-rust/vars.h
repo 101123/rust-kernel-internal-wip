@@ -243,6 +243,8 @@ DEFINE_CONTEXT( local_player,
 	rust::player_eyes* eyes;
 	vector3 eyes_position;
 	vector3 body_forward;
+	rust::item* held_item;
+	rust::held_entity* held_entity;
 );
 
 DEFINE_CONTEXT( held_weapon,
@@ -256,6 +258,7 @@ DEFINE_CONTEXT( held_weapon,
 		uint32_t hash;
 	} mods;
 
+	float unscaled_velocity;
 	float velocity;
 	float max_velocity;
 	float drag;

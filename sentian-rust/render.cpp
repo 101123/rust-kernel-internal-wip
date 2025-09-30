@@ -473,7 +473,7 @@ void on_render( IDXGISwapChain* swapchain ) {
 
 	draw_esp();
 
-	if ( render_input.get_async_key_state( VK_END ) ) {
+	if ( render_input.get_async_key_state( VK_END ) & 0x1 ) {
 		gui::open = !gui::open;
 	}
 

@@ -292,7 +292,9 @@ void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) 
 			return;
 
 		projectile_item_info = ammo_type;
-		velocity_scale = base_projectile->projectile_velocity_scale * held_weapon.mods.projectile_velocity_scale;
+
+		// This is not correct for the compound bow as the velocity of it changes dynamically
+		velocity_scale = base_projectile->get_projectile_velocity_scale() * held_weapon.mods.projectile_velocity_scale;
 	}
 
 	else if ( auto base_melee = held_entity->as<rust::base_melee>() ) {
@@ -323,7 +325,7 @@ void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) 
 	// If the reference hasn't been set yet, we can set it ourselves
 	if ( !is_valid_ptr( projectile_container ) ) {
 		sys::string* guid = projectile_object->guid;
-		
+
 		if ( is_valid_ptr( guid ) ) {
 			unity::object* object = rust::game_manifest::guid_to_object( guid );
 
@@ -340,6 +342,8 @@ void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) 
 	if ( !is_valid_ptr( projectile ) )
 		return;
 
+	// Cache unscaled velocity so we can calculate correct compound bow velocity
+	held_weapon.unscaled_velocity = item_mod_projectile->projectile_velocity;
 	held_weapon.velocity = item_mod_projectile->projectile_velocity * velocity_scale;
 	// BasePlayer.NoteFiredProjectile 
 	held_weapon.max_velocity = ( ( item_mod_projectile->get_max_velocity() * velocity_scale ) * ( 1.f + rust::antihack::projectile_forgiveness ) );
@@ -354,21 +358,35 @@ void reset_local_player() {
 	local_player = {
 		.entity = nullptr,
 		.eyes = nullptr,
-		.eyes_position = vector3()
+		.eyes_position = vector3(),
+		.body_forward = vector3(),
+		.held_item = nullptr,
+		.held_entity = nullptr
 	};
 }
 
 bool cache_local_player( rust::base_player* base_player ) {
 	rust::player_eyes* eyes = base_player->get_eyes();
+
+	// These must be valid for the local player to be populated
 	if ( !is_valid_ptr( eyes ) ) {
 		reset_local_player();
 		return false;
+	}
+
+	rust::item* held_item = base_player->get_held_item();
+	rust::held_entity* held_entity = nullptr;
+
+	if ( held_item && is_valid_ptr( held_item->held_entity.ent_cached ) ) {
+		held_entity = held_item->held_entity.ent_cached->as<rust::held_entity>();
 	}
 
 	local_player.entity = base_player;
 	local_player.eyes = eyes;
 	local_player.eyes_position = eyes->get_position();
 	local_player.body_forward = eyes->body_forward();
+	local_player.held_item = held_item;
+	local_player.held_entity = held_entity;
 
 	return true;
 }
@@ -428,20 +446,14 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 
 	const std::pair<rust::base_player*, cached_player>* target = update_target();
 
-	rust::item* held_item = base_player->get_held_item();
+	if ( local_player.held_entity ) {
+		cache_held_entity( local_player.held_item, local_player.held_entity );
 
-	if ( is_valid_ptr( held_item ) ) {
-		rust::base_entity* held_entity = held_item->held_entity;
+		if ( auto base_projectile = local_player.held_entity->as<rust::base_projectile>() ) {
+			features::weapon_modifiers( base_projectile );
 
-		if ( is_valid_ptr( held_entity ) ) {
-			cache_held_entity( held_item, held_entity );
-
-			if ( auto base_projectile = held_entity->as<rust::base_projectile>() ) {
-				features::weapon_modifiers( base_projectile );
-
-				if ( target && game_input.get_async_key_state( 'C' ) ) {
-					features::memory_aimbot( target );
-				}
+			if ( target && game_input.get_async_key_state( 'C' ) ) {
+				features::memory_aimbot( target );
 			}
 		}
 	}

@@ -56,7 +56,8 @@ class_lookup class_lookups[] = {
 	{ &unity::game_object::klass_, nullptr, nullptr, GameObject_TypeDefinitionIndex },
 	{ &rust::projectile_weapon_mod::klass_, nullptr, nullptr, ProjectileWeaponMod_TypeDefinitionIndex },
 	{ &rust::base_launcher::klass_, nullptr, nullptr, BaseLauncher_TypeDefinitionIndex },
-	{ nullptr, nullptr, &rust::game_physics::static_fields_, GamePhysics_Static_TypeDefinitionIndex }
+	{ nullptr, nullptr, &rust::game_physics::static_fields_, GamePhysics_Static_TypeDefinitionIndex },
+	{ &rust::compound_bow_weapon::klass_, nullptr, nullptr, CompoundBowWeapon_TypeDefinitionIndex }
 };
 
 parent_class_lookup parent_class_lookups[] = {
