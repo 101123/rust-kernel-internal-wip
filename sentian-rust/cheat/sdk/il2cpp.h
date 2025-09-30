@@ -61,8 +61,8 @@ public:
 	}
 
 	template <typename T>
-	bool is() {
-		return klass == T::klass_;
+	T* is() {
+		return klass == T::klass_ ? ( T* )this : nullptr;
 	}
 };
 

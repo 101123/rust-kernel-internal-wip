@@ -466,8 +466,8 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 				features::memory_aimbot( target );
 			}
 
-			if ( base_projectile->is<rust::compound_bow_weapon>() ) {
-				update_velocity_for_compound_bow( ( rust::compound_bow_weapon* )base_projectile );
+			if ( auto compound_bow = base_projectile->is<rust::compound_bow_weapon>() ) {
+				update_velocity_for_compound_bow( compound_bow );
 			}
 		}
 	}
