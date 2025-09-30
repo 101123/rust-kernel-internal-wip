@@ -1237,7 +1237,7 @@ namespace rust {
             if ( !is_valid_ptr( user_id_string ) )
                 return 0ull;
 
-            return wcstoull( user_id_string->buffer, nullptr, 10 );
+            return _wcstoui64( user_id_string->buffer, nullptr, 10 );
         }
 
         player_inventory* get_inventory() {
