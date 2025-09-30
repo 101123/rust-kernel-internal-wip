@@ -217,6 +217,7 @@
     <ClInclude Include="include\glfn.h" />
     <ClInclude Include="include\hexrays.h" />
     <ClInclude Include="include\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="math\quat.h" />
     <ClInclude Include="render.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="um.h" />

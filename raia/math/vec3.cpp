@@ -3,6 +3,13 @@
 
 const float vector3::epsilon = 0.00001f;
 
+const vector3 vector3::up = vector3( 0.f, 1.f, 0.f );
+const vector3 vector3::down = vector3( 0.f, -1.f, 0.f );
+const vector3 vector3::left = vector3( -1.f, 0.f, 0.f );
+const vector3 vector3::right = vector3( 1.f, 0.f, 0.f );
+const vector3 vector3::forward = vector3( 0.f, 0.f, 1.f );
+const vector3 vector3::back = vector3( 0.f, 0.f, -1.f );
+
 //vector3 ortho_normal_vector_fast( const vector3& n ) {
 //	if ( fabsf( n.z ) > 0.7071067811865475244008443621048490f ) {
 //		float a = n.y * n.y + n.z * n.z;

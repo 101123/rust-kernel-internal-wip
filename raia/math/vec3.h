@@ -90,6 +90,13 @@ public:
 	}
 
 	static const float epsilon;
+
+	static const vector3 up;
+	static const vector3 down;
+	static const vector3 left;
+	static const vector3 right;
+	static const vector3 forward;
+	static const vector3 back;
 };
 
 //vector3 ortho_normal_vector_fast( const vector3& n );
