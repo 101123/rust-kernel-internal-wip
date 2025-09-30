@@ -77,6 +77,214 @@ private:
 	size_t position_;
 };
 
+void reset_local_player() {
+	local_player = {
+		.entity = nullptr,
+		.eyes = nullptr,
+		.eyes_position = vector3(),
+		.body_forward = vector3(),
+		.held_item = nullptr,
+		.held_entity = nullptr
+	};
+}
+
+bool cache_local_player( rust::base_player* base_player ) {
+	rust::player_eyes* eyes = base_player->get_eyes();
+
+	// These must be valid for the local player to be populated
+	if ( !is_valid_ptr( eyes ) ) {
+		reset_local_player();
+		return false;
+	}
+
+	rust::item* held_item = base_player->get_held_item();
+	rust::held_entity* held_entity = nullptr;
+
+	if ( held_item && is_valid_ptr( held_item->held_entity.ent_cached ) ) {
+		held_entity = held_item->held_entity.ent_cached->as<rust::held_entity>();
+	}
+
+	local_player.entity = base_player;
+	local_player.eyes = eyes;
+	local_player.eyes_position = eyes->get_position();
+	local_player.body_forward = eyes->body_forward();
+	local_player.held_item = held_item;
+	local_player.held_entity = held_entity;
+
+	return true;
+}
+
+void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) {
+	rust::item_definition* projectile_item_info = nullptr;
+	float velocity_scale = 1.f;
+
+	if ( auto base_projectile = held_entity->as<rust::base_projectile>() ) {
+		if ( base_projectile->cached_mod_hash != held_weapon.mods.hash ) {
+			sys::list<rust::base_entity*>* children_list = base_projectile->children;
+
+			if ( is_valid_ptr( children_list ) ) {
+				sys::array<rust::base_entity*>* children = children_list->items;
+
+				if ( is_valid_ptr( children ) ) {
+					float projectile_velocity_scale = 1.f, aim_sway_scale = 1.f, recoil_scale = 1.f, sight_aim_cone_scale = 1.f, hip_aim_cone_scale = 1.f;
+
+					for ( size_t i = 0; i < children_list->size; i++ ) {
+						rust::base_entity* child = children->buffer[ i ];
+						if ( !is_valid_ptr( child ) )
+							continue;
+
+						auto projectile_weapon_mod = child->as<rust::projectile_weapon_mod>();
+						if ( !projectile_weapon_mod )
+							continue;
+
+						if ( projectile_weapon_mod->needs_on_for_effects &&
+							!projectile_weapon_mod->has_flag( rust::base_entity::flag::on ) )
+							continue;
+
+						rust::projectile_weapon_mod::modifier projectile_velocity = projectile_weapon_mod->projectile_velocity;
+						rust::projectile_weapon_mod::modifier aim_sway = projectile_weapon_mod->aim_sway;
+						rust::projectile_weapon_mod::modifier recoil = projectile_weapon_mod->recoil;
+						rust::projectile_weapon_mod::modifier sight_aim_cone = projectile_weapon_mod->sight_aim_cone;
+						rust::projectile_weapon_mod::modifier hip_aim_cone = projectile_weapon_mod->hip_aim_cone;
+
+						if ( projectile_velocity.enabled ) {
+							projectile_velocity_scale *= projectile_velocity.scalar;
+						}
+
+						if ( aim_sway.enabled ) {
+							aim_sway_scale *= aim_sway.scalar;
+						}
+
+						if ( recoil.enabled ) {
+							recoil_scale *= recoil.scalar;
+						}
+
+						if ( sight_aim_cone.enabled ) {
+							sight_aim_cone_scale *= sight_aim_cone.scalar;
+						}
+
+						if ( hip_aim_cone.enabled ) {
+							hip_aim_cone_scale *= hip_aim_cone.scalar;
+						}
+					}
+
+					held_weapon.mods.projectile_velocity_scale = projectile_velocity_scale;
+					held_weapon.mods.aim_sway_scale = aim_sway_scale;
+					held_weapon.mods.recoil_scale = recoil_scale;
+					held_weapon.mods.sight_aim_cone_scale = sight_aim_cone_scale;
+					held_weapon.mods.hip_aim_cone_scale = hip_aim_cone_scale;
+					held_weapon.mods.hash = base_projectile->cached_mod_hash;
+				}
+			}
+		}
+
+		rust::base_projectile::magazine* magazine = base_projectile->primary_magazine;
+		if ( !is_valid_ptr( magazine ) )
+			return;
+
+		rust::item_definition* ammo_type = magazine->ammo_type;
+		if ( !is_valid_ptr( ammo_type ) )
+			return;
+
+		projectile_item_info = ammo_type;
+
+		// This is not correct for the compound bow as the velocity of it changes dynamically
+		velocity_scale = base_projectile->get_projectile_velocity_scale() * held_weapon.mods.projectile_velocity_scale;
+	}
+
+	else if ( auto base_melee = held_entity->as<rust::base_melee>() ) {
+		rust::item_definition* info = held_item->info;
+		if ( !is_valid_ptr( info ) )
+			return;
+
+		projectile_item_info = info;
+	}
+
+	if ( !projectile_item_info || ( held_entity->prefab_id == held_weapon.prefab_id && projectile_item_info->item_id == held_weapon.item_id ) )
+		return;
+
+	unity::game_object* container = projectile_item_info->get_game_object();
+	if ( !is_valid_ptr( container ) )
+		return;
+
+	auto item_mod_projectile = container->get_component<rust::item_mod_projectile>();
+	if ( !is_valid_ptr( item_mod_projectile ) )
+		return;
+
+	rust::game_object_ref* projectile_object = item_mod_projectile->projectile_object;
+	if ( !is_valid_ptr( projectile_object ) )
+		return;
+
+	unity::game_object* projectile_container = projectile_object->cached_object;
+
+	// If the reference hasn't been set yet, we can set it ourselves
+	if ( !is_valid_ptr( projectile_container ) ) {
+		sys::string* guid = projectile_object->guid;
+
+		if ( is_valid_ptr( guid ) ) {
+			unity::object* object = rust::game_manifest::guid_to_object( guid );
+
+			if ( is_valid_ptr( object ) ) {
+				projectile_object->cached_object = projectile_container = object->as<unity::game_object>();
+			}
+		}
+	}
+
+	if ( !is_valid_ptr( projectile_container ) )
+		return;
+
+	auto projectile = projectile_container->get_component<rust::projectile>();
+	if ( !is_valid_ptr( projectile ) )
+		return;
+	
+	// Cache unscaled velocity so we can calculate correct compound bow velocity
+	held_weapon.unscaled_velocity = item_mod_projectile->projectile_velocity;
+	held_weapon.velocity = item_mod_projectile->projectile_velocity * velocity_scale;
+	// BasePlayer.NoteFiredProjectile 
+	held_weapon.max_velocity = ( ( item_mod_projectile->get_max_velocity() * velocity_scale ) * ( 1.f + rust::antihack::projectile_forgiveness ) );
+	held_weapon.drag = projectile->drag;
+	held_weapon.gravity_modifier = projectile->gravity_modifier;
+	held_weapon.initial_distance = projectile->initial_distance;
+	held_weapon.prefab_id = held_entity->prefab_id;
+	held_weapon.item_id = projectile_item_info->item_id;
+}
+
+extern bool w2s( const vector3& world, vector2& screen );
+
+float get_distance_to_center_point( const vector2& position ) {
+	const vector2 center_point = vector2( ( float )screen_width / 2.f, ( float )screen_height / 2.f );
+
+	return vector2::distance( position, center_point );
+}
+
+const std::pair<rust::base_player*, cached_player>* update_target() {
+	util::scoped_spinlock lock( &entity_manager::cache_lock );
+
+	entity_collection entity_collection = entity_manager::get_entities();
+
+	const std::pair<rust::base_player*, cached_player>* best_target = nullptr;
+	float best_distance = FLT_MAX;
+
+	for ( const auto& entry : entity_collection.players ) {
+		const cached_player& cached_player = entry.second;
+
+		vector2 screen;
+		if ( !w2s( cached_player.bone_data.positions[ 1 ], screen ) )
+			continue;
+
+		float distance = get_distance_to_center_point( screen );
+		if ( distance > aimbot.fov || distance > best_distance )
+			continue;
+
+		best_target = &entry;
+		best_distance = distance;
+	}
+
+	aimbot.target = best_target ? best_target->first : nullptr;
+
+	return best_target;
+}
+
 void network_client_create_networkable_hook( rust::base_networkable* networkable ) {
 	if ( !is_valid_ptr( networkable ) || !is_valid_ptr( networkable->cached_ptr ) )
 		return;
@@ -215,216 +423,9 @@ void client_on_client_disconnected_pre_hook( rust::client* client, sys::string* 
 	entity_manager::invalidate_cache();
 	glow_manager::invalidate_cache();
 
-	local_player.entity = nullptr;
+	reset_local_player();
+
 	aimbot.target = nullptr;
-}
-
-void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) {
-	rust::item_definition* projectile_item_info = nullptr;
-	float velocity_scale = 1.f;
-
-	if ( auto base_projectile = held_entity->as<rust::base_projectile>() ) {
-		if ( base_projectile->cached_mod_hash != held_weapon.mods.hash ) {
-			sys::list<rust::base_entity*>* children_list = base_projectile->children;
-
-			if ( is_valid_ptr( children_list ) ) {
-				sys::array<rust::base_entity*>* children = children_list->items;
-
-				if ( is_valid_ptr( children ) ) {
-					float projectile_velocity_scale = 1.f, aim_sway_scale = 1.f, recoil_scale = 1.f, sight_aim_cone_scale = 1.f, hip_aim_cone_scale = 1.f;
-
-					for ( size_t i = 0; i < children_list->size; i++ ) {
-						rust::base_entity* child = children->buffer[ i ];
-						if ( !is_valid_ptr( child ) )
-							continue;
-
-						auto projectile_weapon_mod = child->as<rust::projectile_weapon_mod>();
-						if ( !projectile_weapon_mod )
-							continue;
-
-						if ( projectile_weapon_mod->needs_on_for_effects &&
-							!projectile_weapon_mod->has_flag( rust::base_entity::flag::on ) )
-							continue;
-
-						rust::projectile_weapon_mod::modifier projectile_velocity = projectile_weapon_mod->projectile_velocity;
-						rust::projectile_weapon_mod::modifier aim_sway = projectile_weapon_mod->aim_sway;
-						rust::projectile_weapon_mod::modifier recoil = projectile_weapon_mod->recoil;
-						rust::projectile_weapon_mod::modifier sight_aim_cone = projectile_weapon_mod->sight_aim_cone;
-						rust::projectile_weapon_mod::modifier hip_aim_cone = projectile_weapon_mod->hip_aim_cone;
-
-						if ( projectile_velocity.enabled ) {
-							projectile_velocity_scale *= projectile_velocity.scalar;
-						}
-
-						if ( aim_sway.enabled ) {
-							aim_sway_scale *= aim_sway.scalar;
-						}
-
-						if ( recoil.enabled ) {
-							recoil_scale *= recoil.scalar;
-						}
-
-						if ( sight_aim_cone.enabled ) {
-							sight_aim_cone_scale *= sight_aim_cone.scalar;
-						}
-
-						if ( hip_aim_cone.enabled ) {
-							hip_aim_cone_scale *= hip_aim_cone.scalar;
-						}
-					}
-
-					held_weapon.mods.projectile_velocity_scale = projectile_velocity_scale;
-					held_weapon.mods.aim_sway_scale = aim_sway_scale;
-					held_weapon.mods.recoil_scale = recoil_scale;
-					held_weapon.mods.sight_aim_cone_scale = sight_aim_cone_scale;
-					held_weapon.mods.hip_aim_cone_scale = hip_aim_cone_scale;
-					held_weapon.mods.hash = base_projectile->cached_mod_hash;
-				}
-			}
-		}
-
-		rust::base_projectile::magazine* magazine = base_projectile->primary_magazine;
-		if ( !is_valid_ptr( magazine ) )
-			return;
-
-		rust::item_definition* ammo_type = magazine->ammo_type;
-		if ( !is_valid_ptr( ammo_type ) )
-			return;
-
-		projectile_item_info = ammo_type;
-
-		// This is not correct for the compound bow as the velocity of it changes dynamically
-		velocity_scale = base_projectile->get_projectile_velocity_scale() * held_weapon.mods.projectile_velocity_scale;
-	}
-
-	else if ( auto base_melee = held_entity->as<rust::base_melee>() ) {
-		rust::item_definition* info = held_item->info;
-		if ( !is_valid_ptr( info ) )
-			return;
-
-		projectile_item_info = info;
-	}
-
-	if ( !projectile_item_info || ( held_entity->prefab_id == held_weapon.prefab_id && projectile_item_info->item_id == held_weapon.item_id ) )
-		return;
-
-	unity::game_object* container = projectile_item_info->get_game_object();
-	if ( !is_valid_ptr( container ) )
-		return;
-
-	auto item_mod_projectile = container->get_component<rust::item_mod_projectile>();
-	if ( !is_valid_ptr( item_mod_projectile ) )
-		return;
-
-	rust::game_object_ref* projectile_object = item_mod_projectile->projectile_object;
-	if ( !is_valid_ptr( projectile_object ) )
-		return;
-
-	unity::game_object* projectile_container = projectile_object->cached_object;
-
-	// If the reference hasn't been set yet, we can set it ourselves
-	if ( !is_valid_ptr( projectile_container ) ) {
-		sys::string* guid = projectile_object->guid;
-
-		if ( is_valid_ptr( guid ) ) {
-			unity::object* object = rust::game_manifest::guid_to_object( guid );
-
-			if ( is_valid_ptr( object ) ) {
-				projectile_object->cached_object = projectile_container = object->as<unity::game_object>();
-			}
-		}
-	}
-
-	if ( !is_valid_ptr( projectile_container ) )
-		return;
-
-	auto projectile = projectile_container->get_component<rust::projectile>();
-	if ( !is_valid_ptr( projectile ) )
-		return;
-
-	// Cache unscaled velocity so we can calculate correct compound bow velocity
-	held_weapon.unscaled_velocity = item_mod_projectile->projectile_velocity;
-	held_weapon.velocity = item_mod_projectile->projectile_velocity * velocity_scale;
-	// BasePlayer.NoteFiredProjectile 
-	held_weapon.max_velocity = ( ( item_mod_projectile->get_max_velocity() * velocity_scale ) * ( 1.f + rust::antihack::projectile_forgiveness ) );
-	held_weapon.drag = projectile->drag;
-	held_weapon.gravity_modifier = projectile->gravity_modifier;
-	held_weapon.initial_distance = projectile->initial_distance;
-	held_weapon.prefab_id = held_entity->prefab_id;
-	held_weapon.item_id = projectile_item_info->item_id;
-}
-
-void reset_local_player() {
-	local_player = {
-		.entity = nullptr,
-		.eyes = nullptr,
-		.eyes_position = vector3(),
-		.body_forward = vector3(),
-		.held_item = nullptr,
-		.held_entity = nullptr
-	};
-}
-
-bool cache_local_player( rust::base_player* base_player ) {
-	rust::player_eyes* eyes = base_player->get_eyes();
-
-	// These must be valid for the local player to be populated
-	if ( !is_valid_ptr( eyes ) ) {
-		reset_local_player();
-		return false;
-	}
-
-	rust::item* held_item = base_player->get_held_item();
-	rust::held_entity* held_entity = nullptr;
-
-	if ( held_item && is_valid_ptr( held_item->held_entity.ent_cached ) ) {
-		held_entity = held_item->held_entity.ent_cached->as<rust::held_entity>();
-	}
-
-	local_player.entity = base_player;
-	local_player.eyes = eyes;
-	local_player.eyes_position = eyes->get_position();
-	local_player.body_forward = eyes->body_forward();
-	local_player.held_item = held_item;
-	local_player.held_entity = held_entity;
-
-	return true;
-}
-
-extern bool w2s( const vector3& world, vector2& screen );
-
-float get_distance_to_center_point( const vector2& position ) {
-	const vector2 center_point = vector2( ( float )screen_width / 2.f, ( float )screen_height / 2.f );
-
-	return vector2::distance( position, center_point );
-}
-
-const std::pair<rust::base_player*, cached_player>* update_target() {
-	util::scoped_spinlock lock( &entity_manager::cache_lock );
-
-	entity_collection entity_collection = entity_manager::get_entities();
-
-	const std::pair<rust::base_player*, cached_player>* best_target = nullptr;
-	float best_distance = FLT_MAX;
-
-	for ( const auto& entry : entity_collection.players ) {
-		const cached_player& cached_player = entry.second;
-
-		vector2 screen;
-		if ( !w2s( cached_player.bone_data.positions[ 1 ], screen ) )
-			continue;
-
-		float distance = get_distance_to_center_point( screen );
-		if ( distance > aimbot.fov || distance > best_distance )
-			continue;
-
-		best_target = &entry;
-		best_distance = distance;
-	}
-
-	aimbot.target = best_target ? best_target->first : nullptr;
-
-	return best_target;
 }
 
 void base_player_client_input_pre_hook( rust::base_player* base_player, rust::input_state* state ) {
