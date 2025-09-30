@@ -499,10 +499,6 @@ void hook_handlers::post_outline_manager_on_render_image( _CONTEXT* context ) {
 		init = true;
 	}
 
-	if ( unity::input::get_key_down( unity::key_code::end ) ) {
-		gui::open = !gui::open;
-	}
-
 	// Update entities
 	entity_manager::update();
 
