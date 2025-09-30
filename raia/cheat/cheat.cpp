@@ -33,7 +33,7 @@ class_lookup class_lookups[] = {
 	{ nullptr, &unity::shader::type_object_, nullptr, Shader_TypeDefinitionIndex },
 	{ nullptr, &unity::component::type_object_, nullptr, Component_TypeDefinitionIndex },
 	{ nullptr, &rust::item_mod_projectile::type_object_, nullptr, ItemModProjectile_TypeDefinitionIndex },
-	{ nullptr, &rust::projectile::type_object_, nullptr, Projectile_TypeDefinitionIndex },
+	{ &rust::projectile::klass_, &rust::projectile::type_object_, nullptr, Projectile_TypeDefinitionIndex },
 	{ &unity::behaviour::klass_, nullptr, nullptr, Behaviour_TypeDefinitionIndex },
 	{ &unity::material::klass_ , &unity::material::type_object_, nullptr, Material_TypeDefinitionIndex },
 	{ &rust::outline_manager::klass_, nullptr, nullptr, OutlineManager_TypeDefinitionIndex },

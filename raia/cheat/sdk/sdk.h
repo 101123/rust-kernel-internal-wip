@@ -1521,7 +1521,7 @@ namespace rust {
         static inline il2cpp_class* klass_;
     };
 
-    class projectile {
+    class projectile : public unity::behaviour {
     public:
         FIELD( vector3, initial_velocity, Offsets::Projectile::initialVelocity );
         FIELD( float, drag, Offsets::Projectile::drag );
@@ -1546,6 +1546,7 @@ namespace rust {
         // FIELD( int, projectile_id, Offsets::Projectile::projectileID );
         FIELD( vector3, sent_position, Offsets::Projectile::sentPosition );
 
+        static inline il2cpp_class* klass_;
         static inline il2cpp_object* type_object_;
     };
 

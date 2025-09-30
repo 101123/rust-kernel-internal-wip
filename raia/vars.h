@@ -301,8 +301,8 @@ DEFINE_CONTEXT( sway_modifier,
 	cvar_f scale = cvar_f( H( "Sway Scale" ), 1.f );
 );
 
-DEFINE_CONTEXT( thick_bullet,
-	cvar enabled = cvar( H( "Thick Bullet" ), false );
+DEFINE_CONTEXT( thicker_projectiles,
+	cvar enabled = cvar( H( "Thicker Projectiles" ), false );
 	cvar_f thickness = cvar_f( H( "Thickness" ), 1.f );
 );
 
@@ -312,7 +312,7 @@ inline cvar instant_eoka = cvar( H( "Instant Eoka" ), false );
 inline cvar instant_compound_bow = cvar( H( "Instant Compound Bow" ), false );
 inline float original_string_hold_duration_max = -1.f;
 
-inline cvar fast_bullet = cvar( H( "Fast Bullet" ), false );
+inline cvar faster_projectiles = cvar( H( "Faster Projectiles" ), false );
 
 inline cvar instant_loot = cvar( H( "Instant Loot" ), true );
 

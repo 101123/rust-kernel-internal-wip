@@ -974,12 +974,12 @@ void gui::run() {
 
                     right.toggle( S( "Force automatic" ), &force_automatic );
 
-                    right.toggle( "Thick bullet", &thick_bullet.enabled );
-                    if ( thick_bullet.enabled ) {
-                        right.slider( S( "Thickness" ), S( "%.2fm" ), &thick_bullet.thickness, 0.05f, 1.f );
+                    right.toggle( "Thicker projectiles", &thicker_projectiles.enabled );
+                    if ( thicker_projectiles.enabled ) {
+                        right.slider( S( "Thickness" ), S( "%.2fm" ), &thicker_projectiles.thickness, 0.05f, 1.f );
                     }
 
-                    right.toggle( "Faster bullets", &fast_bullet );
+                    right.toggle( "Faster projectiles", &faster_projectiles );
 
                     right.toggle( S( "Instant eoka" ), &instant_eoka );
                     right.toggle( S( "Instant compound bow charge" ), &instant_compound_bow );

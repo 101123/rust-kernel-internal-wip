@@ -379,24 +379,40 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 	model_state->set_flag( rust::model_state::flag::sprinting, true );
 }
 
-void protobuf_projectile_shoot_write_to_stream_pre_hook( sys::list<rust::projectile_shoot::projectile*>* server_projectiles_list, sys::list<rust::projectile*>* created_projectiles_list ) {
-	if ( !is_valid_ptr( created_projectiles_list ) || !is_valid_ptr( created_projectiles_list->items ) )
+void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot* projectile_shoot, sys::list<rust::projectile*>* created_projectiles, rust::projectile* projectile ) {
+	if ( !is_valid_ptr( projectile_shoot ) )
 		return;
 
-	sys::array<rust::projectile_shoot::projectile*>* server_projectiles = server_projectiles_list->items;
-	if ( !is_valid_ptr( server_projectiles ) )
+	sys::list<rust::projectile_shoot::projectile*>* projectiles = projectile_shoot->projectiles;
+	if ( !is_valid_ptr( projectiles ) )
 		return;
 
-	sys::array<rust::projectile*>* client_projectiles = created_projectiles_list->items;
-	if ( !is_valid_ptr( server_projectiles ) )
+	sys::array<rust::projectile_shoot::projectile*>* server_projectiles = projectiles->items;
+	if ( !is_valid_ptr( server_projectiles ) || server_projectiles->size <= 0 || server_projectiles->size > 128 )
 		return;
 
-	for ( size_t i = 0; i < server_projectiles_list->size; i++ ) {
+	rust::projectile** client_projectiles = nullptr;
+
+	if ( created_projectiles && is_valid_ptr( created_projectiles ) && is_valid_ptr( created_projectiles->items ) ) {
+		client_projectiles = created_projectiles->items->buffer;
+	}
+
+	else if ( projectile && is_valid_ptr( projectile ) && projectile->is<rust::projectile>() ) {
+		client_projectiles = &projectile;
+	}
+	
+	// What the fuck happened?
+	if ( !client_projectiles )
+		return;
+
+	LOG( "%llu\n", projectiles->size );
+
+	for ( size_t i = 0; i < projectiles->size; i++ ) {
 		rust::projectile_shoot::projectile* server_projectile = server_projectiles->buffer[ i ];
 		if ( !is_valid_ptr( server_projectile ) )
 			continue;
 
-		rust::projectile* client_projectile = client_projectiles->buffer[ i ];
+		rust::projectile* client_projectile = client_projectiles[ i ];
 		if ( !is_valid_ptr( client_projectile ) )
 			continue;
 
@@ -405,14 +421,14 @@ void protobuf_projectile_shoot_write_to_stream_pre_hook( sys::list<rust::project
 		if ( is_valid_ptr( source_projectile ) ) {
 			float thickness = source_projectile->thickness;
 
-			if ( thick_bullet.enabled ) {
-				thickness = thick_bullet.thickness;
+			if ( thicker_projectiles.enabled ) {
+				thickness = thicker_projectiles.thickness;
 			}
 
 			client_projectile->thickness = thickness;
 		}
 
-		if ( fast_bullet ) {
+		if ( faster_projectiles ) {
 			vector3 velocity = vector3::normalize( server_projectile->start_velocity ) * held_weapon.max_velocity;
 
 			server_projectile->start_velocity = velocity;
@@ -545,45 +561,56 @@ void hook_handlers::pre_protobuf_player_tick_write_to_stream_delta( _CONTEXT* co
 }
 
 void hook_handlers::pre_protobuf_projectile_shoot_write_to_stream( _CONTEXT* context ) {
-	rust::projectile_shoot* projectile_shoot = ( rust::projectile_shoot* )context->Rcx;
-	if ( !is_valid_ptr( projectile_shoot ) || !is_valid_ptr( projectile_shoot->projectiles ) )
+	if ( !local_player.held_entity )
 		return;
 
-	rust::base_player* local_player = rust::local_player::get_entity();
-	if ( !is_valid_ptr( local_player ) )
-		return;
-
-	rust::held_entity* held_entity = local_player->get_held_entity();
-	if ( !held_entity )
-		return;
-
-	if ( held_entity->as<rust::base_projectile>() ) {
-		// TODO: Improve this further
+	if ( local_player.held_entity->as<rust::base_projectile>() ) {
 		static context_search search = context_search<sys::list<rust::projectile*>*>( context,
 			[&]( sys::list<rust::projectile*>* value ) {
-				if ( !is_valid_ptr( value ) || !is_valid_ptr( value->items ) )
+				if ( !is_valid_ptr( value ) )
+					return false;
+
+				// Check if the underlying array is valid
+				sys::array<rust::projectile*>* items = value->items;
+				if ( !is_valid_ptr( items ) || items->size <= 0 || items->size > 128 )
+					return false;
+
+				// Check if the first element of the array is a projectile
+				rust::projectile* projectile = items->buffer[ 0 ];
+				if ( !is_valid_ptr( projectile ) || !projectile->is<rust::projectile>() )
 					return false;
 
 				il2cpp_class* klass = value->klass;
-				if ( !is_valid_ptr( klass ) || !is_valid_ptr( klass->name ) )
+				if ( !is_valid_ptr( klass ) )
 					return false;
 
-				// Protect against garbage
+				// Protect against non null-terminated garbage
 				char class_name[ 64 ] = {};
 				memcpy( class_name, klass->name, sizeof( class_name ) - 1llu );
 
-				// We've found a list, it may or not contain projectile objects
+				// This is most likely redundant, but this only runs once, so who cares?
 				return util::hash( class_name ) == H( "List`1" );
 			}, true, 0x100 );
 
 		if ( !search.resolved() )
 			return;
 
-		protobuf_projectile_shoot_write_to_stream_pre_hook( projectile_shoot->projectiles, search.get( context ) );
+		protobuf_projectile_shoot_write_to_stream_pre_hook( ( rust::projectile_shoot* )context->Rcx, search.get( context ), nullptr );
 	}
 
-	else if ( held_entity->as<rust::base_melee>() ) {
+	else if ( local_player.held_entity->as<rust::base_melee>() ) {
+		static context_search search = context_search<rust::projectile*>( context,
+			[&]( rust::projectile* value ) {
+				if ( !is_valid_ptr( value ) )
+					return false;
 
+				return value->is<rust::projectile>() != nullptr;
+			}, true, 0x100 );
+
+		if ( !search.resolved() )
+			return;
+
+		protobuf_projectile_shoot_write_to_stream_pre_hook( ( rust::projectile_shoot* )context->Rcx, nullptr, search.get( context ) );
 	}
 }
 
