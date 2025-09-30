@@ -19,4 +19,5 @@ namespace rust {
 	class base_player;
 
 	class base_projectile;
+	class base_launcher;
 }

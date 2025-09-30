@@ -149,3 +149,68 @@ void features::memory_aimbot( const std::pair<rust::base_player*, cached_player>
 
 	input->body_angles = vector2( angle.x, angle.y );
 }
+
+bool features::update_rocket_trajectory( rust::base_launcher* launcher ) {
+	rust::base_projectile::magazine* magazine = launcher->primary_magazine;
+	if ( !is_valid_ptr( magazine ) )
+		return false;
+
+	rust::item_definition* ammo_type = magazine->ammo_type;
+	if ( !is_valid_ptr( ammo_type ) )
+		return false;
+
+	float gravity_modifier, speed;
+
+	switch ( ammo_type->item_id ) {
+		case -742865266: // Rocket
+			gravity_modifier = 0.25f;
+			speed = 18.f;
+			break;
+		case -1841918730: // High Velocity Rocket
+			gravity_modifier = 0.05f;
+			speed = 40.f;
+			break;
+		case 1638322904: // Incendiary Rocket
+			gravity_modifier = 0.25f;
+			speed = 18.f;
+			break;
+		case -17123659: // Smoke Rocket
+			gravity_modifier = 0.15f;
+			speed = 30.f;
+			break;
+		default:
+			return false;
+	}
+
+	vector3 current_position = local_player.eyes_position + local_player.body_forward;
+	vector3 current_velocity = local_player.body_forward * speed;
+
+	const float delta_time = 0.0625f;
+
+	vector3 points[ 128 + 1 ];
+	uint32_t num_points = 0u;
+
+	for ( float time = 0.f; time < 8.f; time += delta_time ) {
+		vector3 traveled_this_update = current_velocity * delta_time;
+
+		unity::raycast_hit hit_info;
+		if ( unity::physics::raycast( current_position, current_velocity, &hit_info, vector3::magnitude( traveled_this_update ), rust::server_projectile::mask, unity::query_trigger_interaction::ignore ) ) {
+			// Include the hit point
+			points[ num_points++ ] = hit_info.point;
+
+			memcpy( draw_rocket_trajectory.points, points, sizeof( vector3 ) * num_points );
+			draw_rocket_trajectory.num_points = num_points;
+			draw_rocket_trajectory.travel_time = time;
+			draw_rocket_trajectory.hit = true;
+
+			return true;
+		}
+
+		points[ num_points++ ] = current_position;
+
+		current_velocity += vector3( 0.f, -9.81f, 0.f ) * gravity_modifier * delta_time;
+		current_position += traveled_this_update;
+	}
+
+	return false;
+}

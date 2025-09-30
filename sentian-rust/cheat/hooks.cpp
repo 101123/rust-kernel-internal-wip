@@ -368,6 +368,7 @@ bool cache_local_player( rust::base_player* base_player ) {
 	local_player.entity = base_player;
 	local_player.eyes = eyes;
 	local_player.eyes_position = eyes->get_position();
+	local_player.body_forward = eyes->body_forward();
 
 	return true;
 }

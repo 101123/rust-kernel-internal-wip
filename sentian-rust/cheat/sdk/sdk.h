@@ -9,6 +9,7 @@
 
 #include "math/vec2.h"
 #include "math/vec3.h"
+#include "math/vec4.h"
 #include "math/mat4x4.h"
 
 namespace sys {
@@ -238,6 +239,26 @@ namespace unity {
         static inline il2cpp_class* klass_;
     };
 
+    struct ray {
+        vector3 origin;
+        vector3 direction;
+    };
+
+    struct raycast_hit {
+        vector3 point;
+        vector3 normal;
+        uint32_t face_id;
+        float distance;
+        vector2 uv;
+        int collider;
+    };
+
+    enum query_trigger_interaction {
+        use_global,
+        ignore,
+        collide
+    };
+
     class object : public il2cpp_object {
     public:
         FIELD( uintptr_t, cached_ptr, Offsets::Object::m_CachedPtr );
@@ -371,6 +392,21 @@ namespace unity {
             vector3* position = caller.push<vector3>();
             caller( get_position_injected, this, position );
             return *position;
+        }
+
+        void get_position_and_rotation( vector3* position, quaternion* rotation ) {
+            void ( *get_position_and_rotation )( transform*, vector3*, quaternion* ) = 
+                ( decltype( get_position_and_rotation ) )( unity_player + Offsets::Transform::GetPositionAndRotation );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            vector3* _position = caller.push<vector3>();
+            quaternion* _rotation = caller.push<quaternion>();
+
+            caller( get_position_and_rotation, this, _position, _rotation );
+
+            *position = *_position;
+            *rotation = *_rotation;
         }
     };
 
@@ -756,6 +792,38 @@ namespace unity {
             caller( set_keys, this, _color_keys, _alpha_keys );
         }
     };
+
+    class physics {
+    public:
+        static bool raycast( vector3 origin, vector3 direction, raycast_hit* hit_info, float max_distance, int layer_mask, unity::query_trigger_interaction query_trigger_interaction ) {
+            bool ( *raycast )( vector3*, vector3*, raycast_hit*, float, int, unity::query_trigger_interaction ) =
+                ( decltype( raycast ) )( game_assembly + Offsets::Physics::Raycast );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            vector3* _origin = caller.push<vector3>( origin );
+            vector3* _direction = caller.push<vector3>( direction );
+            raycast_hit* _hit_info = caller.push<raycast_hit>();
+
+            bool result = caller( raycast, _origin, _direction, _hit_info, max_distance, layer_mask, query_trigger_interaction );
+
+            *hit_info = *_hit_info;
+
+            return result;
+        }
+
+        static int raycast_non_alloc( vector3 origin, vector3 direction, sys::array<raycast_hit>* results, float max_distance, int layer_mask, unity::query_trigger_interaction query_trigger_interaction ) {
+            int ( *raycast_non_alloc )( vector3*, vector3*, sys::array<raycast_hit>*, float, int, unity::query_trigger_interaction ) =
+                ( decltype( raycast_non_alloc ) )( game_assembly + Offsets::Physics::RaycastNonAlloc );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            vector3* _origin = caller.push<vector3>( origin );
+            vector3* _direction = caller.push<vector3>( direction );
+
+            return caller( raycast_non_alloc, _origin, _direction, results, max_distance, layer_mask, query_trigger_interaction );
+        }
+    };
 }
 
 namespace rust {
@@ -1072,8 +1140,8 @@ namespace rust {
 
     class player_eyes {
     public:
+        // Yes, these are flipped and correct - fn(ret, this), not fn(this, ret)
         vector3 get_position() {
-            // Yes, this is flipped and correct
             void ( *get_position )( vector3*, player_eyes* ) = ( decltype( get_position ) )( game_assembly + Offsets::PlayerEyes::get_position );
 
             um::caller& caller = um::get_caller_for_thread();
@@ -1081,6 +1149,20 @@ namespace rust {
             vector3* position = caller.push<vector3>();
             caller( get_position, position, this );
             return *position;
+        }
+
+        quaternion get_rotation() {
+            void ( *get_rotation )( quaternion*, player_eyes* ) = ( decltype( get_rotation ) )( game_assembly + Offsets::PlayerEyes::get_rotation );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            quaternion* rotation = caller.push<quaternion>();
+            caller( get_rotation, rotation, this );
+            return *rotation;
+        }
+
+        vector3 body_forward() {
+            return rotate_vector_by_quaternion( get_rotation(), vector3::forward );
         }
 
         static inline il2cpp_class* klass_;
@@ -1357,6 +1439,11 @@ namespace rust {
         static inline il2cpp_class* klass_;
     };
 
+    class base_launcher : public base_projectile {
+    public:
+        static inline il2cpp_class* klass_;
+    };
+
     class graphics {
     public:
         class static_fields {
@@ -1562,11 +1649,21 @@ namespace rust {
     
     class game_physics {
     public:
+        class static_fields {
+        public:
+            FIELD( sys::array<unity::raycast_hit>*, hit_buffer, Offsets::GamePhysics_Static::hitBuffer );
+        };
 
+        static inline static_fields* static_fields_;
     };
 
     class antihack {
     public:
         static inline float projectile_forgiveness = 0.495f; /* 0.5f */
+    };
+
+    class server_projectile {
+    public:
+        static inline int mask = 1237003025;
     };
 }

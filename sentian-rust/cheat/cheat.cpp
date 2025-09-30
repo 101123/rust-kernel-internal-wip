@@ -54,7 +54,9 @@ class_lookup class_lookups[] = {
 	{ &rust::item_icon::klass_, nullptr, nullptr, ItemIcon_TypeDefinitionIndex },
 	{ &rust::client::klass_, nullptr, nullptr, Client_TypeDefinitionIndex },
 	{ &unity::game_object::klass_, nullptr, nullptr, GameObject_TypeDefinitionIndex },
-	{ &rust::projectile_weapon_mod::klass_, nullptr, nullptr, ProjectileWeaponMod_TypeDefinitionIndex }
+	{ &rust::projectile_weapon_mod::klass_, nullptr, nullptr, ProjectileWeaponMod_TypeDefinitionIndex },
+	{ &rust::base_launcher::klass_, nullptr, nullptr, BaseLauncher_TypeDefinitionIndex },
+	{ nullptr, nullptr, &rust::game_physics::static_fields_, GamePhysics_Static_TypeDefinitionIndex }
 };
 
 parent_class_lookup parent_class_lookups[] = {

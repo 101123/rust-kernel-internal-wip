@@ -87,6 +87,7 @@ namespace Offsets {
 		constexpr const static size_t InverseTransformDirection_Injected = 0x113150;
 		constexpr const static size_t InverseTransformPoint_Injected = 0x113cb0;
 		constexpr const static size_t InverseTransformVector_Injected = 0x1136d0;
+		constexpr const static size_t GetPositionAndRotation = 0x1127f0;
 		constexpr const static size_t SetLocalPositionAndRotation_Injected = 0x112650;
 		constexpr const static size_t SetPositionAndRotation_Injected = 0x112510;
 		constexpr const static size_t TransformDirection_Injected = 0x112e90;
@@ -340,6 +341,15 @@ namespace Offsets {
 
 		// Functions
 		constexpr const static size_t SetKeys = 0xeee50;
+	}
+
+#define Physics_TypeDefinitionIndex -1
+
+	namespace Physics {
+
+		// Functions
+		constexpr const static size_t Raycast = 0xaee1da0;
+		constexpr const static size_t RaycastNonAlloc = 0xaee4470;
 	}
 
 #define BaseNetworkable_TypeDefinitionIndex 7079
@@ -2335,6 +2345,17 @@ namespace Offsets {
 
 		// Functions
 		constexpr const static size_t WorldPosToImagePos = 0x2e7d020;
+	}
+
+	// obf name: ::%0510d328e2cfd5444468b9cf7f4eefa585ac12f4
+#define GamePhysics_Static_ClassName "%60d2e3dab5e3a301b95383106f6cb56f38c712b4/%0510d328e2cfd5444468b9cf7f4eefa585ac12f4"
+#define GamePhysics_Static_ClassNameShort "%0510d328e2cfd5444468b9cf7f4eefa585ac12f4"
+#define GamePhysics_Static_TypeDefinitionIndex 259
+
+	namespace GamePhysics_Static {
+
+		// Offsets
+		constexpr const static size_t hitBuffer = 0x98;
 	}
 
 	// obf name: ::%60d2e3dab5e3a301b95383106f6cb56f38c712b4

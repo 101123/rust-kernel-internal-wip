@@ -242,6 +242,7 @@ DEFINE_CONTEXT( local_player,
 	rust::base_player* entity;
 	rust::player_eyes* eyes;
 	vector3 eyes_position;
+	vector3 body_forward;
 );
 
 DEFINE_CONTEXT( held_weapon,
@@ -313,7 +314,16 @@ inline cvar instant_loot = cvar( H( "Instant Loot" ), true );
 inline cvar no_attack_restrictions = cvar( H( "No Attack Restrictions" ), true );
 inline bool previous_admin_cheat;
 
-inline cvar draw_rocket_trajectory = cvar( H( "Draw Rocket Trajectory" ), false );
+DEFINE_CONTEXT( draw_rocket_trajectory,
+	cvar enabled = cvar( H( "Draw Rocket Trajectory" ), true );
+
+	vector3 points[ 128 + 1 ];
+	uint32_t num_points;
+	float travel_time;
+	bool hit;
+
+	util::mutex lock;
+);
 
 inline cvar spider_man = cvar( H( "Spider-Man" ), false );
 inline cvar no_fall_damage = cvar( H( "No Fall Damage" ), false );
