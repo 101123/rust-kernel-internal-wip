@@ -122,6 +122,21 @@ void features::weapon_modifiers( rust::base_projectile* weapon ) {
 		( sway_modifier.enabled ? sway_modifier.scale.value : 1.f );
 
 	weapon->automatic = force_automatic ? true : weapon_data->automatic;
+
+	// TODO: This must be reset as it persists until you fire
+	if ( instant_eoka && weapon->is<rust::flint_strike_weapon>() ) {
+		( ( rust::flint_strike_weapon* )weapon )->did_spark_this_frame = true;
+	}
+
+	if ( weapon->is<rust::compound_bow_weapon>() ) {
+		auto _weapon = ( rust::compound_bow_weapon* )weapon;
+
+		if ( previous_string_hold_duration_max == -1.f ) {
+			previous_string_hold_duration_max = _weapon->string_hold_duration_max;
+		}
+
+		_weapon->string_hold_duration_max = instant_compound_bow ? 0.f : previous_string_hold_duration_max;
+	}
 }
 
 bool calc_angle( const vector3& src, const vector3& dst, vector3& result ) {

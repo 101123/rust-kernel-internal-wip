@@ -982,6 +982,7 @@ void gui::run() {
                     right.toggle( "Faster bullets", &fast_bullet );
 
                     right.toggle( S( "Instant eoka" ), &instant_eoka );
+                    right.toggle( S( "Instant compound bow charge" ), &instant_compound_bow );
 
                     right.end();
                     break;

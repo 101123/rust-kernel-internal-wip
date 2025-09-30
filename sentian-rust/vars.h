@@ -309,6 +309,8 @@ DEFINE_CONTEXT( thick_bullet,
 inline cvar force_automatic = cvar( H( "Force Automatic" ), false );
 
 inline cvar instant_eoka = cvar( H( "Instant Eoka" ), false );
+inline cvar instant_compound_bow = cvar( H( "Instant Compound Bow" ), false );
+inline float previous_string_hold_duration_max = -1.f;
 
 inline cvar fast_bullet = cvar( H( "Fast Bullet" ), false );
 
