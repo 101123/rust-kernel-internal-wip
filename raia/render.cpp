@@ -262,7 +262,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		bool draw_avatar = !cached_player.scientist && cached_player.avatar_srv && player_avatar;
 
 		if ( visuals.name || draw_avatar ) {
-			float avatar_width = draw_avatar ? 12.f : 0.f;
+			float avatar_width = draw_avatar ? 13.f : 0.f;
 			float name_width = visuals.name ? renderer::calc_text_size( fonts::verdana, cached_player.name ).x : 0.f;
 			float spacing = ( draw_avatar && visuals.name ) ? 3.f : 0.f;
 			float total_width = avatar_width + spacing + name_width;

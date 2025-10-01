@@ -42,6 +42,12 @@ void entity_manager::destroy() {
     dropped_item_map temp_dropped_item_map;
     entities.dropped_items.swap( temp_dropped_item_map );
 
+    for ( auto& [ _, cached_player ] : entities.players ) {
+        if ( cached_player.avatar_srv ) {
+            cached_player.avatar_srv->Release();
+        }
+    }
+
     player_map temp_player_map;
     entities.players.swap( temp_player_map );
 }
