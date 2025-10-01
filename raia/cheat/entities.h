@@ -48,7 +48,7 @@ struct cached_player {
 	bool scientist;
 	uint64_t user_id;
 	cached_bone_data bone_data;
-	wchar_t name[ 128 ];
+	char name[ 256 ];
 	int active_item_idx;
 	int active_item_id;
 	cached_belt_item belt_items[ 6 ];

@@ -259,8 +259,27 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 			}
 		}
 
-		if ( visuals.name ) {
-			renderer::draw_text( bounds.left + half, bounds.top - 11.f, fonts::verdana, text_flags::centered | text_flags::drop_shadow, visuals.name_color, cached_player.name );
+		bool draw_avatar = !cached_player.scientist && cached_player.avatar_srv && player_avatar;
+
+		if ( visuals.name || draw_avatar ) {
+			float offset = 0.f;
+
+			if ( visuals.name ) {
+				vector2 name_size = renderer::calc_text_size( fonts::verdana, cached_player.name );
+
+				renderer::draw_text( bounds.left + half - ( name_size.x / 2.f ), bounds.top - 11.f, 
+					fonts::verdana, text_flags::none, visuals.name_color, cached_player.name );
+
+				offset -= name_size.x;
+			}
+
+			if ( draw_avatar ) {
+				renderer::draw_unity_image( cached_player.avatar_srv, bounds.left + half - offset, bounds.top - 11.f, 13.f, 13.f, 2.f );
+			}
+		}
+
+		if ( player_avatar && cached_player.avatar_srv ) {
+			renderer::draw_unity_image( cached_player.avatar_srv, bounds.left, bounds.top - 11.f, 13.f, 13.f, 2.f );
 		}
 
 		float offset = 0.f;

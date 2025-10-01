@@ -808,7 +808,7 @@ bool cache_player( rust::base_player* player, cached_player& cached_player ) {
     cached_player.scientist = !player->is<rust::base_player>();
     cached_player.user_id = player->get_user_id();
 
-    if ( cached_player.user_id > 76561197960265728 && cached_player.user_id < 76561202255233023 ) {
+    if ( !cached_player.scientist && cached_player.user_id > 76561197960265728 && cached_player.user_id < 76561202255233023 ) {
         unity::texture* avatar_texture = rust::steam_client_wrapper::get_avatar_texture( cached_player.user_id );
 
         if ( is_valid_ptr( avatar_texture ) ) {
@@ -826,21 +826,25 @@ bool cache_player( rust::base_player* player, cached_player& cached_player ) {
     cached_player.eyes = eyes;
     cached_player.inventory = inventory;
 
-    const wchar_t* name = L"Scientist";
-
-    if ( player->is<rust::base_player>() && is_valid_ptr( player->display_name ) ) {
-        name = player->display_name->buffer;
-    } else if ( player->is<rust::tunnel_dweller>() ) {
-        name = L"Tunnel Dweller";
-    } else if ( player->is<rust::underwater_dweller>() ) {
-        name = L"Underwater Dweller";
-    } else if ( player->is<rust::scarecrow_npc>() ) {
-        name = L"Scarecrow";
-    } else if ( player->is<rust::gingerbread_npc>() ) {
-        name = L"Gingerbread";
+    if ( !cached_player.scientist && is_valid_ptr( player->display_name ) ) {
+        renderer::wstr_to_utf8( player->display_name->buffer, cached_player.name, sizeof( cached_player.name ) );
     }
 
-    wcscpy_s( cached_player.name, _countof( cached_player.name ), name );
+    else {
+        const char* name = S( "Scientist" );
+
+        if ( player->is<rust::tunnel_dweller>() ) {
+            name = S( "Tunnel Dweller" );
+        } else if ( player->is<rust::underwater_dweller>() ) {
+            name = S( "Underwater Dweller" );
+        } else if ( player->is<rust::scarecrow_npc>() ) {
+            name = S( "Scarecrow" );
+        } else if ( player->is<rust::gingerbread_npc>() ) {
+            name = S( "Gingerbread" );
+        }
+
+        strcpy_s( cached_player.name, sizeof( cached_player.name ), name );
+    }
 
     glow_manager::add_player( player );
 

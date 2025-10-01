@@ -56,10 +56,11 @@ namespace renderer {
 	void draw_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const char* text );
 	void draw_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const wchar_t* text );
 	void draw_image( ID3D11ShaderResourceView* srv, float x, float y, float width, float height );
-	void draw_unity_image( ID3D11ShaderResourceView* srv, float x, float y, float width, float height );
+	void draw_unity_image( ID3D11ShaderResourceView* srv, float x, float y, float width, float height, float rounding = 0.f );
 
 	void push_clip_rect( float x, float y, float width, float height );
 	void pop_clip_rect();
 
 	vector2 calc_text_size( uint32_t font, const char* text );
+	void wstr_to_utf8( const wchar_t* in, char* out, int out_size );
 }

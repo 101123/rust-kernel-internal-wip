@@ -388,8 +388,8 @@ void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint3
 	float size = _font->LegacySize;
 
 	if ( flags & text_flags::centered ) {
-		ImVec2 bounds = _font->CalcTextSizeA( size, FLT_MAX, 0.f, text );
-		x -= bounds.x / 2.f;
+		ImVec2 text_size = _font->CalcTextSizeA( size, FLT_MAX, 0.f, text );
+		x -= text_size.x / 2.f;
 	}
 
 	// Small fonts centering "fix"
@@ -418,9 +418,9 @@ void renderer::draw_image( ID3D11ShaderResourceView* srv, float x, float y, floa
 	draw_list->AddImage( ImTextureRef( ( ImTextureID )srv ), ImVec2( x, y ), ImVec2( x + width, y + height ) );
 }
 
-void renderer::draw_unity_image( ID3D11ShaderResourceView* srv, float x, float y, float width, float height ) {
+void renderer::draw_unity_image( ID3D11ShaderResourceView* srv, float x, float y, float width, float height, float rounding ) {
 	draw_list->AddCallback( ( ImDrawCallback )ImGui_ImplDX11_SetGammaFix, nullptr );
-	draw_list->AddImage( ImTextureRef( ( ImTextureID )srv ), ImVec2( x, y ), ImVec2( x + width, y + height ), ImVec2( 0.f, 1.f ), ImVec2( 1.f, 0.f ) );
+	draw_list->AddImageRounded( ImTextureRef( ( ImTextureID )srv ), ImVec2( x, y ), ImVec2( x + width, y + height ), ImVec2( 0.f, 1.f ), ImVec2( 1.f, 0.f ), COL32_WHITE, rounding );
 	draw_list->AddCallback( ( ImDrawCallback )ImGui_ImplDX11_RestoreGammaFix, nullptr );
 }
 
@@ -437,4 +437,8 @@ vector2 renderer::calc_text_size( uint32_t font, const char* text ) {
 	ImVec2 size = _font->CalcTextSizeA( _font->LegacySize, FLT_MAX, 0.f, text );
 
 	return vector2( size.x, size.y );
+}
+
+void renderer::wstr_to_utf8( const wchar_t* in, char* out, int out_size ) {
+	ImTextStrToUtf8( out, out_size, in, in + wcslen( in ) + 1llu );
 }

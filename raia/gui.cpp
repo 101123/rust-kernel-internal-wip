@@ -852,6 +852,10 @@ void player_visuals_impl( group_box& left, group_box& right, cvar_player_visuals
     left.toggle( "Name", &visuals.name );
     left.color_picker( &visuals.name_color );
 
+    if ( is_player_visuals ) {
+        left.toggle( "Avatar", &player_avatar );
+    }
+
     left.toggle( "Held item", &visuals.held_item );
     left.color_picker( &visuals.held_item_color );
 
@@ -864,10 +868,6 @@ void player_visuals_impl( group_box& left, group_box& right, cvar_player_visuals
 
     left.toggle( "Distance", &visuals.distance );
     left.color_picker( &visuals.distance_color );
-
-    if ( is_player_visuals ) {
-        
-    }
 
     left.end();
 
