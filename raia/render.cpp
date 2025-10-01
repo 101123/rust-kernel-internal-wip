@@ -262,24 +262,21 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		bool draw_avatar = !cached_player.scientist && cached_player.avatar_srv && player_avatar;
 
 		if ( visuals.name || draw_avatar ) {
-			float offset = 0.f;
-
-			if ( visuals.name ) {
-				vector2 name_size = renderer::calc_text_size( fonts::verdana, cached_player.name );
-
-				renderer::draw_text( bounds.left + half - ( name_size.x / 2.f ), bounds.top - 11.f, 
-					fonts::verdana, text_flags::drop_shadow, visuals.name_color, cached_player.name );
-
-				offset -= name_size.x;
-			}
+			float avatar_width = draw_avatar ? 12.f : 0.f;
+			float name_width = visuals.name ? renderer::calc_text_size( fonts::verdana, cached_player.name ).x : 0.f;
+			float spacing = ( draw_avatar && visuals.name ) ? 3.f : 0.f;
+			float total_width = avatar_width + spacing + name_width;
+			float cursor = bounds.left + half - ( total_width / 2.f );
 
 			if ( draw_avatar ) {
-				renderer::draw_unity_image( cached_player.avatar_srv, bounds.left + half - offset, bounds.top - 11.f, 13.f, 13.f, 2.f );
-			}
-		}
+				renderer::draw_unity_image( cached_player.avatar_srv, cursor, bounds.top - 14.f, avatar_width, avatar_width, 2.f );
 
-		if ( player_avatar && cached_player.avatar_srv ) {
-			renderer::draw_unity_image( cached_player.avatar_srv, bounds.left, bounds.top - 11.f, 13.f, 13.f, 2.f );
+				cursor += avatar_width + spacing;
+			}
+
+			if ( visuals.name ) {
+				renderer::draw_text( cursor, bounds.top - 11.f, fonts::verdana, text_flags::drop_shadow, visuals.name_color, cached_player.name );
+			}
 		}
 
 		float offset = 0.f;
