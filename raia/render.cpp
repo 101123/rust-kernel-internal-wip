@@ -268,7 +268,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 				vector2 name_size = renderer::calc_text_size( fonts::verdana, cached_player.name );
 
 				renderer::draw_text( bounds.left + half - ( name_size.x / 2.f ), bounds.top - 11.f, 
-					fonts::verdana, text_flags::none, visuals.name_color, cached_player.name );
+					fonts::verdana, text_flags::drop_shadow, visuals.name_color, cached_player.name );
 
 				offset -= name_size.x;
 			}
