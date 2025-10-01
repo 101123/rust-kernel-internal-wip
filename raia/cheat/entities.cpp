@@ -31,6 +31,8 @@ void entity_manager::init() {
 }
 
 void entity_manager::destroy() {
+    util::scoped_spinlock lock( &cache_lock );
+
     cached_entities& entities = entity_cache.get();
 
     entity_map temp_entity_map;
