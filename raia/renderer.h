@@ -54,6 +54,8 @@ namespace renderer {
 	void draw_line( float x1, float y1, float x2, float y2, float thickness, uint32_t color );
 	void draw_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const char* text );
 	void draw_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const wchar_t* text );
+	void draw_image( void* texture_id, float x, float y, float width, float height );
+	void draw_unity_image( void* texture_id, float x, float y, float width, float height );
 
 	void push_clip_rect( float x, float y, float width, float height );
 	void pop_clip_rect();
