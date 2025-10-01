@@ -1,23 +1,11 @@
 #pragma once
 
+#include "sdk/declare.h"
+
 #include "math/vec3.h"
 #include "vars.h"
 
 #include <vector>
-
-namespace unity {
-	class transform;
-}
-
-namespace rust {
-	class base_networkable;
-	class base_entity;
-	class base_combat_entity;
-	class base_player;
-	class player_eyes;
-	class player_inventory;
-	class world_item;
-}
 
 struct cache_specifier {
 	const void** cache_functions;
@@ -58,6 +46,7 @@ struct cached_bone_data {
 struct cached_player {
 	bool init;
 	bool scientist;
+	uint64_t user_id;
 	cached_bone_data bone_data;
 	wchar_t name[ 128 ];
 	int active_item_idx;
@@ -65,6 +54,7 @@ struct cached_player {
 	cached_belt_item belt_items[ 6 ];
 	rust::player_eyes* eyes;
 	rust::player_inventory* inventory;
+	ID3D11ShaderResourceView* avatar_srv;
 };
 
 struct cached_dropped_item {

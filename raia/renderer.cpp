@@ -414,13 +414,13 @@ void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint3
 	draw_text( x, y, font, flags, color, buffer );
 }
 
-void renderer::draw_image( void* texture_id, float x, float y, float width, float height ) {
-	draw_list->AddImage( ImTextureRef( ( ImTextureID )texture_id ), ImVec2( x, y ), ImVec2( x + width, y + height ) );
+void renderer::draw_image( ID3D11ShaderResourceView* srv, float x, float y, float width, float height ) {
+	draw_list->AddImage( ImTextureRef( ( ImTextureID )srv ), ImVec2( x, y ), ImVec2( x + width, y + height ) );
 }
 
-void renderer::draw_unity_image( void* texture_id, float x, float y, float width, float height ) {
+void renderer::draw_unity_image( ID3D11ShaderResourceView* srv, float x, float y, float width, float height ) {
 	draw_list->AddCallback( ( ImDrawCallback )ImGui_ImplDX11_SetGammaFix, nullptr );
-	draw_list->AddImage( ImTextureRef( ( ImTextureID )texture_id ), ImVec2( x, y ), ImVec2( x + width, y + height ), ImVec2( 0.f, 1.f ), ImVec2( 1.f, 0.f ) );
+	draw_list->AddImage( ImTextureRef( ( ImTextureID )srv ), ImVec2( x, y ), ImVec2( x + width, y + height ), ImVec2( 0.f, 1.f ), ImVec2( 1.f, 0.f ) );
 	draw_list->AddCallback( ( ImDrawCallback )ImGui_ImplDX11_RestoreGammaFix, nullptr );
 }
 

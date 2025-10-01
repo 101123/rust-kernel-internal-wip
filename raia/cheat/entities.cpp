@@ -2,6 +2,7 @@
 #include "cheat/sdk/sdk.h"
 #include "util.h"
 #include "glow.h"
+#include "dx.h"
 
 #include <ankerl/unordered_dense.h>
 #include <md5.h>
@@ -157,9 +158,15 @@ namespace player_cacher {
         if ( iterator == players.end() )
             return;
 
-        players.erase( iterator );
+        auto& [ _, cached_player ] = *iterator;
+
+        if ( cached_player.avatar_srv ) {
+            cached_player.avatar_srv->Release();
+        }
 
         glow_manager::remove_player( player );
+
+        players.erase( iterator );
     }
 
     const void* cache_functions[] = {
@@ -798,7 +805,23 @@ bool cache_player( rust::base_player* player, cached_player& cached_player ) {
         cached_player.bone_data.transforms[ i ] = transform;
     }
 
-    cached_player.scientist = true;
+    cached_player.scientist = !player->is<rust::base_player>();
+    cached_player.user_id = player->get_user_id();
+
+    if ( cached_player.user_id > 76561197960265728 && cached_player.user_id < 76561202255233023 ) {
+        unity::texture* avatar_texture = rust::steam_client_wrapper::get_avatar_texture( cached_player.user_id );
+
+        if ( is_valid_ptr( avatar_texture ) ) {
+            ID3D11ShaderResourceView* srv = avatar_texture->get_srv();
+
+            if ( is_valid_ptr( srv ) ) {
+                // Increase reference count for the srv so it doesn't get freed while we're using it
+                srv->AddRef();
+
+                cached_player.avatar_srv = srv;
+            }
+        }
+    }
 
     cached_player.eyes = eyes;
     cached_player.inventory = inventory;
@@ -806,7 +829,6 @@ bool cache_player( rust::base_player* player, cached_player& cached_player ) {
     const wchar_t* name = L"Scientist";
 
     if ( player->is<rust::base_player>() && is_valid_ptr( player->display_name ) ) {
-        cached_player.scientist = false;
         name = player->display_name->buffer;
     } else if ( player->is<rust::tunnel_dweller>() ) {
         name = L"Tunnel Dweller";

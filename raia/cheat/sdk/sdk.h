@@ -146,6 +146,24 @@ namespace unity {
                 return renderer_data->is_visible;
             }
         };
+
+        class d3d11_texture {
+        public:
+            FIELD( ID3D11ShaderResourceView*, srv, 0x8 );
+        };
+
+        class texture {
+        public:
+            FIELD( uint32_t, texture_id, 0x50 );
+
+            d3d11_texture* get_native_texture_ptr() {
+                d3d11_texture* ( *get_texture )( void*, uint32_t ) = ( decltype( get_texture ) )( unity_player + 0x90C490 );
+
+                um::caller& caller = um::get_caller_for_thread();
+
+                return caller( get_texture, nullptr, texture_id );
+            }
+        };
     }
 
     enum key_code {
@@ -499,8 +517,23 @@ namespace unity {
         }
     };
 
-    class texture {
+    class texture : public object {
     public:
+        internals::texture* get_native_texture() {
+            return ( internals::texture* )cached_ptr;
+        }
+
+        ID3D11ShaderResourceView* get_srv() {
+            internals::texture* native_texture = get_native_texture();
+            if ( !is_valid_ptr( native_texture ) )
+                return nullptr;
+
+            internals::d3d11_texture* d3d11_texture = native_texture->get_native_texture_ptr();
+            if ( !is_valid_ptr( d3d11_texture ) )
+                return nullptr;
+
+            return d3d11_texture->srv;
+        }
     };
 
     class render_texture : public texture {
@@ -1677,5 +1710,18 @@ namespace rust {
     class server_projectile {
     public:
         static inline int mask = 1237003025;
+    };
+
+    class steam_client_wrapper {
+    public:
+        // This function isn't labeled as static, but it doesn't use this
+        static unity::texture* get_avatar_texture( uint64_t steam_id ) {
+            unity::texture* ( *get_avatar_texture )( steam_client_wrapper*, uint64_t ) =
+                ( decltype( get_avatar_texture ) )( game_assembly + Offsets::SteamClientWrapper::GetAvatarTexture );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_avatar_texture, nullptr, steam_id );
+        }
     };
 }

@@ -18,19 +18,20 @@ namespace unity {
 namespace rust {
 	class base_networkable;
 	class base_entity;
-
+	class base_combat_entity;
 	class item;
 	class held_entity;
-
 	class player_eyes;
 	class base_player;
-
 	class base_projectile;
 	class base_launcher;
-
 	class model;
 	class networkable;
 	class item_container;
+	class player_inventory;
+	class world_item;
 
 	using networkable_id = uint64_t;
 }
+
+struct ID3D11ShaderResourceView;
