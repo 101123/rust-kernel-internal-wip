@@ -267,41 +267,57 @@ bool resolve_hooks() {
 		}
 	};
 
-	auto& hooks = hook_manager::hooks;
+	enum command_hook_type {
+		set,
+		call
+	};
 
-	const wchar_t* hooked_commands[] = {
-		S( L"noclip" ),
-		S( L"debugcamera" ),
-		S( L"camlerp" ),
-		S( L"camlerptilt" ),
-		S( L"camlookspeed" ),
-		S( L"camspeed" )
+	struct command_hook {
+		const wchar_t* name;
+		command_hook_type type;
+	};
+
+	const command_hook hooked_commands[] = {
+		{ S( L"noclip" ), command_hook_type::call },
+		{ S( L"debugcamera" ), command_hook_type::call },
+		{ S( L"camlerp" ), command_hook_type::set },
+		{ S( L"camlerptilt" ), command_hook_type::set },
+		{ S( L"camlookspeed" ), command_hook_type::set },
+		{ S( L"camspeed" ), command_hook_type::set },
 	};
 
 	for ( auto hooked_command : hooked_commands ) {
 		// The subsequent find call requires an actual string object
-		sys::string* string = sys::string::create( hooked_command );
-		if ( !string )
+		sys::string* name = sys::string::create( hooked_command.name );
+		if ( !name )
 			return false;
 
-		rust::console_system::command* command = rust::console_system::index::client::find( string );
-		if ( !is_valid_ptr( command ) || !is_valid_ptr( command->call ) )
+		rust::console_system::command* command = rust::console_system::index::client::find( name );
+		if ( !is_valid_ptr( command ) )
+			return false;
+
+		sys::action* action = hooked_command.type == command_hook_type::set ? command->set_override : command->call;
+		if ( !is_valid_ptr( action ) )
 			return false;
 
 		hook command_hook = {
 			.init = false,
 			.type = hook_type::ptr_swap,
-			.value = ( uintptr_t* )command->_address_of_call(),
+			.value = ( uintptr_t* )action->_address_of_invoke_impl(),
 			.original = 0ull,
-			.corrupt = generate_corrupt_value(),
+			.corrupt = 0ull,
 			.ptr_swap = {
-				.pre_handler = hook_handlers::pre_console_command_call,
+				.pre_handler = hooked_command.type == command_hook_type::set ? 
+					hook_handlers::pre_console_command_set : hook_handlers::pre_console_command_call,
+
 				.post_handler = nullptr
 			}
 		};
 
-		hooks.add( command_hook );
+		hook_manager::hooks.add( command_hook );
 	}
+
+	auto& hooks = hook_manager::hooks;
 
 	hooks.add( network_client_create_networkable_hook );
 	hooks.add( network_client_destroy_networkable_hook );

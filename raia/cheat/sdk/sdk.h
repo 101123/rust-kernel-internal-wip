@@ -1752,6 +1752,7 @@ namespace rust {
     public:
         class command {
         public:
+            FIELD( sys::action*, set_override, Offsets::ConsoleSystem_Command::SetOveride );
             FIELD( sys::action*, call, Offsets::ConsoleSystem_Command::Call );
         };
 

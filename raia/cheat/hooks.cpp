@@ -636,6 +636,10 @@ void hook_handlers::pre_base_player_client_input( _CONTEXT* context ) {
 	base_player_client_input_pre_hook( ( rust::base_player* )context->Rcx, ( rust::input_state* )context->Rdx );
 }
 
+void hook_handlers::pre_console_command_set( _CONTEXT* ) {
+	LOG( "Set!\n" );
+}
+
 void hook_handlers::pre_console_command_call( _CONTEXT* ) {
-	LOG( "on command!\n" );
+	LOG( "Call!\n" );
 }
