@@ -1,10 +1,14 @@
 #pragma once
 
+// TODO: This file has too many purposes, refactor this
+
 #include "util.h"
 #include "renderer.h"
 #include "vk.h"
 #include "cheat/sdk/declare.h"
 #include "math/vec3.h"
+
+#include <utility>
 
 template <typename T>
 struct cvar_t {
@@ -122,6 +126,7 @@ inline cvar_player_visuals player_visuals = WRAP_PLAYER_CONFIGURATION( "Players"
 inline cvar_visual cvar_wounded = WRAP_VISUAL( "Wounded", true, 500, COL32( 255, 0, 0, 255 ) );
 inline cvar_visual cvar_sleeper = WRAP_VISUAL( "Sleeper", false, 30, COL32( 255, 255, 255, 255 ) );
 inline cvar_visual cvar_corpse = WRAP_VISUAL( "Corpse", true, 100, COL32( 255, 255, 255, 255 ) );
+inline cvar player_avatar = cvar( H( "Player Avatar" ), true );
 
 inline cvar_player_visuals scientist_visuals = WRAP_PLAYER_CONFIGURATION( "Scientists", COL32( 125, 195, 255, 255 ) );
 
@@ -232,9 +237,9 @@ inline cvar_visual dropped_component = WRAP_VISUAL( "Dropped Component", false, 
 inline cvar_visual dropped_electrical = WRAP_VISUAL( "Dropped Electrical", false, 500, COL32( 231, 76, 60, 255 ) );
 inline cvar_visual dropped_fun = WRAP_VISUAL( "Dropped Fun", false, 500, COL32( 142, 68, 173, 255 ) );
 
-#define DEFINE_CONTEXT( Name, Variables ) \
+#define DEFINE_CONTEXT( Name, ... ) \
     struct Name##_context { \
-        Variables \
+        __VA_ARGS__ \
     }; \
     inline Name##_context Name;
 
@@ -277,12 +282,14 @@ namespace aimbot_type {
 	};
 }
 
+struct cached_player;
+
 DEFINE_CONTEXT( aimbot,
 	cvar enabled = cvar( H( "Aimbot" ), true );
 	cvar_ui type = cvar_ui( H( "Aimbot Type" ), aimbot_type::memory );
 	cvar_ui fov = cvar_ui( H( "Aimbot FOV" ), 120 );
-
-	rust::base_player* target;
+	
+	const std::pair<rust::base_player*, cached_player>* player_target;
 );
 
 DEFINE_CONTEXT( recoil_modifier,

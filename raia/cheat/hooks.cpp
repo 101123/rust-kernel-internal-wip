@@ -289,7 +289,7 @@ const std::pair<rust::base_player*, cached_player>* update_target() {
 		best_distance = distance;
 	}
 
-	aimbot.target = best_target ? best_target->first : nullptr;
+	aimbot.player_target = best_target ? best_target : nullptr;
 
 	return best_target;
 }
@@ -435,6 +435,17 @@ void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot*
 			client_projectile->initial_velocity = velocity;
 			client_projectile->current_velocity = velocity;
 		}
+
+		if ( aimbot.player_target ) {
+			if ( aimbot.enabled && aimbot.type == aimbot_type::silent ) {
+				vector3 direction = ( aimbot.player_target->second.bone_data.positions[ 1 ] - server_projectile->start_position );
+				vector3 velocity = vector3::normalize( direction ) * held_weapon.velocity;
+
+				server_projectile->start_velocity = velocity;
+				client_projectile->initial_velocity = velocity;
+				client_projectile->current_velocity = velocity;
+			}
+		}
 	}
 }
 
@@ -450,7 +461,7 @@ void client_on_client_disconnected_pre_hook( rust::client* client, sys::string* 
 
 	reset_local_player();
 
-	aimbot.target = nullptr;
+	aimbot.player_target = nullptr;
 }
 
 void base_player_client_input_pre_hook( rust::base_player* base_player, rust::input_state* state ) {
@@ -478,8 +489,10 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 		if ( auto base_projectile = local_player.held_entity->as<rust::base_projectile>() ) {
 			features::weapon_modifiers( base_projectile );
 
-			if ( target && game_input.get_async_key_state( 'C' ) ) {
-				features::memory_aimbot( target );
+			if ( target ) {
+				if ( aimbot.enabled && aimbot.type == aimbot_type::memory && game_input.get_async_key_state( 'C' ) ) {
+					features::memory_aimbot( target );
+				}
 			}
 
 			if ( auto compound_bow = base_projectile->is<rust::compound_bow_weapon>() ) {
