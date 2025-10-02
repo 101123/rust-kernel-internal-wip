@@ -32,4 +32,8 @@ namespace Offsets {
         constexpr const static size_t groundAngleNew = 0x108;
         constexpr const static size_t nextSprintTime = 0x198;
     }
+
+    namespace ConsoleSystem_Option {
+        constexpr const static size_t IsFromServer = 0xC;
+    }
 }

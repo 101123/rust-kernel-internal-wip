@@ -24,8 +24,10 @@ struct hook {
 		} method_info;
 
 		struct {
-			void( *pre_handler )( _CONTEXT* );
+			bool( *pre_handler )( _CONTEXT* );
 			void( *post_handler )( _CONTEXT* );
+
+			uintptr_t retaddr;
 		} ptr_swap;
 	};
 };

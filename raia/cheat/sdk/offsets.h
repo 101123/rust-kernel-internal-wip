@@ -2680,7 +2680,7 @@ namespace Offsets {
 	// obf name: ::%74531d23f30bec0a098a76a2f5282e6b3d6b8937
 #define ConsoleSystem_Command_ClassName "%4048ac3574147e9f0f03ea1910d685d87838f871/%74531d23f30bec0a098a76a2f5282e6b3d6b8937"
 #define ConsoleSystem_Command_ClassNameShort "%74531d23f30bec0a098a76a2f5282e6b3d6b8937"
-#define ConsoleSystem_Command_TypeDefinitionIndex -1
+#define ConsoleSystem_Command_TypeDefinitionIndex 23232
 
 	namespace ConsoleSystem_Command {
 
@@ -2690,10 +2690,31 @@ namespace Offsets {
 		constexpr const static size_t Call = 0x48;
 	}
 
+	// obf name: ::%c57d40c98ef763d978cc2c32f4a1df6ce5b3334d
+#define ConsoleSystem_Option_ClassName "%4048ac3574147e9f0f03ea1910d685d87838f871/%c57d40c98ef763d978cc2c32f4a1df6ce5b3334d"
+#define ConsoleSystem_Option_ClassNameShort "%c57d40c98ef763d978cc2c32f4a1df6ce5b3334d"
+#define ConsoleSystem_Option_TypeDefinitionIndex 23242
+
+	namespace ConsoleSystem_Option {
+
+		// Offsets
+	}
+
+	// obf name: ::%207418c3733352f7dadfcd31f9bc778fa36900be
+#define ConsoleSystem_Arg_ClassName "%4048ac3574147e9f0f03ea1910d685d87838f871/%207418c3733352f7dadfcd31f9bc778fa36900be"
+#define ConsoleSystem_Arg_ClassNameShort "%207418c3733352f7dadfcd31f9bc778fa36900be"
+#define ConsoleSystem_Arg_TypeDefinitionIndex 23230
+
+	namespace ConsoleSystem_Arg {
+
+		// Offsets
+		constexpr const static size_t Option = 0x20;
+	}
+
 	// obf name: ::%de777af42aa8091b032a138b66645a42efa67099
 #define ConsoleSystem_Index_Client_ClassName "%4048ac3574147e9f0f03ea1910d685d87838f871/%4104071d9762ecab3287da38f0567f994f923b7d.%de777af42aa8091b032a138b66645a42efa67099"
 #define ConsoleSystem_Index_Client_ClassNameShort "%de777af42aa8091b032a138b66645a42efa67099"
-#define ConsoleSystem_Index_Client_TypeDefinitionIndex -1
+#define ConsoleSystem_Index_Client_TypeDefinitionIndex 23238
 
 	namespace ConsoleSystem_Index_Client {
 

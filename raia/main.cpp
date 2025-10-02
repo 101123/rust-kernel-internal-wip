@@ -112,6 +112,7 @@ bool is_exception_hook( CONTEXT* context, uint64_t find, uint64_t replace, uint6
 	return match;
 }
 
+// This doesn't need to be thread-safe because Rust is single-threaded
 CONTEXT previous_context;
 
 bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t previous_mode ) {

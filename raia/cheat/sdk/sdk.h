@@ -1756,6 +1756,21 @@ namespace rust {
             FIELD( sys::action*, call, Offsets::ConsoleSystem_Command::Call );
         };
 
+        struct option {
+        public:
+            FIELD( bool, is_from_server, Offsets::ConsoleSystem_Option::IsFromServer );
+
+        private:
+            uint8_t _[ 64 ];
+        };
+
+        class arg : public il2cpp_object {
+        public:
+            FIELD( rust::console_system::option, option, Offsets::ConsoleSystem_Arg::Option );
+
+            static inline il2cpp_class* klass_;
+        };
+
         class index {
         public:
             class client {

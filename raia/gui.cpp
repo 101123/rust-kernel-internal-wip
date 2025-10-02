@@ -1209,6 +1209,9 @@ void gui::run() {
                     left.end();
 
                     right.begin();
+
+                    right.toggle( "Block server commands", &block_server_commands );
+
                     right.end();
 
                     break;

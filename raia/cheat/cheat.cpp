@@ -57,7 +57,8 @@ class_lookup class_lookups[] = {
 	{ &rust::projectile_weapon_mod::klass_, nullptr, nullptr, ProjectileWeaponMod_TypeDefinitionIndex },
 	{ &rust::base_launcher::klass_, nullptr, nullptr, BaseLauncher_TypeDefinitionIndex },
 	{ nullptr, nullptr, &rust::game_physics::static_fields_, GamePhysics_Static_TypeDefinitionIndex },
-	{ &rust::compound_bow_weapon::klass_, nullptr, nullptr, CompoundBowWeapon_TypeDefinitionIndex }
+	{ &rust::compound_bow_weapon::klass_, nullptr, nullptr, CompoundBowWeapon_TypeDefinitionIndex },
+	{ &rust::console_system::arg::klass_, nullptr, nullptr, ConsoleSystem_Arg_TypeDefinitionIndex }
 };
 
 parent_class_lookup parent_class_lookups[] = {
@@ -308,7 +309,7 @@ bool resolve_hooks() {
 			.corrupt = 0ull,
 			.ptr_swap = {
 				.pre_handler = hooked_command.type == command_hook_type::set ? 
-					hook_handlers::pre_console_command_set : hook_handlers::pre_console_command_call,
+					hook_handlers::pre_console_system_command_set : hook_handlers::pre_console_system_command_call,
 
 				.post_handler = nullptr
 			}

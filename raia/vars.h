@@ -343,6 +343,8 @@ inline cvar infinite_jump = cvar( H( "Infinite Jump" ), false );
 inline cvar omnisprint = cvar( H( "Omnisprint" ), false );
 inline cvar on_ladder = cvar( H( "On Ladder" ), false );
 
+inline cvar block_server_commands = cvar( H( "Block Server Commands" ), true );
+
 inline cvar_bind override_night = WRAP_BIND( "Override Night", true, trigger_type::toggle, 'K' );
 inline cvar_ui ambient_color = cvar_ui( H( "Ambient Color" ), COL32( 85, 50, 75, 255 ) );
 inline cvar_f ambient_multiplier = cvar_f( H( "Ambient Multiplier" ), 2.f );
