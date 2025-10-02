@@ -157,17 +157,17 @@ bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t
 				hook.method_info.handler( context );
 			}
 
-			else if ( hook.type == hook_type::vftable ) {
-				if ( hook.vftable.pre_handler ) {
-					hook.vftable.pre_handler( context );
+			else if ( hook.type == hook_type::ptr_swap ) {
+				if ( hook.ptr_swap.pre_handler ) {
+					hook.ptr_swap.pre_handler( context );
 				}
 
-				if ( hook.vftable.post_handler ) {
+				if ( hook.ptr_swap.post_handler ) {
 					// Call the original function
 					post_hook_impl( context );
 
 					// Call the post handler
-					hook.vftable.post_handler( context );
+					hook.ptr_swap.post_handler( context );
 				}
 			}
 

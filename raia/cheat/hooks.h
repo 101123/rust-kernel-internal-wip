@@ -15,4 +15,5 @@ namespace hook_handlers {
 	void post_item_icon_try_to_move( _CONTEXT* );
 	void pre_client_on_client_disconnected( _CONTEXT* );
 	void pre_base_player_client_input( _CONTEXT* );
+	void pre_console_command_call( _CONTEXT* );
 }

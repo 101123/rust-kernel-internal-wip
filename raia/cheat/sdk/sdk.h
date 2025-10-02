@@ -28,6 +28,23 @@ namespace sys {
             wcscpy( buffer, str );
             buffer[ length ] = '\0';
         }
+
+        static string* create( const wchar_t* str ) {
+            string* ( *fast_allocate_string )( int ) =
+                ( decltype( fast_allocate_string ) )( game_assembly + Offsets::String::FastAllocateString );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            size_t length = wcslen( str );
+            string* string = caller( fast_allocate_string, length );
+            if ( !is_valid_ptr( string ) )
+                return nullptr;
+
+            string->length = length;
+            wcscpy( string->buffer, str );
+
+            return string;
+        }
     };
 
     template <typename T>
@@ -73,6 +90,11 @@ namespace sys {
     class list_dictionary {
     public:
         FIELD( buffer_list<V>*, vals, Offsets::System_ListDictionary::vals );
+    };
+
+    class action {
+    public:
+        FIELD( void*, invoke_impl, 0x18 );
     };
 }
 
@@ -1723,5 +1745,29 @@ namespace rust {
 
             return caller( get_avatar_texture, nullptr, steam_id );
         }
+    };
+
+    // These following classes are wrapped in this parent class to give much needed context when in use
+    class console_system {
+    public:
+        class command {
+        public:
+            FIELD( sys::action*, call, Offsets::ConsoleSystem_Command::Call );
+        };
+
+        class index {
+        public:
+            class client {
+            public:
+                static command* find( sys::string* name ) {
+                    command* ( *find )( sys::string* ) =
+                        ( decltype( find ) )( game_assembly + Offsets::ConsoleSystem_Index_Client::Find );
+
+                    um::caller& caller = um::get_caller_for_thread();
+
+                    return caller( find, name );
+                }
+            };
+        };
     };
 }

@@ -2677,6 +2677,38 @@ namespace Offsets {
 		// Offsets
 	}
 
+	// obf name: ::%74531d23f30bec0a098a76a2f5282e6b3d6b8937
+#define ConsoleSystem_Command_ClassName "%4048ac3574147e9f0f03ea1910d685d87838f871/%74531d23f30bec0a098a76a2f5282e6b3d6b8937"
+#define ConsoleSystem_Command_ClassNameShort "%74531d23f30bec0a098a76a2f5282e6b3d6b8937"
+#define ConsoleSystem_Command_TypeDefinitionIndex -1
+
+	namespace ConsoleSystem_Command {
+
+		// Offsets
+		constexpr const static size_t GetOveride = 0x58;
+		constexpr const static size_t SetOveride = 0x38;
+		constexpr const static size_t Call = 0x48;
+	}
+
+	// obf name: ::%de777af42aa8091b032a138b66645a42efa67099
+#define ConsoleSystem_Index_Client_ClassName "%4048ac3574147e9f0f03ea1910d685d87838f871/%4104071d9762ecab3287da38f0567f994f923b7d.%de777af42aa8091b032a138b66645a42efa67099"
+#define ConsoleSystem_Index_Client_ClassNameShort "%de777af42aa8091b032a138b66645a42efa67099"
+#define ConsoleSystem_Index_Client_TypeDefinitionIndex -1
+
+	namespace ConsoleSystem_Index_Client {
+
+		// Functions
+		constexpr const static size_t Find = 0x63d9320;
+	}
+
+#define String_TypeDefinitionIndex 10145
+
+	namespace String {
+
+		// Offsets
+		constexpr const static size_t FastAllocateString = 0x8542240;
+	}
+
 	// obf name: ::%4373d14dee1b2d51aa36143642c60b756ce166d8
 #define ProtoBuf_ProjectileShoot_ClassName "%4373d14dee1b2d51aa36143642c60b756ce166d8"
 #define ProtoBuf_ProjectileShoot_ClassNameShort "%4373d14dee1b2d51aa36143642c60b756ce166d8"

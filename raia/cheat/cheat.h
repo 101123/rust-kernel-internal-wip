@@ -7,7 +7,7 @@ struct _CONTEXT;
 namespace hook_type {
 	enum : int {
 		method_info = 1,
-		vftable = 2,
+		ptr_swap = 2,
 	};
 }
 
@@ -26,7 +26,7 @@ struct hook {
 		struct {
 			void( *pre_handler )( _CONTEXT* );
 			void( *post_handler )( _CONTEXT* );
-		} vftable;
+		} ptr_swap;
 	};
 };
 
@@ -38,7 +38,7 @@ namespace bootstrap {
 
 namespace hook_manager {
 	inline bool resolved_hooks = false;
-	inline util::array<hook, 16llu> hooks;
+	inline util::array<hook, 32llu> hooks;
 
 	bool init();
 	void place_hooks();

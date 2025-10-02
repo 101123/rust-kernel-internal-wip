@@ -61,8 +61,6 @@ namespace entity_cacher {
             return;
 
         entity_map& entities = entity_cache.get().entities;
-
-        // This is most likely unnecessary
         if ( entities.contains( entity ) )
             return;
 
@@ -92,8 +90,6 @@ namespace combat_entity_cacher {
             return;
 
         combat_entity_map& combat_entities = entity_cache.get().combat_entities;
-
-        // This is most likely unnecessary
         if ( combat_entities.contains( combat_entity ) )
             return;
 
@@ -124,8 +120,6 @@ namespace dropped_item_cacher {
             return;
 
         dropped_item_map& dropped_items = entity_cache.get().dropped_items;
-
-        // This is most likely unnecessary
         if ( dropped_items.contains( world_item ) )
             return;
 
@@ -151,11 +145,10 @@ namespace dropped_item_cacher {
 namespace player_cacher {
     void add_to_cache( rust::base_player* player, cache_specifier* specifier ) {
         player_map& players = entity_cache.get().players;
-
-        // This is most likely unnecessary
         if ( players.contains( player ) )
             return;
 
+        // The player isn't fully constructed here, so we can't cache anything
         players.insert( { player, {} } );
     }
 

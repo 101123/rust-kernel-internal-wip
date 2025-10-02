@@ -168,7 +168,7 @@ bool resolve_hooks() {
 	if ( !is_valid_ptr( facepunch_pool_free_networkable_method ) )
 		return false;
 
-	hook network_client_destroy_networkable_hook {
+	hook network_client_destroy_networkable_hook = {
 		.init = false,
 		.type = hook_type::method_info,
 		.value = ( uintptr_t* )util::relative_32( facepunch_pool_free_networkable_method, 3 ),
@@ -183,91 +183,125 @@ bool resolve_hooks() {
 	if ( !outline_manager_on_render_image_method )
 		return false;
 
-	hook outline_manager_on_render_image_hook {
+	hook outline_manager_on_render_image_hook = {
 		.init = false,
-		.type = hook_type::vftable,
+		.type = hook_type::ptr_swap,
 		.value = ( uintptr_t* )&outline_manager_on_render_image_method->method_ptr,
 		.original = 0ull,
-		.corrupt = generate_corrupt_value(),
-		.vftable = {
+		.corrupt = 0ull,
+		.ptr_swap = {
 			.pre_handler = nullptr,
 			.post_handler = hook_handlers::post_outline_manager_on_render_image
 		}
 	};
 
-	hook player_walk_movement_client_input_hook {
+	hook player_walk_movement_client_input_hook = {
 		.init = false,
-		.type = hook_type::vftable,
+		.type = hook_type::ptr_swap,
 		.value = VFUNC( rust::player_walk_movement, Offsets::PlayerWalkMovement::ClientInput_vtableoff ),
 		.original = 0ull,
-		.corrupt = generate_corrupt_value(),
-		.vftable = {
+		.corrupt = 0ull,
+		.ptr_swap = {
 			.pre_handler = hook_handlers::pre_player_walk_movement_client_input,
 			.post_handler = hook_handlers::post_player_walk_movement_client_input
 		}
 	};
 
-	hook protobuf_projectile_shoot_write_to_stream_hook {
+	hook protobuf_projectile_shoot_write_to_stream_hook = {
 		.init = false,
-		.type = hook_type::vftable,
+		.type = hook_type::ptr_swap,
 		.value = VFUNC( rust::projectile_shoot, Offsets::ProtoBuf_ProjectileShoot::WriteToStream_vtableoff ),
 		.original = 0ull,
-		.corrupt = generate_corrupt_value(),
-		.vftable = {
+		.corrupt = 0ull,
+		.ptr_swap = {
 			.pre_handler = hook_handlers::pre_protobuf_projectile_shoot_write_to_stream,
 			.post_handler = nullptr
 		}
 	};
 
-	hook item_icon_try_to_move_hook {
+	hook item_icon_try_to_move_hook = {
 		.init = false,
-		.type = hook_type::vftable,
+		.type = hook_type::ptr_swap,
 		.value = VFUNC( rust::item_icon, Offsets::ItemIcon::TryToMove_vtableoff ),
 		.original = 0ull,
-		.corrupt = generate_corrupt_value(),
-		.vftable = {
+		.corrupt = 0ull,
+		.ptr_swap = {
 			.pre_handler = nullptr,
 			.post_handler = hook_handlers::post_item_icon_try_to_move
 		}
 	};
 
-	hook protobuf_player_tick_write_to_stream_delta_hook {
+	hook protobuf_player_tick_write_to_stream_delta_hook = {
 		.init = false,
-		.type = hook_type::vftable,
+		.type = hook_type::ptr_swap,
 		.value = VFUNC( rust::player_tick, Offsets::PlayerTick::WriteToStreamDelta_vtableoff ),
 		.original = 0ull,
-		.corrupt = generate_corrupt_value(),
-		.vftable = {
+		.corrupt = 0ull,
+		.ptr_swap = {
 			.pre_handler = hook_handlers::pre_protobuf_player_tick_write_to_stream_delta,
 			.post_handler = nullptr
 		}
 	};
 
-	hook client_on_client_disconnected_hook {
+	hook client_on_client_disconnected_hook = {
 		.init = false,
-		.type = hook_type::vftable,
+		.type = hook_type::ptr_swap,
 		.value = VFUNC( rust::client, Offsets::Client::OnClientDisconnected_vtableoff ),
 		.original = 0ull,
-		.corrupt = generate_corrupt_value(),
-		.vftable = {
+		.corrupt = 0ull,
+		.ptr_swap = {
 			.pre_handler = hook_handlers::pre_client_on_client_disconnected,
 			.post_handler = nullptr
 		}
 	};
 
-	hook base_player_client_input_hook {
+	hook base_player_client_input_hook = {
 		.init = false,
-		.type = hook_type::vftable,
+		.type = hook_type::ptr_swap,
 		.value = VFUNC( rust::base_player, Offsets::BasePlayer::ClientInput_vtableoff ),
 		.original = 0ull,
-		.corrupt = generate_corrupt_value(),
-		.vftable = {
+		.corrupt = 0ull,
+		.ptr_swap = {
 			.pre_handler = hook_handlers::pre_base_player_client_input,
 			.post_handler = nullptr
 		}
 	};
 
 	auto& hooks = hook_manager::hooks;
+
+	const wchar_t* hooked_commands[] = {
+		S( L"noclip" ),
+		S( L"debugcamera" ),
+		S( L"camlerp" ),
+		S( L"camlerptilt" ),
+		S( L"camlookspeed" ),
+		S( L"camspeed" )
+	};
+
+	for ( auto hooked_command : hooked_commands ) {
+		// The subsequent find call requires an actual string object
+		sys::string* string = sys::string::create( hooked_command );
+		if ( !string )
+			return false;
+
+		rust::console_system::command* command = rust::console_system::index::client::find( string );
+		if ( !is_valid_ptr( command ) || !is_valid_ptr( command->call ) )
+			return false;
+
+		hook command_hook = {
+			.init = false,
+			.type = hook_type::ptr_swap,
+			.value = ( uintptr_t* )command->_address_of_call(),
+			.original = 0ull,
+			.corrupt = generate_corrupt_value(),
+			.ptr_swap = {
+				.pre_handler = hook_handlers::pre_console_command_call,
+				.post_handler = nullptr
+			}
+		};
+
+		hooks.add( command_hook );
+	}
 
 	hooks.add( network_client_create_networkable_hook );
 	hooks.add( network_client_destroy_networkable_hook );
@@ -302,7 +336,7 @@ void hook_manager::place_hooks() {
 			hook.original = *hook.value;
 
 			// If it's a vftable hook, we set the corrupted value to the address of the function - 1 so that it lands on function padding (0xCC)
-			if ( hook.type == hook_type::vftable ) {
+			if ( hook.type == hook_type::ptr_swap && !hook.corrupt ) {
 				hook.corrupt = hook.original - 1;
 			}
 

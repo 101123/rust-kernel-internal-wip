@@ -206,6 +206,9 @@ visual_item_info visual_items[] = {
 
 void draw_players( const entity_vector<rust::base_player*, cached_player>& players ) {
 	for ( const auto& [ player, cached_player ] : players ) {
+		if ( player == local_player.entity || !cached_player.init )
+			continue;
+
 		const cvar_player_visuals& visuals = 
 			cached_player.scientist ? scientist_visuals : player_visuals;
 
