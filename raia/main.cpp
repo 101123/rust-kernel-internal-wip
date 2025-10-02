@@ -225,7 +225,7 @@ void on_syscall( sentian::syscall_frame* new_frame, sentian::syscall_frame* old_
 	}
 }
 
-extern "C" int driver_main( sentian::driver_api* api, sentian::driver_allocation* allocation ) {
+int main( sentian::driver_api* api, sentian::driver_allocation* allocation ) {
 	if ( api->version != DRIVER_API_VERSION )
 		return 1;
 

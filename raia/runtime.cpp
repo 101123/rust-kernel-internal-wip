@@ -323,12 +323,12 @@ extern "C" {
     __declspec( allocate( ".CRT$XTA" ) ) _PVFV __xt_a[] = { nullptr };
     __declspec( allocate( ".CRT$XTZ" ) ) _PVFV __xt_z[] = { nullptr };
 
-    int driver_main( void*, void* );
+    int main( void*, void* );
     int DriverEntry( void* DriverObject, void* RegistryPath ) {
         if ( _initterm_e( __xi_a, __xi_z ) != 0 )
             return 1;
 
         _initterm( __xc_a, __xc_z );
-        return driver_main( DriverObject, RegistryPath );
+        return main( DriverObject, RegistryPath );
     }
 }
