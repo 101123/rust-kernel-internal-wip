@@ -415,8 +415,20 @@ namespace unity {
             return caller( get_child_count, this );
         }
 
+        vector3 get_euler_angles() {
+            void ( *get_euler_angles )( vector3*, transform* ) =
+                ( decltype( get_euler_angles ) )( game_assembly + Offsets::Transform::get_eulerAngles );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            vector3* euler_angles = caller.push<vector3>();
+            caller( get_euler_angles, euler_angles, this );
+            return *euler_angles;
+        }
+
         vector3 get_position() {
-            void ( *get_position_injected )( transform*, vector3* ) = ( decltype( get_position_injected ) )( unity_player + Offsets::Transform::get_position_Injected );
+            void ( *get_position_injected )( transform*, vector3* ) = 
+                ( decltype( get_position_injected ) )( unity_player + Offsets::Transform::get_position_Injected );
 
             um::caller& caller = um::get_caller_for_thread();
 

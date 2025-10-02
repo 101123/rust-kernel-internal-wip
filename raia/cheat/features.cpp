@@ -162,6 +162,16 @@ void features::memory_aimbot( const std::pair<rust::base_player*, cached_player>
 	if ( !calc_angle( local_player.eyes_position, target->second.bone_data.positions[ 1 ], angle ) )
 		return;
 
+	rust::base_entity* parent_entity = local_player.entity->parent_entity;
+	
+	if ( is_valid_ptr( parent_entity ) ) {
+		unity::transform* transform = parent_entity->get_transform();
+
+		if ( is_valid_ptr( transform ) ) {
+			angle.y -= transform->get_euler_angles().y;
+		}
+	}
+
 	input->body_angles = vector2( angle.x, angle.y );
 }
 

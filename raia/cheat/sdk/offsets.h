@@ -81,6 +81,7 @@ namespace Offsets {
 	namespace Transform {
 
 		// Functions
+		constexpr const static size_t get_eulerAngles = 0xae5ebf0;
 		constexpr const static size_t GetChild = 0x115600;
 		constexpr const static size_t GetParent = 0x111e60;
 		constexpr const static size_t GetRoot = 0x113f70;
@@ -94,7 +95,6 @@ namespace Offsets {
 		constexpr const static size_t TransformPoint_Injected = 0x1139f0;
 		constexpr const static size_t TransformVector_Injected = 0x113410;
 		constexpr const static size_t get_childCount = 0x773b0;
-		constexpr const static size_t get_eulerAngles = 0x773b0;
 		constexpr const static size_t get_localPosition_Injected = 0x111170;
 		constexpr const static size_t get_localRotation_Injected = 0x111920;
 		constexpr const static size_t get_localScale_Injected = 0x111be0;
