@@ -112,10 +112,9 @@ bool is_exception_hook( CONTEXT* context, uint64_t find, uint64_t replace, uint6
 	return match;
 }
 
-bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t previous_mode ) {
-	if ( cheat_deinit )
-		return false;
+CONTEXT previous_context;
 
+bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t previous_mode ) {
 	if ( is_rust_process() ) {
 		for ( hook& hook : hook_manager::hooks ) {
 			if ( !hook.init )
@@ -147,6 +146,12 @@ bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t
 							// Preserve the original return address
 							hook.ptr_swap.retaddr = *retaddr;
 
+							// Preserve the needed original arguments for the post hook
+							previous_context.Rcx = context->Rcx;
+							previous_context.Rdx = context->Rdx;
+							previous_context.R8 = context->R8;
+							previous_context.R9 = context->R9;
+
 							// Corrupt the return address
 							*retaddr = hook.corrupt - 1llu;
 						}
@@ -160,7 +165,8 @@ bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t
 				// We've caught a post hook
 				else if ( context->Rip == hook.corrupt - 1llu ) {
 					if ( hook.ptr_swap.post_handler ) {
-						hook.ptr_swap.post_handler( context );
+						// Call the post hook with the original context we preserved
+						hook.ptr_swap.post_handler( &previous_context );
 					}
 
 					// Restore the return address we preserved
