@@ -112,66 +112,63 @@ bool is_exception_hook( CONTEXT* context, uint64_t find, uint64_t replace, uint6
 	return match;
 }
 
-void post_hook_impl( _CONTEXT* context ) {
-	uint64_t integers[] = {
-		context->Rcx,
-		context->Rdx,
-		context->R8,
-		context->R9,
-		*( uint64_t* )( context->Rsp + 0x20 ),
-		*( uint64_t* )( context->Rsp + 0x28 ),
-		*( uint64_t* )( context->Rsp + 0x30 ),
-		*( uint64_t* )( context->Rsp + 0x38 )
-	};
-
-	float floats[] = {
-		*( float* )&context->Xmm0,
-		*( float* )&context->Xmm1,
-		*( float* )&context->Xmm2,
-		*( float* )&context->Xmm3
-	};
-
-	// Preserve return address
-	uintptr_t retaddr = *( uintptr_t* )( context->Rsp );
-
-	um::caller& caller = um::get_caller_for_thread();
-
-	// Call the original, rip is correct from is_exception_hook call prior
-	um::detail::run_usermode_call( caller.get_buffer(), context->Rip, integers, floats );
-
-	// Emulate ret
-	context->Rsp += 0x8;
-	context->Rip = retaddr;
-}
-
 bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t previous_mode ) {
+	if ( cheat_deinit )
+		return false;
+
 	if ( is_rust_process() ) {
-		for ( const hook& hook : hook_manager::hooks ) {
+		for ( hook& hook : hook_manager::hooks ) {
 			if ( !hook.init )
 				continue;
 
-			if ( !is_exception_hook( context, hook.corrupt, hook.original ) )
-				continue;
-
 			if ( hook.type == hook_type::method_info ) {
-				hook.method_info.handler( context );
+				if ( is_exception_hook( context, hook.corrupt, hook.original ) ) {
+					hook.method_info.handler( context );
+					return true;
+				}
 			}
 
 			else if ( hook.type == hook_type::ptr_swap ) {
-				if ( hook.ptr_swap.pre_handler ) {
-					hook.ptr_swap.pre_handler( context );
+				if ( context->Rip == hook.corrupt ) {
+					// Check if we want to skip the original
+					if ( hook.ptr_swap.pre_handler && !hook.ptr_swap.pre_handler( context ) ) {
+						uintptr_t retaddr = *( uintptr_t* )context->Rsp;
+
+						// Emulate a ret
+						context->Rsp += 0x8;
+						context->Rip = retaddr;
+					}
+
+					else {
+						// If we have a post hook
+						if ( hook.ptr_swap.post_handler ) {
+							uintptr_t* retaddr = ( uintptr_t* )context->Rsp;
+
+							// Preserve the original return address
+							hook.ptr_swap.retaddr = *retaddr;
+
+							// Corrupt the return address
+							*retaddr = hook.corrupt - 1llu;
+						}
+
+						context->Rip = hook.original;
+					}
+
+					return true;
 				}
 
-				if ( hook.ptr_swap.post_handler ) {
-					// Call the original function
-					post_hook_impl( context );
+				// We've caught a post hook
+				else if ( context->Rip == hook.corrupt - 1llu ) {
+					if ( hook.ptr_swap.post_handler ) {
+						hook.ptr_swap.post_handler( context );
+					}
 
-					// Call the post handler
-					hook.ptr_swap.post_handler( context );
+					// Restore the return address we preserved
+					context->Rip = hook.ptr_swap.retaddr;
+
+					return true;
 				}
 			}
-
-			return true;
 		}
 	}
 
