@@ -176,7 +176,7 @@ bool resolve_hooks() {
 		}
 	};
 
-	method_info* outline_manager_on_render_image_method = il2cpp_class_get_method_from_name( rust::outline_manager::klass_, "OnRenderImage", 2 );
+	method_info* outline_manager_on_render_image_method = il2cpp_class_get_method_from_name( rust::outline_manager::klass_, S( "OnRenderImage" ), 2 );
 	if ( !outline_manager_on_render_image_method )
 		return false;
 

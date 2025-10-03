@@ -832,7 +832,7 @@ void visual_impl( group_box& group_box, cvar_visual& visual, const char* label =
     group_box.color_picker( &visual.color );
 
     if ( toggled ) {
-        group_box.slider( "Max distance", "%dm", &visual.maximum_distance, 0u, 500u );
+        group_box.slider( S( "Max distance" ), S( "%dm" ), &visual.maximum_distance, 0u, 500u );
     }
 }
 
@@ -841,52 +841,52 @@ void player_visuals_impl( group_box& left, group_box& right, cvar_player_visuals
 
     left.begin();
 
-    left.toggle( "Enabled", &visuals.enabled );
+    left.toggle( S( "Enabled" ), &visuals.enabled );
 
-    left.toggle( "Bounding box", &visuals.bounding_box );
+    left.toggle( S( "Bounding box" ), &visuals.bounding_box );
     left.color_picker( &visuals.bounding_box_color );
 
-    left.toggle( "Skeleton", &visuals.skeleton );
+    left.toggle( S( "Skeleton" ), &visuals.skeleton );
     left.color_picker( &visuals.skeleton_color );
 
-    left.toggle( "Name", &visuals.name );
+    left.toggle( S( "Name" ), &visuals.name );
     left.color_picker( &visuals.name_color );
 
     if ( is_player_visuals ) {
-        left.toggle( "Avatar", &player_avatar );
-        left.toggle( "Team ID", &player_team_id );
+        left.toggle( S( "Avatar" ), &player_avatar );
+        left.toggle( S( "Team ID" ), &player_team_id );
     }
 
-    left.toggle( "Held item", &visuals.held_item );
+    left.toggle( S( "Held item" ), &visuals.held_item );
     left.color_picker( &visuals.held_item_color );
 
     if ( visuals.held_item ) {
-        left.multi_combo_box( "Held item type", { 
-            { "Icon", &visuals.held_item_icon }, 
-            { "Text", &visuals.held_item_text } 
+        left.multi_combo_box( S( "Held item type" ), { 
+            { S( "Icon" ), &visuals.held_item_icon }, 
+            { S( "Text" ), &visuals.held_item_text } 
         } );
     }
 
-    left.toggle( "Distance", &visuals.distance );
+    left.toggle( S( "Distance" ), &visuals.distance );
     left.color_picker( &visuals.distance_color );
 
     left.end();
 
     right.begin();
 
-    right.toggle( "Chams", &chams );
+    right.toggle( S( "Chams" ), &chams );
     right.color_picker( &chams_color );
 
     if ( chams ) {
-        right.combo_box( "Chams type", { "Solid", "Material" }, &chams_type );
+        right.combo_box( S( "Chams type" ), { S( "Solid" ), S( "Material" ) }, &chams_type );
     }
 
-    right.toggle( "Glow", &glow );
+    right.toggle( S( "Glow" ), &glow );
     right.color_picker( &glow_outline_color );
 
     if ( glow ) {
-        right.slider( "Glow blur scale", "%.2f", &glow_blur_scale, 0.f, 10.f );
-        right.slider( "Glow outline scale", "%.2f", &glow_outline_scale, 0.f, 10.f );
+        right.slider( S( "Glow blur scale" ), S( "%.2f" ), &glow_blur_scale, 0.f, 10.f );
+        right.slider( S( "Glow outline scale" ), S( "%.2f" ), &glow_outline_scale, 0.f, 10.f );
     }
 
     right.end();
@@ -908,31 +908,31 @@ void gui::run() {
 
     rect tabs_cursor = rect( menu_bounds.x + menu_bounds.w - 6.f, menu_bounds.y + 3.f, 0.f, 20.f );
 
-    tab( "Settings", tabs::settings, &current_tab, tabs_cursor, 20.f );
-    tab( "Miscellaneous", tabs::misc, &current_tab, tabs_cursor, 20.f );
-    tab( "Visuals", tabs::visuals, &current_tab, tabs_cursor, 20.f );
-    tab( "Combat", tabs::combat, &current_tab, tabs_cursor, 20.f );
+    tab( S( "Settings" ), tabs::settings, &current_tab, tabs_cursor, 20.f );
+    tab( S( "Miscellaneous" ), tabs::misc, &current_tab, tabs_cursor, 20.f );
+    tab( S( "Visuals" ), tabs::visuals, &current_tab, tabs_cursor, 20.f );
+    tab( S( "Combat" ), tabs::combat, &current_tab, tabs_cursor, 20.f );
 
     rect subtabs_cursor = rect( menu_bounds.x + menu_bounds.w - 5.f, menu_bounds.y + 28.f, 0.f, 20.f );
 
     switch ( current_tab ) {
         case tabs::combat:
-            tab( "Aimbot", combat_subtabs::aimbot, &current_subtab[ tabs::combat ], subtabs_cursor, 19.f, true );
+            tab( S( "Aimbot" ), combat_subtabs::aimbot, &current_subtab[ tabs::combat ], subtabs_cursor, 19.f, true );
             break;
         case tabs::visuals:
-            tab( "Loot", visual_subtabs::loot, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
-            tab( "Traps", visual_subtabs::traps, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
-            tab( "Animals", visual_subtabs::animals, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
-            tab( "Vehicles", visual_subtabs::vehicles, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
-            tab( "Deployables", visual_subtabs::deployables, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
-            tab( "Resources", visual_subtabs::resources, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
-            tab( "World", visual_subtabs::world, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
-            tab( "Scientists", visual_subtabs::scientists, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
-            tab( "Players", visual_subtabs::players, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( S( "Loot" ), visual_subtabs::loot, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( S( "Traps" ), visual_subtabs::traps, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( S( "Animals" ), visual_subtabs::animals, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( S( "Vehicles" ), visual_subtabs::vehicles, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( S( "Deployables" ), visual_subtabs::deployables, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( S( "Resources" ), visual_subtabs::resources, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( S( "World" ), visual_subtabs::world, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( S( "Scientists" ), visual_subtabs::scientists, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            tab( S( "Players" ), visual_subtabs::players, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
             break;
         case tabs::misc:
-            tab( "Movement", misc_subtabs::movement, &current_subtab[ tabs::misc ], subtabs_cursor, 19.f, true );
-            tab( "Quality of life", misc_subtabs::quality_of_life, &current_subtab[ tabs::misc ], subtabs_cursor, 19.f, true );
+            tab( S( "Movement" ), misc_subtabs::movement, &current_subtab[ tabs::misc ], subtabs_cursor, 19.f, true );
+            tab( S( "Quality of life" ), misc_subtabs::quality_of_life, &current_subtab[ tabs::misc ], subtabs_cursor, 19.f, true );
             break;
     }
 
@@ -975,12 +975,12 @@ void gui::run() {
 
                     right.toggle( S( "Force automatic" ), &force_automatic );
 
-                    right.toggle( "Thicker projectiles", &thicker_projectiles.enabled );
+                    right.toggle( S( "Thicker projectiles" ), &thicker_projectiles.enabled );
                     if ( thicker_projectiles.enabled ) {
                         right.slider( S( "Thickness" ), S( "%.2fm" ), &thicker_projectiles.thickness, 0.05f, 1.f );
                     }
 
-                    right.toggle( "Faster projectiles", &faster_projectiles );
+                    right.toggle( S( "Faster projectiles" ), &faster_projectiles );
 
                     right.toggle( S( "Instant eoka" ), &instant_eoka );
                     right.toggle( S( "Instant compound bow charge" ), &instant_compound_bow );
@@ -1011,20 +1011,20 @@ void gui::run() {
 
                     right.begin();
 
-                    visual_impl( right, dropped_weapon, "Weapon" );
-                    visual_impl( right, dropped_construction, "Construction" );
-                    visual_impl( right, dropped_items, "Items" );
-                    visual_impl( right, dropped_resources, "Resources" );
-                    visual_impl( right, dropped_attire, "Attire" );
-                    visual_impl( right, dropped_tool, "Tool" );
-                    visual_impl( right, dropped_medical, "Medical" );
-                    visual_impl( right, dropped_food, "Food" );
-                    visual_impl( right, dropped_ammunition, "Ammunition" );
-                    visual_impl( right, dropped_traps, "Traps" );
-                    visual_impl( right, dropped_misc, "Misc" );
-                    visual_impl( right, dropped_component, "Component" );
-                    visual_impl( right, dropped_electrical, "Electrical" );
-                    visual_impl( right, dropped_fun, "Fun" );
+                    visual_impl( right, dropped_weapon, S( "Weapon" ) );
+                    visual_impl( right, dropped_construction, S( "Construction" ) );
+                    visual_impl( right, dropped_items, S( "Items" ) );
+                    visual_impl( right, dropped_resources, S( "Resources" ) );
+                    visual_impl( right, dropped_attire, S( "Attire" ) );
+                    visual_impl( right, dropped_tool, S( "Tool" ) );
+                    visual_impl( right, dropped_medical, S( "Medical" ) );
+                    visual_impl( right, dropped_food, S( "Food" ) );
+                    visual_impl( right, dropped_ammunition, S( "Ammunition" ) );
+                    visual_impl( right, dropped_traps, S( "Traps" ) );
+                    visual_impl( right, dropped_misc, S( "Misc" ) );
+                    visual_impl( right, dropped_component, S( "Component" ) );
+                    visual_impl( right, dropped_electrical, S( "Electrical" ) );
+                    visual_impl( right, dropped_fun, S( "Fun" ) );
 
                     right.end();
 
@@ -1034,9 +1034,9 @@ void gui::run() {
                 case visual_subtabs::resources: {
                     left.begin();
 
-                    visual_impl( left, stone_ore, "Stone ore" );
-                    visual_impl( left, metal_ore, "Metal ore" );
-                    visual_impl( left, sulfur_ore, "Sulfur ore" );
+                    visual_impl( left, stone_ore, S( "Stone ore" ) );
+                    visual_impl( left, metal_ore, S( "Metal ore" ) );
+                    visual_impl( left, sulfur_ore, S( "Sulfur ore" ) );
 
                     left.end();
 
@@ -1074,18 +1074,18 @@ void gui::run() {
                     visual_impl( left, rowboat );
                     visual_impl( left, rhib );
                     visual_impl( left, minicopter );
-                    visual_impl( left, scrap_helicopter, "Scrap helicopter" );
-                    visual_impl( left, attack_helicopter, "Attack helicopter" );
+                    visual_impl( left, scrap_helicopter, S( "Scrap helicopter" ) );
+                    visual_impl( left, attack_helicopter, S( "Attack helicopter" ) );
                     visual_impl( left, tugboat );
                     visual_impl( left, submarine );
-                    visual_impl( left, hot_air_balloon, "Hot air balloon" );
-                    visual_impl( left, diver_propulsion_vehicle, "Diver propulsion vehicle" );
+                    visual_impl( left, hot_air_balloon, S( "Hot air balloon" ) );
+                    visual_impl( left, diver_propulsion_vehicle, S( "Diver propulsion vehicle" ) );
 
                     left.end();
 
                     right.begin();
                  
-                    visual_impl( right, patrol_helicopter, "Patrol helicopter" );
+                    visual_impl( right, patrol_helicopter, S( "Patrol helicopter" ) );
                     visual_impl( right, bradley );
 
                     right.end();
@@ -1103,7 +1103,7 @@ void gui::run() {
                     visual_impl( left, stag );
                     visual_impl( left, wolf );
                     visual_impl( left, shark );
-                    visual_impl( left, bee_swarm, "Bee swarm" );
+                    visual_impl( left, bee_swarm, S( "Bee swarm" ) );
                     visual_impl( left, tiger );
                     visual_impl( left, panther );
                     visual_impl( left, crocodile );
@@ -1121,11 +1121,11 @@ void gui::run() {
                 case visual_subtabs::traps: {
                     left.begin();
 
-                    visual_impl( left, shotgun_trap, "Shotgun trap" );
-                    visual_impl( left, flame_turret, "Flame turret" );
-                    visual_impl( left, land_mine, "Land mine" );
-                    visual_impl( left, bear_trap, "Bear trap" );
-                    visual_impl( left, sam_site, "SAM site" );
+                    visual_impl( left, shotgun_trap, S( "Shotgun trap" ) );
+                    visual_impl( left, flame_turret, S( "Flame turret" ) );
+                    visual_impl( left, land_mine, S( "Land mine" ) );
+                    visual_impl( left, bear_trap, S( "Bear trap" ) );
+                    visual_impl( left, sam_site, S( "SAM site" ) );
 
                     left.end();
 
@@ -1138,30 +1138,30 @@ void gui::run() {
                 case visual_subtabs::loot: {
                     left.begin();
 
-                    visual_impl( left, red_barrel, "Red barrel" );
-                    visual_impl( left, blue_barrel, "Blue barrel" );
-                    visual_impl( left, oil_barrel, "Oil barrel" );
-                    visual_impl( left, diesel_barrel, "Diesel barrel" );
-                    visual_impl( left, minecart, "Minecart" );
-                    visual_impl( left, vehicle_parts, "Vehicle parts" );
-                    visual_impl( left, tech_parts, "Tech parts" );
+                    visual_impl( left, red_barrel, S( "Red barrel" ) );
+                    visual_impl( left, blue_barrel, S( "Blue barrel" ) );
+                    visual_impl( left, oil_barrel, S( "Oil barrel" ) );
+                    visual_impl( left, diesel_barrel, S( "Diesel barrel" ) );
+                    visual_impl( left, minecart, S( "Minecart" ) );
+                    visual_impl( left, vehicle_parts, S( "Vehicle parts" ) );
+                    visual_impl( left, tech_parts, S( "Tech parts" ) );
 
                     left.end();
 
                     right.begin();
 
-                    visual_impl( right, food_crate, "Food crate" );
-                    visual_impl( right, medical_crate, "Medical crate" );
-                    visual_impl( right, tool_crate, "Tool crate" );
-                    visual_impl( right, ammo_crate, "Ammo crate" );
-                    visual_impl( right, fuel_crate, "Fuel crate" );
-                    visual_impl( right, basic_crate, "Basic crate" );
-                    visual_impl( right, normal_crate, "Normal crate" );
-                    visual_impl( right, underwater_crate, "Underwater crate" );
-                    visual_impl( right, military_crate, "Military crate" );
-                    visual_impl( right, elite_crate, "Elite crate" );
-                    visual_impl( right, bradley_crate, "Bradley crate" );
-                    visual_impl( right, heli_crate, "Heli crate" );
+                    visual_impl( right, food_crate, S( "Food crate" ) );
+                    visual_impl( right, medical_crate, S( "Medical crate" ) );
+                    visual_impl( right, tool_crate, S( "Tool crate" ) );
+                    visual_impl( right, ammo_crate, S( "Ammo crate" ) );
+                    visual_impl( right, fuel_crate, S( "Fuel crate" ) );
+                    visual_impl( right, basic_crate, S( "Basic crate" ) );
+                    visual_impl( right, normal_crate, S( "Normal crate" ) );
+                    visual_impl( right, underwater_crate, S( "Underwater crate" ) );
+                    visual_impl( right, military_crate, S( "Military crate" ) );
+                    visual_impl( right, elite_crate, S( "Elite crate" ) );
+                    visual_impl( right, bradley_crate, S( "Bradley crate" ) );
+                    visual_impl( right, heli_crate, S( "Heli crate" ) );
 
                     right.end();
 
@@ -1176,24 +1176,24 @@ void gui::run() {
             switch ( current_subtab[ tabs::misc ] ) {
                 case misc_subtabs::quality_of_life: {
                     left.begin();
-                    left.toggle( "Instant loot", &instant_loot );
+                    left.toggle( S( "Instant loot" ), &instant_loot );
 
-                    left.toggle( "Field of view modifier", &fov_modifier.enabled );
+                    left.toggle( S( "Field of view modifier" ), &fov_modifier.enabled );
                     if ( fov_modifier.enabled ) {
-                        left.slider( "Field of view", "%.0f", &fov_modifier.fov, 0.f, 140.f );
+                        left.slider( S( "Field of view" ), S( "%.0f" ), &fov_modifier.fov, 0.f, 140.f );
                     }
 
                     left.end();
 
                     right.begin();
 
-                    right.toggle( "Override night", &override_night.enabled );
+                    right.toggle( S( "Override night" ), &override_night.enabled );
                     right.color_picker( &ambient_color, false );
                     right.keybind( &override_night.key );
 
                     if ( override_night.enabled ) {
-                        right.slider( "Ambient multiplier", "%.2fx", &ambient_multiplier, 0.f, 3.f );
-                        right.slider( "Ambient saturation", "%.2f", &ambient_saturation, 0.f, 0.5f );
+                        right.slider( S( "Ambient multiplier" ), S( "%.2fx" ), &ambient_multiplier, 0.f, 3.f );
+                        right.slider( S( "Ambient saturation" ), S( "%.2f" ), &ambient_saturation, 0.f, 0.5f );
                     }
 
                     right.end();
@@ -1203,15 +1203,15 @@ void gui::run() {
 
                 case misc_subtabs::movement: {
                     left.begin();
-                    left.toggle( "Spider-man", &spider_man );
-                    left.toggle( "Infinite jump", &infinite_jump );
-                    left.toggle( "Omnisprint", &omnisprint );
-                    left.toggle( "No attack restrictions", &no_attack_restrictions );
+                    left.toggle( S( "Spider-man" ), &spider_man );
+                    left.toggle( S( "Infinite jump" ), &infinite_jump );
+                    left.toggle( S( "Omnisprint" ), &omnisprint );
+                    left.toggle( S( "No attack restrictions" ), &no_attack_restrictions );
                     left.end();
 
                     right.begin();
 
-                    right.toggle( "Block server commands", &block_server_commands );
+                    right.toggle( S( "Block server commands" ), &block_server_commands );
 
                     right.end();
 

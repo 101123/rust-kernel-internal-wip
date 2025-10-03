@@ -282,7 +282,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		bool draw_team_id = !cached_player.scientist && ( cached_player.team_id > 0 && cached_player.team_id < 100'000 ) && player_team_id;
 
 		if ( draw_team_id ) {
-			renderer::draw_text( bounds.right + 2.f, bounds.top - 3.f, fonts::small_fonts, text_flags::none, COL32_WHITE, format_string( "%llu", cached_player.team_id ) );
+			renderer::draw_text( bounds.right + 2.f, bounds.top - 3.f, fonts::small_fonts, text_flags::none, COL32_WHITE, format_string( S( "%llu" ), cached_player.team_id ) );
 		}
 
 		float offset = 0.f;
@@ -295,7 +295,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		}
 
 		if ( visuals.distance ) {
-			renderer::draw_text( bounds.left + half, bounds.bottom + 1.f + offset, fonts::small_fonts, text_flags::centered, visuals.distance_color, format_string( "%dm", ( int )distance ) );
+			renderer::draw_text( bounds.left + half, bounds.bottom + 1.f + offset, fonts::small_fonts, text_flags::centered, visuals.distance_color, format_string( S( "%dm" ), ( int )distance ) );
 		}
 	}
 }
@@ -389,10 +389,10 @@ void draw_dropped_items( const entity_vector<rust::world_item*, cached_dropped_i
 			.set_vertical_spacing( 8.f )
 			.set_flags( text_flags::centered )
 			.draw_text( cached_dropped_item.amount > 1 ?
-				format_string_w( L"%ws (%dx)", cached_dropped_item.name, cached_dropped_item.amount ) :
-				format_string_w( L"%ws", cached_dropped_item.name ),
+				format_string_w( S( L"%ws (%dx)" ), cached_dropped_item.name, cached_dropped_item.amount ) :
+				format_string_w( S( L"%ws" ), cached_dropped_item.name ),
 				visuals->color )
-			.draw_text( format_string( "%dm", ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
+			.draw_text( format_string( S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
 	}
 }
 
@@ -459,8 +459,8 @@ void on_render( IDXGISwapChain* swapchain ) {
 
 	renderer::begin_frame();
 
-	renderer::draw_text( 8.f, 5.f, fonts::small_fonts, text_flags::none, COL32( 110, 183, 212, 255 ), "sentian" );
-	renderer::draw_text( 38.f, 5.f, fonts::small_fonts, text_flags::none, COL32( 255, 255, 255, 255 ), ".gg" );
+	renderer::draw_text( 8.f, 5.f, fonts::small_fonts, text_flags::none, COL32( 110, 183, 212, 255 ), S( "sentian" ) );
+	renderer::draw_text( 38.f, 5.f, fonts::small_fonts, text_flags::none, COL32( 255, 255, 255, 255 ), S( ".gg" ) );
 
 	renderer::draw_circle( ( float )screen_width / 2.f, ( float )screen_height / 2.f, ( float )aimbot.fov, 1.f, COL32_WHITE );
 

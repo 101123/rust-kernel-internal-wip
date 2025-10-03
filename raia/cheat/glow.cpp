@@ -38,19 +38,19 @@ int _Color;
 util::lazy_initializer<std::vector<rust::skinned_multi_mesh*>> multi_mesh_cache;
 
 bool glow_manager::init( unity::asset_bundle* asset_bundle ) {
-	stencil_shader = asset_bundle->load_asset<unity::shader>( L"Color.shader" );
+	stencil_shader = asset_bundle->load_asset<unity::shader>( S( L"Color.shader" ) );
 	if ( !stencil_shader )
 		return false;
 
 	il2cpp_gchandle_new( stencil_shader, true );
 
-	composite_shader = asset_bundle->load_asset<unity::shader>( L"Composite.shader" );
+	composite_shader = asset_bundle->load_asset<unity::shader>( S( L"Composite.shader" ) );
 	if ( !composite_shader )
 		return false;
 
 	il2cpp_gchandle_new( composite_shader, true );
 
-	blur_shader = asset_bundle->load_asset<unity::shader>( L"Blur.shader" );
+	blur_shader = asset_bundle->load_asset<unity::shader>( S( L"Blur.shader" ) );
 	if ( !blur_shader )
 		return false;
 
@@ -74,14 +74,14 @@ bool glow_manager::init( unity::asset_bundle* asset_bundle ) {
 
 	il2cpp_gchandle_new( command_buffer, true );
 
-	_BlurScale = unity::shader::property_to_id( L"_BlurScale" );
-	_MainTex = unity::shader::property_to_id( L"_MainTex" );
-	_StencilTex = unity::shader::property_to_id( L"_StencilTex" );
-	_BlurTex = unity::shader::property_to_id( L"_BlurTex" );
-	_OutlineScale = unity::shader::property_to_id( L"_OutlineScale" );
-	_OutlineColor = unity::shader::property_to_id( L"_OutlineColor" );
+	_BlurScale = unity::shader::property_to_id( S( L"_BlurScale" ) );
+	_MainTex = unity::shader::property_to_id( S( L"_MainTex" ) );
+	_StencilTex = unity::shader::property_to_id( S( L"_StencilTex" ) );
+	_BlurTex = unity::shader::property_to_id( S( L"_BlurTex" ) );
+	_OutlineScale = unity::shader::property_to_id( S( L"_OutlineScale" ) );
+	_OutlineColor = unity::shader::property_to_id( S( L"_OutlineColor" ) );
 
-	gui_text_shader = unity::shader::find( L"GUI/Text Shader" );
+	gui_text_shader = unity::shader::find( S( L"GUI/Text Shader" ) );
 	if ( !gui_text_shader )
 		return false;
 
@@ -91,7 +91,7 @@ bool glow_manager::init( unity::asset_bundle* asset_bundle ) {
 
 	gui_text_material_instance_id = gui_text_material->get_instance_id();
 
-	_Color = unity::shader::property_to_id( L"_Color" );
+	_Color = unity::shader::property_to_id( S( L"_Color" ) );
 
 	multi_mesh_cache.construct();
 
