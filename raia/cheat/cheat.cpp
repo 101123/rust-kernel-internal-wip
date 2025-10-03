@@ -58,7 +58,8 @@ class_lookup class_lookups[] = {
 	{ &rust::base_launcher::klass_, nullptr, nullptr, BaseLauncher_TypeDefinitionIndex },
 	{ nullptr, nullptr, &rust::game_physics::static_fields_, GamePhysics_Static_TypeDefinitionIndex },
 	{ &rust::compound_bow_weapon::klass_, nullptr, nullptr, CompoundBowWeapon_TypeDefinitionIndex },
-	{ &rust::console_system::arg::klass_, nullptr, nullptr, ConsoleSystem_Arg_TypeDefinitionIndex }
+	{ &rust::console_system::arg::klass_, nullptr, nullptr, ConsoleSystem_Arg_TypeDefinitionIndex },
+	{ &rust::patrol_helicopter::klass_, nullptr, nullptr, PatrolHelicopter_TypeDefinitionIndex }
 };
 
 bool populate_classes() {
@@ -148,7 +149,7 @@ bool resolve_hooks() {
 	if ( !is_valid_ptr( facepunch_pool_get_networkable_method ) )
 		return false;
 
-	hook network_client_create_networkable_hook {
+	hook network_client_create_networkable_hook = {
 		.init = false,
 		.type = hook_type::method_info,
 		.value = ( uintptr_t* )util::relative_32( facepunch_pool_get_networkable_method, 3 ),
@@ -212,6 +213,18 @@ bool resolve_hooks() {
 		.corrupt = 0ull,
 		.ptr_swap = {
 			.pre_handler = hook_handlers::pre_protobuf_projectile_shoot_write_to_stream,
+			.post_handler = nullptr
+		}
+	};
+
+	hook protobuf_player_projectile_attack_write_to_stream_hook = {
+		.init = false,
+		.type = hook_type::ptr_swap,
+		.value = VFUNC( rust::player_projectile_attack, Offsets::ProtoBuf_PlayerProjectileAttack::WriteToStream_vtableoff ),
+		.original = 0ull,
+		.corrupt = 0ull,
+		.ptr_swap = {
+			.pre_handler = hook_handlers::pre_protobuf_player_projectile_attack_write_to_stream,
 			.post_handler = nullptr
 		}
 	};
@@ -321,6 +334,7 @@ bool resolve_hooks() {
 	hooks.add( outline_manager_on_render_image_hook );
 	hooks.add( player_walk_movement_client_input_hook );
 	hooks.add( protobuf_projectile_shoot_write_to_stream_hook );
+	hooks.add( protobuf_player_projectile_attack_write_to_stream_hook );
 	hooks.add( item_icon_try_to_move_hook );
 	hooks.add( protobuf_player_tick_write_to_stream_delta_hook );
 	hooks.add( client_on_client_disconnected_hook );

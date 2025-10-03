@@ -23,7 +23,6 @@ const char* format_string( const char* format, ... ) {
 
 const wchar_t* format_string_w( const wchar_t* format, ... ) {
 	wchar_t* buffer = ( wchar_t* )format_buffer;
-	size_t count = sizeof( format_buffer ) / sizeof( wchar_t );
 
 	va_list args;
 	va_start( args, format );

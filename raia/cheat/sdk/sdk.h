@@ -593,26 +593,26 @@ namespace unity {
 
     class shader : public object {
     public:
-        static shader* find( sys::string name ) {
+        static shader* find( const sys::string& name ) {
             shader* ( *find )( sys::string* ) =
                 ( decltype( find ) )( game_assembly + Offsets::Shader::Find );
 
             um::caller& caller = um::get_caller_for_thread();
 
-            sys::string* name_ = caller.push<sys::string>( name );
+            sys::string* _name = caller.push<sys::string>( name );
 
-            return caller( find, name_ );
+            return caller( find, _name );
         }
 
-        static int property_to_id( sys::string name ) {
+        static int property_to_id( const sys::string& name ) {
             int ( *property_to_id )( sys::string* ) =
                 ( decltype( property_to_id ) )( unity_player + Offsets::Shader::PropertyToID );
 
             um::caller& caller = um::get_caller_for_thread();
 
-            sys::string* name_ = caller.push<sys::string>( name );
+            sys::string* _name = caller.push<sys::string>( name );
 
-            return caller( property_to_id, name_ );
+            return caller( property_to_id, _name );
         }
 
         static inline il2cpp_object* type_object_;
@@ -650,9 +650,9 @@ namespace unity {
 
             um::caller& caller = um::get_caller_for_thread();
 
-            color* color_ = caller.push<color>( value );
+            color* _color = caller.push<color>( value );
 
-            return caller( set_color_impl_injected, this, name, color_ );
+            return caller( set_color_impl_injected, this, name, _color );
         }
 
         void set_texture( int name, texture* value ) {
@@ -751,9 +751,9 @@ namespace unity {
             // UnityEngine.Rendering.RTClearFlags, 0 = None, 1 = Color, 6 = DepthStencil
             int clear_flags = ( clear_color ? 1 : 0 ) | ( clear_depth ? 6 : 0 );
 
-            color* color_ = caller.push<color>( background_color );
+            color* _color = caller.push<color>( background_color );
 
-            return caller( clear_render_target_injected, this, clear_flags, color_, 1.f, 0u );
+            return caller( clear_render_target_injected, this, clear_flags, _color, 1.f, 0u );
         }
 
         void draw_renderer( renderer* renderer_, material* material_ ) {
@@ -791,15 +791,15 @@ namespace unity {
 
     class asset_bundle {
     public:
-        static asset_bundle* load_from_file( sys::string path, uint32_t crc, uint64_t offset ) {
+        static asset_bundle* load_from_file( const sys::string& path, uint32_t crc, uint64_t offset ) {
             asset_bundle* ( *load_from_file_internal )( sys::string*, uint32_t, uint64_t ) =
                 ( decltype( load_from_file_internal ) )( unity_player + Offsets::AssetBundle::LoadFromFile_Internal );
 
             um::caller& caller = um::get_caller_for_thread();
 
-            sys::string* path_ = caller.push<sys::string>( path );
+            sys::string* _path = caller.push<sys::string>( path );
 
-            return caller( load_from_file_internal, path_, crc, offset );
+            return caller( load_from_file_internal, _path, crc, offset );
         }
 
         void unload( bool unload_all_loaded_objects ) {
@@ -812,15 +812,15 @@ namespace unity {
         }
 
         template <typename T>
-        T* load_asset( sys::string name ) {
+        T* load_asset( const sys::string& name ) {
             T* ( *load_asset_internal )( asset_bundle*, sys::string*, il2cpp_object* ) =
                 ( decltype( load_asset_internal ) )( unity_player + Offsets::AssetBundle::LoadAsset_Internal );
 
             um::caller& caller = um::get_caller_for_thread();
 
-            sys::string* name_ = caller.push<sys::string>( name );
+            sys::string* _name = caller.push<sys::string>( name );
 
-            return caller( load_asset_internal, this, name_, T::type_object_ );
+            return caller( load_asset_internal, this, _name, T::type_object_ );
         }
     };
 
@@ -978,10 +978,152 @@ namespace rust {
 
     };
 
+    class string_pool {
+    public:
+        static uint32_t get( const sys::string& str ) {
+            uint32_t( *get )( sys::string* ) =
+                ( decltype( get ) )( game_assembly + Offsets::StringPool::Get );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            sys::string* _str = caller.push<sys::string>( str );
+
+            return caller( get, _str );
+        }
+    };
+
+    namespace network {
+        enum send_method {
+            reliable,
+            reliable_unordered,
+            unreliable
+        };
+
+        enum priority {
+            immediate,
+            normal
+        };
+
+        struct send_info {
+        public:
+            FIELD( int, method, Offsets::Network_SendInfo::method );
+            FIELD( int8_t, channel, Offsets::Network_SendInfo::channel );
+            FIELD( int, priority, Offsets::Network_SendInfo::priority );
+            FIELD( sys::list<network::connection*>*, connections, Offsets::Network_SendInfo::connections );
+            FIELD( network::connection*, connection, Offsets::Network_SendInfo::connection );
+
+            send_info( network::connection* _connection ) {
+                method = send_method::reliable;
+                channel = 0u;
+                priority = priority::normal;
+                connections = nullptr;
+                connection = _connection;
+            }
+
+        private:
+            uint8_t _[ 64 ];
+        };
+
+        class connection {
+        public:
+
+        };
+
+        class net_write {
+        public:
+            void write_byte( uint8_t value ) {
+                void ( *write_byte )( net_write*, uint8_t ) =
+                    ( decltype( write_byte ) )( game_assembly + Offsets::Network_NetWrite::WriteByte );
+
+                um::caller& caller = um::get_caller_for_thread();
+
+                return caller( write_byte, this, value );
+            }
+
+            void string( const sys::string& value ) {
+                void ( *string )( net_write*, sys::string* ) =
+                    ( decltype( string ) )( game_assembly + Offsets::Network_NetWrite::String );
+
+                um::caller& caller = um::get_caller_for_thread();
+
+                sys::string* _value = caller.push<sys::string>( value );
+
+                return caller( string, this, _value );
+            }
+
+            void send( send_info info ) {
+                void ( *send )( net_write*, send_info* ) =
+                    ( decltype( send ) )( game_assembly + Offsets::Network_NetWrite::Send );
+
+                um::caller& caller = um::get_caller_for_thread();
+
+                send_info* _info = caller.push<send_info>( info );
+
+                return caller( send, this, _info );
+            }
+
+            template <typename T>
+            void write( const T& value ) {
+                uint8_t* bytes = ( uint8_t* )&value;
+
+                for ( size_t i = 0; i < sizeof( T ); i++ ) {
+                    write_byte( bytes[ i ] );
+                }
+            }
+
+            void packet_id( uint8_t type ) {
+                write<uint8_t>( type + 140u );
+            }
+        };
+
+        class message {
+        public:
+            enum type : uint8_t {
+                rpc_message = 9,
+                tick = 15
+            };
+        };
+
+        class base_network {
+        public:
+            net_write* start_write() {
+                net_write*( *start_write )( base_network* ) =
+                    ( decltype( start_write ) )( game_assembly + Offsets::Network_BaseNetwork::StartWrite );
+
+                um::caller& caller = um::get_caller_for_thread();
+
+                return caller( start_write, this );
+            }
+        };
+
+        class client : public base_network {
+        public:
+            FIELD( network::connection*, connection, Offsets::Network_Client::Connection );
+            FIELD( sys::string*, connected_address, Offsets::Network_Client::ConnectedAddress );
+            FIELD( int, connected_port, Offsets::Network_Client::ConnectedPort );
+            FIELD( sys::string*, server_name, Offsets::Network_Client::ServerName );
+        };
+
+        class net {
+        public:
+            class static_fields {
+            public:
+                FIELD( client*, cl, Offsets::Network_Net::cl );
+            };
+
+            static inline static_fields* static_fields_;
+        };
+
+        class networkable {
+        public:
+            FIELD( networkable_id, id, Offsets::Network_Networkable::ID );
+        };
+    }
+
     class base_networkable : public unity::component {
     public:
         FIELD( uint32_t, prefab_id, Offsets::BaseNetworkable::prefabID );
-        FIELD( networkable*, net, Offsets::BaseNetworkable::net );
+        FIELD( network::networkable*, net, Offsets::BaseNetworkable::net );
         FIELD( base_entity*, parent_entity, Offsets::BaseNetworkable::parentEntity );
         FIELD( sys::list<base_entity*>*, children, Offsets::BaseNetworkable::children );
         
@@ -1036,11 +1178,37 @@ namespace rust {
         bool has_flag( base_entity::flag f ) {
             return ( flags & f ) == f;
         }
-    };
 
-    class networkable {
-    public:
-        FIELD( networkable_id, id, Offsets::Network_Networkable::ID );
+        template <typename T>
+        void write_arg( network::net_write* net_write, const T& value ) {
+            if constexpr ( std::is_same_v<T, sys::string> ) {
+                net_write->string( value );
+            } else {
+                net_write->write<T>( value );
+            }
+        }
+
+        template <typename... Args>
+        void server_rpc( const sys::string& name, Args... args ) {
+            if ( !is_valid_ptr( net ) )
+                return;
+
+            network::client* client = network::net::static_fields_->cl;
+            if ( !is_valid_ptr( client ) )
+                return;
+
+            network::net_write* net_write = client->start_write();
+            if ( !is_valid_ptr( net_write ) )
+                return;
+
+            net_write->packet_id( network::message::type::rpc_message );
+            net_write->write<networkable_id>( net->id );
+            net_write->write<uint32_t>( string_pool::get( name ) );
+
+            ( write_arg( net_write, args ), ... );
+
+            net_write->send( network::send_info( client->connection ) );
+        }
     };
 
     class main_camera {
@@ -1621,8 +1789,31 @@ namespace rust {
         static inline il2cpp_class* klass_;
     };
 
+    class attack {
+    public:
+        FIELD( vector3, point_start, Offsets::ProtoBuf_Attack::pointStart );
+        FIELD( vector3, point_end, Offsets::ProtoBuf_Attack::pointEnd );
+        FIELD( networkable_id, hit_id, Offsets::ProtoBuf_Attack::hitID );
+        FIELD( uint32_t, hit_bone, Offsets::ProtoBuf_Attack::hitBone );
+        FIELD( vector3, hit_normal_local, Offsets::ProtoBuf_Attack::hitNormalLocal );
+        FIELD( vector3, hit_position_local, Offsets::ProtoBuf_Attack::hitPositionLocal );
+        FIELD( vector3, hit_normal_world, Offsets::ProtoBuf_Attack::hitNormalWorld );
+        FIELD( vector3, hit_position_world, Offsets::ProtoBuf_Attack::hitPositionWorld );
+        FIELD( uint32_t, hit_part_id, Offsets::ProtoBuf_Attack::hitPartID );
+        FIELD( uint32_t, hit_material_id, Offsets::ProtoBuf_Attack::hitMaterialID );
+        FIELD( networkable_id, src_parent_id, Offsets::ProtoBuf_Attack::srcParentID );
+        FIELD( networkable_id, dst_parent_id, Offsets::ProtoBuf_Attack::dstParentID );
+    };
+
+    class player_attack {
+    public:
+
+    };
+
     class player_projectile_attack {
     public:
+        FIELD( rust::player_attack*, player_attack, Offsets::ProtoBuf_PlayerProjectileAttack::playerAttack );
+
         static inline il2cpp_class* klass_;
     };
 
@@ -1871,5 +2062,10 @@ namespace rust {
                 }
             };
         };
+    };
+
+    class patrol_helicopter {
+    public:
+        static inline il2cpp_class* klass_;
     };
 }

@@ -16,6 +16,10 @@ namespace unity {
 }
 
 namespace rust {
+	namespace network {
+		class connection;
+	}
+
 	class base_networkable;
 	class base_entity;
 	class base_combat_entity;

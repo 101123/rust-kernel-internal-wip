@@ -447,6 +447,28 @@ void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot*
 	}
 }
 
+void protobuf_player_projectile_attack_write_to_stream_pre_hook( rust::player_projectile_attack* player_projectile_attack ) {
+	if ( !is_valid_ptr( player_projectile_attack ) )
+		return;
+
+	rust::player_attack* attack = player_projectile_attack->player_attack;
+	if ( !is_valid_ptr( attack ) )
+		return;
+
+	// TODO: Find a way to get the entity from the networkable id
+	rust::base_networkable* hit_entity = nullptr;
+	if ( !is_valid_ptr( hit_entity ) )
+		return;
+
+	if ( hit_override.enabled && hit_entity->is<rust::base_player>() ) {
+
+	}
+
+	else if ( patrol_heli_weakspots.enabled && hit_entity->is<rust::patrol_helicopter>() ) {
+
+	}
+}
+
 void item_icon_try_to_move_post_hook( rust::item_icon* item_icon ) {
 	if ( instant_loot ) {
 		item_icon->run_timed_action();
@@ -651,6 +673,8 @@ bool hook_handlers::pre_protobuf_player_projectile_update_write_to_stream( _CONT
 }
 
 bool hook_handlers::pre_protobuf_player_projectile_attack_write_to_stream( _CONTEXT* context ) {
+	protobuf_player_projectile_attack_write_to_stream_pre_hook( ( rust::player_projectile_attack* )context->Rcx );
+
 	return true;
 }
 

@@ -320,6 +320,14 @@ DEFINE_CONTEXT( thicker_projectiles,
 	cvar_f thickness = cvar_f( H( "Thickness" ), 1.f );
 );
 
+DEFINE_CONTEXT( hit_override,
+	cvar enabled = cvar( H( "Hit Override" ), false );
+);
+
+DEFINE_CONTEXT( patrol_heli_weakspots,
+	cvar enabled = cvar( H( "Patrol Heli Weakspots" ) );
+);
+
 inline cvar force_automatic = cvar( H( "Force Automatic" ), false );
 
 inline cvar instant_eoka = cvar( H( "Instant Eoka" ), false );
