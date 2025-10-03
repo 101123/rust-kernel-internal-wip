@@ -405,8 +405,6 @@ void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot*
 	if ( !client_projectiles )
 		return;
 
-	LOG( "%llu\n", projectiles->size );
-
 	for ( size_t i = 0; i < projectiles->size; i++ ) {
 		rust::projectile_shoot::projectile* server_projectile = server_projectiles->buffer[ i ];
 		if ( !is_valid_ptr( server_projectile ) )

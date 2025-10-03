@@ -165,6 +165,10 @@ namespace player_cacher {
             cached_player.avatar_srv->Release();
         }
 
+        if ( aimbot.player_target && player == aimbot.player_target->first ) {
+            aimbot.player_target = nullptr;
+        }
+
         glow_manager::remove_player( player );
 
         players.erase( iterator );

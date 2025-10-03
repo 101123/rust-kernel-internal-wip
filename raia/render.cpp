@@ -279,7 +279,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 			}
 		}
 
-		bool draw_team_id = !cached_player.scientist && cached_player.team_id > 0 && cached_player.team_id < 100'000 && player_team_id;
+		bool draw_team_id = !cached_player.scientist && ( cached_player.team_id > 0 && cached_player.team_id < 100'000 ) && player_team_id;
 
 		if ( draw_team_id ) {
 			renderer::draw_text( bounds.right + 2.f, bounds.top - 3.f, fonts::small_fonts, text_flags::none, COL32_WHITE, format_string( "%llu", cached_player.team_id ) );
@@ -319,7 +319,7 @@ void draw_entities( const entity_vector<rust::base_entity*, cached_entity>& enti
 			.set_vertical_spacing( 8.f )
 			.set_flags( text_flags::centered )
 			.draw_text( visuals->display_name, visuals->color )
-			.draw_text( format_string( "%dm", ( int )distance ), COL32_WHITE );
+			.draw_text( format_string( "%dm", ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
 	}
 }
 
@@ -350,8 +350,8 @@ void draw_combat_entities( const entity_vector<rust::base_combat_entity*, cached
 
 		float health_width = ( cached_combat_entity.health / cached_combat_entity.max_health ) * ( width - 2.f );
 
-		renderer::draw_filled_rect( x - half, y + 10.f, width, 4.f, COL32_BLACK );
-		renderer::draw_filled_rect( x - half + 1.f, y + 11.f, health_width, 2.f, COL32( 120, 225, 80, 255 ) );
+		renderer::draw_filled_rect( x - half, y + 10.f, width, 4.f, COL32_MERGE_ALPHA( COL32_BLACK, visuals->color ) );
+		renderer::draw_filled_rect( x - half + 1.f, y + 11.f, health_width, 2.f, COL32_MERGE_ALPHA( COL32( 120, 225, 80, 255 ), visuals->color ) );
 	}
 }
 
@@ -390,9 +390,9 @@ void draw_dropped_items( const entity_vector<rust::world_item*, cached_dropped_i
 			.set_flags( text_flags::centered )
 			.draw_text( cached_dropped_item.amount > 1 ?
 				format_string_w( L"%ws (%dx)", cached_dropped_item.name, cached_dropped_item.amount ) :
-				format_string_w( L"%ws", cached_dropped_item.name ), 
+				format_string_w( L"%ws", cached_dropped_item.name ),
 				visuals->color )
-			.draw_text( format_string( "%dm", ( int )distance ), COL32_WHITE );
+			.draw_text( format_string( "%dm", ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
 	}
 }
 
