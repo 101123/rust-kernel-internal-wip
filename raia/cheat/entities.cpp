@@ -704,74 +704,6 @@ const int cached_bones[] = {
     rust::bones::l_foot, rust::bones::r_foot
 };
 
-void update_player_bones( cached_player& cached_player ) {
-    auto& bone_data = cached_player.bone_data;
-
-    for ( size_t i = 0; i < _countof( cached_bones ); i++ ) {
-        bone_data.positions[ i ] = bone_data.transforms[ i ]->get_position();
-    }
-}
-
-bool update_player_inventory( rust::base_player* player, cached_player& cached_player ) {
-    rust::item_container* belt = cached_player.inventory->container_belt;
-    if ( !is_valid_ptr( belt ) )
-        return false;
-
-    sys::list<rust::item*>* items_list = belt->item_list;
-    if ( !is_valid_ptr( items_list ) || !is_valid_ptr( items_list->items ) )
-        return false;
-
-    sys::array<rust::item*>* items = items_list->items;
-    if ( !is_valid_ptr( items ) )
-        return false;
-    
-    int active_item_idx = -1, active_item_id = -1;
-    uint64_t active_item_uid = player->cl_active_item;
-
-    for ( size_t i = 0; i < 6; i++ ) {
-        if ( i < items_list->size ) {
-            // None of these pointers should ever be invalid, so fail if so
-            rust::item* item = items->buffer[ i ];
-            if ( !is_valid_ptr( item ) )
-                return false;
-
-            rust::item_definition* info = item->info;
-            if ( !is_valid_ptr( info ) )
-                return false;
-
-            rust::phrase* display_name = info->display_name;
-            if ( !is_valid_ptr( display_name ) )
-                return false;
-
-            sys::string* legacy_english = display_name->legacy_english;
-            if ( !is_valid_ptr( legacy_english ) )
-                return false;
-
-            if ( item->uid == active_item_uid ) {
-                active_item_idx = i;
-                active_item_id = info->item_id;
-            }
-
-            cached_belt_item& belt_item = cached_player.belt_items[ i ];
-
-            belt_item.present = true;
-            belt_item.amount = item->amount;
-            wcscpy_s( belt_item.name, _countof( belt_item.name ), legacy_english->buffer );
-        }
-
-        else {
-            cached_belt_item& belt_item = cached_player.belt_items[ i ];
-
-            belt_item.present = false;
-        }
-    }
-
-    cached_player.active_item_idx = active_item_idx;
-    cached_player.active_item_id = active_item_id;
-
-    return true;
-}
-
 bool cache_player( rust::base_player* player, cached_player& cached_player ) {
     if ( cached_player.init )
         return true;
@@ -852,6 +784,86 @@ bool cache_player( rust::base_player* player, cached_player& cached_player ) {
     return cached_player.init = true;
 }
 
+bool should_update_player( const cached_player& cached_player ) {
+    return true;
+}
+
+void update_player_bones( cached_player& cached_player ) {
+    auto& bone_data = cached_player.bone_data;
+
+    for ( size_t i = 0; i < _countof( cached_bones ); i++ ) {
+        bone_data.positions[ i ] = bone_data.transforms[ i ]->get_position();
+    }
+}
+
+bool update_player_inventory( rust::base_player* player, cached_player& cached_player ) {
+    rust::item_container* belt = cached_player.inventory->container_belt;
+    if ( !is_valid_ptr( belt ) )
+        return false;
+
+    sys::list<rust::item*>* items_list = belt->item_list;
+    if ( !is_valid_ptr( items_list ) || !is_valid_ptr( items_list->items ) )
+        return false;
+
+    sys::array<rust::item*>* items = items_list->items;
+    if ( !is_valid_ptr( items ) )
+        return false;
+    
+    int active_item_idx = -1, active_item_id = -1;
+    uint64_t active_item_uid = player->cl_active_item;
+
+    for ( size_t i = 0; i < 6; i++ ) {
+        if ( i < items_list->size ) {
+            // None of these pointers should ever be invalid, so fail if so
+            rust::item* item = items->buffer[ i ];
+            if ( !is_valid_ptr( item ) )
+                return false;
+
+            rust::item_definition* info = item->info;
+            if ( !is_valid_ptr( info ) )
+                return false;
+
+            rust::phrase* display_name = info->display_name;
+            if ( !is_valid_ptr( display_name ) )
+                return false;
+
+            sys::string* legacy_english = display_name->legacy_english;
+            if ( !is_valid_ptr( legacy_english ) )
+                return false;
+
+            if ( item->uid == active_item_uid ) {
+                active_item_idx = i;
+                active_item_id = info->item_id;
+            }
+
+            cached_belt_item& belt_item = cached_player.belt_items[ i ];
+
+            belt_item.present = true;
+            belt_item.amount = item->amount;
+            wcscpy_s( belt_item.name, _countof( belt_item.name ), legacy_english->buffer );
+        }
+
+        else {
+            cached_belt_item& belt_item = cached_player.belt_items[ i ];
+
+            belt_item.present = false;
+        }
+    }
+
+    cached_player.active_item_idx = active_item_idx;
+    cached_player.active_item_id = active_item_id;
+
+    return true;
+}
+
+void update_player_visibility( rust::base_player* player, cached_player& cached_player ) {
+    const vector3& origin = camera.position;
+    vector3 direction = cached_player.bone_data.positions[ 1 ] - camera.position;
+
+    cached_player.visible = !rust::game_physics::trace(
+        unity::ray( origin, direction ), 0.f, nullptr, vector3::magnitude( direction ), 1218519297, unity::query_trigger_interaction::ignore, local_player.entity );
+}
+
 void entity_manager::update() {
     util::scoped_spinlock lock( &cache_lock );
 
@@ -887,8 +899,12 @@ void entity_manager::update() {
         if ( !cache_player( player, cached_player ) )
             continue;
 
+        cached_player.team_id = player->current_team;
+        cached_player.player_flags = player->player_flags;
+
         update_player_bones( cached_player );
         update_player_inventory( player, cached_player );
+        update_player_visibility( player, cached_player );
     }
 }
 

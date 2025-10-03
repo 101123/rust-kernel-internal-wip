@@ -7,6 +7,7 @@
 #include "vk.h"
 #include "cheat/sdk/declare.h"
 #include "math/vec3.h"
+#include "math/mat4x4.h"
 
 #include <utility>
 
@@ -126,6 +127,7 @@ inline cvar_player_visuals player_visuals = WRAP_PLAYER_CONFIGURATION( "Players"
 inline cvar_visual cvar_wounded = WRAP_VISUAL( "Wounded", true, 500, COL32( 255, 0, 0, 255 ) );
 inline cvar_visual cvar_sleeper = WRAP_VISUAL( "Sleeper", false, 30, COL32( 255, 255, 255, 255 ) );
 inline cvar_visual cvar_corpse = WRAP_VISUAL( "Corpse", true, 100, COL32( 255, 255, 255, 255 ) );
+inline cvar player_team_id = cvar( H( "Player Team ID" ), true );
 inline cvar player_avatar = cvar( H( "Player Avatar" ), true );
 
 inline cvar_player_visuals scientist_visuals = WRAP_PLAYER_CONFIGURATION( "Scientists", COL32( 125, 195, 255, 255 ) );
@@ -274,6 +276,11 @@ DEFINE_CONTEXT( held_weapon,
 	int item_id;
 );
 
+DEFINE_CONTEXT( camera,
+	matrix4x4 view_matrix;
+	vector3 position;
+);
+
 namespace aimbot_type {
 	enum : uint32_t {
 		memory,
@@ -361,11 +368,11 @@ inline cvar_bind zoom = WRAP_BIND( "Zoom", true, trigger_type::hold, 'X' );
 inline cvar_f zoom_fov = cvar_f( H( "Zoom FOV" ), 40.f );
 
 
-inline cvar chams = cvar( H( "Chams" ), true );
+inline cvar chams = cvar( H( "Chams" ), false );
 inline cvar_ui chams_type = cvar_ui( H( "Chams Type" ), 0 );
 inline cvar_ui chams_color = cvar_ui( H( "Chams Color" ), COL32( 255, 255, 255, 255 ) );
 
-inline cvar glow = cvar( H( "Glow" ), true );
+inline cvar glow = cvar( H( "Glow" ), false );
 inline cvar_ui glow_outline_color = cvar_ui( H( "Glow Outline Color" ), COL32( 255, 255, 255, 255 ) );
 inline cvar_f glow_blur_scale = cvar_f( H( "Glow Blur Scale" ), 0.75f );
 inline cvar_f glow_outline_scale = cvar_f( H( "Glow Outline Scale" ), 0.5f );

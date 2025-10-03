@@ -55,6 +55,9 @@ struct cached_player {
 	rust::player_eyes* eyes;
 	rust::player_inventory* inventory;
 	ID3D11ShaderResourceView* avatar_srv;
+	bool visible;
+	uint64_t team_id;
+	int player_flags;
 };
 
 struct cached_dropped_item {

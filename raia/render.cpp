@@ -73,22 +73,19 @@ private:
 	uint32_t flags_;
 };
 
-matrix4x4 view_matrix;
-vector3 camera_position;
-
 struct w2s_result {
 	bool success;
 	vector2 screen;
 };
 
 bool w2s( const vector3& world, vector2& screen ) {
-	float w = vector3::dot( vector3( view_matrix[ 3 ], view_matrix[ 7 ], view_matrix[ 11 ] ), world ) + view_matrix[ 15 ];
+	float w = vector3::dot( vector3( camera.view_matrix[ 3 ], camera.view_matrix[ 7 ], camera.view_matrix[ 11 ] ), world ) + camera.view_matrix[ 15 ];
 	if ( w < 0.098f )
 		return false;
 
 	screen = vector2(
-		( ( float )screen_width * 0.5f ) * ( 1.f + ( vector3::dot( vector3( view_matrix[ 0 ], view_matrix[ 4 ], view_matrix[ 8 ] ), world ) + view_matrix[ 12 ] ) / w ),
-		( ( float )screen_height * 0.5f ) * ( 1.f - ( vector3::dot( vector3( view_matrix[ 1 ], view_matrix[ 5 ], view_matrix[ 9 ] ), world ) + view_matrix[ 13 ] ) / w )
+		( ( float )screen_width * 0.5f ) * ( 1.f + ( vector3::dot( vector3( camera.view_matrix[ 0 ], camera.view_matrix[ 4 ], camera.view_matrix[ 8 ] ), world ) + camera.view_matrix[ 12 ] ) / w ),
+		( ( float )screen_height * 0.5f ) * ( 1.f - ( vector3::dot( vector3( camera.view_matrix[ 1 ], camera.view_matrix[ 5 ], camera.view_matrix[ 9 ] ), world ) + camera.view_matrix[ 13 ] ) / w )
 	) + vector2( 0.f, 0.f );
 
 	return true;
@@ -160,48 +157,49 @@ int bone_connections[][ 2 ] = {
 
 struct visual_item_info {
 	int item_id;
+	const char* shorter_name;
 	char codepoint;
 };
 
 visual_item_info visual_items[] = {
-	{ 1545779598, 'a' }, // rifle.ak
-	{ -1335497659, 'a' }, // rifle.ak.ice
-	{ 472505338, 'a' }, // rifle.ak.med
-	{ -139037392, 'a' }, // rifle.ak.diver
-	{ 2054929933, 'a' }, // rifle.ak.jungle
-	{ -880412831, 'b' }, // blunderbuss
-	{ 1588298435, 'c' }, // rifle.bolt
-	{ 884424049, 'd' }, // bow.compound
-	{ 1965232394, 'e' }, // crossbow
-	{ -765183617, 'f' }, // shotgun.double
-	{ -75944661, 'g' }, // pistol.eoka
-	{ 1914691295, 'h' }, // pistol.prototype17
-	{ -1123473824, 'i' }, // multiplegrenadelauncher
-	{ -92315244, 'j' }, // revolver.hc
-	{ -1214542497, 'k' }, // hmlmg
-	{ -218009552, 'l' }, // homingmissile.launcher
-	{ 2040726127, 'm' }, // knife.combat
-	{ -778367295, 'n' }, // rifle.l96
-	{ -1812555177, 'o' }, // rifle.lr300
-	{ 678698219, 'p' }, // shotgun.m4
-	{ 1673224590, 'q' }, // pistol.semiauto.a.m15
-	{ 28201841, 'r' }, // rifle.m39
-	{ -852563019, 's' }, // pistol.m92
-	{ -2069578888, 't' }, // lmg.m249
-	{ 935606207, 'u' }, // minigun
-	{ 1318558775, 'v' }, // smg.mp5
-	{ 1953903201, 'w' }, // pistol.nailgun
-	{ -1367281941, 'x' }, // shotgun.waterpipe
-	{ 1373971859, 'y' }, // pistol.python
-	{ 649912614, 'z' }, // pistol.revolver
-	{ 442886268, 'A' }, // rocket.launcher,
-	{ 795371088, 'B' }, // shotgun.pump,
-	{ 818877484, 'C' }, // pistol.semiauto,
-	{ -904863145, 'D' }, // rifle.semiauto
-	{ -348232115, 'E' }, // rifle.sks
-	{ 1796682209, 'F' }, // smg.2
-	{ -41440462, 'G' }, // shotgun.spas12
-	{ 2083256995, 'H' }, // t1_smg
+	{ 1545779598, "AK", 'a' }, // rifle.ak
+	{ -1335497659, "AK", 'a' }, // rifle.ak.ice
+	{ 472505338, "AK", 'a' }, // rifle.ak.med
+	{ -139037392, "AK", 'a' }, // rifle.ak.diver
+	{ 2054929933, "AK", 'a' }, // rifle.ak.jungle
+	{ -880412831, nullptr, 'b' }, // blunderbuss
+	{ 1588298435, "Bolty", 'c'}, // rifle.bolt
+	{ 884424049, nullptr, 'd'}, // bow.compound
+	{ 1965232394, nullptr, 'e' }, // crossbow
+	{ -765183617, "DB", 'f' }, // shotgun.double
+	{ -75944661, nullptr, 'g' }, // pistol.eoka
+	{ 1914691295, "Glock", 'h' }, // pistol.prototype17
+	{ -1123473824, nullptr, 'i' }, // multiplegrenadelauncher
+	{ -92315244, nullptr, 'j'}, // revolver.hc
+	{ -1214542497, nullptr, 'k' }, // hmlmg
+	{ -218009552, nullptr, 'l' }, // homingmissile.launcher
+	{ 2040726127, nullptr, 'm' }, // knife.combat
+	{ -778367295, "L96", 'n' }, // rifle.l96
+	{ -1812555177, "LR300", 'o' }, // rifle.lr300
+	{ 678698219, "M4", 'p' }, // shotgun.m4
+	{ 1673224590, "M15", 'q' }, // pistol.semiauto.a.m15
+	{ 28201841, "M39", 'r' }, // rifle.m39
+	{ -852563019, "M92", 's' }, // pistol.m92
+	{ -2069578888, "M2", 't' }, // lmg.m249
+	{ 935606207, nullptr, 'u' }, // minigun
+	{ 1318558775, nullptr, 'v' }, // smg.mp5
+	{ 1953903201, nullptr, 'w' }, // pistol.nailgun
+	{ -1367281941, "Pipey", 'x' }, // shotgun.waterpipe
+	{ 1373971859, "Python", 'y' }, // pistol.python
+	{ 649912614, nullptr, 'z' }, // pistol.revolver
+	{ 442886268, nullptr, 'A' }, // rocket.launcher,
+	{ 795371088, "Pumpy", 'B' }, // shotgun.pump,
+	{ 818877484, "P2", 'C' }, // pistol.semiauto,
+	{ -904863145, "SAR", 'D' }, // rifle.semiauto
+	{ -348232115, nullptr, 'E' }, // rifle.sks
+	{ 1796682209, "Custom", 'F' }, // smg.2
+	{ -41440462, "SPAS", 'G' }, // shotgun.spas12
+	{ 2083256995, nullptr, 'H' }, // t1_smg
 };
 
 void draw_players( const entity_vector<rust::base_player*, cached_player>& players ) {
@@ -217,7 +215,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 
 		const cached_bone_data& bone_data = cached_player.bone_data;
 
-		float distance = vector3::distance( camera_position, bone_data.positions[ 17 ] );
+		float distance = vector3::distance( camera.position, bone_data.positions[ 17 ] );
 		if ( distance > visuals.maximum_distance )
 			continue;
 
@@ -273,13 +271,18 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 
 			if ( draw_avatar ) {
 				renderer::draw_unity_image( cached_player.avatar_srv, cursor, bounds.top - 14.f, avatar_width, avatar_width, 2.f );
-
 				cursor += avatar_width + spacing;
 			}
 
 			if ( visuals.name ) {
-				renderer::draw_text( cursor, bounds.top - 11.f, fonts::verdana, text_flags::drop_shadow, visuals.name_color, cached_player.name );
+				renderer::draw_text( cursor, bounds.top - 11.f, fonts::verdana, text_flags::drop_shadow, cached_player.visible ? COL32_RED : ( UINT32 )visuals.name_color, cached_player.name );
 			}
+		}
+
+		bool draw_team_id = !cached_player.scientist && cached_player.team_id > 0 && cached_player.team_id < 100'000 && player_team_id;
+
+		if ( draw_team_id ) {
+			renderer::draw_text( bounds.right + 2.f, bounds.top - 3.f, fonts::small_fonts, text_flags::none, COL32_WHITE, format_string( "%llu", cached_player.team_id ) );
 		}
 
 		float offset = 0.f;
@@ -292,9 +295,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		}
 
 		if ( visuals.distance ) {
-			char buffer[ 16 ] = {};
-			snprintf( buffer, sizeof( buffer ), "%dm", ( int )distance );
-			renderer::draw_text( bounds.left + half, bounds.bottom + 1.f + offset, fonts::small_fonts, text_flags::centered, visuals.distance_color, buffer );
+			renderer::draw_text( bounds.left + half, bounds.bottom + 1.f + offset, fonts::small_fonts, text_flags::centered, visuals.distance_color, format_string( "%dm", ( int )distance ) );
 		}
 	}
 }
@@ -305,7 +306,7 @@ void draw_entities( const entity_vector<rust::base_entity*, cached_entity>& enti
 		if ( !visuals->enabled )
 			continue;
 
-		float distance = vector3::distance( camera_position, cached_entity.position );
+		float distance = vector3::distance( camera.position, cached_entity.position );
 		if ( distance > visuals->maximum_distance )
 			continue;
 
@@ -331,7 +332,7 @@ void draw_combat_entities( const entity_vector<rust::base_combat_entity*, cached
 		if ( !visuals->enabled )
 			continue;
 
-		float distance = vector3::distance( camera_position, cached_combat_entity.position );
+		float distance = vector3::distance( camera.position, cached_combat_entity.position );
 		if ( distance > visuals->maximum_distance )
 			continue;
 
@@ -351,33 +352,6 @@ void draw_combat_entities( const entity_vector<rust::base_combat_entity*, cached
 
 		renderer::draw_filled_rect( x - half, y + 10.f, width, 4.f, COL32_BLACK );
 		renderer::draw_filled_rect( x - half + 1.f, y + 11.f, health_width, 2.f, COL32( 120, 225, 80, 255 ) );
-
-
-		//float x = ( float )( int )( screen.x );
-		//float y = 
-
-		//float width = renderer::calc_text_size( fonts::small_fonts, visuals->display_name ).x;
-		//float half = ceilf( width / 2.f );
-
-		//float rx = ( float )( int )( screen.x );
-		//float ry = ( float )( int )( screen.y );
-
-		//renderer::draw_text( rx - half, ry, fonts::small_fonts, text_flags::none, visuals->color, visuals->display_name );
-
-		//ry += 10.f;
-
-		//renderer::draw_filled_rect( rx - half, ry, width, 4.f, COL32( 120, 225, 80, 255 ) );
-
-		//ry += 10f.;
-
-		////float nig = ( cached_combat_entity.health / cached_combat_entity.max_health ) * width;
-
-		////renderer::draw_filled_rect( rx + 1.f, ry + 1.f, nig, 2.f, COL32( 120, 225, 80, 255 ) );
-
-		//char buffer[ 64 ] = {};
-		//snprintf( buffer, sizeof( buffer ), "%.2f %.2f %.2f %.2f\n", rx, ry, width, half );
-
-		//renderer::draw_text( screen.x, screen.y + 3.f, fonts::small_fonts, text_flags::centered, COL32_WHITE, buffer );
 	}
 }
 
@@ -402,7 +376,7 @@ void draw_dropped_items( const entity_vector<rust::world_item*, cached_dropped_i
 		if ( !visuals->enabled )
 			continue;
 
-		float distance = vector3::distance( camera_position, cached_dropped_item.position );
+		float distance = vector3::distance( camera.position, cached_dropped_item.position );
 		if ( distance > visuals->maximum_distance )
 			continue;
 
@@ -435,8 +409,8 @@ void draw_esp() {
 	if ( !is_valid_ptr( native_camera ) )
 		return;
 
-	view_matrix = native_camera->culling_matrix;
-	camera_position = native_camera->last_position;
+	camera.view_matrix = native_camera->culling_matrix;
+	camera.position = native_camera->last_position;
 
 	util::scoped_spinlock lock( &entity_manager::cache_lock );
 
