@@ -16,8 +16,8 @@ namespace Offsets {
     }
 
     namespace RustCamera {
-        constexpr const static size_t ambientLightNight = 0xDC;
-        constexpr const static size_t ambientLightMultiplier = 0xE0;
+        constexpr const static size_t ambientLightNight = 0x5C;
+        constexpr const static size_t ambientLightMultiplier = 0x54;
     }
 
     namespace BaseMovement {

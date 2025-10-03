@@ -853,8 +853,8 @@ namespace unity {
 
     class physics {
     public:
-        static bool raycast( vector3 origin, vector3 direction, raycast_hit* hit_info, float max_distance, int layer_mask, unity::query_trigger_interaction query_trigger_interaction ) {
-            bool ( *raycast )( vector3*, vector3*, raycast_hit*, float, int, unity::query_trigger_interaction ) =
+        static bool raycast( vector3 origin, vector3 direction, raycast_hit* hit_info, float max_distance, int layer_mask, int query_trigger_interaction ) {
+            bool ( *raycast )( vector3*, vector3*, raycast_hit*, float, int, int ) =
                 ( decltype( raycast ) )( game_assembly + Offsets::Physics::Raycast );
 
             um::caller& caller = um::get_caller_for_thread();
@@ -870,8 +870,8 @@ namespace unity {
             return result;
         }
 
-        static int raycast_non_alloc( vector3 origin, vector3 direction, sys::array<raycast_hit>* results, float max_distance, int layer_mask, unity::query_trigger_interaction query_trigger_interaction ) {
-            int ( *raycast_non_alloc )( vector3*, vector3*, sys::array<raycast_hit>*, float, int, unity::query_trigger_interaction ) =
+        static int raycast_non_alloc( vector3 origin, vector3 direction, sys::array<raycast_hit>* results, float max_distance, int layer_mask, int query_trigger_interaction ) {
+            int ( *raycast_non_alloc )( vector3*, vector3*, sys::array<raycast_hit>*, float, int, int ) =
                 ( decltype( raycast_non_alloc ) )( game_assembly + Offsets::Physics::RaycastNonAlloc );
 
             um::caller& caller = um::get_caller_for_thread();
@@ -930,7 +930,7 @@ namespace rust {
         };
     }
 
-    enum ammo_types {
+    enum ammo_types : int {
         pistol_9mm = 1,
         rifle_556mm = 2,
         shotgun_12gauge = 4,
@@ -995,7 +995,7 @@ namespace rust {
 
     class base_entity : public base_networkable {
     public:
-        enum flag {
+        enum flag : int {
             placeholder = 1,
             on = 2,
             on_fire = 4,
@@ -1112,37 +1112,42 @@ namespace rust {
 
         ENCRYPTED_VALUE( float, ground_time, Offsets::PlayerWalkMovement::groundTime, {},
             {
-                values[ i ] = ( ( ( ( values[ i ] << 6 ) | ( values[ i ] >> 26 ) ) ^ 0xBECB992 ) << 28 )
-                    | ( ( ( ( values[ i ] << 6 ) | ( values[ i ] >> 26 ) ) ^ 0xBECB992 ) >> 4 );
+                int64_t a = 2LL * ( ( ( ( values[ i ] + 2078484805 ) << 15 ) | 
+                    ( ( unsigned int )( values[ i ] + 2078484805 ) >> 17 ) ) + 2138810659 );
+
+                values[ i ] = ( unsigned int )a | ( unsigned __int64 )HIDWORD( a );
             }
         );
 
         ENCRYPTED_VALUE( float, jump_time, Offsets::PlayerWalkMovement::jumpTime, {},
             {
-                int64_t a = 2LL * ( ( ( 16 * values[ i ] ) | ( values[ i ] >> 28 ) ) - 1519640036 );
-
-                values[ i ] = ( ( unsigned int )a | HIDWORD( a ) ) + 1461189103;
+                values[ i ] = ( ( ( ( values[ i ] + 324150175 ) ^ 0x32279839 ) << 7 ) |
+                    ( ( ( values[ i ] + 324150175 ) ^ 0x32279839u ) >> 25 ) ) ^ 0x11F2FB56LL;
             }
         );
 
         ENCRYPTED_VALUE( float, land_time, Offsets::PlayerWalkMovement::landTime, {},
             {
-                values[ i ] = ( ( ( ( values[ i ] - 1165896616 ) ^ 0x979988FA ) + 1086581408 ) << 31 )
-                    | ( unsigned __int64 )( ( ( ( values[ i ] - 1165896616 ) ^ 0x979988FA ) + 1086581408 ) >> 1 );
+                uint32_t a = values[ i ] ^ 0x19F04624;
+
+                values[ i ] = ( ( a << 9 ) | ( a >> 23 ) ) + 866453624;
             }
         );
 
         ENCRYPTED_VALUE( float, ground_angle_new, Offsets::PlayerWalkMovement::groundAngleNew, {},
             {
-                uint32_t a = ( ( ( values[ i ] << 9 ) | ( values[ i ] >> 23 ) ) + 1658094625 ) ^ 0xFD09D9DE;
+                int64_t a = 8LL * ( ( ( ( values[ i ] >> 5 ) | 
+                    ( values[ i ] << 27 ) ) ^ 0x8FAEDEE7 ) + 1516098325 );
 
-                values[ i ] = ( a << 9 ) | ( a >> 23 );
+                values[ i ] = ( unsigned int )a | HIDWORD( a );
             }
         );
 
         ENCRYPTED_VALUE( float, next_sprint_time, Offsets::PlayerWalkMovement::nextSprintTime, {},
             {
-                values[ i ] = ( ( ( values[ i ] << 22 ) | ( values[ i ] >> 10 ) ) ^ 0xBE426B50 ) + 1940450374;
+                uint32_t a = ( values[ i ] - 1587480667 ) ^ 0xC56D8F72;
+
+                values[ i ] = ( a << 29 ) | ( unsigned __int64 )( a >> 3 );
             }
         );
 
@@ -1151,7 +1156,7 @@ namespace rust {
 
     class model_state {
     public:
-        enum flag {
+        enum flag : int {
             ducked = 1,
             jumped = 2,
             on_ground = 4,
@@ -1177,11 +1182,11 @@ namespace rust {
         FIELD( vector3, look_direction, Offsets::ModelState::lookDir );
         FIELD( int, flags, Offsets::ModelState::flags );
 
-        bool has_flag( model_state::flag f ) {
+        bool has_flag( flag f ) {
             return ( flags & f ) == f;
         }
 
-        void set_flag( model_state::flag f, bool b ) {
+        void set_flag( flag f, bool b ) {
             if ( b ) {
                 flags |= f;
             } else {
@@ -1275,6 +1280,41 @@ namespace rust {
 
     class base_player : public base_combat_entity {
     public:
+        // BasePlayer.PlayerFlags
+        enum flag {
+            unused1 = 1,
+            unused2 = 2,
+            is_admin = 4,
+            receiving_snapshot = 8,
+            sleeping = 16,
+            spectating = 32,
+            wounded = 64,
+            is_developer = 128,
+            connected = 256,
+            third_person_viewmode = 1024,
+            eyes_viewmode = 2048,
+            chat_mute = 4096,
+            no_sprint = 8192,
+            aiming = 16384,
+            display_sash = 32768,
+            relaxed = 65536,
+            safe_zone = 131072,
+            server_fall = 262144,
+            incapacitated = 524288,
+            workbench1 = 1048576,
+            workbench2 = 2097152,
+            workbench3 = 4194304,
+            voice_range_boost = 8388608,
+            modify_clan = 16777216,
+            loading_after_transfer = 33554432,
+            no_respawn_zone = 67108864,
+            is_in_tutorial = 134217728,
+            is_restrained = 268435456,
+            creative_mode = 536870912,
+            waiting_for_gesture_interaction = 1073741824,
+            ragdolling = -2147483648
+        };
+
         FIELD( rust::player_model*, player_model, Offsets::BasePlayer::playerModel );
         FIELD( player_input*, input, Offsets::BasePlayer::input );
         FIELD( player_walk_movement*, movement, Offsets::BasePlayer::movement );
@@ -1282,8 +1322,8 @@ namespace rust {
 
         ENCRYPTED_VALUE( uint64_t, cl_active_item, Offsets::BasePlayer::clActiveItem,
             {
-                values[ i ] = ( ( ( values[ i ] - 39167478 ) << 8 ) | 
-                    ( ( unsigned int )( values[ i ] - 39167478 ) >> 24 ) ) - 813727899;
+                values[ i ] = ( ( ( values[ i ] + 112473900 ) << 28 ) |
+                    ( ( unsigned int )( values[ i ] + 112473900 ) >> 4 ) ) + 1863673355;
             }, {}
         );
 
@@ -1383,6 +1423,18 @@ namespace rust {
                 return false;
 
             return model_state->water_level > 0.65f;
+        }
+
+        bool has_player_flag( flag f ) {
+            return ( flags & f ) == f;
+        }
+
+        void set_player_flag( flag f, bool b ) {
+            if ( b ) {
+                flags |= f;
+            } else {
+                flags &= ~f;
+            }
         }
 
         static inline il2cpp_class* klass_;
@@ -1528,8 +1580,17 @@ namespace rust {
         public:
             ENCRYPTED_VALUE( float, fov, Offsets::ConVar_Graphics_Static::_fov, {},
                 {
-                    values[ i ] = ( ( ( values[ i ] << 22 ) | 
-                        ( values[ i ] >> 10 ) ) ^ 0x5A40F656 ) - 1305720721;
+                    uint32_t eax = values[ i ];
+                    uint32_t ecx = eax;
+                    eax <<= 0x8;
+                    ecx >>= 0x18;
+                    ecx |= eax;
+                    ecx ^= 0x5052445E;
+                    eax = ecx;
+                    ecx <<= 0x14;
+                    eax >>= 0xC;
+                    eax |= ecx;         
+                    values[ i ] = eax;
                 }
             );
         };
@@ -1732,6 +1793,24 @@ namespace rust {
         public:
             FIELD( sys::array<unity::raycast_hit>*, hit_buffer, Offsets::GamePhysics_Static::hitBuffer );
         };
+
+        static bool trace( unity::ray ray, float radius, unity::raycast_hit* hit_info, float max_distance, int layer_mask, int query_trigger_interaction, base_entity* ignore_entity ) {
+            bool ( *trace )( unity::ray*, float, unity::raycast_hit*, float, int, int, base_entity* ) =
+                ( decltype( trace ) )( game_assembly + Offsets::GamePhysics::Trace );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            unity::ray* _ray = caller.push<unity::ray>( ray );
+            unity::raycast_hit* _hit_info = caller.push<unity::raycast_hit>();
+
+            bool result = caller( trace, _ray, radius, _hit_info, max_distance, layer_mask, query_trigger_interaction, ignore_entity );
+
+            if ( hit_info ) {
+                *hit_info = *_hit_info;
+            }
+
+            return result;
+        }
 
         static inline static_fields* static_fields_;
     };
