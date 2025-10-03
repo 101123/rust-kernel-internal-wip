@@ -61,10 +61,6 @@ class_lookup class_lookups[] = {
 	{ &rust::console_system::arg::klass_, nullptr, nullptr, ConsoleSystem_Arg_TypeDefinitionIndex }
 };
 
-parent_class_lookup parent_class_lookups[] = {
-	{ &rust::main_camera::klass_, nullptr, &rust::singleton_component<rust::rust_camera>::static_fields_, 2u }
-};
-
 bool populate_classes() {
 	static uintptr_t type_info_definition_table_address = util::relative_32(
 		util::find_pattern_image( game_assembly, "\x48\xF7\xE1\x48\x8B\xCA\x48\xC1\xE9\x04\xBA\x08\x00\x00\x00" ) + 21, 3 );
@@ -94,7 +90,7 @@ bool populate_classes() {
 		}
 	}
 
-	for ( parent_class_lookup& parent_class_lookup : parent_class_lookups ) {
+	/*for ( parent_class_lookup& parent_class_lookup : parent_class_lookups ) {
 		il2cpp_class* klass = *parent_class_lookup.start;
 
 		while ( parent_class_lookup.depth-- ) {
@@ -111,7 +107,7 @@ bool populate_classes() {
 		if ( parent_class_lookup.static_fields ) {
 			*( uintptr_t* )( parent_class_lookup.static_fields ) = klass->static_fields;
 		}
-	}
+	}*/
 
 	return true;
 }

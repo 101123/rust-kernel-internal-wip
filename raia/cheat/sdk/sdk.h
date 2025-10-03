@@ -1043,12 +1043,6 @@ namespace rust {
         FIELD( networkable_id, id, Offsets::Network_Networkable::ID );
     };
 
-    class rust_camera {
-    public:
-        FIELD( float, ambient_light_night, Offsets::RustCamera::ambientLightNight );
-        FIELD( float, ambient_light_multiplier, Offsets::RustCamera::ambientLightMultiplier );
-    };
-
     class main_camera {
     public:
         class static_fields {
@@ -1716,6 +1710,7 @@ namespace rust {
     class tod_night_parameters {
     public:
         FIELD( unity::gradient*, ambient_color, Offsets::TOD_NightParameters::AmbientColor );
+        FIELD( float, ambient_multiplier, Offsets::TOD_NightParameters::AmbientMultiplier );
     };
 
     class tod_ambient_parameters {

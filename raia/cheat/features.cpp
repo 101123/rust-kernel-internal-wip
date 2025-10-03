@@ -11,14 +11,6 @@ void features::graphics() {
 }
 
 void features::bright_night() {
-	auto static_fields = rust::singleton_component<rust::rust_camera>::static_fields_;
-	if ( !static_fields )
-		return;
-
-	rust::rust_camera* rust_camera = static_fields->instance;
-	if ( !is_valid_ptr( rust_camera ) )
-		return;
-
 	rust::tod_sky* tod_sky = rust::tod_sky::get_instance();
 	if ( !is_valid_ptr( tod_sky ) )
 		return;
@@ -31,9 +23,8 @@ void features::bright_night() {
 	if ( !is_valid_ptr( ambient_parameters ) )
 		return;
 
-	rust_camera->ambient_light_night = override_night.enabled ? ( float )ambient_multiplier : 0.f;
-	rust_camera->ambient_light_multiplier = override_night.enabled ? 1.f : ( float )rust_camera->ambient_light_multiplier;
-	ambient_parameters->saturation = ambient_saturation;
+	night_parameters->ambient_multiplier = override_night.enabled ? ( float )ambient_multiplier : 0.f;
+	ambient_parameters->saturation = override_night.enabled ? ( float )ambient_saturation : 1.f;
 
 	if ( unity::gradient* gradient = night_parameters->ambient_color ) {
 		unity::color color = override_night.enabled ? unity::color( ambient_color ) : unity::color( 0.f, 0.0343f, 0.099f, 1.f );

@@ -1920,6 +1920,7 @@ namespace Offsets {
 		constexpr const static size_t MoonColor = 0x10;
 		constexpr const static size_t CloudColor = 0x38;
 		constexpr const static size_t AmbientColor = 0x48;
+		constexpr const static size_t AmbientMultiplier = 0x5c;
 	}
 
 #define TOD_StarParameters_TypeDefinitionIndex 9406

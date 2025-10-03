@@ -15,11 +15,6 @@ namespace Offsets {
         constexpr const static size_t typeHierarchyDepth = 0x120;
     }
 
-    namespace RustCamera {
-        constexpr const static size_t ambientLightNight = 0x5C;
-        constexpr const static size_t ambientLightMultiplier = 0x54;
-    }
-
     namespace BaseMovement {
         constexpr const static size_t TargetMovement = 0x3C;
         constexpr const static size_t Grounded = 0x54;
@@ -34,6 +29,6 @@ namespace Offsets {
     }
 
     namespace ConsoleSystem_Option {
-        constexpr const static size_t IsFromServer = 0xC;
+        constexpr const static size_t IsFromServer = 0x7;
     }
 }
