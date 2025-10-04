@@ -486,8 +486,8 @@ namespace Offsets {
 		constexpr const static size_t baseProtection = 0x1d0;
 		constexpr const static size_t lifestate = 0x23c;
 		constexpr const static size_t markAttackerHostile = 0x242;
-		constexpr const static size_t _health = 0x244;
-		constexpr const static size_t _maxHealth = 0x248;
+		constexpr const static size_t _health = 0x248;
+		constexpr const static size_t _maxHealth = 0x24C;
 		constexpr const static size_t lastNotifyFrame = 0x258;
 	}
 
