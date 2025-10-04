@@ -320,12 +320,23 @@ DEFINE_CONTEXT( thicker_projectiles,
 	cvar_f thickness = cvar_f( H( "Thickness" ), 1.f );
 );
 
-DEFINE_CONTEXT( hit_override,
+namespace hit_override_bone {
+	enum : uint32_t {
+		head,
+		neck,
+		chest,
+		random
+	};
+}
+
+DEFINE_CONTEXT( player_hit_override,
 	cvar enabled = cvar( H( "Hit Override" ), false );
+	cvar_ui bone = cvar_ui( H( "Hit Override Bone" ), hit_override_bone::head );
 );
 
-DEFINE_CONTEXT( patrol_heli_weakspots,
-	cvar enabled = cvar( H( "Patrol Heli Weakspots" ) );
+DEFINE_CONTEXT( hit_patrol_helicopter_weakspots,
+	cvar enabled = cvar( H( "Hit Patrol Helicopter Weakspots" ) );
+	cvar_ui chance = cvar_ui( H( "Hit Patrol Helicopter Weakspots Chance" ), 100 );
 );
 
 inline cvar force_automatic = cvar( H( "Force Automatic" ), false );

@@ -15,6 +15,8 @@
 #include "math/quat.h"
 #include "math/mat4x4.h"
 
+#include <md5.h>
+
 namespace sys {
     class string {
     private:
@@ -882,6 +884,17 @@ namespace unity {
             return caller( raycast_non_alloc, _origin, _direction, results, max_distance, layer_mask, query_trigger_interaction );
         }
     };
+
+    // I don't know that this is actually from Unity, but it's in their namespace
+    class string_ex {
+    public:
+        static constexpr uint32_t manifest_hash( const char* str ) {
+            md5::Digest digest = md5::compute( str );
+
+            return ( uint32_t )( ( int )( digest[ 0 ] ) | ( ( int )digest[ 1 ] << 8 ) | 
+                ( ( int )digest[ 2 ] << 16 ) | ( ( int )digest[ 3 ] << 24 ) );
+        }
+    };
 }
 
 namespace rust {
@@ -953,6 +966,17 @@ namespace rust {
     public:
         base_entity* ent_cached;
         networkable_id id_cached;
+
+        rust::base_entity* get( bool serverside ) {
+            rust::base_entity* ( *get )( entity_ref*, bool ) =
+                ( decltype( get ) )( game_assembly + Offsets::EntityRef::Get );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            entity_ref* _this = caller.push<entity_ref>( *this );
+
+            return caller( get, _this, serverside );
+        }
     };
 
     template <typename T>
@@ -1792,7 +1816,7 @@ namespace rust {
 
     class player_attack {
     public:
-
+        FIELD( rust::attack*, attack, Offsets::ProtoBuf_PlayerAttack::attack );
     };
 
     class player_projectile_attack {

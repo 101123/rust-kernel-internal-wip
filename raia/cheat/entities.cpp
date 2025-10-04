@@ -5,7 +5,6 @@
 #include "dx.h"
 
 #include <ankerl/unordered_dense.h>
-#include <md5.h>
 
 using entity_map = ankerl::unordered_dense::map<rust::base_entity*, cached_entity>;
 using combat_entity_map = ankerl::unordered_dense::map<rust::base_combat_entity*, cached_combat_entity>;
@@ -196,12 +195,7 @@ const void** get_player_cacher() {
     return player_cacher::cache_functions;
 }
 
-constexpr uint32_t generate_prefab_id_from_path( const char* path ) {
-	md5::Digest digest = md5::compute( path );
-	return ( uint32_t )( ( int )( digest[ 0 ] ) | ( ( int )digest[ 1 ] << 8 ) | ( ( int )digest[ 2 ] << 16 ) | ( ( int )digest[ 3 ] << 24 ) );
-}
-
-#define PREFAB( prefab_path ) generate_prefab_id_from_path( prefab_path )
+#define PREFAB( prefab_path ) unity::string_ex::manifest_hash( prefab_path )
 
 bool entity_manager::belongs_in_cache( rust::base_networkable* entity, cache_specifier* specifier ) {
     if ( entity->klass == rust::base_player::klass_ || entity->klass == rust::scientist_npc::klass_ || 

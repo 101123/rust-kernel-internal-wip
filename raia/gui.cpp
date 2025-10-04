@@ -827,12 +827,12 @@ void tab( const char* label, uint32_t value, uint32_t* tab, rect& cursor, float 
     renderer::draw_text( cursor.x + width / 2.f, cursor.y + 6.f, 0, text_flags::centered, selected ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), label );
 }
 
-void visual_impl( group_box& group_box, cvar_visual& visual, const char* label = nullptr ) {
+void visual_impl( group_box& group_box, cvar_visual& visual, const char* label = nullptr, uint32_t max_distance = 500u ) {
     bool toggled = group_box.toggle( label ? label : visual.display_name, &visual.enabled );
     group_box.color_picker( &visual.color );
 
     if ( toggled ) {
-        group_box.slider( S( "Max distance" ), S( "%dm" ), &visual.maximum_distance, 0u, 500u );
+        group_box.slider( S( "Max distance" ), S( "%dm" ), &visual.maximum_distance, 0u, max_distance );
     }
 }
 
@@ -985,7 +985,16 @@ void gui::run() {
                     right.toggle( S( "Instant eoka" ), &instant_eoka );
                     right.toggle( S( "Instant compound bow charge" ), &instant_compound_bow );
 
+                    if ( right.toggle( S( "Player hit override" ), &player_hit_override.enabled ) ) {
+                        right.combo_box( S( "Bone" ), { S( "Head" ), S( "Neck" ), S( "Chest" ), S( "Random" ) }, &player_hit_override.bone );
+                    }
+                   
+                    if ( right.toggle( S( "Hit patrol helicopter weakspots" ), &hit_patrol_helicopter_weakspots.enabled ) ) {
+                        right.slider( S( "Chance" ), S( "%d%" ), &hit_patrol_helicopter_weakspots.chance, 0u, 100u );
+                    }
+
                     right.end();
+
                     break;
                 }
             }
@@ -1085,7 +1094,7 @@ void gui::run() {
 
                     right.begin();
                  
-                    visual_impl( right, patrol_helicopter, S( "Patrol helicopter" ) );
+                    visual_impl( right, patrol_helicopter, S( "Patrol helicopter" ), 5000u );
                     visual_impl( right, bradley );
 
                     right.end();

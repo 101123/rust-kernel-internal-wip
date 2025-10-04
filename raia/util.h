@@ -370,6 +370,10 @@ namespace util {
 	private:
 		alignas( T ) uint8_t m_storage[ sizeof( T ) ];
 	};
+
+	inline uint32_t random( uint32_t seed = 0x811C9DC5 ) {
+		return RtlRandomEx( ( PULONG )&seed );
+	}
 }
 
 #define H( x ) util::hash_const( x )

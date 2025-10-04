@@ -447,25 +447,54 @@ void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot*
 	}
 }
 
+#define BONE( name ) unity::string_ex::manifest_hash( name ) 
+
+uint32_t player_random_hit_bones[] = {
+	BONE( "head" ), BONE( "neck" ),
+	BONE( "spine4" ), BONE( "spine3" ),
+	BONE( "spine2" ), BONE( "spine1" ),
+	BONE( "l_clavicle" ), BONE( "r_clavicle" ),
+	BONE( "l_upperarm" ), BONE( "r_upperarm" ),
+	BONE( "l_forearm" ), BONE( "r_forearm" ),
+	BONE( "l_hand" ), BONE( "r_hand" ),
+	BONE( "l_hip" ), BONE( "r_hip" ),
+	BONE( "l_knee" ), BONE( "r_knee" ),
+	BONE( "l_foot" ), BONE( "r_foot" )
+};
+
+uint32_t player_hit_bones[] = {
+	BONE( "head" ), BONE( "neck" ), BONE( "chest" )
+};
+
+uint32_t patrol_helicopter_weakspot_hit_bones[] = {
+	BONE( "main_rotor_col" ), BONE( "engine_col" ), BONE( "tail_rotor_col" )
+};
+
 void protobuf_player_projectile_attack_write_to_stream_pre_hook( rust::player_projectile_attack* player_projectile_attack ) {
 	if ( !is_valid_ptr( player_projectile_attack ) )
 		return;
 
-	rust::player_attack* attack = player_projectile_attack->player_attack;
+	rust::player_attack* player_attack = player_projectile_attack->player_attack;
+	if ( !is_valid_ptr( player_attack ) )
+		return;
+
+	rust::attack* attack = player_attack->attack;
 	if ( !is_valid_ptr( attack ) )
 		return;
 
-	// TODO: Find a way to get the entity from the networkable id
-	rust::base_networkable* hit_entity = nullptr;
+	rust::base_entity* hit_entity = rust::entity_ref( nullptr, attack->hit_id ).get( false );
 	if ( !is_valid_ptr( hit_entity ) )
 		return;
 
-	if ( hit_override.enabled && hit_entity->is<rust::base_player>() ) {
-
+	if ( player_hit_override.enabled && hit_entity->is<rust::base_player>() ) {
+		attack->hit_bone = player_hit_override.bone == hit_override_bone::random ?
+			player_random_hit_bones[ util::random() % _countof( player_random_hit_bones ) ] : player_hit_bones[ player_hit_override.bone ];
 	}
 
-	else if ( patrol_heli_weakspots.enabled && hit_entity->is<rust::patrol_helicopter>() ) {
-
+	else if ( hit_patrol_helicopter_weakspots.enabled && hit_entity->is<rust::patrol_helicopter>() ) {
+		if ( ( ( util::random() % 100u ) + 1u ) <= hit_patrol_helicopter_weakspots.chance ) {
+			attack->hit_bone = patrol_helicopter_weakspot_hit_bones[ util::random() % _countof( patrol_helicopter_weakspot_hit_bones ) ];
+		}
 	}
 }
 

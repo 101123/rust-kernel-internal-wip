@@ -2819,4 +2819,16 @@ namespace Offsets {
 		constexpr const static size_t srcParentID = 0x48;
 		constexpr const static size_t dstParentID = 0x28;
 	}
+
+
+	// obf name: ::%58c303f6b590d32f408cee691a7e5d0529ee6bf0
+#define EntityRef_ClassName "%58c303f6b590d32f408cee691a7e5d0529ee6bf0"
+#define EntityRef_ClassNameShort "%58c303f6b590d32f408cee691a7e5d0529ee6bf0"
+#define EntityRef_TypeDefinitionIndex 2370
+
+	namespace EntityRef {
+
+		// Offsets
+		constexpr const static size_t Get = 0x18ab580;
+	}
 }
