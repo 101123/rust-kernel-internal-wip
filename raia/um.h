@@ -6,6 +6,10 @@
 #include <new>
 #include <intrin.h>
 
+#ifdef DEBUG
+#include <source_location>
+#endif
+
 #define ALLOCATION_SIZE 0x1000
 #define STACK_SIZE ALLOCATION_SIZE / 2
 
@@ -19,6 +23,10 @@ namespace um {
 
 	class caller {
 	public:
+#ifdef DEBUG
+		std::source_location last_caller;
+#endif
+
 		bool initialize();
 		void destroy();
 
@@ -139,5 +147,11 @@ namespace um {
 
 	void destroy_callers();
 
+#ifndef DEBUG
 	caller& get_caller_for_thread();
+#else
+	caller& get_caller_for_thread( const std::source_location& location = std::source_location::current() );
+
+	void print_last_callers();
+#endif
 }

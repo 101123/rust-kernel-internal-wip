@@ -129,52 +129,52 @@ bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t
 			}
 
 			else if ( hook.type == hook_type::ptr_swap ) {
-				if ( context->Rip == hook.corrupt ) {
-					// Check if we want to skip the original
-					if ( hook.ptr_swap.pre_handler && !hook.ptr_swap.pre_handler( context ) ) {
-						uintptr_t retaddr = *( uintptr_t* )context->Rsp;
+			if ( context->Rip == hook.corrupt ) {
+				// Check if we want to skip the original
+				if ( hook.ptr_swap.pre_handler && !hook.ptr_swap.pre_handler( context ) ) {
+					uintptr_t retaddr = *( uintptr_t* )context->Rsp;
 
-						// Emulate a ret
-						context->Rsp += 0x8;
-						context->Rip = retaddr;
-					}
-
-					else {
-						// If we have a post hook
-						if ( hook.ptr_swap.post_handler ) {
-							uintptr_t* retaddr = ( uintptr_t* )context->Rsp;
-
-							// Preserve the original return address
-							hook.ptr_swap.retaddr = *retaddr;
-
-							// Preserve the needed original arguments for the post hook
-							previous_context.Rcx = context->Rcx;
-							previous_context.Rdx = context->Rdx;
-							previous_context.R8 = context->R8;
-							previous_context.R9 = context->R9;
-
-							// Corrupt the return address
-							*retaddr = hook.corrupt - 1llu;
-						}
-
-						context->Rip = hook.original;
-					}
-
-					return true;
+					// Emulate a ret
+					context->Rsp += 0x8;
+					context->Rip = retaddr;
 				}
 
-				// We've caught a post hook
-				else if ( context->Rip == hook.corrupt - 1llu ) {
+				else {
+					// If we have a post hook
 					if ( hook.ptr_swap.post_handler ) {
-						// Call the post hook with the original context we preserved
-						hook.ptr_swap.post_handler( &previous_context );
+						uintptr_t* retaddr = ( uintptr_t* )context->Rsp;
+
+						// Preserve the original return address
+						hook.ptr_swap.retaddr = *retaddr;
+
+						// Preserve the needed original arguments for the post hook
+						previous_context.Rcx = context->Rcx;
+						previous_context.Rdx = context->Rdx;
+						previous_context.R8 = context->R8;
+						previous_context.R9 = context->R9;
+
+						// Corrupt the return address
+						*retaddr = hook.corrupt - 1llu;
 					}
 
-					// Restore the return address we preserved
-					context->Rip = hook.ptr_swap.retaddr;
-
-					return true;
+					context->Rip = hook.original;
 				}
+
+				return true;
+			}
+
+			// We've caught a post hook
+			else if ( context->Rip == hook.corrupt - 1llu ) {
+				if ( hook.ptr_swap.post_handler ) {
+					// Call the post hook with the original context we preserved
+					hook.ptr_swap.post_handler( &previous_context );
+				}
+
+				// Restore the return address we preserved
+				context->Rip = hook.ptr_swap.retaddr;
+
+				return true;
+			}
 			}
 		}
 	}
@@ -215,7 +215,7 @@ void on_syscall( sentian::syscall_frame* new_frame, sentian::syscall_frame* old_
 	if ( !set_d3d_render_handler ) {
 		if ( !is_rust_process() )
 			return;
-		
+
 		// Makes sure this only runs on a single thread
 		if ( syscall_mutex.try_lock() ) {
 			user_sdk::set_d3d_render_handler( render_handler );
@@ -224,6 +224,14 @@ void on_syscall( sentian::syscall_frame* new_frame, sentian::syscall_frame* old_
 			syscall_mutex.unlock();
 		}
 	}
+}
+
+bool on_exit_process( sentian::callback_result* callback, bool last_thread_exit, PEPROCESS process ) {
+	if ( process == rust_process ) {
+		um::print_last_callers();
+	}
+
+	return true;
 }
 
 int main( sentian::driver_api* api, sentian::driver_allocation* allocation ) {
@@ -249,6 +257,10 @@ int main( sentian::driver_api* api, sentian::driver_allocation* allocation ) {
 	slot->unload = ( sentian::unload_callback_t )on_unload;
 	slot->trap = ( sentian::exception_callback_t )on_exception;
 	slot->syscall = ( sentian::syscall_callback_t )on_syscall;
+
+#ifdef DEBUG
+	slot->psp_exit_process = ( sentian::psp_exit_process_callback_t )on_exit_process;
+#endif
 
 	driver_api = api;
 	rust_process = process_info.process;

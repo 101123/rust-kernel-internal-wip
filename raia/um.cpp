@@ -118,7 +118,11 @@ namespace um {
 	//
 	static util::tls<caller, 16> callers;
 
+#ifndef DEBUG
 	caller& get_caller_for_thread() {
+#else
+	caller& get_caller_for_thread( const std::source_location& location ) {
+#endif
 		caller* caller = callers.get();
 		if ( !caller ) [[unlikely]]
 			__fastfail( 0 );
@@ -128,12 +132,25 @@ namespace um {
 		if ( !caller->initialized() && !caller->initialize() )
 			__fastfail( 0 );
 
+#ifdef DEBUG
+		caller->last_caller = location;
+#endif
+
 		return *caller;
 	}
 
+#ifdef DEBUG
+	void print_last_callers() {
+		for ( auto& [ _, caller ] : callers.get_objects() ) {
+			const std::source_location& location = caller.last_caller;
+
+			LOG( "%s (%d): %s", location.file_name(), location.line(), location.function_name() );
+		}
+	}
+#endif
+
 	void destroy_callers() {
 		for ( auto& caller : callers.get_objects() ) {
-			LOG( "Destroying caller with thread id %p\n", caller.thread_id );
 			caller.object.destroy();
 		}
 	}

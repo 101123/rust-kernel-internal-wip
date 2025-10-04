@@ -572,7 +572,7 @@ bool console_system_command_pre_hook( rust::console_system::arg* arg ) {
 void hook_handlers::network_client_create_networkable( _CONTEXT* context ) {
 	static context_search search = context_search<rust::base_networkable*>( context,
 		[]( rust::base_networkable* value ) {
-			if ( !is_valid_ptr( value ) )
+			if ( !is_valid_ptr( value ) || !is_valid_ptr( value->cached_ptr ) )
 				return false;
 
 			if ( !value->as<rust::base_networkable>() )
