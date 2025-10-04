@@ -6,32 +6,6 @@
 #include "renderer.h"
 #include "gui.h"
 
-#include <cstdarg>
-
-uint8_t format_buffer[ 1024 ];
-
-const char* format_string( const char* format, ... ) {
-	char* buffer = ( char* )format_buffer;
-
-	va_list args;
-	va_start( args, format );
-	vsprintf( buffer, format, args );
-	va_end( args );
-
-	return buffer;
-}
-
-const wchar_t* format_string_w( const wchar_t* format, ... ) {
-	wchar_t* buffer = ( wchar_t* )format_buffer;
-
-	va_list args;
-	va_start( args, format );
-	vswprintf( buffer, format, args );
-	va_end( args );
-
-	return buffer;
-}
-
 class visual_builder {
 public:
 	visual_builder() = delete;
@@ -281,7 +255,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		bool draw_team_id = !cached_player.scientist && ( cached_player.team_id > 0 && cached_player.team_id < 100'000 ) && player_team_id;
 
 		if ( draw_team_id ) {
-			renderer::draw_text( bounds.right + 2.f, bounds.top - 3.f, fonts::small_fonts, text_flags::none, COL32_WHITE, format_string( S( "%llu" ), cached_player.team_id ) );
+			renderer::draw_text( bounds.right + 2.f, bounds.top - 3.f, fonts::small_fonts, text_flags::none, COL32_WHITE, util::format_string( S( "%llu" ), cached_player.team_id ) );
 		}
 
 		float offset = 0.f;
@@ -294,7 +268,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		}
 
 		if ( visuals.distance ) {
-			renderer::draw_text( bounds.left + half, bounds.bottom + 1.f + offset, fonts::small_fonts, text_flags::centered, visuals.distance_color, format_string( S( "%dm" ), ( int )distance ) );
+			renderer::draw_text( bounds.left + half, bounds.bottom + 1.f + offset, fonts::small_fonts, text_flags::centered, visuals.distance_color, util::format_string( S( "%dm" ), ( int )distance ) );
 		}
 	}
 }
@@ -318,7 +292,7 @@ void draw_entities( const entity_vector<rust::base_entity*, cached_entity>& enti
 			.set_vertical_spacing( 8.f )
 			.set_flags( text_flags::centered )
 			.draw_text( visuals->display_name, visuals->color )
-			.draw_text( format_string( "%dm", ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
+			.draw_text( util::format_string( "%dm", ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
 	}
 }
 
@@ -388,10 +362,10 @@ void draw_dropped_items( const entity_vector<rust::world_item*, cached_dropped_i
 			.set_vertical_spacing( 8.f )
 			.set_flags( text_flags::centered )
 			.draw_text( cached_dropped_item.amount > 1 ?
-				format_string_w( S( L"%ws (%dx)" ), cached_dropped_item.name, cached_dropped_item.amount ) :
-				format_string_w( S( L"%ws" ), cached_dropped_item.name ),
+				util::format_string_w( S( L"%ws (%dx)" ), cached_dropped_item.name, cached_dropped_item.amount ) :
+				util::format_string_w( S( L"%ws" ), cached_dropped_item.name ),
 				visuals->color )
-			.draw_text( format_string( S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
+			.draw_text( util::format_string( S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
 	}
 }
 
@@ -419,7 +393,7 @@ void draw_esp() {
 		.set_font( fonts::verdana )
 		.set_vertical_spacing( 12.f )
 		.set_flags( text_flags::none )
-		.draw_text( format_string( "Velocity: %.2f [%.2f], Drag: %.2f, Gravity Modifier: %.2f, Initial Distance: %.2f, Projectile Velocity Scale: %.2f, Aim Sway Scale: %.2f, Recoil Scale: %.2f, Sight Aim Cone Scale: %.2f, Hip Aim Cone Scale: %.2f, Hash: %u",
+		.draw_text( util::format_string( "Velocity: %.2f [%.2f], Drag: %.2f, Gravity Modifier: %.2f, Initial Distance: %.2f, Projectile Velocity Scale: %.2f, Aim Sway Scale: %.2f, Recoil Scale: %.2f, Sight Aim Cone Scale: %.2f, Hip Aim Cone Scale: %.2f, Hash: %u",
 			held_weapon.velocity,
 			held_weapon.max_velocity,
 			held_weapon.drag,
@@ -433,10 +407,10 @@ void draw_esp() {
 			held_weapon.mods.hash ),
 			COL32_WHITE )
 
-		.draw_text( format_string( "%d entities", entity_collection.entities.size() ), COL32_WHITE )
-		.draw_text( format_string( "%d combat entities", entity_collection.combat_entities.size() ), COL32_WHITE )
-		.draw_text( format_string( "%d dropped items", entity_collection.dropped_items.size() ), COL32_WHITE )
-		.draw_text( format_string( "%d players", entity_collection.players.size() ), COL32_WHITE );
+		.draw_text( util::format_string( "%d entities", entity_collection.entities.size() ), COL32_WHITE )
+		.draw_text( util::format_string( "%d combat entities", entity_collection.combat_entities.size() ), COL32_WHITE )
+		.draw_text( util::format_string( "%d dropped items", entity_collection.dropped_items.size() ), COL32_WHITE )
+		.draw_text( util::format_string( "%d players", entity_collection.players.size() ), COL32_WHITE );
 
 	draw_entities( entity_collection.entities );
 	draw_combat_entities( entity_collection.combat_entities );

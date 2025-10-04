@@ -238,7 +238,7 @@ void update_input() {
     left_mouse_held = left_mouse_state.previous && left_mouse_state.current;
 
     vector2 mouse_pos = unity::input::get_mouse_position();
-    mouse_pos.y = 1440.f - mouse_pos.y;
+    mouse_pos.y = ( float )screen_height - mouse_pos.y;
 
     mouse_position = {
         .previous = mouse_position.current,
@@ -350,10 +350,7 @@ public:
             }
         }
 
-        char buffer[ 8 ] = {};
-        snprintf( buffer, sizeof( buffer ), "[%c]", *key );
-
-        draw_list.add_text( bounds.x, bounds.y, fonts::small_fonts, text_flags::none, active ? COL32_RED : COL32( 160, 160, 160, 255 ), buffer );
+        draw_list.add_text( bounds.x, bounds.y, fonts::small_fonts, text_flags::none, active ? COL32_RED : COL32( 160, 160, 160, 255 ), util::format_string( S( "[%c]" ), *key ) );
 
         draw_list.pop_z_index();
     }
@@ -551,7 +548,7 @@ public:
 
         draw_list.add_filled_rect_multi_color( draw_bounds.x, draw_bounds.y, fill_width, draw_bounds.h, gradient_on );
 
-        //renderer.draw_string_a( draw_bounds.x + fill_width, draw_bounds.y, Fonts::SmallFonts, TextFlags::Centered, COL32( 255, 255, 255, 255 ), FMT( fmt, value ) );
+        draw_list.add_text( draw_bounds.x + fill_width, draw_bounds.y, fonts::small_fonts, text_flags::centered, COL32( 160, 160, 160, 255 ), util::format_string( fmt, *value ) );
 
         draw_list.pop_z_index();
 
@@ -560,7 +557,7 @@ public:
 
     static inline vector2 combo_box_movement[] = {
         { 0.f, 0.f }, /* None */
-        { 0.f, 18.f }, /* Toggle -> Combobox */
+        { 0.f, 16.f }, /* Toggle -> Combobox */
         { 0.f, 29.f }, /* Slider -> Combobox */
         { 0.f, 50.f } /* Combobox -> Combobox */
     };
@@ -571,7 +568,7 @@ public:
 
         static_assert( std::is_integral_v<T> );
 
-        cursor_ += slider_movement[ ( int )previous_id_ ];
+        cursor_ += combo_box_movement[ ( int )previous_id_ ];
 
         draw_list.push_z_index( 3 );
 
@@ -624,7 +621,7 @@ public:
     void multi_combo_box( const char* label, std::initializer_list<std::pair<const char*, bool*>> options) {
         auto& draw_list = gui_draw_list.get();
 
-        cursor_ += slider_movement[ ( int )previous_id_ ];
+        cursor_ += combo_box_movement[ ( int )previous_id_ ];
 
         draw_list.push_z_index( 3 );
 
@@ -986,7 +983,7 @@ void gui::run() {
                     right.toggle( S( "Instant compound bow charge" ), &instant_compound_bow );
 
                     if ( right.toggle( S( "Player hit override" ), &player_hit_override.enabled ) ) {
-                        right.combo_box( S( "Bone" ), { S( "Head" ), S( "Neck" ), S( "Chest" ), S( "Random" ) }, &player_hit_override.bone );
+                        right.combo_box( S( "Hit bone" ), { S( "Head" ), S( "Neck" ), S( "Chest" ), S( "Random" ) }, &player_hit_override.bone );
                     }
                    
                     if ( right.toggle( S( "Hit patrol helicopter weakspots" ), &hit_patrol_helicopter_weakspots.enabled ) ) {

@@ -463,7 +463,7 @@ uint32_t player_random_hit_bones[] = {
 };
 
 uint32_t player_hit_bones[] = {
-	BONE( "head" ), BONE( "neck" ), BONE( "chest" )
+	BONE( "head" ), BONE( "neck" ), BONE( "spine2" )
 };
 
 uint32_t patrol_helicopter_weakspot_hit_bones[] = {

@@ -476,13 +476,25 @@ namespace unity {
     class input {
     public:
         static vector2 get_mouse_position() {
-            vector2* ( *get_mouse_position_injected )( vector2* ) = decltype( get_mouse_position_injected )( unity_player + Offsets::Input::get_mousePosition_Injected );
+            vector2* ( *get_mouse_position_injected )( vector2* ) = 
+                decltype( get_mouse_position_injected )( unity_player + Offsets::Input::get_mousePosition_Injected );
 
             um::caller& caller = um::get_caller_for_thread();
 
             vector2* mouse_position = caller.push<vector2>();
             caller( get_mouse_position_injected, mouse_position );
             return *mouse_position;
+        }
+
+        static vector2 get_mouse_scroll_delta() {
+            vector2* ( *get_mouse_scroll_delta_injected )( vector2* ) = 
+                decltype( get_mouse_scroll_delta_injected )( unity_player + Offsets::Input::get_mouseScrollDelta_Injected );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            vector2* scroll_delta = caller.push<vector2>();
+            caller( get_mouse_scroll_delta_injected, scroll_delta );
+            return *scroll_delta;
         }
 
         static bool get_mouse_button_down( int button ) {

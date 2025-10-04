@@ -3,6 +3,8 @@
 #include "nt.h"
 
 #include <type_traits>
+#include <cstdarg>
+#include <cstdio>
 
 namespace util {
 	namespace detail {
@@ -28,6 +30,8 @@ namespace util {
 			buffer[ unicode_string_length ] = L'\0';
 			return true;
 		}
+
+		inline uint8_t format_buffer[ 1024 ];
 	}
 
 	template <typename T, size_t N>
@@ -373,6 +377,28 @@ namespace util {
 
 	inline uint32_t random( uint32_t seed = 0x811C9DC5 ) {
 		return RtlRandomEx( ( PULONG )&seed );
+	}
+
+	inline const char* format_string( const char* format, ... ) {
+		char* buffer = ( char* )detail::format_buffer;
+
+		va_list args;
+		va_start( args, format );
+		vsprintf( buffer, format, args );
+		va_end( args );
+
+		return buffer;
+	}
+
+	inline const wchar_t* format_string_w( const wchar_t* format, ... ) {
+		wchar_t* buffer = ( wchar_t* )detail::format_buffer;
+
+		va_list args;
+		va_start( args, format );
+		vswprintf( buffer, format, args );
+		va_end( args );
+
+		return buffer;
 	}
 }
 
