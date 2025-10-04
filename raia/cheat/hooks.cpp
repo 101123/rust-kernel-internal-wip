@@ -575,6 +575,10 @@ void hook_handlers::network_client_create_networkable( _CONTEXT* context ) {
 			if ( !is_valid_ptr( value ) || !is_valid_ptr( value->cached_ptr ) )
 				return false;
 
+			// This must not be populated as we're hooking the creation of the networkable object
+			if ( value->net )
+				return false;
+
 			if ( !value->as<rust::base_networkable>() )
 				return false;
 
@@ -582,13 +586,12 @@ void hook_handlers::network_client_create_networkable( _CONTEXT* context ) {
 			if ( !is_valid_ptr( transform ) )
 				return false;
 
-			// We don't want any entities with a valid networkable object as we're hooking the creation of it
-			return !is_valid_ptr( value->net );
+			return true;
 		}, true, 0x100 );
 
 	if ( !search.resolved() )
 		return;
-
+	
 	network_client_create_networkable_hook( search.get( context ) );
 }
 
