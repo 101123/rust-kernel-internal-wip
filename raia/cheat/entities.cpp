@@ -920,6 +920,8 @@ void entity_manager::invalidate_cache() {
     for ( auto& [ _, cached_player ] : cached_entities.players ) {
         SAFE_RELEASE( cached_player.avatar_srv );
     }
+
+    cached_entities.players.clear();
 }
 
 entity_collection entity_manager::get_entities() {
