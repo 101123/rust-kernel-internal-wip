@@ -2089,4 +2089,20 @@ namespace rust {
     public:
         static inline il2cpp_class* klass_;
     };
+
+    class effect {
+    public:
+        FIELD( vector3, world_pos, Offsets::Effect::worldPos );
+        FIELD( sys::string*, pooled_string, Offsets::Effect::pooledString );
+    };
+
+    class effect_network {
+    public:
+        class static_fields {
+        public:
+            FIELD( rust::effect*, effect, Offsets::EffectNetwork_Static::effect );
+        };
+
+        static inline static_fields* static_fields_;
+    };
 }

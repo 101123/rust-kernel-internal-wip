@@ -569,6 +569,27 @@ bool console_system_command_pre_hook( rust::console_system::arg* arg ) {
 	return true;
 }
 
+static uint64_t effect_name_hashes[] = {
+	H( "assets/prefabs/weapons/rocketlauncher/effects/rocket_explosion.prefab" ),
+	H( "assets/prefabs/weapons/rocketlauncher/effects/rocket_explosion_incendiary.prefab" ),
+	H( "assets/bundled/prefabs/fx/impacts/additive/explosion.prefab" ),
+	H( "assets/prefabs/tools/c4/effects/c4_explosion.prefab" ),
+	H( "assets/prefabs/weapons/satchelcharge/effects/satchel-charge-explosion.prefab" ),
+	H( "assets/prefabs/ammo/40mmgrenade/effects/40mm_he_explosion.prefab" ),
+	H( "assets/content/vehicles/mlrs/effects/pfx_mlrs_rocket_explosion_ground.prefab" )
+};
+
+void effect_library_setup_effect_hook( rust::effect* effect ) {
+	if ( !is_valid_ptr( effect ) )
+		return;
+
+	sys::string* pooled_string = effect->pooled_string;
+	if ( !is_valid_ptr( pooled_string ) )
+		return;
+
+	LOG( "%ws\n", pooled_string->buffer );
+}
+
 void hook_handlers::network_client_create_networkable( _CONTEXT* context ) {
 	static context_search search = context_search<rust::base_networkable*>( context,
 		[]( rust::base_networkable* value ) {
@@ -749,4 +770,8 @@ bool hook_handlers::pre_console_system_command_set( _CONTEXT* context ) {
 
 bool hook_handlers::pre_console_system_command_call( _CONTEXT* context ) {
 	return console_system_command_pre_hook( ( rust::console_system::arg* )context->Rdx );
+}
+
+void hook_handlers::effect_library_setup_effect( _CONTEXT* context ) {
+	effect_library_setup_effect_hook( rust::effect_network::static_fields_->effect );
 }

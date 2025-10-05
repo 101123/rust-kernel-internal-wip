@@ -18,4 +18,5 @@ namespace hook_handlers {
 	void post_base_player_client_input( _CONTEXT* );
 	bool pre_console_system_command_set( _CONTEXT* );
 	bool pre_console_system_command_call( _CONTEXT* );
+	void effect_library_setup_effect( _CONTEXT* );
 }

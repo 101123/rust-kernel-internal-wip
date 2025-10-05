@@ -1616,6 +1616,17 @@ namespace Offsets {
 		constexpr const static size_t worldPos = 0x9c;
 	}
 
+	// obf name: ::%7162ea8e134adbacf26d768d3abc732b727eb8ff
+#define EffectLibrary_ClassName "%7162ea8e134adbacf26d768d3abc732b727eb8ff"
+#define EffectLibrary_ClassNameShort "%7162ea8e134adbacf26d768d3abc732b727eb8ff"
+#define EffectLibrary_TypeDefinitionIndex 2301
+
+	namespace EffectLibrary {
+
+		// Functions
+		constexpr const static size_t SetupEffect = 0x17ad950;
+	}
+
 	// obf name: ::%06f94687ae213c3280db9ee0246250337b6a5129
 #define EffectNetwork_ClassName "%06f94687ae213c3280db9ee0246250337b6a5129"
 #define EffectNetwork_ClassNameShort "%06f94687ae213c3280db9ee0246250337b6a5129"

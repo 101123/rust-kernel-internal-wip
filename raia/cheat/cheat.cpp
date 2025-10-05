@@ -59,7 +59,8 @@ class_lookup class_lookups[] = {
 	{ nullptr, nullptr, &rust::game_physics::static_fields_, GamePhysics_Static_TypeDefinitionIndex },
 	{ &rust::compound_bow_weapon::klass_, nullptr, nullptr, CompoundBowWeapon_TypeDefinitionIndex },
 	{ &rust::console_system::arg::klass_, nullptr, nullptr, ConsoleSystem_Arg_TypeDefinitionIndex },
-	{ &rust::patrol_helicopter::klass_, nullptr, nullptr, PatrolHelicopter_TypeDefinitionIndex }
+	{ &rust::patrol_helicopter::klass_, nullptr, nullptr, PatrolHelicopter_TypeDefinitionIndex },
+	{ nullptr, nullptr, &rust::effect_network::static_fields_, EffectNetwork_Static_TypeDefinitionIndex }
 };
 
 bool populate_classes() {
@@ -84,10 +85,27 @@ bool populate_classes() {
 
 		if ( class_lookup.type_object ) {
 			*class_lookup.type_object = il2cpp_type_get_object( il2cpp_class_get_type( klass ) );
+
+			if ( !is_valid_ptr( *class_lookup.type_object ) ) {
+#ifdef DEBUG
+				LOG( "Failed to resolve type object\n" );
+#endif
+				return false;
+			}
 		}
 
-		if ( class_lookup.static_fields ) {
-			*( uintptr_t* )( class_lookup.static_fields ) = klass->static_fields;
+		uintptr_t* static_fields_lookup = ( uintptr_t* )class_lookup.static_fields;
+
+		if ( static_fields_lookup ) {
+			*static_fields_lookup = klass->static_fields;
+
+			if ( !is_valid_ptr( *static_fields_lookup ) ) {
+#ifdef DEBUG
+				LOG( "Failed to resolve static fields\n" );
+#endif
+
+				return false;
+			}
 		}
 	}
 
@@ -174,6 +192,23 @@ bool resolve_hooks() {
 		.corrupt = generate_corrupt_value(),
 		.method_info = {
 			.handler = hook_handlers::network_client_destroy_networkable
+		}
+	};
+
+	uintptr_t facepunch_pool_get_list_ieffect_method = util::find_pattern(
+		game_assembly + Offsets::EffectLibrary::SetupEffect, "\x48\x8B\x1D\xCC\xCC\xCC\xCC\x4C\x39\x63\x38", 0x200 );
+
+	if ( !is_valid_ptr( facepunch_pool_get_list_ieffect_method ) )
+		return false;
+
+	hook effect_library_setup_effect_hook = {
+		.init = false,
+		.type = hook_type::method_info,
+		.value = ( uintptr_t* )util::relative_32( facepunch_pool_get_list_ieffect_method, 3 ),
+		.original = 0ull,
+		.corrupt = generate_corrupt_value(),
+		.method_info = {
+			.handler = hook_handlers::effect_library_setup_effect
 		}
 	};
 
@@ -331,6 +366,7 @@ bool resolve_hooks() {
 
 	hooks.add( network_client_create_networkable_hook );
 	hooks.add( network_client_destroy_networkable_hook );
+	hooks.add( effect_library_setup_effect_hook );
 	hooks.add( outline_manager_on_render_image_hook );
 	hooks.add( player_walk_movement_client_input_hook );
 	hooks.add( protobuf_projectile_shoot_write_to_stream_hook );
