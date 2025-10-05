@@ -1050,7 +1050,7 @@ void gui::run() {
                                 { S( "MLRS rocket" ), &raid_visuals.mlrs_rocket },
                             } );
 
-                        right.slider( S( "Draw time" ), S( "%us" ), &raid_visuals.draw_time, 0u, 600u );
+                        right.slider( S( "Maximum time" ), S( "%us" ), &raid_visuals.maximum_time, 0u, 600u );
                         right.slider( S( "Maximum distance" ), S( "%um" ), &raid_visuals.maximum_distance, 0u, 5000u );
                     }
 

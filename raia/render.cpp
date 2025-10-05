@@ -433,9 +433,9 @@ void draw_raids() {
 
 		uint32_t seconds_since_active = time - raid.active_time;
 
-		// If the raid has timed out, we can just reset the active time to allow the slot to be reused
+		// If the raid has timed out, reset it
 		if ( seconds_since_active > raid_visuals.maximum_time ) {
-			raid.active_time = 0u;
+			memset( &raid, 0, sizeof( raid ) );
 			continue;
 		}
 
@@ -451,18 +451,17 @@ void draw_raids() {
 			.set_font( fonts::small_fonts )
 			.set_vertical_spacing( 9.f )
 			.set_flags( text_flags::none )
-			.draw_text( util::format_string( S( "Raid [%s] [%dm]" ), raid.grid, ( int )distance ), raid_visuals.color );
+			.draw_text( util::format_string( S( "Raid - %dm [%s]" ), ( int )distance, raid.grid ), raid_visuals.color )
+			.draw_text( util::format_string( S( "Last Explosion: %us" ), seconds_since_active ), raid_visuals.color );
 
-		static const char* effect_names[] = { S( "Rocket" ), S( "High Velocity Rocket" ), S( "Incendiary Rocket" ),
-			S( "Explosive Ammo" ), S( "C4" ), S( "Satchel Charge" ), S( "HE Grenade" ), S( "MLRS Rocket" ) };
+		static const char* effect_names[] = { S( "Rockets" ), S( "High Velocity Rockets" ), S( "Incendiary Rockets" ),
+			S( "Explosive Ammo" ), S( "C4" ), S( "Satchel Charges" ), S( "HE Grenades" ), S( "MLRS Rockets" ) };
 
 		for ( size_t i = 0; i < _countof( raid.effects ); i++ ) {
 			if ( raid.effects[ i ] ) {
-				visual.draw_text( util::format_string( S( "%s (%ux)" ), effect_names[ i ], raid.effects[ i ] ), raid_visuals.color );
+				visual.draw_text( util::format_string( S( "%s: %u" ), effect_names[ i ], raid.effects[ i ] ), raid_visuals.color );
 			}
 		}
-
-		visual.draw_text( util::format_string( S( "%us" ), seconds_since_active ), raid_visuals.color );
 	}
 }
 
@@ -483,10 +482,7 @@ void on_render( IDXGISwapChain* swapchain ) {
 	renderer::draw_circle( ( float )screen_width / 2.f, ( float )screen_height / 2.f, ( float )aimbot.fov, 1.f, COL32_WHITE );
 
 	draw_esp();
-
-	{
-		
-	}
+	draw_raids();
 
 	if ( render_input.get_async_key_state( VK_END ) & 0x1 ) {
 		gui::open = !gui::open;
