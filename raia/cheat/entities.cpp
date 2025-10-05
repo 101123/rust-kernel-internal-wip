@@ -6,6 +6,8 @@
 
 #include <ankerl/unordered_dense.h>
 
+#define SAFE_RELEASE( Object ) if ( Object ) { Object->Release(); Object = nullptr; }
+
 using entity_map = ankerl::unordered_dense::map<rust::base_entity*, cached_entity>;
 using combat_entity_map = ankerl::unordered_dense::map<rust::base_combat_entity*, cached_combat_entity>;
 using dropped_item_map = ankerl::unordered_dense::map<rust::world_item*, cached_dropped_item>;
@@ -44,9 +46,7 @@ void entity_manager::destroy() {
     entities.dropped_items.swap( temp_dropped_item_map );
 
     for ( auto& [ _, cached_player ] : entities.players ) {
-        if ( cached_player.avatar_srv ) {
-            cached_player.avatar_srv->Release();
-        }
+        SAFE_RELEASE( cached_player.avatar_srv );
     }
 
     player_map temp_player_map;
@@ -160,9 +160,7 @@ namespace player_cacher {
 
         auto& [ _, cached_player ] = *iterator;
 
-        if ( cached_player.avatar_srv ) {
-            cached_player.avatar_srv->Release();
-        }
+        SAFE_RELEASE( cached_player.avatar_srv );
 
         if ( aimbot.player_target && player == aimbot.player_target->first ) {
             aimbot.player_target = nullptr;
@@ -738,22 +736,6 @@ bool cache_player( rust::base_player* player, cached_player& cached_player ) {
 
     cached_player.scientist = !player->is<rust::base_player>();
     cached_player.user_id = player->get_user_id();
-
-    if ( !cached_player.scientist && cached_player.user_id > 76561197960265728 && cached_player.user_id < 76561202255233023 ) {
-        unity::texture* avatar_texture = rust::steam_client_wrapper::get_avatar_texture( cached_player.user_id );
-
-        if ( is_valid_ptr( avatar_texture ) ) {
-            ID3D11ShaderResourceView* srv = avatar_texture->get_srv();
-
-            if ( is_valid_ptr( srv ) ) {
-                // Increase reference count for the srv so it doesn't get freed while we're using it
-                srv->AddRef();
-
-                cached_player.avatar_srv = srv;
-            }
-        }
-    }
-
     cached_player.eyes = eyes;
     cached_player.inventory = inventory;
 
@@ -862,6 +844,25 @@ void update_player_visibility( rust::base_player* player, cached_player& cached_
         unity::ray( origin, direction ), 0.f, nullptr, vector3::magnitude( direction ), 1218519297, unity::query_trigger_interaction::ignore, local_player.entity );
 }
 
+void update_player_avatar( rust::base_player* player, cached_player& cached_player ) {
+    if ( cached_player.avatar_srv || cached_player.scientist || 
+        !( cached_player.user_id > 76561197960265728 && cached_player.user_id < 76561202255233023 ) )
+        return;
+
+    unity::texture* avatar_texture = rust::steam_client_wrapper::get_avatar_texture( cached_player.user_id );
+
+    if ( is_valid_ptr( avatar_texture ) ) {
+        ID3D11ShaderResourceView* srv = avatar_texture->get_srv();
+
+        if ( is_valid_ptr( srv ) ) {
+            // Increase reference count for the srv so it doesn't get freed while we're using it
+            srv->AddRef();
+
+            cached_player.avatar_srv = srv;
+        }
+    }
+}
+
 void entity_manager::update() {
     util::scoped_spinlock lock( &cache_lock );
 
@@ -903,6 +904,7 @@ void entity_manager::update() {
         update_player_bones( cached_player );
         update_player_inventory( player, cached_player );
         update_player_visibility( player, cached_player );
+        update_player_avatar( player, cached_player );
     }
 }
 
@@ -914,7 +916,10 @@ void entity_manager::invalidate_cache() {
     cached_entities.entities.clear();
     cached_entities.combat_entities.clear();
     cached_entities.dropped_items.clear();
-    cached_entities.players.clear();
+
+    for ( auto& [ _, cached_player ] : cached_entities.players ) {
+        SAFE_RELEASE( cached_player.avatar_srv );
+    }
 }
 
 entity_collection entity_manager::get_entities() {

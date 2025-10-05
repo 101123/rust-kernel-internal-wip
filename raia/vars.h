@@ -128,6 +128,7 @@ inline cvar_visual cvar_wounded = WRAP_VISUAL( "Wounded", true, 500, COL32( 255,
 inline cvar_visual cvar_sleeper = WRAP_VISUAL( "Sleeper", false, 30, COL32( 255, 255, 255, 255 ) );
 inline cvar_visual cvar_corpse = WRAP_VISUAL( "Corpse", true, 100, COL32( 255, 255, 255, 255 ) );
 inline cvar player_team_id = cvar( H( "Player Team ID" ), true );
+inline cvar_ui player_team_id_color = cvar_ui( H( "Player Team ID Color" ), COL32( 255, 255, 255, 255 ) );
 inline cvar player_avatar = cvar( H( "Player Avatar" ), true );
 
 inline cvar_player_visuals scientist_visuals = WRAP_PLAYER_CONFIGURATION( "Scientists", COL32( 125, 195, 255, 255 ) );

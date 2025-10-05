@@ -255,7 +255,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		bool draw_team_id = !cached_player.scientist && ( cached_player.team_id > 0 && cached_player.team_id < 100'000 ) && player_team_id;
 
 		if ( draw_team_id ) {
-			renderer::draw_text( bounds.right + 2.f, bounds.top - 3.f, fonts::small_fonts, text_flags::none, COL32_WHITE, util::format_string( S( "%llu" ), cached_player.team_id ) );
+			renderer::draw_text( bounds.right + 2.f, bounds.top - 3.f, fonts::small_fonts, text_flags::none, player_team_id_color, util::format_string( S( "%llu" ), cached_player.team_id ) );
 		}
 
 		float offset = 0.f;

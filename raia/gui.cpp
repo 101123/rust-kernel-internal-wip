@@ -854,6 +854,7 @@ void player_visuals_impl( group_box& left, group_box& right, cvar_player_visuals
     if ( is_player_visuals ) {
         left.toggle( S( "Avatar" ), &player_avatar );
         left.toggle( S( "Team ID" ), &player_team_id );
+        left.color_picker( &player_team_id_color );
     }
 
     left.toggle( S( "Held item" ), &visuals.held_item );
