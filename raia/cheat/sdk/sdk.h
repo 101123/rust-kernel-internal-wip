@@ -102,6 +102,40 @@ namespace sys {
 
 namespace unity {
     namespace internals {
+        namespace math {
+            struct trsx {
+            public:
+                vector3 t;
+            private:
+                uint8_t _[ 0x4 ];
+            public:
+                vector4 q;
+                vector3 s;
+            private:
+                uint8_t __[ 0x4 ];
+            };
+
+            inline vector3 quat_mul_vec( const vector4& q, const vector3& u ) {
+                const vector3 c0 = vector3( -2.f, 2.f, -2.f );
+                const vector3 c1 = vector3( -2.f, -2.f, 2.f );
+                const vector3 c2 = vector3( 2.f, -2.f, -2.f );
+
+                vector3 qyxw = vector3( q.y, q.x, q.w );
+                vector3 qzwx = vector3( q.z, q.w, q.x );
+                vector3 qwzy = vector3( q.w, q.z, q.y );
+
+                vector3 m0 = ( c0 * q.y ) * qyxw - ( c2 * q.z ) * qzwx;
+                vector3 m1 = ( c1 * q.z ) * qwzy - ( c0 * q.x ) * qyxw;
+                vector3 m2 = ( c2 * q.x ) * qzwx - ( c1 * q.y ) * qwzy;
+
+                return vector3( ( u + ( m0 * u.x ) ) + ( ( m1 * u.y ) + ( m2 * u.z ) ) );
+            }
+
+            inline vector3 mul( trsx& x, vector3& v ) {
+                return x.t + quat_mul_vec( x.q, v * x.s );
+            }
+        }
+
         template <typename T>
         struct pptr {
             int32_t instance_id;
@@ -126,6 +160,16 @@ namespace unity {
             uint32_t is_visible : 1;
         };
 
+        struct transform_hierarchy {
+            FIELD( math::trsx*, local_transforms, 0x18 );
+            FIELD( int32_t*, parent_indices, 0x20 );
+        };
+
+        struct transform_access {
+            transform_hierarchy* hierarchy;
+            uint32_t index;
+        };
+
         class scripting_gc_handle {
         public:
             FIELD( il2cpp_object*, object, 0x10 );
@@ -134,6 +178,37 @@ namespace unity {
         class object {
         public:
             FIELD( scripting_gc_handle, mono_reference, 0x18 );
+        };
+
+        class transform {
+        public:
+            FIELD( transform_access, transform_data, 0x38 );
+
+            vector3 get_position() {
+                transform_access transform_access = transform_data;
+                if ( transform_access.index > 65536u || !is_valid_ptr( transform_access.hierarchy ) )
+                    return vector3();
+
+                transform_hierarchy* hierarchy = transform_access.hierarchy;
+                if ( !is_valid_ptr( hierarchy->local_transforms ) || !is_valid_ptr( hierarchy->parent_indices ) )
+                    return vector3();
+
+                math::trsx* local_transforms = hierarchy->local_transforms;
+
+                vector3 global_t = local_transforms[ transform_data.index ].t;
+
+                int32_t* parent_indices = hierarchy->parent_indices;
+                int32_t parent_index = parent_indices[ transform_data.index ];
+
+                int32_t iterations = 0;
+
+                while ( parent_index >= 0 && iterations++ < 256 ) {
+                    global_t = math::mul( local_transforms[ parent_index ], global_t );
+                    parent_index = parent_indices[ parent_index ];
+                }
+
+                return global_t;
+            }
         };
 
         class camera {
@@ -429,14 +504,11 @@ namespace unity {
         }
 
         vector3 get_position() {
-            void ( *get_position_injected )( transform*, vector3* ) = 
-                ( decltype( get_position_injected ) )( unity_player + Offsets::Transform::get_position_Injected );
+            internals::transform* native_transform = ( internals::transform* )cached_ptr;
+            if ( !is_valid_ptr( native_transform ) )
+                return vector3();
 
-            um::caller& caller = um::get_caller_for_thread();
-
-            vector3* position = caller.push<vector3>();
-            caller( get_position_injected, this, position );
-            return *position;
+            return native_transform->get_position();
         }
 
         void get_position_and_rotation( vector3* position, quaternion* rotation ) {

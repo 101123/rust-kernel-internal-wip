@@ -41,6 +41,10 @@ public:
 		x *= value; y *= value; z *= value; return *this; 
 	}
 
+	vector3 operator*( const vector3& value ) {
+		return vector3( x * value.x, y * value.y, z * value.z );
+	}
+
 	vector3 operator/( const float value ) const {
 		return vector3( x / value, y / value, z / value );
 	}
