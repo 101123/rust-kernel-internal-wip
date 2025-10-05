@@ -671,7 +671,7 @@ bool hook_handlers::pre_protobuf_projectile_shoot_write_to_stream( _CONTEXT* con
 
 	if ( local_player.held_entity->as<rust::base_projectile>() ) {
 		static context_search search = context_search<sys::list<rust::projectile*>*>( context,
-			[&]( sys::list<rust::projectile*>* value ) {
+			[]( sys::list<rust::projectile*>* value ) {
 				if ( !is_valid_ptr( value ) )
 					return false;
 
@@ -705,7 +705,7 @@ bool hook_handlers::pre_protobuf_projectile_shoot_write_to_stream( _CONTEXT* con
 
 	else if ( local_player.held_entity->as<rust::base_melee>() ) {
 		static context_search search = context_search<rust::projectile*>( context,
-			[&]( rust::projectile* value ) {
+			[]( rust::projectile* value ) {
 				if ( !is_valid_ptr( value ) )
 					return false;
 
@@ -755,7 +755,7 @@ void hook_handlers::post_base_player_client_input( _CONTEXT* context ) {
 
 bool hook_handlers::pre_console_system_command_set( _CONTEXT* context ) {
 	static context_search search = context_search<rust::console_system::arg*>( context,
-		[&]( rust::console_system::arg* value ) {
+		[]( rust::console_system::arg* value ) {
 			if ( !is_valid_ptr( value ) )
 				return false;
 
@@ -773,5 +773,16 @@ bool hook_handlers::pre_console_system_command_call( _CONTEXT* context ) {
 }
 
 void hook_handlers::effect_library_setup_effect( _CONTEXT* context ) {
-	effect_library_setup_effect_hook( rust::effect_network::static_fields_->effect );
+	static context_search search = context_search<rust::effect*>( context,
+		[]( rust::effect* value ) {
+			if ( !is_valid_ptr( value ) )
+				return false;
+
+			return value->is<rust::effect>() != nullptr;
+		}, true, 0x100 );
+
+	if ( !search.resolved() )
+		return;
+
+	effect_library_setup_effect_hook( search.get( context ) );
 }

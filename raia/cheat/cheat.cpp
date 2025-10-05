@@ -60,7 +60,8 @@ class_lookup class_lookups[] = {
 	{ &rust::compound_bow_weapon::klass_, nullptr, nullptr, CompoundBowWeapon_TypeDefinitionIndex },
 	{ &rust::console_system::arg::klass_, nullptr, nullptr, ConsoleSystem_Arg_TypeDefinitionIndex },
 	{ &rust::patrol_helicopter::klass_, nullptr, nullptr, PatrolHelicopter_TypeDefinitionIndex },
-	{ nullptr, nullptr, &rust::effect_network::static_fields_, EffectNetwork_Static_TypeDefinitionIndex }
+	{ nullptr, nullptr, &rust::effect_network::static_fields_, EffectNetwork_Static_TypeDefinitionIndex },
+	{ &rust::effect::klass_, nullptr, nullptr, Effect_TypeDefinitionIndex }
 };
 
 bool populate_classes() {
