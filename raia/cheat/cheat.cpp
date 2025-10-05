@@ -164,16 +164,36 @@ const uint64_t generate_corrupt_value() {
 #define VFUNC( klass, offset ) ( uintptr_t* )( ( uintptr_t )klass::klass_ + offset )
 
 bool resolve_hooks() {
-	uintptr_t facepunch_pool_get_networkable_method = util::find_pattern(
+	uintptr_t il2cpp_codegen_initialize_method_call = util::find_pattern( 
+		game_assembly + Offsets::Network_Client::CreateNetworkable, "\x48\x8D\x0D\xCC\xCC\xCC\xCC\xE8", 0x100 );
+
+	if ( !is_valid_ptr( il2cpp_codegen_initialize_method_call ) )
+		return false;
+
+	void( *il2cpp_codegen_initialize_method )( uintptr_t* ) = 
+		( decltype( il2cpp_codegen_initialize_method ) )util::relative_32( il2cpp_codegen_initialize_method_call + 7, 1 );
+
+	if ( !is_valid_ptr( il2cpp_codegen_initialize_method ) )
+		return false;
+
+	um::caller caller = um::get_caller_for_thread();
+
+	uintptr_t facepunch_pool_get_networkable_method_address = util::find_pattern(
 		game_assembly + Offsets::Network_Client::CreateNetworkable, "\x48\x8D\x0D", 0x100 );
 
+	if ( !is_valid_ptr( facepunch_pool_get_networkable_method_address ) )
+		return false;
+
+	uintptr_t* facepunch_pool_get_networkable_method = ( uintptr_t* )util::relative_32( facepunch_pool_get_networkable_method_address, 3 );
 	if ( !is_valid_ptr( facepunch_pool_get_networkable_method ) )
 		return false;
+
+	caller( il2cpp_codegen_initialize_method, facepunch_pool_get_networkable_method );
 
 	hook network_client_create_networkable_hook = {
 		.init = false,
 		.type = hook_type::method_info,
-		.value = ( uintptr_t* )util::relative_32( facepunch_pool_get_networkable_method, 3 ),
+		.value = facepunch_pool_get_networkable_method,
 		.original = 0ull,
 		.corrupt = generate_corrupt_value(),
 		.method_info = {
@@ -181,16 +201,22 @@ bool resolve_hooks() {
 		}
 	};
 
-	uintptr_t facepunch_pool_free_networkable_method = util::find_pattern(
+	uintptr_t facepunch_pool_free_networkable_method_address = util::find_pattern(
 		game_assembly + Offsets::Network_Client::DestroyNetworkable, "\x48\x8D\x0D", 0x100 );
 
+	if ( !is_valid_ptr( facepunch_pool_free_networkable_method_address ) )
+		return false;
+
+	uintptr_t* facepunch_pool_free_networkable_method = ( uintptr_t* )util::relative_32( facepunch_pool_free_networkable_method_address, 3 );
 	if ( !is_valid_ptr( facepunch_pool_free_networkable_method ) )
 		return false;
+
+	caller( il2cpp_codegen_initialize_method, facepunch_pool_free_networkable_method );
 
 	hook network_client_destroy_networkable_hook = {
 		.init = false,
 		.type = hook_type::method_info,
-		.value = ( uintptr_t* )util::relative_32( facepunch_pool_free_networkable_method, 3 ),
+		.value = facepunch_pool_free_networkable_method,
 		.original = 0ull,
 		.corrupt = generate_corrupt_value(),
 		.method_info = {
