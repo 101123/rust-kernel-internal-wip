@@ -2107,4 +2107,55 @@ namespace rust {
 
         static inline static_fields* static_fields_;
     };
+
+    class world {
+    public:
+        class static_fields {
+        public:
+            FIELD( int, size, Offsets::World_Static::_size );
+        };
+
+        static inline static_fields* static_fields_;
+    };
+
+    class map_helper {
+    public:
+        static vector2i position_to_grid( vector3 position ) {
+            int world_size = world::static_fields_->size;
+            float num = 146.28572f;
+            int num2 = ( int )( world_size / num + 0.001f );
+            float num3 = ( float )( ( uint32_t )world_size / ( uint32_t )( ( long )num2 ) );
+            vector2 vec = vector2( ( float )( -( float )( ( uint32_t )world_size ) ) / 2.f, world_size / 2.f );
+            vector2 vec2 = vector2( position.x - vec.x, vec.y - position.z );
+            int x = ( int )( vec2.x / num3 );
+            int y = ( int )( vec2.y / num3 );
+            return vector2i( x, y );
+        }
+
+        static const char* grid_to_string( vector2i grid, char* buffer, size_t size ) {
+            grid.x = max( grid.x, 0 );
+            int i = grid.x + 1;
+            int buffer_index = 0;
+            while ( i > 0 ) {
+                i--;
+                if ( buffer_index < size - 1 ) {
+                    buffer[ buffer_index++ ] = ( char )( 'A' + i % 26 );
+                }
+                i /= 26;
+            }
+            for ( int start = 0, end = buffer_index - 1; start < end; ++start, --end ) {
+                char temp = buffer[ start ];
+                buffer[ start ] = buffer[ end ];
+                buffer[ end ] = temp;
+            }
+            if ( buffer_index < size - 1 ) {
+                buffer[ buffer_index++ ] = '\0';
+                snprintf( buffer + buffer_index - 1, size - buffer_index + 1, S( "%d" ), grid.y );
+            }
+            else {
+                buffer[ size - 1 ] = '\0';
+            }
+            return buffer;
+        }
+    };
 }

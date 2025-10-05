@@ -781,16 +781,18 @@ namespace combat_subtabs {
     };
 }
 
-enum visual_subtabs {
-    players,
-    scientists,
-    world,
-    resources,
-    deployables,
-    vehicles,
-    animals,
-    traps,
-    loot
+namespace visual_subtabs {
+    enum : uint32_t {
+        players,
+        scientists,
+        world,
+        resources,
+        deployables,
+        vehicles,
+        animals,
+        traps,
+        loot
+    };
 };
 
 enum misc_subtabs {
@@ -1013,24 +1015,44 @@ void gui::run() {
 
                 case visual_subtabs::world: {
                     left.begin();
+
+                    visual_impl( left, dropped_weapon, S( "Weapon" ) );
+                    visual_impl( left, dropped_construction, S( "Construction" ) );
+                    visual_impl( left, dropped_items, S( "Items" ) );
+                    visual_impl( left, dropped_resources, S( "Resources" ) );
+                    visual_impl( left, dropped_attire, S( "Attire" ) );
+                    visual_impl( left, dropped_tool, S( "Tool" ) );
+                    visual_impl( left, dropped_medical, S( "Medical" ) );
+                    visual_impl( left, dropped_food, S( "Food" ) );
+                    visual_impl( left, dropped_ammunition, S( "Ammunition" ) );
+                    visual_impl( left, dropped_traps, S( "Traps" ) );
+                    visual_impl( left, dropped_misc, S( "Misc" ) );
+                    visual_impl( left, dropped_component, S( "Component" ) );
+                    visual_impl( left, dropped_electrical, S( "Electrical" ) );
+                    visual_impl( left, dropped_fun, S( "Fun" ) );
+
                     left.end();
 
                     right.begin();
 
-                    visual_impl( right, dropped_weapon, S( "Weapon" ) );
-                    visual_impl( right, dropped_construction, S( "Construction" ) );
-                    visual_impl( right, dropped_items, S( "Items" ) );
-                    visual_impl( right, dropped_resources, S( "Resources" ) );
-                    visual_impl( right, dropped_attire, S( "Attire" ) );
-                    visual_impl( right, dropped_tool, S( "Tool" ) );
-                    visual_impl( right, dropped_medical, S( "Medical" ) );
-                    visual_impl( right, dropped_food, S( "Food" ) );
-                    visual_impl( right, dropped_ammunition, S( "Ammunition" ) );
-                    visual_impl( right, dropped_traps, S( "Traps" ) );
-                    visual_impl( right, dropped_misc, S( "Misc" ) );
-                    visual_impl( right, dropped_component, S( "Component" ) );
-                    visual_impl( right, dropped_electrical, S( "Electrical" ) );
-                    visual_impl( right, dropped_fun, S( "Fun" ) );
+                    right.toggle( "Raids", &raid_visuals.enabled );
+                    right.color_picker( &raid_visuals.color );
+
+                    if ( raid_visuals.enabled ) {
+                        right.multi_combo_box( S( "Explosives" ), {
+                                { S( "Rocket" ), &raid_visuals.rocket },
+                                { S( "High velocity rocket" ), &raid_visuals.high_velocity_rocket },
+                                { S( "Incendiary rocket" ), &raid_visuals.incendiary_rocket },
+                                { S( "Explosive ammo" ), &raid_visuals.explosive_ammo },
+                                { S( "C4" ), &raid_visuals.c4 },
+                                { S( "Satchel charge" ), &raid_visuals.satchel_charge },
+                                { S( "HE grenade" ), &raid_visuals.he_grenade },
+                                { S( "MLRS rocket" ), &raid_visuals.mlrs_rocket },
+                            } );
+
+                        right.slider( S( "Draw time" ), S( "%us" ), &raid_visuals.draw_time, 0u, 600u );
+                        right.slider( S( "Maximum distance" ), S( "%um" ), &raid_visuals.maximum_distance, 0u, 5000u );
+                    }
 
                     right.end();
 

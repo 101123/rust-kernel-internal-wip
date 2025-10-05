@@ -421,6 +421,51 @@ void draw_esp() {
 	}
 }
 
+void draw_raids() {
+	if ( !raid_visuals.enabled )
+		return;
+
+	uint32_t time = util::get_seconds();
+
+	for ( auto& raid : raids ) {
+		if ( !raid.active_time )
+			continue;
+
+		uint32_t seconds_since_active = time - raid.active_time;
+
+		// If the raid has timed out, we can just reset the active time to allow the slot to be reused
+		if ( seconds_since_active > raid_visuals.maximum_time ) {
+			raid.active_time = 0u;
+			continue;
+		}
+
+		float distance = vector3::distance( camera.position, raid.position );
+		if ( distance > raid_visuals.maximum_distance )
+			continue;
+
+		vector2 screen;
+		if ( !w2s( raid.position, screen ) )
+			continue;
+
+		auto visual = visual_builder( screen )
+			.set_font( fonts::small_fonts )
+			.set_vertical_spacing( 9.f )
+			.set_flags( text_flags::none )
+			.draw_text( util::format_string( S( "Raid [%s] [%dm]" ), raid.grid, ( int )distance ), raid_visuals.color );
+
+		static const char* effect_names[] = { S( "Rocket" ), S( "High Velocity Rocket" ), S( "Incendiary Rocket" ),
+			S( "Explosive Ammo" ), S( "C4" ), S( "Satchel Charge" ), S( "HE Grenade" ), S( "MLRS Rocket" ) };
+
+		for ( size_t i = 0; i < _countof( raid.effects ); i++ ) {
+			if ( raid.effects[ i ] ) {
+				visual.draw_text( util::format_string( S( "%s (%ux)" ), effect_names[ i ], raid.effects[ i ] ), raid_visuals.color );
+			}
+		}
+
+		visual.draw_text( util::format_string( S( "%us" ), seconds_since_active ), raid_visuals.color );
+	}
+}
+
 bool renderer_init;
 
 void on_render( IDXGISwapChain* swapchain ) {
@@ -438,6 +483,10 @@ void on_render( IDXGISwapChain* swapchain ) {
 	renderer::draw_circle( ( float )screen_width / 2.f, ( float )screen_height / 2.f, ( float )aimbot.fov, 1.f, COL32_WHITE );
 
 	draw_esp();
+
+	{
+		
+	}
 
 	if ( render_input.get_async_key_state( VK_END ) & 0x1 ) {
 		gui::open = !gui::open;

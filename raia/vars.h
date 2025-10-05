@@ -395,3 +395,27 @@ inline cvar glow = cvar( H( "Glow" ), false );
 inline cvar_ui glow_outline_color = cvar_ui( H( "Glow Outline Color" ), COL32( 255, 255, 255, 255 ) );
 inline cvar_f glow_blur_scale = cvar_f( H( "Glow Blur Scale" ), 0.75f );
 inline cvar_f glow_outline_scale = cvar_f( H( "Glow Outline Scale" ), 0.5f );
+
+DEFINE_CONTEXT( raid_visuals,
+	cvar enabled = cvar( H( "Raid ESP" ), true );
+	cvar_ui color = cvar_ui( H( "Raid Color" ), COL32_RED );
+	cvar rocket = cvar( H( "Raid Rocket" ), true );
+	cvar high_velocity_rocket = cvar( H( "Raid Hight Velocity Rocket" ), true );
+	cvar incendiary_rocket = cvar( H( "Raid Incendiary Rocket" ), true );
+	cvar explosive_ammo = cvar( H( "Raid Explosive Ammo" ), true );
+	cvar c4 = cvar( H( "Raid C4" ), true );
+	cvar satchel_charge = cvar( H( "Raid Satchel Charge" ), true );
+	cvar he_grenade = cvar( H( "Raid HE Grenade" ), true );
+	cvar mlrs_rocket = cvar( H( "Raid MLRS Rocket" ), true );
+	cvar_ui maximum_time = cvar_ui( H( "Raid Maximum Time" ), 300u );
+	cvar_ui maximum_distance = cvar_ui( H( "Raid Maximum Distance" ), 5000u );
+);
+
+struct raid {
+	uint32_t active_time;
+	vector3 position;
+	char grid[ 8 ];
+	uint16_t effects[ 8 ];
+};
+
+inline raid raids[ 256 ];

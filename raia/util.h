@@ -400,6 +400,10 @@ namespace util {
 
 		return buffer;
 	}
+
+	inline uint32_t get_seconds() {
+		return ( uint32_t )( *( volatile uint64_t* )( 0xFFFFF78000000008 ) / 10000000ull );
+	}
 }
 
 #define H( x ) util::hash_const( x )

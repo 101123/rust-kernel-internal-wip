@@ -569,8 +569,9 @@ bool console_system_command_pre_hook( rust::console_system::arg* arg ) {
 	return true;
 }
 
-static uint64_t effect_name_hashes[] = {
+uint64_t effect_name_hashes[] = {
 	H( "assets/prefabs/weapons/rocketlauncher/effects/rocket_explosion.prefab" ),
+	H( "assets/prefabs/weapons/rocketlauncher/effects/rocket_explosion_hv.prefab" ),
 	H( "assets/prefabs/weapons/rocketlauncher/effects/rocket_explosion_incendiary.prefab" ),
 	H( "assets/bundled/prefabs/fx/impacts/additive/explosion.prefab" ),
 	H( "assets/prefabs/tools/c4/effects/c4_explosion.prefab" ),
@@ -587,7 +588,60 @@ void effect_library_setup_effect_hook( rust::effect* effect ) {
 	if ( !is_valid_ptr( pooled_string ) )
 		return;
 
-	LOG( "%ws\n", pooled_string->buffer );
+	uint64_t effect_name_hash = util::hash_w( pooled_string->buffer );
+
+	for ( size_t i = 0; i < _countof( effect_name_hashes ); i++ ) {
+		if ( effect_name_hash != effect_name_hashes[ i ] )
+			continue;
+
+		bool present = false;
+		int use_index = -1, top_index = -1;
+
+		for ( size_t j = 0; j < _countof( raids ); j++ ) {
+			raid& raid = raids[ j ];
+
+			// Try to find an empty slot in case the raid isn't present
+			if ( !raid.active_time ) {
+				use_index = j;
+				continue;
+			}
+
+			if ( vector3::sqr_distance( effect->world_pos, raid.position ) < _pow2( 30.f ) ) {
+				raid.effects[ i ]++;
+				raid.active_time = util::get_seconds();
+				present = true;
+				break;
+			}
+
+			top_index = j;
+		}
+
+		if ( !present ) {
+			int index = use_index;
+
+			// If we haven't found an empty slot, look for one now starting at the top index
+			if ( index == -1 ) {
+				for ( size_t k = top_index; k < _countof( raids ); k++ ) {
+					raid& raid = raids[ k ];
+					if ( raid.active_time )
+						continue;
+
+					index = k;
+					break;
+				}
+			}
+
+			if ( index != -1 ) {
+				raid& raid = raids[ index ];
+
+				raid.active_time = util::get_seconds();
+				raid.position = effect->world_pos;
+				raid.effects[ i ]++;
+
+				rust::map_helper::grid_to_string( rust::map_helper::position_to_grid( effect->world_pos ), raid.grid, sizeof( raid.grid ) );
+			}
+		}
+	}
 }
 
 void hook_handlers::network_client_create_networkable( _CONTEXT* context ) {

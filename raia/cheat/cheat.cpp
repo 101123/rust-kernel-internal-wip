@@ -61,7 +61,8 @@ class_lookup class_lookups[] = {
 	{ &rust::console_system::arg::klass_, nullptr, nullptr, ConsoleSystem_Arg_TypeDefinitionIndex },
 	{ &rust::patrol_helicopter::klass_, nullptr, nullptr, PatrolHelicopter_TypeDefinitionIndex },
 	{ nullptr, nullptr, &rust::effect_network::static_fields_, EffectNetwork_Static_TypeDefinitionIndex },
-	{ &rust::effect::klass_, nullptr, nullptr, Effect_TypeDefinitionIndex }
+	{ &rust::effect::klass_, nullptr, nullptr, Effect_TypeDefinitionIndex },
+	{ nullptr, nullptr, &rust::world::static_fields_, World_Static_TypeDefinitionIndex }
 };
 
 bool populate_classes() {

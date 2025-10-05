@@ -1,6 +1,6 @@
 #pragma once
 
-#define _pow2( x ) x * x
+#define _pow2( x ) ( x * x )
 
 #define _USE_MATH_DEFINES
 
