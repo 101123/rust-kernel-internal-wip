@@ -144,7 +144,7 @@ namespace um {
 		for ( auto& [ _, caller ] : callers.get_objects() ) {
 			const std::source_location& location = caller.last_caller;
 
-			LOG( "%s (%d): %s", location.file_name(), location.line(), location.function_name() );
+			LOG( "%s (%d): %s\n", location.file_name(), location.line(), location.function_name() );
 		}
 	}
 #endif
