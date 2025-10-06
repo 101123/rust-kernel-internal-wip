@@ -82,6 +82,7 @@ struct cvar_bind {
 
 struct cvar_player_visuals {
 	cvar enabled;
+	cvar visible_check;
 	cvar_ui visible_color;
 	cvar_ui occluded_color;
 	cvar bounding_box;
@@ -104,6 +105,7 @@ struct cvar_player_visuals {
 
 #define WRAP_PLAYER_CONFIGURATION( Name, Color ) { \
 	cvar( H( Name " Enabled" ), true ), \
+	cvar( H( Name " Visible Check" ), false ), \
 	cvar_ui( H( Name " Visible Color" ), Color ), \
 	cvar_ui( H( Name " Occluded Color" ), Color ), \
 	cvar( H( Name " Bounding Box" ), true ), \

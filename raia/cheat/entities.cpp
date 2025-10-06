@@ -837,6 +837,12 @@ bool update_player_inventory( rust::base_player* player, cached_player& cached_p
 }
 
 void update_player_visibility( rust::base_player* player, cached_player& cached_player ) {
+    const cvar_player_visuals& visuals =
+        cached_player.scientist ? scientist_visuals : player_visuals;
+
+    if ( !visuals.visible_check )
+        return;
+
     const vector3& origin = camera.position;
     vector3 direction = cached_player.bone_data.positions[ 1 ] - camera.position;
 

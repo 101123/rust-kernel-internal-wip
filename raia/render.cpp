@@ -175,6 +175,16 @@ visual_item_info visual_items[] = {
 	{ 2083256995, nullptr, 'H' }, // t1_smg
 };
 
+visual_item_info* get_visual_item(int item_id) {
+	for ( auto& visual_item : visual_items ) {
+		if ( visual_item.item_id == item_id ) {
+			return &visual_item;
+		}
+	}
+
+	return nullptr;
+}
+
 void draw_players( const entity_vector<rust::base_player*, cached_player>& players ) {
 	for ( const auto& [ player, cached_player ] : players ) {
 		if ( player == local_player.entity || !cached_player.init )
@@ -258,9 +268,19 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 			renderer::draw_text( bounds.right + 2.f, bounds.top - 3.f, fonts::small_fonts, text_flags::none, player_team_id_color, util::format_string( S( "%llu" ), cached_player.team_id ) );
 		}
 
-		float offset = 0.f;
+		float offset = 0.f; 
 
 		if ( visuals.held_item && cached_player.active_item_idx != -1 ) {
+			if ( visuals.held_item_icon ) {
+				visual_item_info* visual_item = get_visual_item( cached_player.active_item_id );
+
+				if ( visual_item ) {
+					char icon[] = { visual_item->codepoint, '\0' };
+
+					renderer::draw_text( bounds.left + half, bounds.bottom + 10.f, fonts::icons, text_flags::centered | text_flags::drop_shadow, visuals.held_item_color, icon );
+				}
+			}
+
 			if ( visuals.held_item_text ) {
 				renderer::draw_text( bounds.left + half, bounds.bottom + offset + 1.f, fonts::small_fonts, text_flags::centered, visuals.held_item_color, cached_player.belt_items[ cached_player.active_item_idx ].name );
 				offset += 8.f + 1.f;
