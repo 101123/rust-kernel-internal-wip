@@ -8,14 +8,14 @@
 
 namespace util {
 	namespace detail {
-		inline bool compare_pattern( uint8_t* base, uint8_t* pattern, size_t mask ) {
-			for ( ; mask; ++base, ++pattern, mask-- ) {
-				if ( *pattern != 0xCC && *base != *pattern ) {
+		inline bool compare_pattern( uint8_t* data, uint8_t* pattern, const char* mask ) {
+			for ( ; *mask; ++data, ++pattern, ++mask ) {
+				if ( *mask == 'x' && *data != *pattern ) {
 					return false;
 				}
 			}
 
-			return true;
+			return *mask == '\0';
 		}
 
 		inline bool copy_unicode_string( const UNICODE_STRING* unicode_string, wchar_t* buffer, size_t length ) {
@@ -102,22 +102,16 @@ namespace util {
 		mutex* m_mutex;
 	};
 
-	inline uintptr_t find_pattern( uint8_t* base, size_t size, uint8_t* pattern, size_t mask ) {
-		size -= mask;
+	inline uintptr_t find_pattern( uintptr_t base, const char* pattern, const char* mask, size_t size ) {
+		for ( int32_t i = 0, len = strlen( mask ); i < size - len; i++ ) {
+			uint8_t* address = &( ( uint8_t* )base )[ i ];
 
-		for ( size_t i = 0; i <= size; i++ ) {
-			uint8_t* address = &base[ i ];
-
-			if ( detail::compare_pattern( address, pattern, mask ) ) {
+			if ( detail::compare_pattern( address, ( uint8_t* )pattern, mask ) ) {
 				return ( uintptr_t )address;
 			}
 		}
 
-		return 0;
-	}
-
-	inline uintptr_t find_pattern( uintptr_t base, const char* pattern, size_t size ) {
-		return find_pattern( ( uint8_t* )base, size, ( uint8_t* )pattern, strlen( pattern ) );
+		return 0ull;
 	}
 
 	inline uintptr_t relative_32( uintptr_t instruction, int offset ) {
@@ -192,7 +186,7 @@ namespace util {
 		util::mutex m_mutex;
 	};
 
-	inline uintptr_t find_pattern_image( uintptr_t image, const char* pattern ) {
+	inline uintptr_t find_pattern_image( uintptr_t image, const char* pattern, const char* mask ) {
 		IMAGE_DOS_HEADER dos_header = *( IMAGE_DOS_HEADER* )( image );
 		IMAGE_NT_HEADERS nt_headers = *( IMAGE_NT_HEADERS* )( image + dos_header.e_lfanew );
 
@@ -208,8 +202,8 @@ namespace util {
 				continue;
 			}
 
-			uintptr_t result = util::find_pattern( ( uint8_t* )image + section.VirtualAddress,
-				max( section.SizeOfRawData, section.Misc.VirtualSize ), ( uint8_t* )pattern, strlen( pattern ) );
+			uintptr_t result = util::find_pattern( 
+				image + section.VirtualAddress, pattern, mask, max( section.SizeOfRawData, section.Misc.VirtualSize ) );
 
 			if ( result ) {
 				return result;

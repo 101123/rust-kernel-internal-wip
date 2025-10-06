@@ -68,7 +68,7 @@ class_lookup class_lookups[] = {
 
 bool populate_classes() {
 	static uintptr_t type_info_definition_table_address = util::relative_32(
-		util::find_pattern_image( game_assembly, "\x48\xF7\xE1\x48\x8B\xCA\x48\xC1\xE9\x04\xBA\x08\x00\x00\x00" ) + 21, 3 );
+		util::find_pattern_image( game_assembly, S( "\x48\xF7\xE1\x48\x8B\xCA\x48\xC1\xE9\x04\xBA\x08\x00\x00\x00" ), S( "xxxxxxxxxxxxxxx" ) ) + 21, 3 );
 
 	if ( !is_valid_ptr( type_info_definition_table_address ) )
 		return false;
@@ -164,8 +164,8 @@ const uint64_t generate_corrupt_value() {
 #define VFUNC( klass, offset ) ( uintptr_t* )( ( uintptr_t )klass::klass_ + offset )
 
 bool resolve_hooks() {
-	uintptr_t il2cpp_codegen_initialize_method_call = util::find_pattern( 
-		game_assembly + Offsets::Network_Client::CreateNetworkable, "\x48\x8D\x0D\xCC\xCC\xCC\xCC\xE8", 0x100 );
+	uintptr_t il2cpp_codegen_initialize_method_call = util::find_pattern(
+		game_assembly + Offsets::Network_Client::CreateNetworkable, S( "\x48\x8D\x0D\xCC\xCC\xCC\xCC\xE8" ), S( "xxx????x" ), 0x100 );
 
 	if ( !is_valid_ptr( il2cpp_codegen_initialize_method_call ) )
 		return false;
@@ -179,7 +179,7 @@ bool resolve_hooks() {
 	um::caller caller = um::get_caller_for_thread();
 
 	uintptr_t facepunch_pool_get_networkable_method_address = util::find_pattern(
-		game_assembly + Offsets::Network_Client::CreateNetworkable, "\x48\x8D\x0D", 0x100 );
+		game_assembly + Offsets::Network_Client::CreateNetworkable, S( "\x48\x8D\x0D" ), S( "xxx" ), 0x100 );
 
 	if ( !is_valid_ptr( facepunch_pool_get_networkable_method_address ) )
 		return false;
@@ -202,7 +202,7 @@ bool resolve_hooks() {
 	};
 
 	uintptr_t facepunch_pool_free_networkable_method_address = util::find_pattern(
-		game_assembly + Offsets::Network_Client::DestroyNetworkable, "\x48\x8D\x0D", 0x100 );
+		game_assembly + Offsets::Network_Client::DestroyNetworkable, S( "\x48\x8D\x0D" ), S( "xxx" ), 0x100);
 
 	if ( !is_valid_ptr( facepunch_pool_free_networkable_method_address ) )
 		return false;
@@ -225,7 +225,7 @@ bool resolve_hooks() {
 	};
 
 	uintptr_t facepunch_pool_get_list_ieffect_method = util::find_pattern(
-		game_assembly + Offsets::EffectLibrary::SetupEffect, "\x48\x8B\x1D\xCC\xCC\xCC\xCC\x4C\x39\x63\x38", 0x200 );
+		game_assembly + Offsets::EffectLibrary::SetupEffect, S( "\x48\x8B\x1D\xCC\xCC\xCC\xCC\x4C\x39\x63\x38" ), S( "xxx????xxxx" ), 0x200 );
 
 	if ( !is_valid_ptr( facepunch_pool_get_list_ieffect_method ) )
 		return false;
