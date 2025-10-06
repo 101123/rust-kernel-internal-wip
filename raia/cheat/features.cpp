@@ -239,7 +239,7 @@ void features::looking_at( rust::base_player* local_player ) {
 	rust::buttons::con_button* use = rust::buttons::static_fields_->use;
 	
 	if ( is_valid_ptr( use ) && use->is_down ) {
-		static util::timer<time_unit::milliseconds> timer;
+		static util::timer<time_unit::milliseconds> timer( 0ull );
 
 		if ( loot_without_untie && timer.has_elapsed( 100llu ) && looking_at_entity->is( H( "FreeableLootContainer" ) ) ) {
 			looking_at_entity->server_rpc( S( L"RPC_OpenLoot" ) );

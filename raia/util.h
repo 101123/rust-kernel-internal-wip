@@ -410,8 +410,8 @@ namespace util {
 	template <uint64_t unit>
 	class timer {
 	public:
-		timer() :
-			previous_time_( get_time() ) {}
+		timer( uint64_t start_time = get_time() ) :
+			previous_time_( start_time ) {}
 
 		bool has_elapsed( uint64_t time ) {
 			if ( ( get_time() - previous_time_ ) > ( time * unit ) ) {

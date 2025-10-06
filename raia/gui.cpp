@@ -1206,6 +1206,7 @@ void gui::run() {
                 case misc_subtabs::quality_of_life: {
                     left.begin();
                     left.toggle( S( "Instant loot" ), &instant_loot );
+                    left.toggle( S( "Loot without untie" ), &loot_without_untie );
 
                     left.toggle( S( "Field of view modifier" ), &fov_modifier.enabled );
                     if ( fov_modifier.enabled ) {
