@@ -427,9 +427,12 @@ void hook_manager::place_hooks() {
 		if ( !hook.init && is_valid_ptr( *hook.value ) ) {
 			hook.original = *hook.value;
 
-			// If it's a vftable hook, we set the corrupted value to the address of the function - 1 so that it lands on function padding (0xCC)
-			if ( hook.type == hook_type::ptr_swap && !hook.corrupt ) {
-				hook.corrupt = hook.original - 1;
+			// If it's a pointer swap hook, we set the corrupted value to the address of function padding (0xCC)
+			if ( hook.type == hook_type::ptr_swap ) {
+				hook.corrupt = hook.original - 1llu;
+
+				// We also need a corrupt return address for post hooks, so find the next 0xCC since function padding is only guaranteed to be at least 1 byte
+				hook.ptr_swap.corrupt_retaddr = util::find_pattern( hook.original, S( "\xCC" ), S( "x" ), 0x1000 );
 			}
 
 			hook.init = true;

@@ -151,23 +151,23 @@ bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t
 						previous_context.Rcx = context->Rcx;
 						previous_context.Rdx = context->Rdx;
 						previous_context.R8 = context->R8;
-						previous_context.R9 = context->R9;
+							previous_context.R9 = context->R9;
 
-						// Corrupt the return address
-						*retaddr = hook.corrupt - 1llu;
-					}
+							// Corrupt the return address
+							*retaddr = hook.ptr_swap.corrupt_retaddr;
+						}
 
-					context->Rip = hook.original;
+						context->Rip = hook.original;
 				}
 
 				return true;
-			}
+				}
 
-			// We've caught a post hook
-			else if ( context->Rip == hook.corrupt - 1llu ) {
-				if ( hook.ptr_swap.post_handler ) {
-					// Call the post hook with the original context we preserved
-					hook.ptr_swap.post_handler( &previous_context );
+				// We've caught a post hook
+				else if ( context->Rip == hook.ptr_swap.corrupt_retaddr ) {
+					if ( hook.ptr_swap.post_handler ) {
+						// Call the post hook with the original context we preserved
+						hook.ptr_swap.post_handler( &previous_context );
 				}
 
 				// Restore the return address we preserved

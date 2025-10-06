@@ -4,7 +4,13 @@
 
 #define S( x ) x
 
+// #define EAC_LOGS
+
+#ifdef EAC_LOGS
+#define LOG( Format, ... ) driver_api->add_log( 0, 0, 0, util::format_string( Format, __VA_ARGS__ ) );
+#else
 #define LOG( Format, ... ) DbgPrintEx( DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, Format, __VA_ARGS__ );
+#endif
 
 #include "sentian/api.h"
 
