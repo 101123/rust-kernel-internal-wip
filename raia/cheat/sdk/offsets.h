@@ -2143,6 +2143,7 @@ namespace Offsets {
 		constexpr const static size_t Right = 0x90;
 		constexpr const static size_t Left = 0xf70;
 		constexpr const static size_t Sprint = 0xc80;
+		constexpr const static size_t Use = 0xba8;
 
 		// Functions
 		constexpr const static size_t Pets_setter = 0x3108d80;

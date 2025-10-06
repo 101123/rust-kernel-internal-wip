@@ -63,7 +63,8 @@ class_lookup class_lookups[] = {
 	{ nullptr, nullptr, &rust::effect_network::static_fields_, EffectNetwork_Static_TypeDefinitionIndex },
 	{ &rust::effect::klass_, nullptr, nullptr, Effect_TypeDefinitionIndex },
 	{ nullptr, nullptr, &rust::world::static_fields_, World_Static_TypeDefinitionIndex },
-	{ nullptr, nullptr, &rust::network::net::static_fields_, Network_Net_TypeDefinitionIndex }
+	{ nullptr, nullptr, &rust::network::net::static_fields_, Network_Net_TypeDefinitionIndex },
+	{ nullptr, nullptr, &rust::buttons::static_fields_, Buttons_Static_TypeDefinitionIndex }
 };
 
 bool populate_classes() {

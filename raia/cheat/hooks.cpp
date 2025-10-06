@@ -552,6 +552,7 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 
 	features::graphics();
 	features::bright_night();
+	features::looking_at( base_player );
 }
 
 void base_player_client_input_post_hook( rust::base_player* base_player, rust::input_state* state ) {
@@ -608,7 +609,7 @@ void effect_library_setup_effect_hook( rust::effect* effect ) {
 
 			if ( vector3::sqr_distance( effect->world_pos, raid.position ) < _pow2( 30.f ) ) {
 				raid.effects[ i ]++;
-				raid.active_time = util::get_seconds();
+				raid.active_time = util::get_time<time_unit::seconds>();
 				present = true;
 				break;
 			}
@@ -634,7 +635,7 @@ void effect_library_setup_effect_hook( rust::effect* effect ) {
 			if ( index != -1 ) {
 				raid& raid = raids[ index ];
 
-				raid.active_time = util::get_seconds();
+				raid.active_time = util::get_time<time_unit::seconds>();
 				raid.position = effect->world_pos;
 				raid.effects[ i ]++;
 

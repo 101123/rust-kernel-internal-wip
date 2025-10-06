@@ -413,7 +413,8 @@ void draw_esp() {
 		.set_font( fonts::verdana )
 		.set_vertical_spacing( 12.f )
 		.set_flags( text_flags::none )
-		.draw_text( util::format_string( "Velocity: %.2f [%.2f], Drag: %.2f, Gravity Modifier: %.2f, Initial Distance: %.2f, Projectile Velocity Scale: %.2f, Aim Sway Scale: %.2f, Recoil Scale: %.2f, Sight Aim Cone Scale: %.2f, Hip Aim Cone Scale: %.2f, Hash: %u",
+		.draw_text( util::format_string( "Time: %llu, Velocity: %.2f [%.2f], Drag: %.2f, Gravity Modifier: %.2f, Initial Distance: %.2f, Projectile Velocity Scale: %.2f, Aim Sway Scale: %.2f, Recoil Scale: %.2f, Sight Aim Cone Scale: %.2f, Hip Aim Cone Scale: %.2f, Hash: %u",
+			util::get_time<time_unit::seconds>(),
 			held_weapon.velocity,
 			held_weapon.max_velocity,
 			held_weapon.drag,
@@ -445,7 +446,7 @@ void draw_raids() {
 	if ( !raid_visuals.enabled )
 		return;
 
-	uint32_t time = util::get_seconds();
+	uint32_t time = util::get_time<time_unit::seconds>();
 
 	for ( auto& raid : raids ) {
 		if ( !raid.active_time )

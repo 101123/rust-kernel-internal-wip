@@ -1538,7 +1538,7 @@ namespace rust {
         static inline il2cpp_object* type_object_;
     };
 
-    class input_state {
+    class input_state { 
     public:
 
     };
@@ -1583,6 +1583,7 @@ namespace rust {
         FIELD( rust::player_model*, player_model, Offsets::BasePlayer::playerModel );
         FIELD( player_input*, input, Offsets::BasePlayer::input );
         FIELD( player_walk_movement*, movement, Offsets::BasePlayer::movement );
+        FIELD( base_entity*, looking_at_entity, Offsets::BasePlayer::_lookingAtEntity );
         FIELD( uint64_t, current_team, Offsets::BasePlayer::currentTeam );
 
         ENCRYPTED_VALUE( uint64_t, cl_active_item, Offsets::BasePlayer::clActiveItem,
@@ -2232,5 +2233,20 @@ namespace rust {
             }
             return buffer;
         }
+    };
+
+    class buttons {
+    public:
+        class con_button {
+        public:
+            FIELD( bool, is_down, Offsets::Buttons_ConButton::IsDown );
+        };
+
+        class static_fields {
+        public:
+            FIELD( con_button*, use, Offsets::Buttons_Static::Use );
+        };
+
+        static inline static_fields* static_fields_;
     };
 }

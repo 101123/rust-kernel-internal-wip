@@ -230,3 +230,19 @@ bool features::update_rocket_trajectory( rust::base_launcher* launcher ) {
 
 	return false;
 }
+
+void features::looking_at( rust::base_player* local_player ) {
+	rust::base_entity* looking_at_entity = local_player->looking_at_entity;
+	if ( !is_valid_ptr( looking_at_entity ) )
+		return;
+
+	rust::buttons::con_button* use = rust::buttons::static_fields_->use;
+	
+	if ( is_valid_ptr( use ) && use->is_down ) {
+		static util::timer<time_unit::milliseconds> timer;
+
+		if ( loot_without_untie && timer.has_elapsed( 100llu ) && looking_at_entity->is( H( "FreeableLootContainer" ) ) ) {
+			looking_at_entity->server_rpc( S( L"RPC_OpenLoot" ) );
+		}
+	}
+}

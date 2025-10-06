@@ -389,7 +389,6 @@ DEFINE_CONTEXT( fov_modifier,
 inline cvar_bind zoom = WRAP_BIND( "Zoom", true, trigger_type::hold, 'X' );
 inline cvar_f zoom_fov = cvar_f( H( "Zoom FOV" ), 40.f );
 
-
 inline cvar chams = cvar( H( "Chams" ), false );
 inline cvar_ui chams_type = cvar_ui( H( "Chams Type" ), 0 );
 inline cvar_ui chams_color = cvar_ui( H( "Chams Color" ), COL32( 255, 255, 255, 255 ) );
@@ -398,6 +397,8 @@ inline cvar glow = cvar( H( "Glow" ), false );
 inline cvar_ui glow_outline_color = cvar_ui( H( "Glow Outline Color" ), COL32( 255, 255, 255, 255 ) );
 inline cvar_f glow_blur_scale = cvar_f( H( "Glow Blur Scale" ), 0.75f );
 inline cvar_f glow_outline_scale = cvar_f( H( "Glow Outline Scale" ), 0.5f );
+
+inline cvar loot_without_untie = cvar( H( "Loot Without Untie" ), true );
 
 DEFINE_CONTEXT( raid_visuals,
 	cvar enabled = cvar( H( "Raid ESP" ), true );

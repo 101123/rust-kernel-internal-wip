@@ -6,6 +6,13 @@
 #include <cstdarg>
 #include <cstdio>
 
+enum time_unit {
+	nanoseconds = 1,
+	microseconds = 10,
+	milliseconds = 10000,
+	seconds = 10000000
+};
+
 namespace util {
 	namespace detail {
 		inline bool compare_pattern( uint8_t* data, uint8_t* pattern, const char* mask ) {
@@ -395,9 +402,29 @@ namespace util {
 		return buffer;
 	}
 
-	inline uint32_t get_seconds() {
-		return ( uint32_t )( *( volatile uint64_t* )( 0xFFFFF78000000008 ) / 10000000ull );
+	template <uint64_t unit = time_unit::nanoseconds>
+	inline uint64_t get_time() {
+		return ( *( volatile uint64_t* )( 0xFFFFF78000000008 ) / unit );
 	}
+
+	template <uint64_t unit>
+	class timer {
+	public:
+		timer() :
+			previous_time_( get_time() ) {}
+
+		bool has_elapsed( uint64_t time ) {
+			if ( ( get_time() - previous_time_ ) > ( time * unit ) ) {
+				previous_time_ = get_time();
+				return true;
+			}
+
+			return false;
+		}
+
+	private:
+		uint64_t previous_time_;
+	};
 }
 
 #define H( x ) util::hash_const( x )

@@ -64,6 +64,14 @@ public:
 	T* is() {
 		return klass == T::klass_ ? ( T* )this : nullptr;
 	}
+
+	bool is( uint64_t hash ) {
+		if ( is_valid_ptr( klass ) && is_valid_ptr( klass->name ) ) {
+			return util::hash( klass->name ) == hash;
+		}
+
+		return false;
+	}
 };
 
 struct handle_data {
