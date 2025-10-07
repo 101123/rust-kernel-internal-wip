@@ -362,7 +362,7 @@ bool resolve_hooks() {
 	};
 
 	for ( auto hooked_command : hooked_commands ) {
-		// The subsequent find call requires an actual string object
+		// The subsequent find call requires a managed string object
 		sys::string* name = sys::string::create( hooked_command.name );
 		if ( !name )
 			return false;
@@ -381,8 +381,9 @@ bool resolve_hooks() {
 			.value = ( uintptr_t* )action->_address_of_invoke_impl(),
 			.original = 0ull,
 			.corrupt = 0ull,
+			.user_data = ( void* )util::hash_w( hooked_command.name ),
 			.ptr_swap = {
-				.pre_handler = hooked_command.type == command_hook_type::set ? 
+				.pre_handler = hooked_command.type == command_hook_type::set ?
 					hook_handlers::pre_console_system_command_set : hook_handlers::pre_console_system_command_call,
 
 				.post_handler = nullptr

@@ -15,7 +15,6 @@ namespace hook_handlers {
 	void post_item_icon_try_to_move( _CONTEXT*, void* );
 	bool pre_client_on_client_disconnected( _CONTEXT*, void* );
 	bool pre_base_player_client_input( _CONTEXT*, void* );
-	void post_base_player_client_input( _CONTEXT*, void* );
 	bool pre_console_system_command_set( _CONTEXT*, void* );
 	bool pre_console_system_command_call( _CONTEXT*, void* );
 	void effect_library_setup_effect( _CONTEXT*, void* );

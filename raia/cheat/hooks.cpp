@@ -555,11 +555,7 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 	features::looking_at( base_player );
 }
 
-void base_player_client_input_post_hook( rust::base_player* base_player, rust::input_state* state ) {
-
-}
-
-bool console_system_command_pre_hook( rust::console_system::arg* arg ) {
+bool console_system_command_pre_hook( rust::console_system::arg* arg, uint64_t command ) {
 	if ( !is_valid_ptr( arg ) )
 		return true;
 
@@ -804,10 +800,6 @@ bool hook_handlers::pre_base_player_client_input( _CONTEXT* context, void* user_
 	return true;
 }
 
-void hook_handlers::post_base_player_client_input( _CONTEXT* context, void* user_data ) {
-	base_player_client_input_post_hook( ( rust::base_player* )context->Rcx, ( rust::input_state* )context->Rdx );
-}
-
 bool hook_handlers::pre_console_system_command_set( _CONTEXT* context, void* user_data ) {
 	static context_search search = context_search<rust::console_system::arg*>( context,
 		[]( rust::console_system::arg* value ) {
@@ -824,7 +816,7 @@ bool hook_handlers::pre_console_system_command_set( _CONTEXT* context, void* use
 }
 
 bool hook_handlers::pre_console_system_command_call( _CONTEXT* context, void* user_data ) {
-	return console_system_command_pre_hook( ( rust::console_system::arg* )context->Rdx );
+	return console_system_command_pre_hook( ( rust::console_system::arg* )context->Rdx, ( uint64_t )user_data );
 }
 
 void hook_handlers::effect_library_setup_effect( _CONTEXT* context, void* user_data ) {
