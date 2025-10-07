@@ -1694,14 +1694,14 @@ namespace rust {
         }
 
         bool has_player_flag( flag f ) {
-            return ( flags & f ) == f;
+            return ( player_flags & f ) == f;
         }
 
         void set_player_flag( flag f, bool b ) {
             if ( b ) {
-                flags |= f;
+                player_flags |= f;
             } else {
-                flags &= ~f;
+                player_flags &= ~f;
             }
         }
 
