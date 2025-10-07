@@ -1236,7 +1236,8 @@ void gui::run() {
                     left.toggle( S( "Spider-man" ), &spider_man );
                     left.toggle( S( "Infinite jump" ), &infinite_jump );
                     left.toggle( S( "Omnisprint" ), &omnisprint );
-                    left.toggle( S( "No attack restrictions" ), &no_attack_restrictions );
+                    left.toggle( S( "No attack restrictions" ), &no_attack_restrictions.enabled );
+                    left.toggle( S( "On ladder" ), &on_ladder );
                     left.end();
 
                     right.begin();

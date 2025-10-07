@@ -323,8 +323,8 @@ void player_walk_movement_client_input_pre_hook( rust::player_walk_movement* pla
 	if ( player_walk_movement->owner != local_player.entity )
 		return;
 
-	if ( no_attack_restrictions ) {
-		player_walk_movement->admin_cheat = previous_admin_cheat;
+	if ( no_attack_restrictions.enabled ) {
+		player_walk_movement->admin_cheat = no_attack_restrictions.admin_cheat;
 	}
 }
 
@@ -335,8 +335,9 @@ void player_walk_movement_client_input_post_hook( rust::player_walk_movement* pl
 	if ( player_walk_movement->owner != local_player.entity )
 		return;
 
-	if ( model_state->has_flag( rust::model_state::flag::flying ) )
-		return;
+	if ( no_attack_restrictions.enabled ) {
+		player_walk_movement->admin_cheat = true;
+	}
 
 	if ( spider_man ) {
 		player_walk_movement->ground_angle_new = 0.f;
@@ -355,7 +356,8 @@ void player_walk_movement_client_input_post_hook( rust::player_walk_movement* pl
 	}
 
 	if ( omnisprint ) {
-		if ( !model_state->has_flag( rust::model_state::flag::ducked ) &&
+		if ( !model_state->has_flag( rust::model_state::flag::flying ) &&
+			!model_state->has_flag( rust::model_state::flag::ducked ) &&
 			!model_state->has_flag( rust::model_state::flag::crawling ) &&
 			model_state->water_level < 0.65f && !player_walk_movement->ladder ) {
 			vector3 current_velocity = player_walk_movement->target_movement;
@@ -365,6 +367,10 @@ void player_walk_movement_client_input_post_hook( rust::player_walk_movement* pl
 				model_state->set_flag( rust::model_state::flag::sprinting, true );
 			}
 		}
+	}
+
+	if ( on_ladder ) {
+		model_state->set_flag( rust::model_state::flag::on_ladder, true );
 	}
 }
 
@@ -520,14 +526,35 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 	if ( !cache_local_player( base_player ) )
 		return;
 
-	// BasePlayer.CanAttack checks if adminCheat is true, and if so returns an early true. We set it here and then clear it before PlayerWalkMovement.ClientInput runs
-	if ( no_attack_restrictions ) {
-		rust::base_movement* movement = base_player->movement;
+	rust::base_movement* movement = base_player->movement;
 
-		if ( is_valid_ptr( movement ) ) {
-			previous_admin_cheat = movement->admin_cheat;
+	if ( is_valid_ptr( movement ) ) {
+		if ( no_attack_restrictions.enabled ) {
+			no_attack_restrictions.reset = true;
+
+			if ( no_attack_restrictions.noclip ) {
+				no_attack_restrictions.admin_cheat = !no_attack_restrictions.admin_cheat;
+				no_attack_restrictions.noclip = false;
+			}
+
 			movement->admin_cheat = true;
 		}
+
+		else if ( no_attack_restrictions.reset ) {
+			rust::model_state* model_state = base_player->model_state;
+
+			if ( is_valid_ptr( model_state ) ) {
+				movement->admin_cheat = model_state->has_flag( rust::model_state::flag::flying );
+			}
+
+			no_attack_restrictions.reset = false;
+		}
+	}
+
+	if ( admin_flags ) {
+		base_player->set_player_flag( rust::base_player::flag::is_admin, true );
+
+
 	}
 
 	const std::pair<rust::base_player*, cached_player>* target = update_target();
@@ -560,6 +587,13 @@ bool console_system_command_pre_hook( rust::console_system::arg* arg, uint64_t c
 		return true;
 
 	if ( block_server_commands && arg->option.is_from_server ) {
+		return false;
+	}
+
+	if ( no_attack_restrictions.enabled && command == H( "noclip" ) ) {
+		no_attack_restrictions.noclip = true;
+
+		// We're skipping the original because this code may run between our hooks if binded, which we don't want
 		return false;
 	}
 

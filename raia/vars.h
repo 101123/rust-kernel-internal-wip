@@ -352,8 +352,16 @@ inline cvar faster_projectiles = cvar( H( "Faster Projectiles" ), false );
 
 inline cvar instant_loot = cvar( H( "Instant Loot" ), true );
 
-inline cvar no_attack_restrictions = cvar( H( "No Attack Restrictions" ), true );
-inline bool previous_admin_cheat;
+DEFINE_CONTEXT( no_attack_restrictions,
+	cvar enabled = cvar( H( "No Attack Restrictions" ), true );
+
+	bool admin_cheat;
+	bool noclip;
+	bool reset;
+);
+
+inline bool admin_cheat;
+inline bool flip_admin_cheat;
 
 DEFINE_CONTEXT( draw_rocket_trajectory,
 	cvar enabled = cvar( H( "Draw Rocket Trajectory" ), true );
@@ -399,6 +407,9 @@ inline cvar_f glow_blur_scale = cvar_f( H( "Glow Blur Scale" ), 0.75f );
 inline cvar_f glow_outline_scale = cvar_f( H( "Glow Outline Scale" ), 0.5f );
 
 inline cvar loot_without_untie = cvar( H( "Loot Without Untie" ), true );
+inline cvar suicide = cvar( H( "Suicide" ), false );
+
+inline cvar admin_flags = cvar( H( "Admin Flags" ), false );
 
 DEFINE_CONTEXT( raid_visuals,
 	cvar enabled = cvar( H( "Raid ESP" ), true );
