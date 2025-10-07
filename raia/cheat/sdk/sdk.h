@@ -1240,6 +1240,7 @@ namespace rust {
 
     class model {
     public:
+        FIELD( unity::transform*, eye_bone, Offsets::Model::eyeBone );
         FIELD( sys::array<unity::transform*>*, bone_transforms, Offsets::Model::boneTransforms );
     };
 
@@ -1580,6 +1581,14 @@ namespace rust {
             ragdolling = -2147483648
         };
 
+        enum camera_mode {
+            first_person,
+            third_person,
+            eyes,
+            first_person_with_arms,
+            death_cam_classic
+        };
+
         FIELD( rust::player_model*, player_model, Offsets::BasePlayer::playerModel );
         FIELD( player_input*, input, Offsets::BasePlayer::input );
         FIELD( player_walk_movement*, movement, Offsets::BasePlayer::movement );
@@ -1703,6 +1712,15 @@ namespace rust {
             } else {
                 player_flags &= ~f;
             }
+        }
+
+        int32_t get_ideal_view_mode() {
+            int32_t( *get_ideal_view_mode )( base_player* ) =
+                ( decltype( get_ideal_view_mode ) )( game_assembly + Offsets::BasePlayer::get_idealViewMode );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_ideal_view_mode, this );
         }
 
         static inline il2cpp_class* klass_;

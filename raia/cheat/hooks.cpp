@@ -385,6 +385,22 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 	}
 
 	player_tick->eye_pos = local_player.eyes_position;
+
+	if ( local_player.entity ) {
+		int32_t ideal_view_mode = local_player.entity->get_ideal_view_mode();
+
+		if ( ideal_view_mode == rust::base_player::camera_mode::eyes ) {
+			rust::model* model = local_player.entity->model;
+
+			if ( is_valid_ptr( model ) ) {
+				unity::transform* eye_bone = model->eye_bone;
+
+				if ( is_valid_ptr( eye_bone ) ) {
+					player_tick->eye_pos = eye_bone->get_position();
+				}
+			}
+		}
+	}
 }
 
 void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot* projectile_shoot, sys::list<rust::projectile*>* created_projectiles, rust::projectile* projectile ) {

@@ -841,6 +841,7 @@ void player_visuals_impl( group_box& left, group_box& right, cvar_player_visuals
     left.begin();
 
     left.toggle( S( "Enabled" ), &visuals.enabled );
+    left.toggle( S( "Visible check" ), &visuals.visible_check );
 
     left.toggle( S( "Bounding box" ), &visuals.bounding_box );
     left.color_picker( &visuals.bounding_box_color );
@@ -1242,6 +1243,7 @@ void gui::run() {
 
                     right.begin();
 
+                    right.toggle( S( "Admin flags" ), &admin_flags );
                     right.toggle( S( "Block server commands" ), &block_server_commands );
 
                     right.end();

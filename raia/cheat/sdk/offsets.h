@@ -433,6 +433,7 @@ namespace Offsets {
 		// Offsets
 		constexpr const static size_t rootBone = 0x28;
 		constexpr const static size_t headBone = 0x30;
+		constexpr const static size_t eyeBone = 0x38;
 		constexpr const static size_t boneTransforms = 0x50;
 	}
 
@@ -942,6 +943,7 @@ namespace Offsets {
 		constexpr const static size_t MaxHealth_vtableoff = 0x18e8;
 		constexpr const static size_t OnAttacked = 0x3fc50c0;
 		constexpr const static size_t OnAttacked_vtableoff = 0x2b28;
+		constexpr const static size_t get_idealViewMode = 0x3ee6f10;
 	}
 
 #define ScientistNPC_TypeDefinitionIndex 6573
