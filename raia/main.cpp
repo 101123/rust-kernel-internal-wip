@@ -123,18 +123,18 @@ bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t
 
 			if ( hook.type == hook_type::method_info ) {
 				if ( is_exception_hook( context, hook.corrupt, hook.original ) ) {
-					hook.method_info.handler( context );
+					hook.method_info.handler( context, hook.user_data );
 					return true;
 				}
 			}
 
 			else if ( hook.type == hook_type::ptr_swap ) {
-			if ( context->Rip == hook.corrupt ) {
-				// Check if we want to skip the original
-				if ( hook.ptr_swap.pre_handler && !hook.ptr_swap.pre_handler( context ) ) {
-					uintptr_t retaddr = *( uintptr_t* )context->Rsp;
+				if ( context->Rip == hook.corrupt ) {
+					// Check if we want to skip the original
+					if ( hook.ptr_swap.pre_handler && !hook.ptr_swap.pre_handler( context, hook.user_data ) ) {
+						uintptr_t retaddr = *( uintptr_t* )context->Rsp;
 
-					// Emulate a ret
+						// Emulate a ret
 					context->Rsp += 0x8;
 					context->Rip = retaddr;
 				}
@@ -167,10 +167,10 @@ bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t
 				else if ( context->Rip == hook.ptr_swap.corrupt_retaddr ) {
 					if ( hook.ptr_swap.post_handler ) {
 						// Call the post hook with the original context we preserved
-						hook.ptr_swap.post_handler( &previous_context );
-				}
+						hook.ptr_swap.post_handler( &previous_context, hook.user_data );
+					}
 
-				// Restore the return address we preserved
+					// Restore the return address we preserved
 				context->Rip = hook.ptr_swap.retaddr;
 
 				return true;

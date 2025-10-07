@@ -17,15 +17,16 @@ struct hook {
 	uintptr_t* value;
 	uintptr_t original;
 	uint64_t corrupt;
+	void* user_data;
 
 	union {
 		struct {
-			void( *handler )( _CONTEXT* );
+			void( *handler )( _CONTEXT*, void* );
 		} method_info;
 
 		struct {
-			bool( *pre_handler )( _CONTEXT* );
-			void( *post_handler )( _CONTEXT* );
+			bool( *pre_handler )( _CONTEXT*, void* );
+			void( *post_handler )( _CONTEXT*, void* );
 
 			uint64_t corrupt_retaddr;
 			uintptr_t retaddr;

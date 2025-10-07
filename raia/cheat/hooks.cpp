@@ -645,7 +645,7 @@ void effect_library_setup_effect_hook( rust::effect* effect ) {
 	}
 }
 
-void hook_handlers::network_client_create_networkable( _CONTEXT* context ) {
+void hook_handlers::network_client_create_networkable( _CONTEXT* context, void* user_data ) {
 	static context_search search = context_search<rust::base_networkable*>( context,
 		[]( rust::base_networkable* value ) {
 			if ( !is_valid_ptr( value ) || !is_valid_ptr( value->cached_ptr ) )
@@ -671,7 +671,7 @@ void hook_handlers::network_client_create_networkable( _CONTEXT* context ) {
 	network_client_create_networkable_hook( search.get( context ) );
 }
 
-void hook_handlers::network_client_destroy_networkable( _CONTEXT* context ) {
+void hook_handlers::network_client_destroy_networkable( _CONTEXT* context, void* user_data ) {
 	static context_search search = context_search<rust::base_networkable*>( context,
 		[]( rust::base_networkable* value ) {
 			if ( !is_valid_ptr( value ) )
@@ -690,7 +690,7 @@ void hook_handlers::network_client_destroy_networkable( _CONTEXT* context ) {
 
 bool init = false;
 
-void hook_handlers::post_outline_manager_on_render_image( _CONTEXT* context ) {
+void hook_handlers::post_outline_manager_on_render_image( _CONTEXT* context, void* user_data ) {
 	if ( !init ) {
 		asset_bundle = unity::asset_bundle::load_from_file( L"C://assetbundle", 0u, 0ull );
 		glow_manager::init( asset_bundle );
@@ -704,23 +704,23 @@ void hook_handlers::post_outline_manager_on_render_image( _CONTEXT* context ) {
 	glow_manager::on_render_image_hook( ( unity::render_texture* )context->Rdx, ( unity::render_texture* )context->R8 );
 }
 
-bool hook_handlers::pre_player_walk_movement_client_input( _CONTEXT* context ) {
+bool hook_handlers::pre_player_walk_movement_client_input( _CONTEXT* context, void* user_data ) {
 	player_walk_movement_client_input_pre_hook( ( rust::player_walk_movement* )context->Rcx, ( rust::input_state* )context->Rdx, ( rust::model_state* )context->R8 );
 
 	return true;
 }
 
-void hook_handlers::post_player_walk_movement_client_input( _CONTEXT* context ) {
+void hook_handlers::post_player_walk_movement_client_input( _CONTEXT* context, void* user_data ) {
 	player_walk_movement_client_input_post_hook( ( rust::player_walk_movement* )context->Rcx, ( rust::input_state* )context->Rdx, ( rust::model_state* )context->R8 );
 }
 
-bool hook_handlers::pre_protobuf_player_tick_write_to_stream_delta( _CONTEXT* context ) {
+bool hook_handlers::pre_protobuf_player_tick_write_to_stream_delta( _CONTEXT* context, void* user_data ) {
 	protobuf_player_tick_write_to_stream_delta_pre_hook( ( rust::player_tick* )context->Rcx );
 
 	return true;
 }
 
-bool hook_handlers::pre_protobuf_projectile_shoot_write_to_stream( _CONTEXT* context ) {
+bool hook_handlers::pre_protobuf_projectile_shoot_write_to_stream( _CONTEXT* context, void* user_data ) {
 	if ( !local_player.held_entity )
 		return true;
 
@@ -776,27 +776,27 @@ bool hook_handlers::pre_protobuf_projectile_shoot_write_to_stream( _CONTEXT* con
 	return true;
 }
 
-bool hook_handlers::pre_protobuf_player_projectile_update_write_to_stream( _CONTEXT* context ) {
+bool hook_handlers::pre_protobuf_player_projectile_update_write_to_stream( _CONTEXT* context, void* user_data ) {
 	return true;
 }
 
-bool hook_handlers::pre_protobuf_player_projectile_attack_write_to_stream( _CONTEXT* context ) {
+bool hook_handlers::pre_protobuf_player_projectile_attack_write_to_stream( _CONTEXT* context, void* user_data ) {
 	protobuf_player_projectile_attack_write_to_stream_pre_hook( ( rust::player_projectile_attack* )context->Rcx );
 
 	return true;
 }
 
-void hook_handlers::post_item_icon_try_to_move( _CONTEXT* context ) {
+void hook_handlers::post_item_icon_try_to_move( _CONTEXT* context, void* user_data ) {
 	item_icon_try_to_move_post_hook( ( rust::item_icon* )context->Rcx );
 }
 
-bool hook_handlers::pre_client_on_client_disconnected( _CONTEXT* context ) {
+bool hook_handlers::pre_client_on_client_disconnected( _CONTEXT* context, void* user_data ) {
 	client_on_client_disconnected_pre_hook( ( rust::client* )context->Rcx, ( sys::string* )context->Rdx );
 
 	return true;
 }
 
-bool hook_handlers::pre_base_player_client_input( _CONTEXT* context ) {
+bool hook_handlers::pre_base_player_client_input( _CONTEXT* context, void* user_data ) {
 	game_input.update();
 
 	base_player_client_input_pre_hook( ( rust::base_player* )context->Rcx, ( rust::input_state* )context->Rdx );
@@ -804,11 +804,11 @@ bool hook_handlers::pre_base_player_client_input( _CONTEXT* context ) {
 	return true;
 }
 
-void hook_handlers::post_base_player_client_input( _CONTEXT* context ) {
+void hook_handlers::post_base_player_client_input( _CONTEXT* context, void* user_data ) {
 	base_player_client_input_post_hook( ( rust::base_player* )context->Rcx, ( rust::input_state* )context->Rdx );
 }
 
-bool hook_handlers::pre_console_system_command_set( _CONTEXT* context ) {
+bool hook_handlers::pre_console_system_command_set( _CONTEXT* context, void* user_data ) {
 	static context_search search = context_search<rust::console_system::arg*>( context,
 		[]( rust::console_system::arg* value ) {
 			if ( !is_valid_ptr( value ) )
@@ -820,14 +820,14 @@ bool hook_handlers::pre_console_system_command_set( _CONTEXT* context ) {
 	if ( !search.resolved() )
 		return true;
 
-	return console_system_command_pre_hook( search.get( context ) );
+	return console_system_command_pre_hook( search.get( context ), ( uint64_t )user_data );
 }
 
-bool hook_handlers::pre_console_system_command_call( _CONTEXT* context ) {
+bool hook_handlers::pre_console_system_command_call( _CONTEXT* context, void* user_data ) {
 	return console_system_command_pre_hook( ( rust::console_system::arg* )context->Rdx );
 }
 
-void hook_handlers::effect_library_setup_effect( _CONTEXT* context ) {
+void hook_handlers::effect_library_setup_effect( _CONTEXT* context, void* user_data ) {
 	static context_search search = context_search<rust::effect*>( context,
 		[]( rust::effect* value ) {
 			if ( !is_valid_ptr( value ) )
