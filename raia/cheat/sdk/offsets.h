@@ -1134,8 +1134,8 @@ namespace Offsets {
 		constexpr const static size_t modelState = 0x40;
 		constexpr const static size_t activeItem = 0x10;
 		constexpr const static size_t parentID = 0x18;
-		constexpr const static size_t intermediatePosition = 0x58;
-		constexpr const static size_t position = 0x20;
+		constexpr const static size_t intermediatePosition = 0x20;
+		constexpr const static size_t position = 0x58;
 		constexpr const static size_t eyePos = 0x2c;
 
 		// Functions

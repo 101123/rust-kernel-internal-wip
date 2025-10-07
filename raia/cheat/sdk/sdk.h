@@ -1927,6 +1927,7 @@ namespace rust {
         FIELD( uint64_t, active_item, Offsets::PlayerTick::activeItem );
         FIELD( vector3, eye_pos, Offsets::PlayerTick::eyePos );
         FIELD( uint64_t, parent_id, Offsets::PlayerTick::parentID );
+        FIELD( vector3, intermediate_position, Offsets::PlayerTick::intermediatePosition );
 
         static inline il2cpp_class* klass_;
     };

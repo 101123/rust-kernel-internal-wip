@@ -379,10 +379,12 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 		return;
 
 	rust::model_state* model_state = player_tick->model_state;
-	if ( !is_valid_ptr( model_state ) )
-		return;
 
-	model_state->set_flag( rust::model_state::flag::sprinting, true );
+	if ( is_valid_ptr( model_state ) ) {
+		model_state->set_flag( rust::model_state::flag::flying, false );
+	}
+
+	player_tick->eye_pos = local_player.eyes_position;
 }
 
 void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot* projectile_shoot, sys::list<rust::projectile*>* created_projectiles, rust::projectile* projectile ) {
