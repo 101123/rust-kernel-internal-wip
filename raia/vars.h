@@ -434,3 +434,6 @@ struct raid {
 };
 
 inline raid raids[ 256 ];
+
+inline vector3 belt_position;
+inline vector3 belt_lossy_scale;

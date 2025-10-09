@@ -525,6 +525,17 @@ namespace unity {
             *position = *_position;
             *rotation = *_rotation;
         }
+
+        vector3 get_lossy_scale() {
+            void ( *get_lossy_scale_injected )( transform*, vector3* ) =
+                ( decltype( get_lossy_scale_injected ) )( unity_player + Offsets::Transform::get_lossyScale_Injected );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            vector3* lossy_scale = caller.push<vector3>();
+            caller( get_lossy_scale_injected, this, lossy_scale );
+            return *lossy_scale;
+        }
     };
 
     class camera : public behaviour {
@@ -2300,5 +2311,12 @@ namespace rust {
         };
 
         static inline static_fields* static_fields_;
+    };
+
+    class ui_belt {
+    public:
+        FIELD( sys::list<unity::component*>*, item_icons, Offsets::UIBelt::ItemIcons );
+
+        static inline il2cpp_class* klass_;
     };
 }

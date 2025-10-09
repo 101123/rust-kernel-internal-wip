@@ -544,6 +544,29 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 	if ( !cache_local_player( base_player ) )
 		return;
 
+	rust::ui_belt* ui_belt = rust::singleton_component<rust::ui_belt>::static_fields_->instance;
+
+	if ( is_valid_ptr( ui_belt ) ) {
+		sys::list<unity::component*>* item_icons_list = ui_belt->item_icons;
+
+		if ( is_valid_ptr( item_icons_list ) && item_icons_list->size == 6 ) {
+			sys::array<unity::component*>* item_icons = item_icons_list->items;
+
+			if ( is_valid_ptr( item_icons ) ) {
+				unity::component* icon = item_icons->buffer[ 0 ];
+
+				if ( is_valid_ptr( icon ) ) {
+					unity::transform* transform = icon->get_transform();
+
+					if ( is_valid_ptr( transform ) ) {
+						belt_position = transform->get_position();
+						belt_lossy_scale = transform->get_lossy_scale();
+					}
+				}
+			}
+		}
+	}
+
 	rust::base_movement* movement = base_player->movement;
 
 	if ( is_valid_ptr( movement ) ) {

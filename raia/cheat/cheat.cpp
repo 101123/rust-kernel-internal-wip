@@ -64,7 +64,12 @@ class_lookup class_lookups[] = {
 	{ &rust::effect::klass_, nullptr, nullptr, Effect_TypeDefinitionIndex },
 	{ nullptr, nullptr, &rust::world::static_fields_, World_Static_TypeDefinitionIndex },
 	{ nullptr, nullptr, &rust::network::net::static_fields_, Network_Net_TypeDefinitionIndex },
-	{ nullptr, nullptr, &rust::buttons::static_fields_, Buttons_Static_TypeDefinitionIndex }
+	{ nullptr, nullptr, &rust::buttons::static_fields_, Buttons_Static_TypeDefinitionIndex },
+	{ &rust::ui_belt::klass_, nullptr, nullptr, UIBelt_TypeDefinitionIndex }
+};
+
+parent_class_lookup parent_class_lookups[] = {
+	{ &rust::ui_belt::klass_, nullptr, &rust::singleton_component<rust::ui_belt>::static_fields_, 1 },
 };
 
 bool populate_classes() {
@@ -107,13 +112,12 @@ bool populate_classes() {
 #ifdef DEBUG
 				LOG( "Failed to resolve static fields\n" );
 #endif
-
 				return false;
 			}
 		}
 	}
 
-	/*for ( parent_class_lookup& parent_class_lookup : parent_class_lookups ) {
+	for ( parent_class_lookup& parent_class_lookup : parent_class_lookups ) {
 		il2cpp_class* klass = *parent_class_lookup.start;
 
 		while ( parent_class_lookup.depth-- ) {
@@ -125,12 +129,28 @@ bool populate_classes() {
 
 		if ( parent_class_lookup.klass ) {
 			*parent_class_lookup.klass = klass;
+
+			if ( !is_valid_ptr( *parent_class_lookup.klass ) ) {
+#ifdef DEBUG
+				LOG( "Failed to resolve parent class\n" );
+#endif
+				return false;
+			}
 		}
 
-		if ( parent_class_lookup.static_fields ) {
-			*( uintptr_t* )( parent_class_lookup.static_fields ) = klass->static_fields;
+		uintptr_t* static_fields_lookup = ( uintptr_t* )parent_class_lookup.static_fields;
+
+		if ( static_fields_lookup ) {
+			*static_fields_lookup = klass->static_fields;
+
+			if ( !is_valid_ptr( *static_fields_lookup ) ) {
+#ifdef DEBUG
+				LOG( "Failed to resolve parent static fields\n" );
+#endif
+				return false;
+			}
 		}
-	}*/
+	}
 
 	return true;
 }
