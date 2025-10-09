@@ -58,6 +58,7 @@ struct cached_player {
 	bool visible;
 	uint64_t team_id;
 	int player_flags;
+	int lifestate;
 };
 
 struct cached_dropped_item {

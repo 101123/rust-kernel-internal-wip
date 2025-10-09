@@ -906,6 +906,7 @@ void entity_manager::update() {
 
         cached_player.team_id = player->current_team;
         cached_player.player_flags = player->player_flags;
+        cached_player.lifestate = player->lifestate;
 
         update_player_bones( cached_player );
         update_player_inventory( player, cached_player );
