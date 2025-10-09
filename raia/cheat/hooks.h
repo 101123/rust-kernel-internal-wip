@@ -18,4 +18,5 @@ namespace hook_handlers {
 	bool pre_console_system_command_set( _CONTEXT*, void* );
 	bool pre_console_system_command_call( _CONTEXT*, void* );
 	void effect_library_setup_effect( _CONTEXT*, void* );
+	void projectile_update( _CONTEXT*, void* );
 }

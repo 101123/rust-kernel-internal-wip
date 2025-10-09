@@ -693,6 +693,16 @@ void effect_library_setup_effect_hook( rust::effect* effect ) {
 	}
 }
 
+void projectile_update_hook( rust::projectile* projectile ) {
+	if ( !is_valid_ptr( projectile ) )
+		return;
+
+	if ( projectile->owner != local_player.entity )
+		return;
+
+	unity::ddraw::line( projectile->previous_position, projectile->current_position, unity::color( 1.f, 1.f, 1.f, 0.5f ), 2.f, false, false );
+}
+
 void hook_handlers::network_client_create_networkable( _CONTEXT* context, void* user_data ) {
 	static context_search search = context_search<rust::base_networkable*>( context,
 		[]( rust::base_networkable* value ) {
@@ -884,4 +894,8 @@ void hook_handlers::effect_library_setup_effect( _CONTEXT* context, void* user_d
 		return;
 
 	effect_library_setup_effect_hook( search.get( context ) );
+}
+
+void hook_handlers::projectile_update( _CONTEXT* context, void* user_data ) {
+	projectile_update_hook( ( rust::projectile* )context->Rcx );
 }

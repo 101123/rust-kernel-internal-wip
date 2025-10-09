@@ -979,6 +979,22 @@ namespace unity {
                 ( ( int )digest[ 2 ] << 16 ) | ( ( int )digest[ 3 ] << 24 ) );
         }
     };
+
+    class ddraw {
+    public:
+        static void line( vector3 pos_a, vector3 pos_b, unity::color color, float duration = 0.5f, bool distance_fade = true, bool ztest = true ) {
+            void ( *line )( vector3*, vector3*, unity::color*, float, bool, bool ) =
+                ( decltype( line ) )( game_assembly + Offsets::DDraw::Line );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            vector3* _pos_a = caller.push<vector3>( pos_a );
+            vector3* _pos_b = caller.push<vector3>( pos_b );
+            unity::color* _color = caller.push<unity::color>( color );
+
+            return caller( line, _pos_a, _pos_b, _color, duration, distance_fade, ztest );
+        }
+    };
 }
 
 namespace rust {

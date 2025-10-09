@@ -342,6 +342,22 @@ bool resolve_hooks() {
 		}
 	};
 
+	method_info* projectile_update_method = il2cpp_class_get_method_from_name( rust::projectile::klass_, S( "Update" ), 0 );
+	if ( !projectile_update_method )
+		return false;
+
+	hook projectile_update_hook = {
+		.init = false,
+		.type = hook_type::ptr_swap,
+		.value = ( uintptr_t* )&projectile_update_method->method_ptr,
+		.original = 0ull,
+		.corrupt = 0ull,
+		.ptr_swap = {
+			.pre_handler = nullptr,
+			.post_handler = hook_handlers::projectile_update
+		}
+	};
+
 	enum command_hook_type {
 		set,
 		call
@@ -406,6 +422,7 @@ bool resolve_hooks() {
 	hooks.add( protobuf_player_tick_write_to_stream_delta_hook );
 	hooks.add( client_on_client_disconnected_hook );
 	hooks.add( base_player_client_input_hook );
+	hooks.add( projectile_update_hook );
 
 	return true;
 }
