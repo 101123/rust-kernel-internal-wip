@@ -819,6 +819,18 @@ bool update_player_inventory( rust::base_player* player, cached_player& cached_p
             if ( !is_valid_ptr( display_name ) )
                 return false;
 
+            unity::sprite* icon_sprite = info->icon_sprite;
+            if ( !is_valid_ptr( icon_sprite ) )
+                return false;
+
+            unity::texture2d* icon_texture = icon_sprite->get_texture();
+            if ( !is_valid_ptr( icon_texture ) )
+                return false;
+
+            ID3D11ShaderResourceView* icon_srv = icon_texture->get_srv();
+            if ( !is_valid_ptr( icon_srv ) )
+                return false;
+
             sys::string* legacy_english = display_name->legacy_english;
             if ( !is_valid_ptr( legacy_english ) )
                 return false;
@@ -831,6 +843,7 @@ bool update_player_inventory( rust::base_player* player, cached_player& cached_p
             cached_belt_item& belt_item = cached_player.belt_items[ i ];
 
             belt_item.present = true;
+            belt_item.srv = icon_srv;
             belt_item.amount = item->amount;
             wcscpy_s( belt_item.name, _countof( belt_item.name ), legacy_english->buffer );
         }

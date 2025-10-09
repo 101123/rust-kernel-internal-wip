@@ -418,9 +418,9 @@ void renderer::draw_image( ID3D11ShaderResourceView* srv, float x, float y, floa
 }
 
 void renderer::draw_unity_image( ID3D11ShaderResourceView* srv, float x, float y, float width, float height, float rounding ) {
-	draw_list->AddCallback( ( ImDrawCallback )ImGui_ImplDX11_SetGammaFix, nullptr );
+	draw_list->AddCallback( ( ImDrawCallback )ImGui_ImplDX11_SetUnity, nullptr );
 	draw_list->AddImageRounded( ImTextureRef( ( ImTextureID )srv ), ImVec2( x, y ), ImVec2( x + width, y + height ), ImVec2( 0.f, 1.f ), ImVec2( 1.f, 0.f ), COL32_WHITE, rounding );
-	draw_list->AddCallback( ( ImDrawCallback )ImGui_ImplDX11_RestoreGammaFix, nullptr );
+	draw_list->AddCallback( ( ImDrawCallback )ImGui_ImplDX11_RestoreUnity, nullptr );
 }
 
 void renderer::push_clip_rect( float x, float y, float width, float height ) {

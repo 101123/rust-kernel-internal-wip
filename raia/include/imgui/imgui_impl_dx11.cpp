@@ -71,13 +71,15 @@ struct ImGui_ImplDX11_Data
     ID3D11InputLayout*          pInputLayout;
     ID3D11Buffer*               pVertexConstantBuffer;
     ID3D11PixelShader*          pPixelShader;
-    ID3D11PixelShader*          pPixelShaderGammaFix;
     ID3D11SamplerState*         pFontSampler;
     ID3D11RasterizerState*      pRasterizerState;
     ID3D11BlendState*           pBlendState;
     ID3D11DepthStencilState*    pDepthStencilState;
     int                         VertexBufferSize;
     int                         IndexBufferSize;
+
+    ID3D11PixelShader*          pPixelShaderUnity;
+    ID3D11SamplerState*         pSamplerStateUnity;
 
     ImGui_ImplDX11_Data()       { memset((void*)this, 0, sizeof(*this)); VertexBufferSize = 5000; IndexBufferSize = 10000; }
 };
@@ -653,7 +655,7 @@ bool    ImGui_ImplDX11_CreateDeviceObjects()
             0x00, 0x00, 0x00, 0x00
         };
 
-        if ( bd->pd3dDevice->CreatePixelShader( pixel_shader_gamma_fix, sizeof( pixel_shader_gamma_fix ), nullptr, &bd->pPixelShaderGammaFix ) != S_OK ) {
+        if ( bd->pd3dDevice->CreatePixelShader( pixel_shader_gamma_fix, sizeof( pixel_shader_gamma_fix ), nullptr, &bd->pPixelShaderUnity ) != S_OK ) {
             return false;
         }
     }
@@ -715,6 +717,24 @@ bool    ImGui_ImplDX11_CreateDeviceObjects()
         bd->pd3dDevice->CreateSamplerState(&desc, &bd->pFontSampler);
     }
 
+    // Create unity image sampler
+    {
+        D3D11_SAMPLER_DESC sampler_desc = {
+            .Filter = D3D11_FILTER_ANISOTROPIC,
+            .AddressU = D3D11_TEXTURE_ADDRESS_CLAMP,
+            .AddressV = D3D11_TEXTURE_ADDRESS_CLAMP,
+            .AddressW = D3D11_TEXTURE_ADDRESS_CLAMP,
+            .MipLODBias = -0.3f,
+            .MaxAnisotropy = 4,
+            .ComparisonFunc = D3D11_COMPARISON_ALWAYS,
+            .BorderColor = { 0.f, 0.f, 0.f, 0.f },
+            .MinLOD = 0,
+            .MaxLOD = D3D11_FLOAT32_MAX
+        };
+
+        bd->pd3dDevice->CreateSamplerState( &sampler_desc, &bd->pSamplerStateUnity );
+    }
+
     return true;
 }
 
@@ -734,6 +754,9 @@ void    ImGui_ImplDX11_InvalidateDeviceObjects()
     if (bd->pVertexConstantBuffer)  { bd->pVertexConstantBuffer->Release(); bd->pVertexConstantBuffer = nullptr; }
     if (bd->pInputLayout)           { bd->pInputLayout->Release(); bd->pInputLayout = nullptr; }
     if (bd->pVertexShader)          { bd->pVertexShader->Release(); bd->pVertexShader = nullptr; }
+
+    if ( bd->pPixelShaderUnity )    { bd->pPixelShaderUnity->Release();  bd->pPixelShaderUnity = nullptr;  }
+    if ( bd->pSamplerStateUnity )   { bd->pSamplerStateUnity->Release();  bd->pSamplerStateUnity = nullptr; }
 }
 
 bool    ImGui_ImplDX11_Init(ID3D11Device* device, ID3D11DeviceContext* device_context)
@@ -785,16 +808,18 @@ void ImGui_ImplDX11_NewFrame()
 
 //-----------------------------------------------------------------------------
 
-void ImGui_ImplDX11_SetGammaFix() {
+void ImGui_ImplDX11_SetUnity() {
     ImGui_ImplDX11_Data* bd = ImGui_ImplDX11_GetBackendData();
 
-    bd->pd3dDeviceContext->PSSetShader( bd->pPixelShaderGammaFix, nullptr, 0u );
+    bd->pd3dDeviceContext->PSSetShader( bd->pPixelShaderUnity, nullptr, 0u );
+    bd->pd3dDeviceContext->PSSetSamplers( 0u, 1u, &bd->pSamplerStateUnity );
 }
 
-void ImGui_ImplDX11_RestoreGammaFix() {
+void ImGui_ImplDX11_RestoreUnity() {
     ImGui_ImplDX11_Data* bd = ImGui_ImplDX11_GetBackendData();
 
     bd->pd3dDeviceContext->PSSetShader( bd->pPixelShader, nullptr, 0u );
+    bd->pd3dDeviceContext->PSSetSamplers( 0u, 1u, &bd->pFontSampler );
 }
 
 #endif // #ifndef IMGUI_DISABLE

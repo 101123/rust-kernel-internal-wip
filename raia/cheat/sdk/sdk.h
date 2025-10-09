@@ -656,6 +656,11 @@ namespace unity {
         }
     };
 
+    class texture2d : public texture {
+    public:
+
+    };
+
     class render_texture : public texture {
     public:
         static render_texture* get_temporary( int width, int height, int depth_buffer ) {
@@ -674,6 +679,18 @@ namespace unity {
             um::caller& caller = um::get_caller_for_thread();
 
             return caller( release_temporary, rt );
+        }
+    };
+
+    class sprite : public object {
+    public:
+        texture2d* get_texture() {
+            texture2d* ( *get_texture )( sprite* ) =
+                ( decltype( get_texture ) )( unity_player + Offsets::Sprite::get_texture );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_texture, this );
         }
     };
 
@@ -1516,6 +1533,7 @@ namespace rust {
     public:
         FIELD( int, item_id, Offsets::ItemDefinition::itemid );
         FIELD( phrase*, display_name, Offsets::ItemDefinition::displayName );
+        FIELD( unity::sprite*, icon_sprite, Offsets::ItemDefinition::iconSprite );
         FIELD( int, category, Offsets::ItemDefinition::category );
     };
 

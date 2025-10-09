@@ -48,7 +48,7 @@ struct ImGui_ImplDX11_RenderState
     ID3D11Buffer*           VertexConstantBuffer;
 };
 
-IMGUI_IMPL_API void     ImGui_ImplDX11_SetGammaFix();
-IMGUI_IMPL_API void     ImGui_ImplDX11_RestoreGammaFix();
+IMGUI_IMPL_API void     ImGui_ImplDX11_SetUnity();
+IMGUI_IMPL_API void     ImGui_ImplDX11_RestoreUnity();
 
 #endif // #ifndef IMGUI_DISABLE

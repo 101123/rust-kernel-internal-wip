@@ -207,6 +207,14 @@ namespace Offsets {
 		constexpr const static size_t ApplyImpl = 0xdc5e0;
 	}
 
+#define Sprite_TypeDefinitionIndex 16804
+
+	namespace Sprite {
+
+		// Functions
+		constexpr const static size_t get_texture = 0x119300;
+	}
+
 #define RenderTexture_TypeDefinitionIndex 16641
 
 	namespace RenderTexture {
