@@ -21,8 +21,7 @@ struct ID3D11ShaderResourceView;
 
 enum fonts {
 	verdana,
-	small_fonts,
-	icons
+	small_fonts
 };
 
 namespace text_flags {

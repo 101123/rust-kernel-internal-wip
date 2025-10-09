@@ -21,12 +21,20 @@ bool cheat_init = false;
 
 bool init_cheat() {
 	// Resolve game dlls and populate classes in sdk
-	if ( !bootstrap::init() )
+	if ( !bootstrap::init() ) {
+#ifdef DEBUG
+		LOG( "Bootstrap failed\n" );
+#endif
 		return false;
+	}
 
 	// Resolve hooks
-	if ( !hook_manager::init() )
+	if ( !hook_manager::init() ) {
+#ifdef DEBUG
+		LOG( "Failed to resolve hooks" )
+#endif
 		return false;
+	}
 	
 	// Initialize entity manager internal maps
 	entity_manager::init();
@@ -135,22 +143,22 @@ bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t
 						uintptr_t retaddr = *( uintptr_t* )context->Rsp;
 
 						// Emulate a ret
-					context->Rsp += 0x8;
-					context->Rip = retaddr;
-				}
+						context->Rsp += 0x8;
+						context->Rip = retaddr;
+					}
 
-				else {
-					// If we have a post hook
-					if ( hook.ptr_swap.post_handler ) {
-						uintptr_t* retaddr = ( uintptr_t* )context->Rsp;
+					else {
+						// If we have a post hook
+						if ( hook.ptr_swap.post_handler ) {
+							uintptr_t* retaddr = ( uintptr_t* )context->Rsp;
 
-						// Preserve the original return address
-						hook.ptr_swap.retaddr = *retaddr;
+							// Preserve the original return address
+							hook.ptr_swap.retaddr = *retaddr;
 
-						// Preserve the needed original arguments for the post hook
-						previous_context.Rcx = context->Rcx;
-						previous_context.Rdx = context->Rdx;
-						previous_context.R8 = context->R8;
+							// Preserve the needed original arguments for the post hook
+							previous_context.Rcx = context->Rcx;
+							previous_context.Rdx = context->Rdx;
+							previous_context.R8 = context->R8;
 							previous_context.R9 = context->R9;
 
 							// Corrupt the return address
@@ -158,9 +166,9 @@ bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t
 						}
 
 						context->Rip = hook.original;
-				}
+					}
 
-				return true;
+					return true;
 				}
 
 				// We've caught a post hook
@@ -171,10 +179,10 @@ bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t
 					}
 
 					// Restore the return address we preserved
-				context->Rip = hook.ptr_swap.retaddr;
+					context->Rip = hook.ptr_swap.retaddr;
 
-				return true;
-			}
+					return true;
+				}
 			}
 		}
 	}
@@ -226,6 +234,7 @@ void on_syscall( sentian::syscall_frame* new_frame, sentian::syscall_frame* old_
 	}
 }
 
+#ifdef DEBUG
 bool on_exit_process( sentian::callback_result* callback, bool last_thread_exit, PEPROCESS process ) {
 	if ( process == rust_process ) {
 		um::print_last_callers();
@@ -233,6 +242,7 @@ bool on_exit_process( sentian::callback_result* callback, bool last_thread_exit,
 
 	return true;
 }
+#endif
 
 int main( sentian::driver_api* api, sentian::driver_allocation* allocation ) {
 	if ( api->version != DRIVER_API_VERSION )
@@ -243,14 +253,8 @@ int main( sentian::driver_api* api, sentian::driver_allocation* allocation ) {
 		return 2;
 
 	sentian::driver_slot* slot = &api->slots[ 1 ];
-
-#ifdef DEBUG
 	if ( !api->unload_slot( slot ) )
 		return 3;
-#else
-	if ( slot->enabled )
-		return 4;
-#endif
 
 	slot->enabled = true;
 	slot->allocation = *allocation;

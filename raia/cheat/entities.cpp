@@ -6,8 +6,6 @@
 
 #include <ankerl/unordered_dense.h>
 
-#define SAFE_RELEASE( Object ) if ( Object ) { Object->Release(); Object = nullptr; }
-
 using entity_map = ankerl::unordered_dense::map<rust::base_entity*, cached_entity>;
 using combat_entity_map = ankerl::unordered_dense::map<rust::base_combat_entity*, cached_combat_entity>;
 using dropped_item_map = ankerl::unordered_dense::map<rust::world_item*, cached_dropped_item>;
@@ -30,6 +28,20 @@ static util::lazy_initializer<cached_entities> entity_cache;
 void entity_manager::init() {
     entity_cache.construct();
 }
+
+// We need to validate the objects vftable because it may become invalidated even without us releasing our reference
+void safe_release_impl( IUnknown* object ) {
+    if ( !is_valid_ptr( object ) )
+        return;
+
+    void** vftable = *( void*** )( object );
+    if ( !is_valid_ptr( vftable ) )
+        return;
+
+    object->Release();
+}
+
+#define SAFE_RELEASE( Object ) if ( Object ) { safe_release_impl( Object ); Object = nullptr; }
 
 void entity_manager::destroy() {
     util::scoped_spinlock lock( &cache_lock );

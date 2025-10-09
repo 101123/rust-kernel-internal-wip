@@ -38,4 +38,5 @@ namespace rust {
 	using networkable_id = uint64_t;
 }
 
+struct IUnknown;
 struct ID3D11ShaderResourceView;

@@ -7,6 +7,10 @@
 // #define EAC_LOGS
 
 #ifdef EAC_LOGS
+namespace util {
+	extern const char* format_string( const char* format, ... );
+}
+
 #define LOG( Format, ... ) driver_api->add_log( 0, 0, 0, util::format_string( Format, __VA_ARGS__ ) );
 #else
 #define LOG( Format, ... ) DbgPrintEx( DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, Format, __VA_ARGS__ );
