@@ -1383,37 +1383,36 @@ namespace rust {
 
         ENCRYPTED_VALUE( float, ground_time, Offsets::PlayerWalkMovement::groundTime, {},
             {
-                values[ i ] = ( ( ( values[ i ] + 82150697 ) << 20 ) | 
-                    ( ( unsigned int )( values[ i ] + 82150697 ) >> 12 ) ) - 2144897053;
+                values[ i ] = ( ( ( values[ i ] + 1752535058 ) << 12 ) | 
+                    ( ( unsigned int )( values[ i ] + 1752535058 ) >> 20 ) ) - 2055606043;
             }
         );
 
         ENCRYPTED_VALUE( float, jump_time, Offsets::PlayerWalkMovement::jumpTime, {},
             {
-                uint32_t a = values[ i ] ^ 0x457BC0EC;
-
-                values[ i ] = ( ( a << 23 ) | ( a >> 9 ) ) ^ 0xF8DEF506LL;
+                values[ i ] = ( ( ( values[ i ] + 2059904648 ) << 7 ) | 
+                    ( ( unsigned int )( values[ i ] + 2059904648 ) >> 25 ) ) - 1221529911;
             }
         );
 
         ENCRYPTED_VALUE( float, land_time, Offsets::PlayerWalkMovement::landTime, {},
             {
-                values[ i ] = ( ( 2 * ( values[ i ] + 737851121 ) ) | 
-                    ( ( unsigned int )( values[ i ] + 737851121 ) >> 31 ) ) + 1587576312;
+                values[ i ] = ( ( ( ( values[ i ] ^ 0xCD96A67F ) - 146153489 ) << 27 ) |
+                    ( ( ( values[ i ] ^ 0xCD96A67F ) - 146153489 ) >> 5 ) ) - 1411645490;
             }
         );
 
         ENCRYPTED_VALUE( float, ground_angle_new, Offsets::PlayerWalkMovement::groundAngleNew, {},
             {
-                values[ i ] = ( ( ( ( values[ i ] ^ 0x8E8364AE ) << 29 ) | 
-                    ( ( values[ i ] ^ 0x8E8364AE ) >> 3 ) ) - 672440370 ) ^ 0x25C14BBDLL;
+                values[ i ] = ( ( ( ( values[ i ] << 22 ) | ( values[ i ] >> 10 ) ) + 991899351 ) << 24 ) |
+                    ( ( ( ( values[ i ] << 22 ) | ( values[ i ] >> 10 ) ) + 991899351 ) >> 8 );
             }
         );
 
         ENCRYPTED_VALUE( float, next_sprint_time, Offsets::PlayerWalkMovement::nextSprintTime, {},
             {
-                values[ i ] = ( ( ( values[ i ] - 127427770 ) << 28 ) | 
-                    ( ( unsigned int )( values[ i ] - 127427770 ) >> 4 ) ) ^ 0x609524FELL;
+                values[ i ] = ( ( ( ( ( values[ i ] << 16 ) | HIWORD( values[ i ] ) ) ^ 0xB6AE16A7 ) << 28 ) |
+                    ( ( ( ( values[ i ] << 16 ) | HIWORD( values[ i ] ) ) ^ 0xB6AE16A7 ) >> 4 ) ) - 1660185661;
             }
         );
 
@@ -1597,10 +1596,10 @@ namespace rust {
 
         ENCRYPTED_VALUE( uint64_t, cl_active_item, Offsets::BasePlayer::clActiveItem,
             {
-                uint32_t a = ( ( ( values[ i ] + 225446873 ) << 18 ) | 
-                    ( ( unsigned int )( values[ i ] + 225446873 ) >> 14 ) ) ^ 0x1DDD956D;
+                uint32_t a = ( ( ( values[ i ] ^ 0x1E861947 ) << 24 ) | 
+                    ( ( values[ i ] ^ 0x1E861947u ) >> 8 ) ) - 379168552;
 
-                values[ i ] = ( a << 12 ) | ( a >> 20 );
+                values[ i ] = ( a << 7 ) | ( a >> 25 );
             }, {}
         );
 
@@ -1866,8 +1865,8 @@ namespace rust {
         public:
             ENCRYPTED_VALUE( float, fov, Offsets::ConVar_Graphics_Static::_fov, {},
                 {
-                    values[ i ] = ( ( ( values[ i ] << 19 ) | 
-                        ( values[ i ] >> 13 ) ) + 1747917654 ) ^ 0xC202832;
+                    values[ i ] = ( ( ( ( ( values[ i ] << 21 ) | ( values[ i ] >> 11 ) ) ^ 0xAE41CFF8 ) << 12 ) | 
+                        ( ( ( ( values[ i ] << 21 ) | ( values[ i ] >> 11 ) ) ^ 0xAE41CFF8 ) >> 20 ) ) + 726560829;
                 }
             );
         };
