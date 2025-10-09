@@ -165,7 +165,7 @@ ImFont* create_font( uint8_t* font_data, float font_size, bool uppercase = false
 	return font;
 }
 
-ImFont* create_glfn_font( uint8_t* font_data, float font_size ) {
+ImFont* create_glfn_font( uint8_t* font_data, float font_size, std::initializer_list<std::pair<uint16_t, uint16_t>> ranges ) {
 	stream_reader stream( font_data );
 
 	glf_file_header_s header = stream.read<glf_file_header_s>();
@@ -216,33 +216,33 @@ ImFont* create_glfn_font( uint8_t* font_data, float font_size ) {
 
 	int size = stream.read<int>();
 	int size_read = 0;
-	int codepoint = 0;
 
-	while ( size_read < size ) {
-		glf_glyph_t glyph_info = stream.read<glf_glyph_t>();
+	for ( const auto& range : ranges ) {
+		for ( uint16_t codepoint = range.first; codepoint <= range.second && size_read < size; codepoint++ ) {
+			glf_glyph_t glyph_info = stream.read<glf_glyph_t>();
 
-		for ( size_t i = 0; i < glyph_info.nKerningPairs; i++ ) {
-			glf_kerning_pair_t kerning_pair = stream.read<glf_kerning_pair_t>();
-			size_read += sizeof( kerning_pair );
+			for ( size_t i = 0; i < glyph_info.nKerningPairs; ++i ) {
+				glf_kerning_pair_t kerning_pair = stream.read<glf_kerning_pair_t>();
+				size_read += sizeof( kerning_pair );
+			}
+
+			ImFontGlyph glyph = ImFontGlyph();
+			glyph.Visible = true;
+			glyph.Codepoint = codepoint;
+			glyph.AdvanceX = ( float )glyph_info.iAdvance;
+			glyph.X0 = ( float )glyph_info.iLeftBearing;
+			glyph.Y0 = ( float )( -glyph_info.iTopBearing + header.fm.iAscent );
+			glyph.X1 = glyph.X0 + ( float )glyph_info.iWidth;
+			glyph.Y1 = glyph.Y0 + ( float )glyph_info.iHeight;
+			glyph.U0 = ( ( float )texture_rect->x + ( float )glyph_info.iX ) / ( float )font_atlas->TexData->Width;
+			glyph.V0 = ( ( float )texture_rect->y + ( float )glyph_info.iY ) / ( float )font_atlas->TexData->Height;
+			glyph.U1 = ( ( float )texture_rect->x + ( float )glyph_info.iX + ( float )glyph_info.iWidth ) / ( float )font_atlas->TexData->Width;
+			glyph.V1 = ( ( float )texture_rect->y + ( float )glyph_info.iY + ( float )glyph_info.iHeight ) / ( float )font_atlas->TexData->Height;
+
+			ImFontAtlasBakedAddFontGlyph( font_atlas, baked, nullptr, &glyph );
+
+			size_read += sizeof( glyph_info );
 		}
-
-		ImFontGlyph glyph = ImFontGlyph();
-		glyph.Visible = true;
-		glyph.Codepoint = codepoint;
-		glyph.AdvanceX = ( float )glyph_info.iAdvance;
-		glyph.X0 = ( float )glyph_info.iLeftBearing;
-		glyph.Y0 = ( float )( -glyph_info.iTopBearing + header.fm.iAscent );
-		glyph.X1 = glyph.X0 + ( float )glyph_info.iWidth;
-		glyph.Y1 = glyph.Y0 + ( float )glyph_info.iHeight;
-		glyph.U0 = ( ( float )texture_rect->x + ( float )glyph_info.iX ) / ( float )font_atlas->TexData->Width;
-		glyph.V0 = ( ( float )texture_rect->y + ( float )glyph_info.iY ) / ( float )font_atlas->TexData->Height;
-		glyph.U1 = ( ( float )texture_rect->x + ( float )glyph_info.iX + ( float )glyph_info.iWidth ) / ( float )font_atlas->TexData->Width;
-		glyph.V1 = ( ( float )texture_rect->y + ( float )glyph_info.iY + ( float )glyph_info.iHeight ) / ( float )font_atlas->TexData->Height;
-
-		ImFontAtlasBakedAddFontGlyph( font_atlas, baked, nullptr, &glyph );
-
-		size_read += sizeof( glyph_info );
-		codepoint++;
 	}
 
 	return font;
@@ -277,7 +277,7 @@ bool renderer::init( IDXGISwapChain* swapchain ) {
 	font_atlas->TexMinHeight = 1024;
 	ImFontAtlasBuildInit( font_atlas );
 
-	fonts[ fonts::verdana ] = create_glfn_font( antialiased_verdana_12_glfn, 12.f );
+	fonts[ fonts::verdana ] = create_glfn_font( antialiased_verdana_12_glfn, 12.f, { { 0x0, 0xFF }, { 0x400, 0x4FF } } );
 	fonts[ fonts::small_fonts ] = create_font( outlined_smallfonts_8, 8.f, true );
 
 	ImGui_ImplDX11_UpdateTexture( font_atlas->TexData );
