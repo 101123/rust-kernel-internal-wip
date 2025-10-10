@@ -1346,31 +1346,31 @@ namespace rust {
             locked = 16,
             debugging = 32,
             disabled = 64,
-            reserved_1 = 128,
-            reserved_2 = 256,
-            reserved_3 = 512,
-            reserved_4 = 1024,
-            reserved_5 = 2048,
+            reserved1 = 128,
+            reserved2 = 256,
+            reserved3 = 512,
+            reserved4 = 1024,
+            reserved5 = 2048,
             broken = 4096,
             busy = 8192,
-            reserved_6 = 16384,
-            reserved_7 = 32768,
-            reserved_8 = 65536,
-            reserved_9 = 131072,
-            reserved_10 = 262144,
-            reserved_11 = 524288,
+            reserved6 = 16384,
+            reserved7 = 32768,
+            reserved8 = 65536,
+            reserved9 = 131072,
+            reserved10 = 262144,
+            reserved11 = 524288,
             in_use = 1048576,
-            reserved_12 = 2097152,
-            reserved_13 = 4194304,
+            reserved12 = 2097152,
+            reserved13 = 4194304,
             unused_23 = 8388608,
             _protected = 16777216,
             transferring = 33554432,
-            reserved_14 = 67108864,
-            reserved_15 = 134217728,
-            reserved_16 = 268435456,
-            reserved_17 = 536870912,
-            reserved_18 = 1073741824,
-            reserved_19 = -2147483648
+            reserved14 = 67108864,
+            reserved15 = 134217728,
+            reserved16 = 268435456,
+            reserved17 = 536870912,
+            reserved18 = 1073741824,
+            reserved19 = -2147483648
         };
 
         FIELD( rust::model*, model, Offsets::BaseEntity::model );
@@ -2366,6 +2366,25 @@ namespace rust {
     class ui_belt {
     public:
         FIELD( sys::list<item_icon*>*, item_icons, Offsets::UIBelt::ItemIcons );
+
+        static inline il2cpp_class* klass_;
+    };
+
+    class lootable_corpse {
+    public:
+        FIELD( uint64_t, player_steam_id, Offsets::LootableCorpse::playerSteamID );
+        FIELD( sys::string*, player_name, Offsets::LootableCorpse::_playerName );
+    };
+
+    class player_corpse : public lootable_corpse {
+    public:
+        static inline il2cpp_class* klass_;
+    };
+
+    class dropped_item_container {
+    public:
+        FIELD( uint64_t, player_steam_id, Offsets::DroppedItemContainer::playerSteamID );
+        FIELD( sys::string*, player_name, Offsets::DroppedItemContainer::_playerName );
 
         static inline il2cpp_class* klass_;
     };

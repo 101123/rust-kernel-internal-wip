@@ -291,11 +291,14 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 			float icon_height = icon_width;
 			float padding = 4.f * belt_icons.lossy_scale.x;
 
+			float y = ( float )screen_height - ( belt_icons.positions[ 0 ].y + ( icon_height / 2.f ) ) - icon_height - padding;
+
+			renderer::draw_text( belt_icons.positions[ 3 ].x - ( icon_width / 2.f ), y - 8.f - padding, fonts::small_fonts, text_flags::centered, COL32( 255, 255, 255, 200 ), util::format_string( S( "%s's Belt" ), cached_player.name ) );
+
 			for ( int32_t i = 0; i < 6; i++ ) {
 				const cached_belt_item& belt_item = cached_player.belt_items[ i ];
 
 				float x = belt_icons.positions[ i ].x - ( icon_width / 2.f );
-				float y = ( float )screen_height - ( belt_icons.positions[ i ].y + ( icon_height / 2.f ) ) - icon_height - padding;
 
 				if ( is_valid_ptr( belt_icons.background ) ) {
 					renderer::draw_unity_image( x, y, icon_width, icon_height, i == cached_player.active_item_idx ? player_visuals.bounding_box_color : player_visuals.skeleton_color, 0.f, belt_icons.background );
@@ -312,6 +315,82 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 	}
 }
 
+void draw_entity( const cvar_visual* visuals, const vector2& screen, float distance, const cached_entity* entity ) {
+	visual_builder( screen )
+		.set_font( fonts::small_fonts )
+		.set_vertical_spacing( 8.f )
+		.set_flags( text_flags::centered )
+		.draw_text( visuals->display_name, visuals->color )
+		.draw_text( util::format_string( S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
+}
+
+void draw_named_entity( const cvar_visual* visuals, const vector2& screen, float distance, const cached_named_entity* named_entity ) {
+	auto visual = visual_builder( screen )
+		.set_font( fonts::small_fonts )
+		.set_vertical_spacing( 8.f )
+		.set_flags( text_flags::centered )
+		.draw_text( visuals->display_name, visuals->color );
+
+
+	if ( named_entity->name[ 0 ] != L'\0' ) {
+		visual.draw_text( util::format_string_w( S( L"%ws" ), named_entity->name ), visuals->color );
+	}
+
+	else if ( named_entity->steam_id ) {
+		visual.draw_text( util::format_string( S( "%llu" ), named_entity->steam_id ), visuals->color );
+	}
+
+	// This is very lazy, but works fine, since we only have backpacks and corpses in this map
+	if ( named_entity->flags & rust::base_entity::flag::reserved2 ) {
+		visual.draw_text( S( "Looted" ), visuals->color );
+	}
+
+	visual.draw_text( util::format_string( S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
+}
+
+void draw_combat_entity( const cvar_visual* visuals, const vector2& screen, float distance, const cached_combat_entity* combat_entity ) {
+	float x = TRUNC( screen.x );
+	float y = TRUNC( screen.y );
+
+	float width = renderer::calc_text_size( fonts::small_fonts, visuals->display_name ).x + 1.f;
+	float half = ceilf( width / 2.f );
+
+	renderer::draw_text( x - half, y, fonts::small_fonts, text_flags::none, visuals->color, visuals->display_name );
+
+	float health_width = ( combat_entity->health / combat_entity->max_health ) * ( width - 2.f );
+
+	renderer::draw_filled_rect( x - half, y + 10.f, width, 4.f, COL32_MERGE_ALPHA( COL32_BLACK, visuals->color ) );
+	renderer::draw_filled_rect( x - half + 1.f, y + 11.f, health_width, 2.f, COL32_MERGE_ALPHA( COL32( 120, 225, 80, 255 ), visuals->color ) );
+}
+
+void draw_locked_by_ent_crate( const cvar_visual* visuals, const vector2& screen, float distance, const cached_entity* entity ) {
+	auto visual = visual_builder( screen )
+		.set_font( fonts::small_fonts )
+		.set_vertical_spacing( 8.f )
+		.set_flags( text_flags::centered )
+		.draw_text( visuals->display_name, visuals->color );
+
+	if ( entity->flags & rust::base_entity::flag::on_fire ) {
+		visual.draw_text( S( "On Fire" ), visuals->color );
+	}
+
+	visual.draw_text( util::format_string( S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
+}
+
+void draw_bear_trap( const cvar_visual* visuals, const vector2& screen, float distance, const cached_combat_entity* combat_entity ) {
+	if ( bear_trap_ignore_unarmed && !( combat_entity->flags & rust::base_entity::flag::on ) )
+		return;
+
+	draw_combat_entity( visuals, screen, distance, combat_entity );
+}
+
+void draw_sam_site( const cvar_visual* visuals, const vector2& screen, float distance, const cached_combat_entity* combat_entity ) {
+	if ( sam_site_ignore_offline && !( combat_entity->flags & rust::base_entity::flag::reserved8 ) )
+		return;
+
+	draw_combat_entity( visuals, screen, distance, combat_entity );
+}
+
 void draw_entities( const entity_vector<rust::base_entity*, cached_entity>& entities ) {
 	for ( const auto& [ entity, cached_entity ] : entities ) {
 		cvar_visual* visuals = cached_entity.visual;
@@ -326,12 +405,30 @@ void draw_entities( const entity_vector<rust::base_entity*, cached_entity>& enti
 		if ( !w2s( cached_entity.position, screen ) )
 			continue;
 
-		visual_builder( screen )
-			.set_font( fonts::small_fonts )
-			.set_vertical_spacing( 8.f )
-			.set_flags( text_flags::centered )
-			.draw_text( visuals->display_name, visuals->color )
-			.draw_text( util::format_string( "%dm", ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
+		if ( visuals->draw_override ) {
+			visuals->draw_override( visuals, screen, distance, &cached_entity );
+			continue;
+		}
+
+		draw_entity( visuals, screen, distance, &cached_entity );
+	}
+}
+
+void draw_named_entities( const entity_vector<rust::base_entity*, cached_named_entity>& named_entities ) {
+	for ( const auto& [ named_entity, cached_named_entity ] : named_entities ) {
+		cvar_visual* visuals = cached_named_entity.visual;
+		if ( !visuals->enabled )
+			continue;
+
+		float distance = vector3::distance( camera.position, cached_named_entity.position );
+		if ( distance > visuals->maximum_distance )
+			continue;
+
+		vector2 screen;
+		if ( !w2s( cached_named_entity.position, screen ) )
+			continue;
+
+		draw_named_entity( visuals, screen, distance, &cached_named_entity );
 	}
 }
 
@@ -352,18 +449,12 @@ void draw_combat_entities( const entity_vector<rust::base_combat_entity*, cached
 		if ( !w2s( cached_combat_entity.position, screen ) )
 			continue;
 
-		float x = TRUNC( screen.x );
-		float y = TRUNC( screen.y );
+		if ( visuals->draw_override ) {
+			visuals->draw_override( visuals, screen, distance, &cached_combat_entity );
+			continue;
+		}
 
-		float width = renderer::calc_text_size( fonts::small_fonts, visuals->display_name ).x + 1.f;
-		float half = ceilf( width / 2.f );
-
-		renderer::draw_text( x - half, y, fonts::small_fonts, text_flags::none, visuals->color, visuals->display_name );
-
-		float health_width = ( cached_combat_entity.health / cached_combat_entity.max_health ) * ( width - 2.f );
-
-		renderer::draw_filled_rect( x - half, y + 10.f, width, 4.f, COL32_MERGE_ALPHA( COL32_BLACK, visuals->color ) );
-		renderer::draw_filled_rect( x - half + 1.f, y + 11.f, health_width, 2.f, COL32_MERGE_ALPHA( COL32( 120, 225, 80, 255 ), visuals->color ) );
+		draw_combat_entity( visuals, screen, distance, &cached_combat_entity );
 	}
 }
 
@@ -453,6 +544,7 @@ void draw_esp() {
 		.draw_text( util::format_string( "%d players", entity_collection.players.size() ), COL32_WHITE );
 
 	draw_entities( entity_collection.entities );
+	draw_named_entities( entity_collection.named_entities );
 	draw_combat_entities( entity_collection.combat_entities );
 	draw_dropped_items( entity_collection.dropped_items );
 
@@ -505,6 +597,15 @@ void draw_raids() {
 	}
 }
 
+void set_draw_overrides() {
+	using T = decltype( cvar_visual::draw_override );
+
+	bradley_crate.draw_override = ( T )draw_locked_by_ent_crate;
+	heli_crate.draw_override = ( T )draw_locked_by_ent_crate;
+	bear_trap.draw_override = ( T )draw_bear_trap;
+	sam_site.draw_override = ( T )draw_sam_site;
+}
+
 bool renderer_init;
 
 void on_render( IDXGISwapChain* swapchain ) {
@@ -512,6 +613,8 @@ void on_render( IDXGISwapChain* swapchain ) {
 		if ( !( renderer_init = renderer::init( swapchain ) ) ) {
 			return;
 		}
+
+		set_draw_overrides();
 	}
 
 	renderer::begin_frame();

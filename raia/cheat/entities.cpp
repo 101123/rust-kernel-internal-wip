@@ -7,20 +7,20 @@
 #include <ankerl/unordered_dense.h>
 
 using entity_map = ankerl::unordered_dense::map<rust::base_entity*, cached_entity>;
+using named_entity_map = ankerl::unordered_dense::map<rust::base_entity*, cached_named_entity>;
 using combat_entity_map = ankerl::unordered_dense::map<rust::base_combat_entity*, cached_combat_entity>;
 using dropped_item_map = ankerl::unordered_dense::map<rust::world_item*, cached_dropped_item>;
 using player_map = ankerl::unordered_dense::map<rust::base_player*, cached_player>;
 
 struct cached_entities {
     entity_map entities;
+    named_entity_map named_entities;
     combat_entity_map combat_entities;
     dropped_item_map dropped_items;
     player_map players;
 
     // Hackable Crate
     // Tool Cupboard
-    // Dropped Items
-    // Backpacks/Corpses
 };
 
 static util::lazy_initializer<cached_entities> entity_cache;
@@ -51,6 +51,9 @@ void entity_manager::destroy() {
     entity_map temp_entity_map;
     entities.entities.swap( temp_entity_map );
 
+    named_entity_map temp_named_entity_map;
+    entities.named_entities.swap( temp_named_entity_map );
+
     combat_entity_map temp_combat_entity_map;
     entities.combat_entities.swap( temp_combat_entity_map );
 
@@ -75,7 +78,15 @@ namespace entity_cacher {
         if ( entities.contains( entity ) )
             return;
 
-        entities.insert( { entity, cached_entity( transform, transform->get_position(), specifier->visual, specifier->update ) } );
+        entities.insert( { entity, 
+            cached_entity {
+                entity->flags,
+                transform,
+                transform->get_position(),
+                specifier->visual,
+                specifier->update 
+            } } 
+        );
     }
 
     void remove_from_cache( rust::base_entity* entity, cache_specifier* specifier ) {
@@ -94,6 +105,45 @@ namespace entity_cacher {
     };
 }
 
+namespace named_entity_cacher {
+    void add_to_cache( rust::base_entity* entity, cache_specifier* specifier ) {
+        unity::transform* transform = entity->get_transform();
+        if ( !is_valid_ptr( transform ) )
+            return;
+
+        named_entity_map& named_entities = entity_cache.get().named_entities;
+        if ( named_entities.contains( entity ) )
+            return;
+
+        named_entities.insert( { entity, 
+            cached_named_entity {
+                cached_entity {
+                    entity->flags,
+                    transform,
+                    transform->get_position(),
+                    specifier->visual,
+                    specifier->update
+                }
+            } }
+        );
+    }
+
+    void remove_from_cache( rust::base_entity* entity, cache_specifier* specifier ) {
+        named_entity_map& named_entities = entity_cache.get().named_entities;
+
+        auto iterator = named_entities.find( entity );
+        if ( iterator == named_entities.end() )
+            return;
+
+        named_entities.erase( iterator );
+    }
+
+    const void* cache_functions[] = {
+        add_to_cache,
+        remove_from_cache
+    };
+}
+
 namespace combat_entity_cacher {
     void add_to_cache( rust::base_combat_entity* combat_entity, cache_specifier* specifier ) {
         unity::transform* transform = combat_entity->get_transform();
@@ -104,8 +154,21 @@ namespace combat_entity_cacher {
         if ( combat_entities.contains( combat_entity ) )
             return;
 
-        combat_entities.insert( { combat_entity, 
-            cached_combat_entity( transform, transform->get_position(), specifier->visual, specifier->update, combat_entity->lifestate, combat_entity->health, combat_entity->max_health ) } );
+        combat_entities.insert( { combat_entity,
+            cached_combat_entity {
+                cached_entity { 
+                    combat_entity->flags,
+                    transform,
+                    transform->get_position(),
+                    specifier->visual,
+                    specifier->update
+                },
+
+                combat_entity->lifestate,
+                combat_entity->health,
+                combat_entity->max_health
+            } }
+        );
     }
 
     void remove_from_cache( rust::base_combat_entity* entity, cache_specifier* specifier ) {
@@ -134,7 +197,13 @@ namespace dropped_item_cacher {
         if ( dropped_items.contains( world_item ) )
             return;
 
-        dropped_items.insert( { world_item, { false, transform, transform->get_position() } } );
+        dropped_items.insert( { world_item, 
+            cached_dropped_item { 
+                false, 
+                transform, 
+                transform->get_position() 
+            } } 
+        );
     }
 
     void remove_from_cache( rust::world_item* world_item, cache_specifier* specifier ) {
@@ -191,6 +260,10 @@ namespace player_cacher {
 
 const void** get_entity_cacher() {
     return entity_cacher::cache_functions;
+}
+
+const void** get_named_entity_cacher() {
+    return named_entity_cacher::cache_functions;
 }
 
 const void** get_combat_entity_cacher() {
@@ -587,12 +660,12 @@ bool entity_manager::belongs_in_cache( rust::base_networkable* entity, cache_spe
         }
 
         case PREFAB( "assets/prefabs/npc/m2bradley/bradley_crate.prefab" ): {
-            *specifier = cache_specifier( get_entity_cacher(), &bradley_crate, false );
+            *specifier = cache_specifier( get_entity_cacher(), &bradley_crate, true );
             return true;
         }
 
         case PREFAB( "assets/prefabs/npc/patrol helicopter/heli_crate.prefab" ): {
-            *specifier = cache_specifier( get_entity_cacher(), &heli_crate, false );
+            *specifier = cache_specifier( get_entity_cacher(), &heli_crate, true );
             return true;
         }
 
@@ -603,7 +676,8 @@ bool entity_manager::belongs_in_cache( rust::base_networkable* entity, cache_spe
 
         case PREFAB( "assets/prefabs/misc/supply drop/supply_drop.prefab" ):
         case PREFAB( "assets/prefabs/misc/xmas/sleigh/presentdrop.prefab" ): {
-            return false;
+            *specifier = cache_specifier( get_entity_cacher(), &supply_drop, true );
+            return true;
         }
 
         case PREFAB( "assets/prefabs/deployable/single shot trap/guntrap.deployed.prefab" ): {
@@ -643,11 +717,13 @@ bool entity_manager::belongs_in_cache( rust::base_networkable* entity, cache_spe
 
         case PREFAB( "assets/prefabs/player/player_corpse.prefab" ):
         case PREFAB( "assets/prefabs/player/player_corpse_new.prefab" ): {
-            return false;
+            *specifier = cache_specifier( get_named_entity_cacher(), &player_corpse, true );
+            return true;
         }
 
         case PREFAB( "assets/prefabs/misc/item drop/item_drop_backpack.prefab" ): {
-            return false;
+            *specifier = cache_specifier( get_named_entity_cacher(), &backpack, false );
+            return true;
         }
     }
 
@@ -670,6 +746,27 @@ void entity_manager::remove_from_cache( rust::base_networkable* entity, cache_sp
         ( decltype( remove_from_cache ) )( specifier->cache_functions[ 1 ] );
 
     remove_from_cache( entity, specifier );
+}
+
+void cache_named_entity( rust::base_entity* named_entity, cached_named_entity& cached_named_entity ) {
+    uint64_t steam_id = 0ull;
+    sys::string* player_name = nullptr;
+
+    if ( auto player_corpse = named_entity->is<rust::player_corpse>() ) {
+        steam_id = player_corpse->player_steam_id;
+        player_name = player_corpse->player_name;
+    }
+
+    else if ( auto dropped_item_container = named_entity->is<rust::dropped_item_container>() ) {
+        steam_id = dropped_item_container->player_steam_id;
+        player_name = dropped_item_container->player_name;
+    }
+
+    cached_named_entity.steam_id = steam_id;
+
+    if ( cached_named_entity.name[ 0 ] == L'\0' && is_valid_ptr( player_name ) ) {
+        wcscpy_s( cached_named_entity.name, _countof( cached_named_entity.name ), player_name->buffer );
+    }
 }
 
 bool cache_dropped_item( rust::world_item* world_item, cached_dropped_item& cached_dropped_item ) {
@@ -747,7 +844,7 @@ bool cache_player( rust::base_player* player, cached_player& cached_player ) {
     }
 
     cached_player.scientist = !player->is<rust::base_player>();
-    cached_player.user_id = player->get_user_id();
+    cached_player.steam_id = player->get_user_id();
     cached_player.eyes = eyes;
     cached_player.inventory = inventory;
 
@@ -877,10 +974,10 @@ void update_player_visibility( rust::base_player* player, cached_player& cached_
 
 void update_player_avatar( rust::base_player* player, cached_player& cached_player ) {
     if ( cached_player.avatar_srv || cached_player.scientist || 
-        !( cached_player.user_id > 76561197960265728 && cached_player.user_id < 76561202255233023 ) )
+        !( cached_player.steam_id > 76561197960265728 && cached_player.steam_id < 76561202255233023 ) )
         return;
 
-    unity::texture* avatar_texture = rust::steam_client_wrapper::get_avatar_texture( cached_player.user_id );
+    unity::texture* avatar_texture = rust::steam_client_wrapper::get_avatar_texture( cached_player.steam_id );
 
     if ( is_valid_ptr( avatar_texture ) ) {
         ID3D11ShaderResourceView* srv = avatar_texture->get_srv();
@@ -900,18 +997,31 @@ void entity_manager::update() {
     cached_entities& cached_entities = entity_cache.get();
 
     for ( auto& [ entity, cached_entity ] : cached_entities.entities ) {
+        cached_entity.flags = entity->flags;
+
         if ( !entity->parent_entity && !cached_entity.update )
             continue;
 
         cached_entity.position = cached_entity.transform->get_position();
     }
 
+    for ( auto& [ named_entity, cached_named_entity ] : cached_entities.named_entities ) {
+        cached_named_entity.flags = named_entity->flags;
+
+        cache_named_entity( named_entity, cached_named_entity );
+
+        if ( !named_entity->parent_entity && !cached_named_entity.update )
+            continue;
+
+        cached_named_entity.position = cached_named_entity.transform->get_position();
+    }
+
     for ( auto& [ combat_entity, cached_combat_entity ] : cached_entities.combat_entities ) {
+        cached_combat_entity.flags = combat_entity->flags;
         cached_combat_entity.lifestate = combat_entity->lifestate;
         cached_combat_entity.health = combat_entity->health;
         cached_combat_entity.max_health = combat_entity->max_health;
 
-        // Only update the position if the entity is parented or moves
         if ( !combat_entity->parent_entity && !cached_combat_entity.update )
             continue;
 
@@ -961,6 +1071,7 @@ entity_collection entity_manager::get_entities() {
 
     return entity_collection {
         .entities = cached_entities.entities.values(),
+        .named_entities = cached_entities.named_entities.values(),
         .combat_entities = cached_entities.combat_entities.values(),
         .dropped_items = cached_entities.dropped_items.values(),
         .players = cached_entities.players.values()

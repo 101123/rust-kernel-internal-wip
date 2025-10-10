@@ -14,28 +14,28 @@ struct cache_specifier {
 };
 
 struct cached_entity {
+	int32_t flags;
 	unity::transform* transform;
 	vector3 position;
 	cvar_visual* visual;
 	bool update;
+};
 
-	cached_entity( unity::transform* transform, vector3 position, cvar_visual* visual, bool update ) :
-		transform( transform ), position( position ), visual( visual ), update( update ) {};
+struct cached_named_entity : public cached_entity {
+	uint64_t steam_id;
+	wchar_t name[ 128 ];
 };
 
 struct cached_combat_entity : public cached_entity {
 	int lifestate;
 	float health;
 	float max_health;
-
-	cached_combat_entity( unity::transform* transform, vector3 position, cvar_visual* visual, bool update, int lifestate, float health, float max_health )
-		: cached_entity( transform, position, visual, update ), lifestate( lifestate ), health( health ), max_health( max_health ) {}
 };
 
 struct cached_belt_item {
 	bool present;
 	ID3D11ShaderResourceView* srv;
-	int amount;
+	int32_t amount;
 	wchar_t name[ 128 ];
 };
 
@@ -47,27 +47,27 @@ struct cached_bone_data {
 struct cached_player {
 	bool init;
 	bool scientist;
-	uint64_t user_id;
+	uint64_t steam_id;
 	cached_bone_data bone_data;
 	char name[ 256 ];
-	int active_item_idx;
-	int active_item_id;
+	int32_t active_item_idx;
+	int32_t active_item_id;
 	cached_belt_item belt_items[ 6 ];
 	rust::player_eyes* eyes;
 	rust::player_inventory* inventory;
 	ID3D11ShaderResourceView* avatar_srv;
 	bool visible;
 	uint64_t team_id;
-	int player_flags;
-	int lifestate;
+	int32_t player_flags;
+	int32_t lifestate;
 };
 
 struct cached_dropped_item {
 	bool init;
 	unity::transform* transform;
 	vector3 position;
-	int amount;
-	int category;
+	int32_t amount;
+	int32_t category;
 	wchar_t name[ 128 ];
 };
 
@@ -76,6 +76,7 @@ using entity_vector = const std::vector<std::pair<K, V>>&;
 
 struct entity_collection {
 	entity_vector<rust::base_entity*, cached_entity> entities;
+	entity_vector<rust::base_entity*, cached_named_entity> named_entities;
 	entity_vector<rust::base_combat_entity*, cached_combat_entity> combat_entities;
 	entity_vector<rust::world_item*, cached_dropped_item> dropped_items;
 	entity_vector<rust::base_player*, cached_player> players;

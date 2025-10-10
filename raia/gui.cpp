@@ -503,7 +503,7 @@ public:
 
     static inline vector2 slider_movement[] = {
         { 0.f, 0.f }, /* None */
-        { 0.f, 18.f }, /* Toggle -> Slider */
+        { 0.f, 16.f }, /* Toggle -> Slider */
         { 0.f, 29.f }, /* Slider -> Slider */
         { 0.f, 44.f } /* Combobox -> Slider */
     };
@@ -1063,6 +1063,9 @@ void gui::run() {
                         right.slider( S( "Maximum distance" ), S( "%um" ), &raid_visuals.maximum_distance, 0u, 5000u );
                     }
 
+                    visual_impl( right, player_corpse, S( "Player corpse" ) );
+                    visual_impl( right, backpack, S( "Backpack" ) );
+
                     right.end();
 
                     break;
@@ -1161,8 +1164,22 @@ void gui::run() {
                     visual_impl( left, shotgun_trap, S( "Shotgun trap" ) );
                     visual_impl( left, flame_turret, S( "Flame turret" ) );
                     visual_impl( left, land_mine, S( "Land mine" ) );
-                    visual_impl( left, bear_trap, S( "Bear trap" ) );
-                    visual_impl( left, sam_site, S( "SAM site" ) );
+     
+                    left.toggle( S( "Bear trap" ), &bear_trap.enabled );
+                    left.color_picker( &bear_trap.color );
+
+                    if ( bear_trap.enabled ) {
+                        left.toggle( S( "Ignore unarmed" ), &bear_trap_ignore_unarmed );
+                        left.slider( S( "Max distance" ), S( "%dm" ), &bear_trap.maximum_distance, 0u, 500u );
+                    }
+
+                    left.toggle( S( "SAM site" ), &sam_site.enabled );
+                    left.color_picker( &sam_site.color );
+
+                    if ( sam_site.enabled ) {
+                        left.toggle( S( "Ignore offline" ), &sam_site_ignore_offline );
+                        left.slider( S( "Max distance" ), S( "%dm" ), &sam_site.maximum_distance, 0u, 500u );
+                    }
 
                     left.end();
 
@@ -1182,6 +1199,7 @@ void gui::run() {
                     visual_impl( left, minecart, S( "Minecart" ) );
                     visual_impl( left, vehicle_parts, S( "Vehicle parts" ) );
                     visual_impl( left, tech_parts, S( "Tech parts" ) );
+                    visual_impl( left, supply_drop, S( "Supply drop" ), 5000u );
 
                     left.end();
 

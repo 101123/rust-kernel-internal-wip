@@ -56,13 +56,14 @@ struct cvar_visual {
 	cvar_ui maximum_distance;
 	cvar_ui color;
 	const char* display_name;
+	void( *draw_override )( const cvar_visual*, const vector2&, float, const void* );
 };
 
 #define WRAP_VISUAL( Name, Enabled, MaximumDistance, Color ) { \
     cvar( H( Name " Enabled" ), Enabled ), \
 	cvar_ui( H( Name " Maximum Distance" ), MaximumDistance ), \
     cvar_ui( H( Name " Color" ), Color ), \
-	Name } 
+	Name, nullptr } 
 
 enum trigger_type {
 	toggle,
@@ -126,9 +127,9 @@ struct cvar_player_visuals {
 	cvar_i( H( Name " Maximum Distance" ), 500 ) }
 
 inline cvar_player_visuals player_visuals = WRAP_PLAYER_CONFIGURATION( "Players", COL32( 255, 255, 255, 255 ) );
-inline cvar_visual cvar_wounded = WRAP_VISUAL( "Wounded", true, 500, COL32( 255, 0, 0, 255 ) );
-inline cvar_visual cvar_sleeper = WRAP_VISUAL( "Sleeper", false, 30, COL32( 255, 255, 255, 255 ) );
-inline cvar_visual cvar_corpse = WRAP_VISUAL( "Corpse", true, 100, COL32( 255, 255, 255, 255 ) );
+inline cvar_visual player_wounded = WRAP_VISUAL( "Wounded Player", true, 500, COL32( 255, 0, 0, 255 ) );
+inline cvar_visual player_sleeper = WRAP_VISUAL( "Sleeper", false, 30, COL32( 255, 255, 255, 255 ) );
+inline cvar_visual player_corpse = WRAP_VISUAL( "Corpse", true, 100, COL32( 255, 255, 255, 255 ) );
 inline cvar player_team_id = cvar( H( "Player Team ID" ), true );
 inline cvar_ui player_team_id_color = cvar_ui( H( "Player Team ID Color" ), COL32( 255, 255, 255, 255 ) );
 inline cvar player_avatar = cvar( H( "Player Avatar" ), true );
@@ -191,7 +192,7 @@ inline cvar_visual snake = WRAP_VISUAL( "Snake", false, 500, COL32( 90, 200, 200
 
 inline cvar_visual cvar_tool_cupboard = WRAP_VISUAL( "Tool Cupboard", false, 500, COL32( 255, 255, 255, 255 ) );
 inline cvar cvar_tool_cupboard_upkeep = cvar( H( "Tool Cupboard Upkeep" ), true );
-inline cvar_visual cvar_backpack = WRAP_VISUAL( "Backpack", false, 500, COL32( 255, 255, 255, 255 ) );
+inline cvar_visual backpack = WRAP_VISUAL( "Backpack", false, 500, COL32( 255, 255, 255, 255 ) );
 
 inline cvar_visual red_barrel = WRAP_VISUAL( "Red Barrel", false, 500, COL32( 26, 188, 156, 255 ) );
 inline cvar_visual blue_barrel = WRAP_VISUAL( "Blue Barrel", false, 500, COL32( 46, 204, 113, 255 ) );

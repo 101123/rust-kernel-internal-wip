@@ -38,5 +38,9 @@ namespace rust {
 	using networkable_id = uint64_t;
 }
 
+struct cached_entity;
+struct cached_combat_entity;
+struct cached_player;
+
 struct IUnknown;
 struct ID3D11ShaderResourceView;
