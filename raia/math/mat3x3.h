@@ -31,14 +31,4 @@ public:
 	float& operator[]( int index ) {
 		return data[ index ];
 	}
-
-	vector3 multiply( const vector3& v ) const {
-		vector3 res;
-		res.x = data[ 0 ] * v.x + data[ 3 ] * v.y + data[ 6 ] * v.z;
-		res.y = data[ 1 ] * v.x + data[ 4 ] * v.y + data[ 7 ] * v.z;
-		res.z = data[ 2 ] * v.x + data[ 5 ] * v.y + data[ 8 ] * v.z;
-		return res;
-	}
-
-	matrix3x3& set_axis_angle( const vector3& rotation_axis, float radians );
 };

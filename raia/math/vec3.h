@@ -102,7 +102,3 @@ public:
 	static const vector3 forward;
 	static const vector3 back;
 };
-
-//vector3 ortho_normal_vector_fast( const vector3& n );
-//vector3 slerp( const vector3& lhs, const vector3& rhs, float t );
-
