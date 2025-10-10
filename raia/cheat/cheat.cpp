@@ -65,11 +65,13 @@ class_lookup class_lookups[] = {
 	{ nullptr, nullptr, &rust::world::static_fields_, World_Static_TypeDefinitionIndex },
 	{ nullptr, nullptr, &rust::network::net::static_fields_, Network_Net_TypeDefinitionIndex },
 	{ nullptr, nullptr, &rust::buttons::static_fields_, Buttons_Static_TypeDefinitionIndex },
-	{ &rust::ui_belt::klass_, nullptr, nullptr, UIBelt_TypeDefinitionIndex }
+	{ &rust::ui_belt::klass_, nullptr, nullptr, UIBelt_TypeDefinitionIndex },
+	{ &unity::instanced_debug_draw::klass_, nullptr, nullptr, InstancedDebugDraw_TypeDefinitionIndex },
 };
 
 parent_class_lookup parent_class_lookups[] = {
 	{ &rust::ui_belt::klass_, nullptr, &rust::singleton_component<rust::ui_belt>::static_fields_, 1 },
+	{ &unity::instanced_debug_draw::klass_, nullptr, &rust::singleton_component<unity::instanced_debug_draw>::static_fields_, 1 },
 };
 
 bool populate_classes() {

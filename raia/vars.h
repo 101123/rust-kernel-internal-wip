@@ -394,6 +394,12 @@ DEFINE_CONTEXT( fov_modifier,
 	bool dirty;
 );
 
+DEFINE_CONTEXT( projectile_tracers,
+	cvar enabled = cvar( H( "Projectile Tracers" ), true );
+	cvar_f duration = cvar_f( H( "Projectile Tracer Duration" ), 2.f );
+	cvar_ui color = cvar_ui( H( "Projectile Tracer Color" ), COL32( 255, 255, 255, 255 ) );
+);
+
 inline cvar_bind zoom = WRAP_BIND( "Zoom", true, trigger_type::hold, 'X' );
 inline cvar_f zoom_fov = cvar_f( H( "Zoom FOV" ), 40.f );
 
@@ -435,5 +441,8 @@ struct raid {
 
 inline raid raids[ 256 ];
 
-inline vector3 belt_position;
-inline vector3 belt_lossy_scale;
+DEFINE_CONTEXT( belt_icons,
+	ID3D11ShaderResourceView* background;
+	vector3 lossy_scale;
+	vector3 positions[ 6 ];
+);

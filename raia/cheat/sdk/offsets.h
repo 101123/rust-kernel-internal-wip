@@ -360,6 +360,14 @@ namespace Offsets {
 		constexpr const static size_t RaycastNonAlloc = 0xb16da40;
 	}
 
+#define Image_TypeDefinitionIndex 20925
+
+	namespace Image {
+
+		// Offsets
+		constexpr const static size_t m_Sprite = 0xd0;
+	}
+
 #define BaseNetworkable_TypeDefinitionIndex 4175
 
 	namespace BaseNetworkable {
@@ -1597,6 +1605,9 @@ namespace Offsets {
 
 	namespace ItemIcon {
 
+		// Offsets
+		constexpr const static size_t backgroundImage = 0xe8;
+
 		// Functions
 		constexpr const static size_t TryToMove = 0x4c35ad0;
 		constexpr const static size_t TryToMove_vtableoff = 0x448;
@@ -2374,13 +2385,12 @@ namespace Offsets {
 		constexpr const static size_t Verify = 0x158af60;
 	}
 
-#define DDraw_TypeDefinitionIndex 1355
+#define InstancedDebugDraw_TypeDefinitionIndex 1325
 
-	namespace DDraw {
+	namespace InstancedDebugDraw {
 
 		// Functions
-		constexpr const static size_t Sphere = 0x54aa020;
-		constexpr const static size_t Line = 0x54a1c00;
+		constexpr const static size_t AddInstance = 0x548cb90;
 	}
 
 	// obf name: ::%d6c65cfb500f59d82de544261a99dad4da7084e0

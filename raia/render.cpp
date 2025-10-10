@@ -196,6 +196,12 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		if ( !visuals.enabled )
 			continue;
 
+		if ( cached_player.lifestate != rust::lifestate::alive )
+			continue;
+
+		if ( cached_player.player_flags & rust::base_player::flag::sleeping )
+			continue;
+
 		const cached_bone_data& bone_data = cached_player.bone_data;
 
 		float distance = vector3::distance( camera.position, bone_data.positions[ 17 ] );
@@ -239,6 +245,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 				const vector2& a_pos = a_w2s.screen;
 				const vector2& b_pos = b_w2s.screen;
 
+				renderer::draw_line( a_pos.x, a_pos.y, b_pos.x, b_pos.y, 1.1f, COL32( 0, 0, 0, 128 ) );
 				renderer::draw_line( a_pos.x, a_pos.y, b_pos.x, b_pos.y, 1.f, visuals.skeleton_color );
 			}
 		}
@@ -253,7 +260,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 			float cursor = bounds.left + half - ( total_width / 2.f );
 
 			if ( draw_avatar ) {
-				renderer::draw_unity_image( cached_player.avatar_srv, cursor, bounds.top - 14.f, avatar_width, avatar_width, 2.f );
+				renderer::draw_unity_image( cursor, bounds.top - 14.f, avatar_width, avatar_width, COL32_WHITE, 2.f, cached_player.avatar_srv );
 				cursor += avatar_width + spacing;
 			}
 
@@ -271,24 +278,36 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		float offset = 0.f; 
 
 		if ( visuals.held_item && cached_player.active_item_idx != -1 ) {
-			if ( visuals.held_item_icon ) {
-				visual_item_info* visual_item = get_visual_item( cached_player.active_item_id );
-
-				if ( visual_item ) {
-					char icon[] = { visual_item->codepoint, '\0' };
-
-					renderer::draw_text( bounds.left + half, bounds.bottom + 10.f, fonts::icons, text_flags::centered | text_flags::drop_shadow, visuals.held_item_color, icon );
-				}
-			}
-
-			if ( visuals.held_item_text ) {
-				renderer::draw_text( bounds.left + half, bounds.bottom + offset + 1.f, fonts::small_fonts, text_flags::centered, visuals.held_item_color, cached_player.belt_items[ cached_player.active_item_idx ].name );
-				offset += 8.f + 1.f;
-			}
+			renderer::draw_text( bounds.left + half, bounds.bottom + offset + 1.f, fonts::small_fonts, text_flags::centered, visuals.held_item_color, cached_player.belt_items[ cached_player.active_item_idx ].name );
+			offset += 8.f + 1.f;
 		}
 
 		if ( visuals.distance ) {
 			renderer::draw_text( bounds.left + half, bounds.bottom + 1.f + offset, fonts::small_fonts, text_flags::centered, visuals.distance_color, util::format_string( S( "%dm" ), ( int )distance ) );
+		}
+
+		if ( aimbot.player_target && player == aimbot.player_target->first ) {
+			float icon_width = 60.f * belt_icons.lossy_scale.x;
+			float icon_height = icon_width;
+			float padding = 4.f * belt_icons.lossy_scale.x;
+
+			for ( int32_t i = 0; i < 6; i++ ) {
+				const cached_belt_item& belt_item = cached_player.belt_items[ i ];
+
+				float x = belt_icons.positions[ i ].x - ( icon_width / 2.f );
+				float y = ( float )screen_height - ( belt_icons.positions[ i ].y + ( icon_height / 2.f ) ) - icon_height - padding;
+
+				if ( is_valid_ptr( belt_icons.background ) ) {
+					renderer::draw_unity_image( x, y, icon_width, icon_height, i == cached_player.active_item_idx ? player_visuals.bounding_box_color : player_visuals.skeleton_color, 0.f, belt_icons.background );
+				}
+
+				float icon_scale = spread_modifier.scale;
+				float pad = icon_width * ( ( 1.f - icon_scale ) / 2.f );
+
+				if ( belt_item.present ) {
+					renderer::draw_unity_image( x + pad, y + pad, icon_width * icon_scale, icon_height * icon_scale, COL32_WHITE, 0.f, belt_item.srv );
+				}
+			}
 		}
 	}
 }

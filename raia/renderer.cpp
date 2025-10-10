@@ -413,13 +413,13 @@ void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint3
 	draw_text( x, y, font, flags, color, buffer );
 }
 
-void renderer::draw_image( ID3D11ShaderResourceView* srv, float x, float y, float width, float height ) {
-	draw_list->AddImage( ImTextureRef( ( ImTextureID )srv ), ImVec2( x, y ), ImVec2( x + width, y + height ) );
+void renderer::draw_image( float x, float y, float width, float height, uint32_t color, ID3D11ShaderResourceView* srv ) {
+	draw_list->AddImage( ImTextureRef( ( ImTextureID )srv ), ImVec2( x, y ), ImVec2( x + width, y + height ), ImVec2( 0.f, 0.f ), ImVec2( 1.f, 1.f ), color );
 }
 
-void renderer::draw_unity_image( ID3D11ShaderResourceView* srv, float x, float y, float width, float height, float rounding ) {
+void renderer::draw_unity_image( float x, float y, float width, float height, uint32_t color, float rounding, ID3D11ShaderResourceView* srv ) {
 	draw_list->AddCallback( ( ImDrawCallback )ImGui_ImplDX11_SetUnity, nullptr );
-	draw_list->AddImageRounded( ImTextureRef( ( ImTextureID )srv ), ImVec2( x, y ), ImVec2( x + width, y + height ), ImVec2( 0.f, 1.f ), ImVec2( 1.f, 0.f ), COL32_WHITE, rounding );
+	draw_list->AddImageRounded( ImTextureRef( ( ImTextureID )srv ), ImVec2( x, y ), ImVec2( x + width, y + height ), ImVec2( 0.f, 1.f ), ImVec2( 1.f, 0.f ), color, rounding );
 	draw_list->AddCallback( ( ImDrawCallback )ImGui_ImplDX11_RestoreUnity, nullptr );
 }
 

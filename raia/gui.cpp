@@ -994,6 +994,13 @@ void gui::run() {
                         right.slider( S( "Chance" ), S( "%d%" ), &hit_patrol_helicopter_weakspots.chance, 0u, 100u );
                     }
 
+                    right.toggle( S( "Projectile tracers" ), &projectile_tracers.enabled );
+                    right.color_picker( &projectile_tracers.color );
+
+                    if ( projectile_tracers.enabled ) {
+                        right.slider( S( "Tracer duration" ), S( "%.2fs" ), &projectile_tracers.duration, 0.5f, 5.f );
+                    }
+
                     right.end();
 
                     break;

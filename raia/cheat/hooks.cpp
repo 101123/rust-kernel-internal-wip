@@ -114,6 +114,51 @@ bool cache_local_player( rust::base_player* base_player ) {
 	return true;
 }
 
+void cache_belt_icons() {
+	rust::ui_belt* ui_belt = rust::singleton_component<rust::ui_belt>::static_fields_->instance;
+	if ( !is_valid_ptr( ui_belt ) )
+		return;
+
+	sys::list<rust::item_icon*>* item_icons_list = ui_belt->item_icons;
+	if ( !is_valid_ptr( item_icons_list ) || item_icons_list->size != 6 )
+		return;
+
+	sys::array<rust::item_icon*>* item_icons = item_icons_list->items;
+	if ( !is_valid_ptr( item_icons ) )
+		return;
+
+	for ( int32_t i = 0; i < item_icons_list->size; i++ ) {
+		rust::item_icon* item_icon = item_icons->buffer[ i ];
+		if ( !is_valid_ptr( item_icon ) )
+			continue;
+
+		unity::transform* transform = item_icon->get_transform();
+		if ( !is_valid_ptr( transform ) )
+			continue;
+
+		if ( i == 0 ) {
+			unity::image* background_image = item_icon->background_image;
+
+			if ( is_valid_ptr( background_image ) ) {
+				unity::sprite* sprite = background_image->sprite;
+
+				if ( is_valid_ptr( sprite ) ) {
+					unity::texture2d* texture = sprite->get_texture();
+
+					if ( is_valid_ptr( texture ) ) {
+						belt_icons.background = texture->get_srv();
+					}
+				}
+			}
+
+			// All lossy scales are the same
+			belt_icons.lossy_scale = transform->get_lossy_scale();
+		}
+
+		belt_icons.positions[ i ] = transform->get_position();
+	}
+}
+
 void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) {
 	rust::item_definition* projectile_item_info = nullptr;
 	float velocity_scale = 1.f, max_velocity_scale = 1.f;
@@ -544,29 +589,8 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 	if ( !cache_local_player( base_player ) )
 		return;
 
-	rust::ui_belt* ui_belt = rust::singleton_component<rust::ui_belt>::static_fields_->instance;
-
-	if ( is_valid_ptr( ui_belt ) ) {
-		sys::list<unity::component*>* item_icons_list = ui_belt->item_icons;
-
-		if ( is_valid_ptr( item_icons_list ) && item_icons_list->size == 6 ) {
-			sys::array<unity::component*>* item_icons = item_icons_list->items;
-
-			if ( is_valid_ptr( item_icons ) ) {
-				unity::component* icon = item_icons->buffer[ 0 ];
-
-				if ( is_valid_ptr( icon ) ) {
-					unity::transform* transform = icon->get_transform();
-
-					if ( is_valid_ptr( transform ) ) {
-						belt_position = transform->get_position();
-						belt_lossy_scale = transform->get_lossy_scale();
-					}
-				}
-			}
-		}
-	}
-
+	cache_belt_icons();
+	
 	rust::base_movement* movement = base_player->movement;
 
 	if ( is_valid_ptr( movement ) ) {
@@ -723,7 +747,13 @@ void projectile_update_hook( rust::projectile* projectile ) {
 	if ( projectile->owner != local_player.entity )
 		return;
 
-	unity::ddraw::line( projectile->previous_position, projectile->current_position, unity::color( 1.f, 1.f, 1.f, 0.5f ), 2.f, false, false );
+	if ( projectile_tracers.enabled ) {
+		unity::instanced_debug_draw* ddraw = rust::singleton_component<unity::instanced_debug_draw>::static_fields_->instance;
+
+		if ( is_valid_ptr( ddraw ) ) {
+			ddraw->line( projectile->previous_position, projectile->current_position, unity::color( projectile_tracers.color ), projectile_tracers.duration, false, false );
+		}
+	}
 }
 
 void hook_handlers::network_client_create_networkable( _CONTEXT* context, void* user_data ) {

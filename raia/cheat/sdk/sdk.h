@@ -1008,20 +1008,68 @@ namespace unity {
         }
     };
 
-    class ddraw {
+    // UnityEngine.UI.Image
+    class image {
     public:
-        static void line( vector3 pos_a, vector3 pos_b, unity::color color, float duration = 0.5f, bool distance_fade = true, bool ztest = true ) {
-            void ( *line )( vector3*, vector3*, unity::color*, float, bool, bool ) =
-                ( decltype( line ) )( game_assembly + Offsets::DDraw::Line );
+        FIELD( unity::sprite*, sprite, Offsets::Image::m_Sprite );
+    };
+
+    class instanced_debug_draw {
+    public:
+        enum transform_type {
+            none,
+            world_space,
+            screen_aligned,
+            pixel_space
+        };
+
+        struct instance_creation_data {
+            matrix4x4 matrix;
+            color color;
+            vector3 pos_offset;
+            float duration;
+            float line_width;
+            int sub_mesh_index;
+            transform_type transform_type;
+            bool use_distance_fade;
+            bool use_depth_test;
+        };
+
+        void add_instance( const instance_creation_data& data ) {
+            void ( *add_instance )( instanced_debug_draw*, instance_creation_data* ) =
+                ( decltype( add_instance ) )( game_assembly + Offsets::InstancedDebugDraw::AddInstance );
 
             um::caller& caller = um::get_caller_for_thread();
 
-            vector3* _pos_a = caller.push<vector3>( pos_a );
-            vector3* _pos_b = caller.push<vector3>( pos_b );
-            unity::color* _color = caller.push<unity::color>( color );
+            instance_creation_data* _data = caller.push<instance_creation_data>( data );
 
-            return caller( line, _pos_a, _pos_b, _color, duration, distance_fade, ztest );
+            return caller( add_instance, this, _data );
         }
+
+        void line( vector3 start, vector3 end, color color, float duration, bool distance_fade, bool ztest ) {
+            vector3 delta = end - start;
+            quaternion q = quaternion::identity;
+
+            if ( vector3::magnitude( delta ) > 0.01f ) {
+                look_rotation_to_quaternion( delta, vector3::up, q );
+            }
+
+            instance_creation_data instance = {
+                .matrix = matrix4x4::trs( start, q, vector3( 1.f, 1.f, vector3::magnitude(delta) ) ),
+                .color = color,
+                .pos_offset = vector3(),
+                .duration = duration,
+                .line_width = 1.f,
+                .sub_mesh_index = 2,
+                .transform_type = transform_type::world_space,
+                .use_distance_fade = distance_fade,
+                .use_depth_test = ztest
+            };
+
+            add_instance( instance );
+        }
+
+        static inline il2cpp_class* klass_;
     };
 }
 
@@ -2034,8 +2082,10 @@ namespace rust {
         }
     };
 
-    class item_icon {
+    class item_icon : public unity::behaviour {
     public:
+        FIELD( unity::image*, background_image, Offsets::ItemIcon::backgroundImage );
+
         void run_timed_action() {
             void ( *run_timed_action )( item_icon* ) = 
                 ( decltype( run_timed_action ) )( game_assembly + Offsets::ItemIcon::RunTimedAction );
@@ -2315,7 +2365,7 @@ namespace rust {
 
     class ui_belt {
     public:
-        FIELD( sys::list<unity::component*>*, item_icons, Offsets::UIBelt::ItemIcons );
+        FIELD( sys::list<item_icon*>*, item_icons, Offsets::UIBelt::ItemIcons );
 
         static inline il2cpp_class* klass_;
     };
