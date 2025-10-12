@@ -898,19 +898,25 @@ bool update_player_inventory( rust::base_player* player, cached_player& cached_p
     if ( !is_valid_ptr( items ) )
         return false;
     
-    int active_item_idx = -1, active_item_id = -1;
+    int32_t active_item_idx = -1, active_item_id = -1;
     uint64_t active_item_uid = player->cl_active_item;
 
-    for ( size_t i = 0; i < 6; i++ ) {
-        if ( i < items_list->size ) {
-            // None of these pointers should ever be invalid, so fail if so
-            rust::item* item = items->buffer[ i ];
-            if ( !is_valid_ptr( item ) )
-                return false;
+    for ( int32_t i = 0; i < 6; i++ ) {
+        cached_player.belt_items[ i ].present = false;
+    }
 
-            rust::item_definition* info = item->info;
-            if ( !is_valid_ptr( info ) )
-                return false;
+    for ( int32_t j = 0; j < items_list->size; j++ ) {
+        // None of these pointers should ever be invalid, so fail if so
+        rust::item* item = items->buffer[ j ];
+        if ( !is_valid_ptr( item ) )
+            return false;
+
+        if ( item->position < 0 || item->position > 5 )
+            return false;
+
+        rust::item_definition* info = item->info;
+        if ( !is_valid_ptr( info ) )
+            return false;
 
             rust::phrase* display_name = info->display_name;
             if ( !is_valid_ptr( display_name ) )
@@ -930,26 +936,21 @@ bool update_player_inventory( rust::base_player* player, cached_player& cached_p
 
             sys::string* legacy_english = display_name->legacy_english;
             if ( !is_valid_ptr( legacy_english ) )
-                return false;
+            return false;
 
-            if ( item->uid == active_item_uid ) {
-                active_item_idx = i;
-                active_item_id = info->item_id;
-            }
-
-            cached_belt_item& belt_item = cached_player.belt_items[ i ];
-
-            belt_item.present = true;
-            belt_item.srv = icon_srv;
-            belt_item.amount = item->amount;
-            wcscpy_s( belt_item.name, _countof( belt_item.name ), legacy_english->buffer );
+        if ( item->uid == active_item_uid ) {
+            active_item_idx = item->position;
+            active_item_id = info->item_id;
         }
 
-        else {
-            cached_belt_item& belt_item = cached_player.belt_items[ i ];
+        cached_belt_item& belt_item = cached_player.belt_items[ item->position ];
 
-            belt_item.present = false;
-        }
+        belt_item.present = true;
+        belt_item.srv = icon_srv;
+        belt_item.condition = item->condition;
+        belt_item.max_condition = item->max_condition;
+        belt_item.amount = item->amount;
+        wcscpy_s( belt_item.name, _countof( belt_item.name ), legacy_english->buffer );
     }
 
     cached_player.active_item_idx = active_item_idx;

@@ -154,9 +154,6 @@ void update_chams() {
 			if ( !is_valid_ptr( native_renderer ) )
 				continue;
 
-			if ( !native_renderer->is_visible_in_scene() )
-				continue;
-
 			auto materials = native_renderer->materials;
 			if ( !is_valid_ptr( materials.buffer ) )
 				continue;

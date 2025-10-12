@@ -128,13 +128,13 @@ int bone_connections[][ 2 ] = {
 	{ 13, 15 }, { 15, 17 }
 };
 
-struct visual_item_info {
-	int item_id;
-	const char* shorter_name;
-	char codepoint;
+struct name_replacement {
+	int32_t item_id;
+	const char* replacement;
+	char _;
 };
 
-visual_item_info visual_items[] = {
+name_replacement name_replacements[] = {
 	{ 1545779598, "AK", 'a' }, // rifle.ak
 	{ -1335497659, "AK", 'a' }, // rifle.ak.ice
 	{ 472505338, "AK", 'a' }, // rifle.ak.med
@@ -160,7 +160,7 @@ visual_item_info visual_items[] = {
 	{ -852563019, "M92", 's' }, // pistol.m92
 	{ -2069578888, "M2", 't' }, // lmg.m249
 	{ 935606207, nullptr, 'u' }, // minigun
-	{ 1318558775, nullptr, 'v' }, // smg.mp5
+	{ 1318558775, "MP5", 'v' }, // smg.mp5
 	{ 1953903201, nullptr, 'w' }, // pistol.nailgun
 	{ -1367281941, "Pipey", 'x' }, // shotgun.waterpipe
 	{ 1373971859, "Python", 'y' }, // pistol.python
@@ -175,8 +175,8 @@ visual_item_info visual_items[] = {
 	{ 2083256995, nullptr, 'H' }, // t1_smg
 };
 
-visual_item_info* get_visual_item(int item_id) {
-	for ( auto& visual_item : visual_items ) {
+name_replacement* get_name_replacement( int32_t item_id ) {
+	for ( auto& visual_item : name_replacements ) {
 		if ( visual_item.item_id == item_id ) {
 			return &visual_item;
 		}
@@ -245,7 +245,6 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 				const vector2& a_pos = a_w2s.screen;
 				const vector2& b_pos = b_w2s.screen;
 
-				renderer::draw_line( a_pos.x, a_pos.y, b_pos.x, b_pos.y, 1.1f, COL32( 0, 0, 0, 128 ) );
 				renderer::draw_line( a_pos.x, a_pos.y, b_pos.x, b_pos.y, 1.f, visuals.skeleton_color );
 			}
 		}
@@ -278,7 +277,16 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		float offset = 0.f; 
 
 		if ( visuals.held_item && cached_player.active_item_idx != -1 ) {
-			renderer::draw_text( bounds.left + half, bounds.bottom + offset + 1.f, fonts::small_fonts, text_flags::centered, visuals.held_item_color, cached_player.belt_items[ cached_player.active_item_idx ].name );
+			name_replacement* shorter_name = get_name_replacement( cached_player.active_item_id );
+
+			if ( shorter_name && shorter_name->replacement ) {
+				renderer::draw_text( bounds.left + half, bounds.bottom + offset + 1.f, fonts::small_fonts, text_flags::centered, visuals.held_item_color, shorter_name->replacement );
+			}
+
+			else {
+				renderer::draw_text( bounds.left + half, bounds.bottom + offset + 1.f, fonts::small_fonts, text_flags::centered, visuals.held_item_color, cached_player.belt_items[ cached_player.active_item_idx ].name );
+			}
+
 			offset += 8.f + 1.f;
 		}
 
@@ -286,29 +294,37 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 			renderer::draw_text( bounds.left + half, bounds.bottom + 1.f + offset, fonts::small_fonts, text_flags::centered, visuals.distance_color, util::format_string( S( "%dm" ), ( int )distance ) );
 		}
 
-		if ( aimbot.player_target && player == aimbot.player_target->first ) {
+		if ( aimbot.player_target && player == aimbot.player_target->first && is_valid_ptr( belt_icons.background ) ) {
 			float icon_width = 60.f * belt_icons.lossy_scale.x;
 			float icon_height = icon_width;
 			float padding = 4.f * belt_icons.lossy_scale.x;
 
 			float y = ( float )screen_height - ( belt_icons.positions[ 0 ].y + ( icon_height / 2.f ) ) - icon_height - padding;
 
-			renderer::draw_text( belt_icons.positions[ 3 ].x - ( icon_width / 2.f ), y - 8.f - padding, fonts::small_fonts, text_flags::centered, COL32( 255, 255, 255, 200 ), util::format_string( S( "%s's Belt" ), cached_player.name ) );
+			renderer::draw_text( belt_icons.positions[ 3 ].x - ( icon_width / 2.f ), y - 8.f - padding, fonts::small_fonts, text_flags::centered, COL32( 255, 255, 255, 255 ), util::format_string( S( "%s's Belt" ), cached_player.name ) );
 
 			for ( int32_t i = 0; i < 6; i++ ) {
 				const cached_belt_item& belt_item = cached_player.belt_items[ i ];
 
 				float x = belt_icons.positions[ i ].x - ( icon_width / 2.f );
+					
+				renderer::draw_unity_image( x, y, icon_width, icon_height, i == cached_player.active_item_idx ? COL32( 32, 92, 200, 200 ) : COL32( 255, 255, 255, 30 ), 0.f, belt_icons.background );
 
-				if ( is_valid_ptr( belt_icons.background ) ) {
-					renderer::draw_unity_image( x, y, icon_width, icon_height, i == cached_player.active_item_idx ? player_visuals.bounding_box_color : player_visuals.skeleton_color, 0.f, belt_icons.background );
-				}
-
-				float icon_scale = spread_modifier.scale;
+				float icon_scale = 0.85f;
 				float pad = icon_width * ( ( 1.f - icon_scale ) / 2.f );
 
 				if ( belt_item.present ) {
 					renderer::draw_unity_image( x + pad, y + pad, icon_width * icon_scale, icon_height * icon_scale, COL32_WHITE, 0.f, belt_item.srv );
+
+					if ( belt_item.max_condition > 0.f ) {
+						float height = ( belt_item.condition / belt_item.max_condition ) * icon_height;
+
+						renderer::draw_unity_image( x, y + ( icon_height - height ), padding, height, COL32( 100, 130, 60, 255 ), 0.f, belt_icons.background );
+					}
+
+					if ( belt_item.amount > 1 ) {
+						renderer::draw_text( x + icon_width - 10.f, y + icon_height - 10.f, fonts::small_fonts, text_flags::none, COL32_WHITE, util::format_string( S( "%dx" ), belt_item.amount ) );
+					}
 				}
 			}
 		}
