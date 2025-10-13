@@ -90,7 +90,7 @@ void features::weapon_modifiers( rust::base_projectile* weapon ) {
 	recoil->recoil_pitch_max = weapon_data->pitch_max * pitch_scale;
 
 	// Bow spread is derived from BaseProjectile.aimCone, which is static so we can do the same thing
-	if ( weapon->is<rust::bow_weapon>() ) {
+	if ( weapon->is<rust::bow_weapon>() || weapon->is<rust::compound_bow_weapon>() ) {
 		weapon->aim_cone = weapon_data->aim_cone *
 			( spread_modifier.enabled ? spread_modifier.scale.value : 1.f );
 	}
