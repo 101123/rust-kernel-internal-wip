@@ -1983,11 +1983,12 @@ namespace rust {
                         values[ i ] = ( ( ( ( ( values[ i ] << 21 ) | ( values[ i ] >> 11 ) ) ^ 0xAE41CFF8 ) << 12 ) |
                             ( ( ( ( values[ i ] << 21 ) | ( values[ i ] >> 11 ) ) ^ 0xAE41CFF8 ) >> 20 ) ) + 726560829;
                     }
-                );
+                    );
             };
 
-        static inline static_fields* static_fields_;
-    };
+            static inline static_fields* static_fields_;
+        };
+    }
 
     class outline_manager {
     public:
