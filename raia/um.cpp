@@ -143,8 +143,15 @@ namespace um {
 	void print_last_callers() {
 		for ( auto& [ _, caller ] : callers.get_objects() ) {
 			const std::source_location& location = caller.last_caller;
+			const auto& args = caller.last_caller_args;
 
-			LOG( "%s (%d): %s\n", location.file_name(), location.line(), location.function_name() );
+			LOG2( "%s (%d): %s (%p, %.2f) (%p, %.2f), (%p, %.2f), (%p, %.2f)\n",
+				location.file_name(), location.line(), location.function_name(),
+				args.integers[ 0 ], args.floats[ 0 ],
+				args.integers[ 1 ], args.floats[ 1 ],
+				args.integers[ 2 ], args.floats[ 2 ],
+				args.integers[ 3 ], args.floats[ 3 ]
+			);
 		}
 	}
 #endif

@@ -25,6 +25,11 @@ namespace um {
 	public:
 #ifdef DEBUG
 		std::source_location last_caller;
+
+		struct {
+			uint64_t integers[ 8 ];
+			float floats[ 4 ];
+		} last_caller_args;
 #endif
 
 		bool initialize();
@@ -94,10 +99,15 @@ namespace um {
 
 			using RetType = std::invoke_result_t<Func, Args...>;
 
+#ifndef DEBUG
 			// Not initialized on purpose to worsen decompilation.
 			//
 			uint64_t integers[ 8 ];
 			float floats[ 4 ];
+#else
+			uint64_t integers[ 8 ] = {};
+			float floats[ 4 ] = {};
+#endif
 
 			// Store arguments in correct indices in accordance with ABI.
 			//
@@ -116,6 +126,10 @@ namespace um {
 
 			( store_argument( std::forward<Args>( args ) ), ... );
 			
+#ifdef DEBUG
+			memcpy( last_caller_args.integers, integers, sizeof( integers ) );
+			memcpy( last_caller_args.floats, floats, sizeof( floats ) );
+#endif
 			// Call correct function caller based on the return type.
 			//
 			if constexpr ( std::is_same_v<RetType, float> ) {
