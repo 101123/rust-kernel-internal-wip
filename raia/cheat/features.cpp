@@ -5,7 +5,7 @@
 
 void features::graphics() {
 	if ( fov_modifier.enabled || fov_modifier.dirty ) {
-		rust::graphics::static_fields_->fov = fov_modifier.enabled ? ( float )fov_modifier.fov : 90.f;
+		rust::convar::graphics::static_fields_->fov = fov_modifier.enabled ? ( float )fov_modifier.fov : 90.f;
 		fov_modifier.dirty = fov_modifier.enabled;
 	}
 }

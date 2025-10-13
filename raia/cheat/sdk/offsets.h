@@ -2754,6 +2754,15 @@ namespace Offsets {
 		constexpr const static size_t Get = 0x2db5070;
 	}
 
+#define ConVar_Debugging_TypeDefinitionIndex 24661
+
+	namespace ConVar_Debugging {
+
+		// Functions
+		constexpr const static size_t debugcamera = 0x17fcdf0;
+		constexpr const static size_t noclip = 0x17e2950;
+	}
+
 	// obf name: ::%4f1b766c02fc7e5db55b06c2b7e6f521c64f288a
 #define ProtoBuf_ProjectileShoot_ClassName "%4f1b766c02fc7e5db55b06c2b7e6f521c64f288a"
 #define ProtoBuf_ProjectileShoot_ClassNameShort "%4f1b766c02fc7e5db55b06c2b7e6f521c64f288a"

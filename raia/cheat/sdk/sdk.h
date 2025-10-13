@@ -1952,17 +1952,39 @@ namespace rust {
         static inline il2cpp_class* klass_;
     };
 
-    class graphics {
-    public:
-        class static_fields {
+    namespace convar {
+        class debugging {
         public:
-            ENCRYPTED_VALUE( float, fov, Offsets::ConVar_Graphics_Static::_fov, {},
-                {
-                    values[ i ] = ( ( ( ( ( values[ i ] << 21 ) | ( values[ i ] >> 11 ) ) ^ 0xAE41CFF8 ) << 12 ) | 
-                        ( ( ( ( values[ i ] << 21 ) | ( values[ i ] >> 11 ) ) ^ 0xAE41CFF8 ) >> 20 ) ) + 726560829;
-                }
-            );
+            static void debugcamera() {
+                void ( *debugcamera )( void* ) =
+                    ( decltype( debugcamera ) )( game_assembly + Offsets::ConVar_Debugging::debugcamera );
+
+                um::caller& caller = um::get_caller_for_thread();
+
+                return caller( debugcamera, nullptr );
+            }
+
+            static void noclip() {
+                void ( *noclip )( void* ) =
+                    ( decltype( noclip ) )( game_assembly + Offsets::ConVar_Debugging::noclip );
+
+                um::caller& caller = um::get_caller_for_thread();
+
+                return caller( noclip, nullptr );
+            }
         };
+
+        class graphics {
+        public:
+            class static_fields {
+            public:
+                ENCRYPTED_VALUE( float, fov, Offsets::ConVar_Graphics_Static::_fov, {},
+                    {
+                        values[ i ] = ( ( ( ( ( values[ i ] << 21 ) | ( values[ i ] >> 11 ) ) ^ 0xAE41CFF8 ) << 12 ) |
+                            ( ( ( ( values[ i ] << 21 ) | ( values[ i ] >> 11 ) ) ^ 0xAE41CFF8 ) >> 20 ) ) + 726560829;
+                    }
+                );
+            };
 
         static inline static_fields* static_fields_;
     };

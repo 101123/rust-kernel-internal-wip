@@ -17,7 +17,7 @@ struct parent_class_lookup {
 };
 
 class_lookup class_lookups[] = {
-	{ nullptr, nullptr, &rust::graphics::static_fields_, ConVar_Graphics_Static_TypeDefinitionIndex },
+	{ nullptr, nullptr, &rust::convar::graphics::static_fields_, ConVar_Graphics_Static_TypeDefinitionIndex },
 	{ &rust::main_camera::klass_, nullptr, &rust::main_camera::static_fields_, MainCamera_TypeDefinitionIndex },
 	{ &rust::base_networkable::klass_, nullptr, nullptr, BaseNetworkable_TypeDefinitionIndex },
 	{ &rust::base_player::klass_, nullptr, nullptr, BasePlayer_TypeDefinitionIndex },
