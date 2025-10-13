@@ -7,6 +7,7 @@
 #include "cheat/glow.h"
 #include "gui.h"
 #include "features.h"
+#include "aimbot.h"
 
 #include <cstddef>
 
@@ -486,6 +487,9 @@ void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot*
 		if ( !is_valid_ptr( client_projectile ) )
 			continue;
 
+		client_projectile->swim_scale = vector3();
+		client_projectile->swim_speed = vector3();
+
 		rust::projectile* source_projectile = client_projectile->source_projectile_prefab;
 
 		if ( is_valid_ptr( source_projectile ) ) {
@@ -506,15 +510,19 @@ void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot*
 			client_projectile->current_velocity = velocity;
 		}
 
-		if ( aimbot.player_target ) {
-			if ( aimbot.enabled && aimbot.type == aimbot_type::silent ) {
-				vector3 direction = ( aimbot.player_target->second.bone_data.positions[ 1 ] - server_projectile->start_position );
-				vector3 velocity = vector3::normalize( direction ) * held_weapon.velocity;
+		if ( aimbot.player_target && aimbot.enabled && aimbot.type == aimbot_type::silent && game_input.get_async_key_state( 'C' ) ) {
+			vector3 target_position = aimbot.player_target->second.bone_data.positions[ 0 ];
+			float travel_time = 0.f;
 
-				server_projectile->start_velocity = velocity;
-				client_projectile->initial_velocity = velocity;
-				client_projectile->current_velocity = velocity;
-			}
+			if ( !prediction( server_projectile->start_position, target_position, travel_time ) )
+				return;
+
+			vector3 direction = ( target_position - server_projectile->start_position );
+			vector3 velocity = vector3::normalize( direction ) * ( faster_projectiles ? held_weapon.max_velocity : held_weapon.velocity );
+
+			server_projectile->start_velocity = velocity;
+			client_projectile->initial_velocity = velocity;
+			client_projectile->current_velocity = velocity;
 		}
 	}
 }

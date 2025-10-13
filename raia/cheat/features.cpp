@@ -2,6 +2,7 @@
 #include "sdk/sdk.h"
 #include "vars.h"
 #include "entities.h"
+#include "aimbot.h"
 
 void features::graphics() {
 	if ( fov_modifier.enabled || fov_modifier.dirty ) {
@@ -149,8 +150,14 @@ void features::memory_aimbot( const std::pair<rust::base_player*, cached_player>
 	if ( !is_valid_ptr( input ) )
 		return;
 
+	vector3 target_position = target->second.bone_data.positions[ 0 ];
+	float travel_time = 0.f;
+
+	if ( !prediction( local_player.eyes_position, target_position, travel_time ) )
+		return;
+
 	vector3 angle;
-	if ( !calc_angle( local_player.eyes_position, target->second.bone_data.positions[ 1 ], angle ) )
+	if ( !calc_angle( local_player.eyes_position, target_position, angle ) )
 		return;
 
 	rust::base_entity* parent_entity = local_player.entity->parent_entity;

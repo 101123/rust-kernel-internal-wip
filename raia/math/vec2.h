@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.h"
+#include "vec3.h"
 
 class vector2 {
 public:
@@ -8,6 +9,7 @@ public:
 
 	vector2() : x( 0.f ), y( 0.f ) {};
 	vector2( float _x, float _y ) : x( _x ), y( _y ) {};
+	vector2( vector3 vector ) : x( vector.x ), y( vector.z ) {};
 
 	float* get_ptr() {
 		return &x;

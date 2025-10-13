@@ -181,6 +181,7 @@
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cheat\aimbot.cpp" />
     <ClCompile Include="cheat\cheat.cpp" />
     <ClCompile Include="cheat\entities.cpp" />
     <ClCompile Include="cheat\features.cpp" />
@@ -209,6 +210,7 @@
     <ClCompile Include="um.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cheat\aimbot.h" />
     <ClInclude Include="cheat\cheat.h" />
     <ClInclude Include="cheat\entities.h" />
     <ClInclude Include="cheat\features.h" />
