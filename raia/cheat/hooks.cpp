@@ -162,6 +162,7 @@ void cache_belt_icons() {
 void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) {
 	rust::item_definition* projectile_item_info = nullptr;
 	float velocity_scale = 1.f, max_velocity_scale = 1.f;
+	bool mod_hash_broken = false;
 
 	if ( auto base_projectile = held_entity->as<rust::base_projectile>() ) {
 		if ( base_projectile->cached_mod_hash != held_weapon.mods.hash ) {
@@ -220,6 +221,8 @@ void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) 
 					held_weapon.mods.sight_aim_cone_scale = sight_aim_cone_scale;
 					held_weapon.mods.hip_aim_cone_scale = hip_aim_cone_scale;
 					held_weapon.mods.hash = base_projectile->cached_mod_hash;
+
+					mod_hash_broken = true;
 				}
 			}
 		}
@@ -250,7 +253,7 @@ void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) 
 		projectile_item_info = info;
 	}
 
-	if ( !projectile_item_info || ( held_entity->prefab_id == held_weapon.prefab_id && projectile_item_info->item_id == held_weapon.item_id ) )
+	if ( !projectile_item_info || ( ( held_entity->prefab_id == held_weapon.prefab_id && projectile_item_info->item_id == held_weapon.item_id ) && !mod_hash_broken ) )
 		return;
 
 	unity::game_object* container = projectile_item_info->get_game_object();
