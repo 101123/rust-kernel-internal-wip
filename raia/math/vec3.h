@@ -86,6 +86,11 @@ public:
 	}
 
 	static vector3 normalize( const vector3& vec ) {
+		float length = magnitude( vec );
+		if ( length == 0.f ) {
+			return vector3();
+		}
+
 		return vec / magnitude( vec );
 	}
 
@@ -97,6 +102,26 @@ public:
 		return to * t + from * ( 1.f - t );
 	}
 
+	static vector3 move_towards( const vector3& from, const vector3& to, float distance ) {
+		vector3 delta = to - from;
+		float sqr_delta = sqr_magnitude( delta );
+		float sqr_distance = _pow2( distance );
+
+		if ( sqr_delta > sqr_distance ) {
+			float delta_magnitude = sqrtf( sqr_delta );
+
+			if ( delta_magnitude > vector3::epsilon ) {
+				return from + delta / delta_magnitude * distance;
+			}
+
+			else {
+				return from;
+			}
+		}
+
+		return to;
+	}
+
 	static const float epsilon;
 
 	static const vector3 up;
@@ -105,4 +130,5 @@ public:
 	static const vector3 right;
 	static const vector3 forward;
 	static const vector3 back;
+	static const vector3 zero;
 };

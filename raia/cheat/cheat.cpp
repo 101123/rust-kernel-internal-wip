@@ -74,6 +74,7 @@ class_lookup class_lookups[] = {
 parent_class_lookup parent_class_lookups[] = {
 	{ &rust::ui_belt::klass_, nullptr, &rust::singleton_component<rust::ui_belt>::static_fields_, 1 },
 	{ &unity::instanced_debug_draw::klass_, nullptr, &rust::singleton_component<unity::instanced_debug_draw>::static_fields_, 1 },
+	{ &rust::projectile::klass_, nullptr, &rust::list_component<rust::projectile>::static_fields_, 1 }
 };
 
 bool populate_classes() {
@@ -366,18 +367,18 @@ bool resolve_hooks() {
 		}
 	};
 
-	method_info* projectile_update_method = il2cpp_class_get_method_from_name( rust::projectile::klass_, S( "Update" ), 0 );
-	if ( !projectile_update_method )
+	method_info* client_update_method = il2cpp_class_get_method_from_name( rust::client::klass_, S( "Update" ), 0 );
+	if ( !client_update_method )
 		return false;
 
-	hook projectile_update_hook = {
+	hook client_update_hook = {
 		.init = false,
 		.type = hook_type::ptr_swap,
-		.value = ( uintptr_t* )&projectile_update_method->method_ptr,
+		.value = ( uintptr_t* )&client_update_method->method_ptr,
 		.original = 0ull,
 		.corrupt = 0ull,
 		.ptr_swap = {
-			.pre_handler = hook_handlers::pre_projectile_update,
+			.pre_handler = hook_handlers::pre_client_update,
 			.post_handler = nullptr
 		}
 	};
@@ -441,12 +442,12 @@ bool resolve_hooks() {
 	hooks.add( outline_manager_on_render_image_hook );
 	hooks.add( player_walk_movement_client_input_hook );
 	hooks.add( protobuf_projectile_shoot_write_to_stream_hook );
-	hooks.add( protobuf_player_projectile_attack_write_to_stream_hook );
+	// hooks.add( protobuf_player_projectile_attack_write_to_stream_hook );
 	hooks.add( item_icon_try_to_move_hook );
 	hooks.add( protobuf_player_tick_write_to_stream_delta_hook );
 	hooks.add( client_on_client_disconnected_hook );
 	hooks.add( base_player_client_input_hook );
-	hooks.add( projectile_update_hook );
+	hooks.add( client_update_hook );
 
 	return true;
 }

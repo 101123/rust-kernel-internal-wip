@@ -31,10 +31,32 @@ public:
 
 class il2cpp_object {
 public:
+	union data {
+		struct {
+			float f32[ 2 ];
+		}; 
+
+		struct {
+			int32_t i32[ 2 ];
+		};
+
+		struct {
+			uint32_t u32[ 2 ];
+		};
+
+		struct {
+			int64_t i64;
+		};
+
+		struct {
+			uint64_t u64;
+		};
+	};
+
 	FIELD( il2cpp_class*, klass, Offsets::Il2CppObject::klass );
 
 	// You can store 64 bits of your own data inside this field and it shouldn't cause a problem
-	FIELD( uint64_t, monitor, Offsets::Il2CppObject::monitor );
+	FIELD( data, monitor, Offsets::Il2CppObject::monitor );
 
 	template <typename T>
 	T* as() {

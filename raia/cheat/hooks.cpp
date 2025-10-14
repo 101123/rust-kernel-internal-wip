@@ -383,14 +383,163 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 	}
 }
 
+//
+#include <algorithm>
+
+class line2 {
+public:
+	vector3 point0, point1;
+
+	vector3 closest_2d_point( vector3 pos ) {
+		vector2 p0_xz( point0.x, point0.z );
+		vector2 p1_xz( point1.x, point1.z );
+		vector2 pos_xz( pos.x, pos.z );
+
+		vector2 line = p1_xz - p0_xz;
+		float len = vector2::magnitude( line );
+
+		if ( len < 0.001f )
+			return point0;
+
+		vector2 dir = line / len;
+		float proj = vector2::dot( pos_xz - p0_xz, dir );
+		float t = std::clamp( proj / len, 0.f, 1.f );
+
+		return point0 + ( point1 - point0 ) * t;
+	}
+
+	vector3 closest_point( vector3 pos ) {
+		vector3 a = point1 - point0;
+		float magnitude = vector3::magnitude( a );
+		if ( magnitude < 0.001f ) {
+			return point0;
+		}
+
+		vector3 vector = a / magnitude;
+		return point0 + ( vector * std::clamp( vector3::dot( pos - point0, vector ), 0.f, magnitude ) );
+	}
+
+	float distance( vector3 position ) {
+		return vector3::magnitude( position - closest_point( position ) );
+	}
+};
+
+const std::pair<rust::base_player*, cached_player>* get_target_for_projectile( rust::projectile* projectile ) {
+	util::scoped_spinlock lock( &entity_manager::cache_lock );
+
+	entity_collection entity_collection = entity_manager::get_entities();
+
+	const std::pair<rust::base_player*, cached_player>* best_target = nullptr;
+	float best_distance = 5.f;
+
+	for ( const auto& entry : entity_collection.players ) {
+		const cached_player& cached_player = entry.second;
+
+		float distance = line2( 
+			projectile->current_position, 
+			projectile->current_position + ( projectile->current_velocity * 0.03125f ) ).distance( cached_player.bone_data.positions[ 1 ] );
+
+		if ( distance < best_distance ) {
+			best_target = &entry;
+			best_distance = distance;
+		}
+	}
+
+	return best_target;
+}
+//
+
 namespace features {
-	void on_projectile_update( rust::projectile* projectile, bool launch = false ) {
+	void on_projectile_update( rust::projectile* projectile ) {
 		if ( projectile_tracers.enabled ) {
 			unity::instanced_debug_draw* ddraw = rust::singleton_component<unity::instanced_debug_draw>::static_fields_->instance;
 
 			if ( is_valid_ptr( ddraw ) && projectile->previous_position != vector3() ) {
 				ddraw->line( projectile->previous_position, projectile->current_position, unity::color( projectile_tracers.color ), projectile_tracers.duration, false, false );
 			}
+		}
+
+		if ( !bullet_teleport )
+			return;
+
+		auto target = get_target_for_projectile( projectile );
+		if ( !target )
+			return;
+
+		unity::transform* target_transform = target->second.bone_data.transforms[ 1 ];
+		if ( !target_transform )
+			return;
+
+		vector3 target_position = target->second.bone_data.positions[ 1 ];
+
+		// Divide one normal update representing 0.03125f seconds, into x amount of updates, based on speed
+		vector3 start_position = projectile->current_position;
+		vector3 projectile_position = projectile->current_position;
+		vector3 projectile_velocity = projectile->current_velocity;
+		const float dt = 0.03125f / ( vector3::magnitude( projectile_velocity ) * 0.1875f );
+
+		// Simulate each projectile update
+		for ( float t = 0.f; t < 0.03125f; t += dt ) {
+			// Check if projectile is within teleport range
+			float distance = vector3::distance( projectile_position, target_position );
+			if ( distance < 2.2f ) {
+				// Check if simulated position is visible to previous valid position
+				if ( rust::game_physics::line_of_sight( start_position, projectile_position, 1218510848 ) ) {
+					vector3 attack_position = vector3::move_towards( projectile_position, target_position, 2.f );
+
+					// Check if simulated position is visible to attack position
+					if ( rust::game_physics::line_of_sight( projectile_position, attack_position, 1218510848 ) ) {
+						if ( rust::player_projectile_update* player_projectile_update = rust::player_projectile_update::create() ) {
+							// We are teleporting the bullet in a simulated update that would lose line of sight from the previous sent position, so it needs to be done here
+							if ( !rust::game_physics::line_of_sight( projectile->sent_position, projectile_position, 1218510848 ) ) {
+								player_projectile_update->projectile_id = projectile->projectile_id;
+								player_projectile_update->cur_position = start_position;
+								player_projectile_update->cur_velocity = projectile->current_velocity;
+								player_projectile_update->travel_time = projectile->traveled_time;
+
+								local_player.entity->send_projectile_update( player_projectile_update );
+							}
+
+							// Move real projectile to simulated projectile
+							projectile->current_position = projectile_position;
+							projectile->current_velocity = projectile_velocity;
+							projectile->traveled_distance += vector3::distance( start_position, target_position );
+							projectile->traveled_time += t;
+
+							// Send projectile update at current point in trajectory
+							player_projectile_update->projectile_id = projectile->projectile_id;
+							player_projectile_update->cur_position = projectile->current_position;
+							player_projectile_update->cur_velocity = projectile->current_velocity;
+							player_projectile_update->travel_time = projectile->traveled_time;
+
+							local_player.entity->send_projectile_update( player_projectile_update );
+
+							// Send projectile attack
+							rust::hit_test hit_test = {};
+							hit_test.did_hit = true;
+							hit_test.hit_entity = target->first;
+							hit_test.hit_transform = target_transform;
+							hit_test.hit_point = target_transform->inverse_transform_point( attack_position );
+							hit_test.attack_ray = unity::ray( attack_position, vector3::normalize( target_position - attack_position ) );
+
+							projectile->do_hit( &hit_test, hit_test.hit_point, vector3::zero );
+
+							// Cleanup
+							player_projectile_update->should_pool = true;
+							player_projectile_update->dispose();
+
+							// Kill the projectile
+							projectile->integrity = 0.f;
+							break;
+						}
+					}
+				}
+			}
+
+			// Move projectile along trajectory
+			projectile_position += projectile_velocity * dt;
+			projectile_velocity.y -= 9.81f * projectile->gravity_modifier * dt;
+			projectile_velocity -= projectile_velocity * projectile->drag * dt;
 		}
 	}
 }
@@ -433,7 +582,7 @@ void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot*
 		// Only projectiles launched from a BaseProjectile get Projectile.Launch called on them
 		if ( created_projectiles ) {
 			// Set a unique value to to this field so we know what projectiles we need to run Projectile.Launch for
-			client_projectile->monitor = 0xDEADBEEFCAFEBEEF;
+			client_projectile->monitor.u64 = 0xDEADBEEFCAFEBEEF;
 		}
 
 		// Fix for 5.56 projectiles having a weird deviation from their trajectory even with zero spread
@@ -706,31 +855,54 @@ void effect_library_setup_effect_hook( rust::effect* effect ) {
 	}
 }
 
-void projectile_update_pre_hook( rust::projectile* projectile ) {
-	if ( !is_valid_ptr( projectile ) )
+void client_update_pre_hook( rust::client* client ) {
+	if ( !is_valid_ptr( client ) )
 		return;
 
-	if ( projectile->owner != local_player.entity )
-		return;
+	rust::list_hash_set<rust::projectile*>* projectiles_instance_list = rust::list_component<rust::projectile>::static_fields_->instance_list;
 
-	// If this is a projectile we've skipped Projectile.Launch for, run it ourselves
-	if ( projectile->monitor == 0xDEADBEEFCAFEBEEF ) {
-		projectile->monitor = 0ull;
+	if ( is_valid_ptr( projectiles_instance_list ) ) {
+		sys::buffer_list<rust::projectile*>* projectiles_buffer_list = projectiles_instance_list->vals;
 
-		float maximum_travel_time = 0.1f;
+		if ( is_valid_ptr( projectiles_buffer_list ) ) {
+			sys::array<rust::projectile*>* projectiles_array = projectiles_buffer_list->buffer;
 
-		while ( projectile->is_alive() ) {
-			if ( projectile->initial_distance <= projectile->traveled_distance && projectile->traveled_time >= maximum_travel_time )
-				break;
+			if ( is_valid_ptr( projectiles_array ) ) {
+				float time = unity::time::get_time();
 
-			features::on_projectile_update( projectile, true );
-			projectile->update_velocity( 0.03125f );
+				for ( int32_t i = 0; i < projectiles_buffer_list->count; i++ ) {
+					rust::projectile* projectile = projectiles_array->buffer[ i ];
+					if ( !is_valid_ptr( projectile ) )
+						continue;
+
+					if ( projectile->owner != local_player.entity )
+						continue;
+
+					// If this is a projectile we've skipped Projectile.Launch for, run it ourselves
+					if ( projectile->monitor.u64 == 0xDEADBEEFCAFEBEEF ) {
+						projectile->monitor.u64 = 0ull;
+
+						float maximum_travel_time = 0.1f;
+
+						while ( projectile->is_alive() ) {
+							if ( projectile->initial_distance <= projectile->traveled_distance && projectile->traveled_time >= maximum_travel_time )
+								break;
+
+							features::on_projectile_update( projectile );
+							projectile->update_velocity( 0.03125f );
+						}
+
+						projectile->launch_time = unity::time::get_fixed_time() - projectile->traveled_time;
+					}
+
+					if ( !projectile->is_alive() || ( time - projectile->launch_time < projectile->traveled_time + 0.03125f ) )
+						continue;
+
+					features::on_projectile_update( projectile );
+				}
+			}
 		}
-
-		projectile->launch_time = unity::time::get_fixed_time() - projectile->traveled_time;
 	}
-
-	features::on_projectile_update( projectile );
 }
 
 void hook_handlers::network_client_create_networkable( _CONTEXT* context, void* user_data ) {
@@ -926,8 +1098,8 @@ void hook_handlers::effect_library_setup_effect( _CONTEXT* context, void* user_d
 	effect_library_setup_effect_hook( search.get( context ) );
 }
 
-bool hook_handlers::pre_projectile_update( _CONTEXT* context, void* user_data ) {
-	projectile_update_pre_hook( ( rust::projectile* )context->Rcx );
+bool hook_handlers::pre_client_update( _CONTEXT* context, void* user_data ) {
+	client_update_pre_hook( ( rust::client* )context->Rcx );
 
 	return true;
 }

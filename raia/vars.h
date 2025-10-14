@@ -324,6 +324,8 @@ DEFINE_CONTEXT( thicker_projectiles,
 	cvar_f thickness = cvar_f( H( "Thickness" ), 1.f );
 );
 
+inline cvar bullet_teleport = cvar( H( "Bullet Teleport" ), true );
+
 namespace hit_override_bone {
 	enum : uint32_t {
 		head,

@@ -6,7 +6,7 @@
     Type* _address_of_##Name() const { \
         return ( Type* )( ( uintptr_t )this + Offset ); \
     } \
-    Type _get_##Name() const { \
+    Type& _get_##Name() const { \
         return *_address_of_##Name(); \
     } \
     void _set_##Name( Type value ) { \

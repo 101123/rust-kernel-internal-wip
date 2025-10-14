@@ -32,4 +32,8 @@ namespace Offsets {
     namespace ConsoleSystem_Option {
         constexpr const static size_t IsFromServer = 0x7;
     }
+
+    namespace Projectile {
+        constexpr const static size_t projectileID = 0x128;
+    }
 }

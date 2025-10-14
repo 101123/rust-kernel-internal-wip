@@ -536,6 +536,20 @@ namespace unity {
             caller( get_lossy_scale_injected, this, lossy_scale );
             return *lossy_scale;
         }
+
+        vector3 inverse_transform_point( const vector3& position ) {
+            void ( *inverse_transform_point_injected )( transform*, vector3*, vector3* ) =
+                ( decltype( inverse_transform_point_injected ) )( unity_player + Offsets::Transform::InverseTransformPoint_Injected );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            vector3* _position = caller.push<vector3>( position );
+            vector3* result = caller.push<vector3>();
+
+            caller( inverse_transform_point_injected, this, _position, result );
+
+            return *result;
+        }
     };
 
     class camera : public behaviour {
@@ -1169,6 +1183,23 @@ namespace rust {
         class static_fields {
         public:
             FIELD( T*, instance, Offsets::SingletonComponent::Instance );
+        };
+
+        static inline static_fields* static_fields_;
+    };
+
+    template <typename T>
+    class list_hash_set {
+    public:
+        FIELD( sys::buffer_list<T>*, vals, Offsets::ListHashSet::vals );
+    };
+
+    template <typename T>
+    class list_component {
+    public:
+        class static_fields {
+        public:
+            FIELD( list_hash_set<T*>*, instance_list, Offsets::ListComponent::InstanceList );
         };
 
         static inline static_fields* static_fields_;
@@ -1823,6 +1854,15 @@ namespace rust {
             return caller( get_ideal_view_mode, this );
         }
 
+        void send_projectile_update( player_projectile_update* update ) {
+            void( *send_projectile_update )( base_player*, player_projectile_update* ) =
+                ( decltype( send_projectile_update ) )( game_assembly + Offsets::BasePlayer::SendProjectileUpdate );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( send_projectile_update, this, update );
+        }
+
         static inline il2cpp_class* klass_;
     };
 
@@ -1991,7 +2031,7 @@ namespace rust {
                         values[ i ] = ( ( ( ( ( values[ i ] << 21 ) | ( values[ i ] >> 11 ) ) ^ 0xAE41CFF8 ) << 12 ) |
                             ( ( ( ( values[ i ] << 21 ) | ( values[ i ] >> 11 ) ) ^ 0xAE41CFF8 ) >> 20 ) ) + 726560829;
                     }
-                    );
+                );
             };
 
             static inline static_fields* static_fields_;
@@ -2023,6 +2063,19 @@ namespace rust {
         FIELD( vector3, cur_velocity, Offsets::ProtoBuf_PlayerProjectileUpdate::curVelocity );
         FIELD( float, travel_time, Offsets::ProtoBuf_PlayerProjectileUpdate::travelTime );
         FIELD( bool, should_pool, Offsets::ProtoBuf_PlayerProjectileUpdate::ShouldPool );
+
+        static player_projectile_update* create() {
+            return ( player_projectile_update* )il2cpp_object_new( player_projectile_update::klass_ );
+        }
+
+        void dispose() {
+            void ( *dispose )( player_projectile_update* ) =
+                ( decltype( dispose ) )( game_assembly + Offsets::ProtoBuf_PlayerProjectileUpdate::Dispose );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( dispose, this );
+        }
 
         static inline il2cpp_class* klass_;
     };
@@ -2075,7 +2128,21 @@ namespace rust {
 
     class hit_test {
     public:
+        FIELD( int32_t, type, Offsets::HitTest::type );
+        FIELD( unity::ray, attack_ray, Offsets::HitTest::AttackRay );
+        FIELD( float, max_distance, Offsets::HitTest::MaxDistance );
+        FIELD( bool, did_hit, Offsets::HitTest::DidHit );
+        FIELD( unity::game_object*, game_object, Offsets::HitTest::gameObject );
+        FIELD( base_entity*, ignore_entity, Offsets::HitTest::ignoreEntity );
+        FIELD( base_entity*, hit_entity, Offsets::HitTest::HitEntity );
+        FIELD( vector3, hit_point, Offsets::HitTest::HitPoint );
+        FIELD( vector3, hit_normal, Offsets::HitTest::HitNormal );
+        FIELD( unity::transform*, hit_transform, Offsets::HitTest::HitTransform );
+        FIELD( uint32_t, hit_part, Offsets::HitTest::HitPart );
+        FIELD( sys::string*, hit_materal, Offsets::HitTest::HitMaterial );
 
+    private:
+        uint8_t _[ 256 ];
     };
 
     class projectile : public unity::behaviour {
@@ -2100,7 +2167,7 @@ namespace rust {
         FIELD( vector3, previous_position, Offsets::Projectile::previousPosition );
         FIELD( vector3, previous_velocity, Offsets::Projectile::previousVelocity );
         FIELD( float, previous_traveled_time, Offsets::Projectile::previousTraveledTime );
-        // FIELD( int, projectile_id, Offsets::Projectile::projectileID );
+        FIELD( int, projectile_id, Offsets::Projectile::projectileID );
         FIELD( vector3, sent_position, Offsets::Projectile::sentPosition );
 
         void update_velocity( float delta_time ) {
@@ -2116,6 +2183,19 @@ namespace rust {
             return integrity > 0.001f
                 && max_distance > traveled_distance
                 && traveled_time < 8.f;
+        }
+
+        void do_hit( rust::hit_test* test, const vector3& point, const vector3& normal ) {
+            void ( *do_hit )( projectile*, rust::hit_test*, vector3*, vector3* ) = 
+                ( decltype( do_hit ) )( game_assembly + Offsets::Projectile::DoHit );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            rust::hit_test* _test = caller.push<rust::hit_test>( *test );
+            vector3* _point = caller.push<vector3>( point );
+            vector3* _normal = caller.push<vector3>( normal );
+
+            return caller( do_hit, this, _test, _point, _normal );
         }
 
         static inline il2cpp_class* klass_;
@@ -2257,6 +2337,10 @@ namespace rust {
             }
 
             return result;
+        }
+
+        static bool line_of_sight( vector3 p0, vector3 p1, int32_t layer_mask ) {
+            return !trace( unity::ray( p0, p1 - p0 ), 0.f, nullptr, vector3::distance( p0, p1 ), layer_mask, 0, nullptr );
         }
 
         static inline static_fields* static_fields_;
