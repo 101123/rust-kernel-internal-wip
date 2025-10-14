@@ -9,8 +9,6 @@
 #include "features.h"
 #include "aimbot.h"
 
-#include <cstddef>
-
 void reset_local_player() {
 	local_player = {
 		.entity = nullptr,
@@ -385,7 +383,19 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 	}
 }
 
-void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot* projectile_shoot, sys::list<rust::projectile*>* created_projectiles, rust::projectile* projectile ) {
+namespace features {
+	void on_projectile_update( rust::projectile* projectile, bool launch = false ) {
+		if ( projectile_tracers.enabled ) {
+			unity::instanced_debug_draw* ddraw = rust::singleton_component<unity::instanced_debug_draw>::static_fields_->instance;
+
+			if ( is_valid_ptr( ddraw ) && projectile->previous_position != vector3() ) {
+				ddraw->line( projectile->previous_position, projectile->current_position, unity::color( projectile_tracers.color ), projectile_tracers.duration, false, false );
+			}
+		}
+	}
+}
+
+void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot* projectile_shoot, sys::list<rust::projectile*>* created_projectiles, rust::projectile* melee_projectile ) {
 	if ( !is_valid_ptr( projectile_shoot ) )
 		return;
 
@@ -403,8 +413,8 @@ void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot*
 		client_projectiles = created_projectiles->items->buffer;
 	}
 
-	else if ( projectile && is_valid_ptr( projectile ) && projectile->is<rust::projectile>() ) {
-		client_projectiles = &projectile;
+	else if ( melee_projectile && is_valid_ptr( melee_projectile ) && melee_projectile->is<rust::projectile>() ) {
+		client_projectiles = &melee_projectile;
 	}
 	
 	// What the fuck happened?
@@ -420,6 +430,13 @@ void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot*
 		if ( !is_valid_ptr( client_projectile ) )
 			continue;
 
+		// Only projectiles launched from a BaseProjectile get Projectile.Launch called on them
+		if ( created_projectiles ) {
+			// Set a unique value to to this field so we know what projectiles we need to run Projectile.Launch for
+			client_projectile->monitor = 0xDEADBEEFCAFEBEEF;
+		}
+
+		// Fix for 5.56 projectiles having a weird deviation from their trajectory even with zero spread
 		client_projectile->swim_scale = vector3();
 		client_projectile->swim_speed = vector3();
 
@@ -457,6 +474,11 @@ void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot*
 			client_projectile->initial_velocity = velocity;
 			client_projectile->current_velocity = velocity;
 		}
+	}
+
+	// Set the created projectiles list size to 0, so IEnumerator.GetNext fails, which in turn will skip Projectile.Launch/AdjustVelocity
+	if ( created_projectiles ) {
+		created_projectiles->size = 0;
 	}
 }
 
@@ -691,13 +713,24 @@ void projectile_update_hook( rust::projectile* projectile ) {
 	if ( projectile->owner != local_player.entity )
 		return;
 
-	if ( projectile_tracers.enabled ) {
-		unity::instanced_debug_draw* ddraw = rust::singleton_component<unity::instanced_debug_draw>::static_fields_->instance;
+	// If this is a projectile we've skipped Projectile.Launch for, run it ourselves
+	if ( projectile->monitor == 0xDEADBEEFCAFEBEEF ) {
+		projectile->monitor = 0ull;
 
-		if ( is_valid_ptr( ddraw ) ) {
-			ddraw->line( projectile->previous_position, projectile->current_position, unity::color( projectile_tracers.color ), projectile_tracers.duration, false, false );
+		float maximum_travel_time = 0.1f;
+
+		while ( projectile->is_alive() ) {
+			if ( projectile->initial_distance <= projectile->traveled_distance && projectile->traveled_time >= maximum_travel_time )
+				break;
+
+			features::on_projectile_update( projectile, true );
+			projectile->update_velocity( 0.03125f );
 		}
+
+		projectile->launch_time = unity::time::get_fixed_time() - projectile->traveled_time;
 	}
+
+	features::on_projectile_update( projectile );
 }
 
 void hook_handlers::network_client_create_networkable( _CONTEXT* context, void* user_data ) {

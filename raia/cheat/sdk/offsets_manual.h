@@ -3,6 +3,7 @@
 namespace Offsets {
     namespace Il2CppObject {
         constexpr const static size_t klass = 0x0;
+        constexpr const static size_t monitor = 0x8;
     }
 
     namespace Il2CppClass {

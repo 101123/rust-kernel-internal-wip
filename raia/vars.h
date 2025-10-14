@@ -404,7 +404,7 @@ DEFINE_CONTEXT( projectile_tracers,
 inline cvar_bind zoom = WRAP_BIND( "Zoom", true, trigger_type::hold, 'X' );
 inline cvar_f zoom_fov = cvar_f( H( "Zoom FOV" ), 40.f );
 
-inline cvar chams = cvar( H( "Chams" ), true );
+inline cvar chams = cvar( H( "Chams" ), false );
 inline cvar_ui chams_type = cvar_ui( H( "Chams Type" ), 0 );
 inline cvar_ui chams_color = cvar_ui( H( "Chams Color" ), COL32( 255, 255, 255, 255 ) );
 

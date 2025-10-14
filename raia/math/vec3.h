@@ -53,6 +53,10 @@ public:
 		x /= value; y /= value; z /= value; return *this;
 	}
 
+	bool operator==( const vector3 value ) {
+		return x == value.x && y == value.y && z == value.z;
+	}
+
 	static vector3 cross( const vector3& lhs, const vector3& rhs ) {
 		return vector3(
 			lhs.y * rhs.z - lhs.z * rhs.y,

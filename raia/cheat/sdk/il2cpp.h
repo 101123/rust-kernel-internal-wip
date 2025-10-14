@@ -33,6 +33,9 @@ class il2cpp_object {
 public:
 	FIELD( il2cpp_class*, klass, Offsets::Il2CppObject::klass );
 
+	// You can store 64 bits of your own data inside this field and it shouldn't cause a problem
+	FIELD( uint64_t, monitor, Offsets::Il2CppObject::monitor );
+
 	template <typename T>
 	T* as() {
 #ifdef FAST_HIERARCHY_CHECKS

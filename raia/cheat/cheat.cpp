@@ -186,7 +186,7 @@ const uint64_t generate_corrupt_value() {
 	return 0xDEADCAFEBEEF0000ull + ( count++ << 16ull );
 }
 
-#define VFUNC( klass, offset ) ( uintptr_t* )( ( uintptr_t )klass::klass_ + offset )
+#define VFUNC( Class, Offset ) ( uintptr_t* )( ( uintptr_t )Class::klass_ + Offset )
 
 bool resolve_hooks() {
 	uintptr_t il2cpp_codegen_initialize_method_call = util::find_pattern(

@@ -548,11 +548,19 @@ namespace unity {
     class time {
     public:
         static float get_time() {
-            float ( *get_time )() = decltype( get_time )( unity_player + Offsets::Time::get_time );
+            float ( *get_time )( ) = decltype( get_time )( unity_player + Offsets::Time::get_time );
 
             um::caller& caller = um::get_caller_for_thread();
 
             return caller( get_time );
+        }
+
+        static float get_fixed_time() {
+            float ( *get_fixed_time )( ) = decltype( get_fixed_time )( unity_player + Offsets::Time::get_fixedTime );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_fixed_time );
         }
     };
 
@@ -2065,6 +2073,11 @@ namespace rust {
         static inline il2cpp_class* klass_;
     };
 
+    class hit_test {
+    public:
+
+    };
+
     class projectile : public unity::behaviour {
     public:
         FIELD( vector3, initial_velocity, Offsets::Projectile::initialVelocity );
@@ -2076,7 +2089,7 @@ namespace rust {
         FIELD( vector3, swim_speed, Offsets::Projectile::swimSpeed );
         FIELD( base_player*, owner, Offsets::Projectile::owner );
         FIELD( projectile*, source_projectile_prefab, Offsets::Projectile::sourceProjectilePrefab );
-        // FIELD( rust::hit_test*, hit_test );
+        FIELD( rust::hit_test*, hit_test, Offsets::Projectile::hitTest );
         FIELD( float, integrity, Offsets::Projectile::integrity );
         FIELD( float, max_distance, Offsets::Projectile::maxDistance );
         FIELD( vector3, current_velocity, Offsets::Projectile::currentVelocity );
@@ -2089,6 +2102,21 @@ namespace rust {
         FIELD( float, previous_traveled_time, Offsets::Projectile::previousTraveledTime );
         // FIELD( int, projectile_id, Offsets::Projectile::projectileID );
         FIELD( vector3, sent_position, Offsets::Projectile::sentPosition );
+
+        void update_velocity( float delta_time ) {
+            void( *update_velocity )( projectile*, float ) =
+                ( decltype( update_velocity ) )( game_assembly + Offsets::Projectile::UpdateVelocity );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            caller( update_velocity, this, delta_time );
+        }
+
+        bool is_alive() {
+            return integrity > 0.001f
+                && max_distance > traveled_distance
+                && traveled_time < 8.f;
+        }
 
         static inline il2cpp_class* klass_;
         static inline il2cpp_object* type_object_;
