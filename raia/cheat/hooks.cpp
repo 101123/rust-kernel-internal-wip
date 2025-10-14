@@ -11,73 +11,6 @@
 
 #include <cstddef>
 
-enum resolved_location {
-	unresolved,
-	registers,
-	stack,
-};
-
-template <typename T>
-class context_search {
-public:
-	static_assert( sizeof( T ) <= sizeof( uint64_t ) );
-
-	context_search() = delete;
-
-	template <typename C>
-	context_search( _CONTEXT* context, C&& callback, bool stack, size_t depth ) {
-		uint64_t* registers = ( uint64_t* )&context->Rax;
-		constexpr size_t num_registers = ( offsetof( CONTEXT, Rip ) - offsetof( CONTEXT, Rax ) ) / sizeof( uint64_t );
-
-		for ( size_t i = 0; i < num_registers; i++ ) {
-			T value = ( T )registers[ i ];
-
-			if ( callback( value ) ) {
-				location_ = resolved_location::registers;
-				position_ = i;
-				return;
-			}
-		}
-
-		if ( stack ) {
-			for ( size_t i = 0, n = depth / sizeof( T ); i < n; i++ ) {
-				size_t offset = i * sizeof( T );
-				T value = *( T* )( context->Rsp + offset );
-
-				if ( callback( value ) ) {
-					location_ = resolved_location::stack;
-					position_ = offset;
-					return;
-				}
-			}
-		}
-
-		location_ = resolved_location::unresolved;
-		position_ = 0ull;
-	}
-
-	bool resolved() {
-		return location_ != resolved_location::unresolved;
-	}
-
-	T get( _CONTEXT* context ) {
-		if ( location_ == resolved_location::registers ) {
-			uint64_t* registers = ( uint64_t* )&context->Rax;
-			return ( T )registers[ position_ ];
-		} 
-		
-		else if ( location_ == resolved_location::stack ) {
-			return *( T* )( context->Rsp + position_ );
-		}
-
-		return T();
-	}
-
-private:
-	resolved_location location_;
-	size_t position_;
-};
-
 void reset_local_player() {
 	local_player = {
 		.entity = nullptr,
@@ -768,7 +701,7 @@ void projectile_update_hook( rust::projectile* projectile ) {
 }
 
 void hook_handlers::network_client_create_networkable( _CONTEXT* context, void* user_data ) {
-	static context_search search = context_search<rust::base_networkable*>( context,
+	static util::context_search search = util::context_search<rust::base_networkable*>( context,
 		[]( rust::base_networkable* value ) {
 			if ( !is_valid_ptr( value ) || !is_valid_ptr( value->cached_ptr ) )
 				return false;
@@ -794,7 +727,7 @@ void hook_handlers::network_client_create_networkable( _CONTEXT* context, void* 
 }
 
 void hook_handlers::network_client_destroy_networkable( _CONTEXT* context, void* user_data ) {
-	static context_search search = context_search<rust::base_networkable*>( context,
+	static util::context_search search = util::context_search<rust::base_networkable*>( context,
 		[]( rust::base_networkable* value ) {
 			if ( !is_valid_ptr( value ) )
 				return false;
@@ -847,7 +780,7 @@ bool hook_handlers::pre_protobuf_projectile_shoot_write_to_stream( _CONTEXT* con
 		return true;
 
 	if ( local_player.held_entity->as<rust::base_projectile>() ) {
-		static context_search search = context_search<sys::list<rust::projectile*>*>( context,
+		static util::context_search search = util::context_search<sys::list<rust::projectile*>*>( context,
 			[]( sys::list<rust::projectile*>* value ) {
 				if ( !is_valid_ptr( value ) )
 					return false;
@@ -881,7 +814,7 @@ bool hook_handlers::pre_protobuf_projectile_shoot_write_to_stream( _CONTEXT* con
 	}
 
 	else if ( local_player.held_entity->as<rust::base_melee>() ) {
-		static context_search search = context_search<rust::projectile*>( context,
+		static util::context_search search = util::context_search<rust::projectile*>( context,
 			[]( rust::projectile* value ) {
 				if ( !is_valid_ptr( value ) )
 					return false;
@@ -927,7 +860,7 @@ bool hook_handlers::pre_base_player_client_input( _CONTEXT* context, void* user_
 }
 
 bool hook_handlers::pre_console_system_command_set( _CONTEXT* context, void* user_data ) {
-	static context_search search = context_search<rust::console_system::arg*>( context,
+	static util::context_search search = util::context_search<rust::console_system::arg*>( context,
 		[]( rust::console_system::arg* value ) {
 			if ( !is_valid_ptr( value ) )
 				return false;
@@ -946,7 +879,7 @@ bool hook_handlers::pre_console_system_command_call( _CONTEXT* context, void* us
 }
 
 void hook_handlers::effect_library_setup_effect( _CONTEXT* context, void* user_data ) {
-	static context_search search = context_search<rust::effect*>( context,
+	static util::context_search search = util::context_search<rust::effect*>( context,
 		[]( rust::effect* value ) {
 			if ( !is_valid_ptr( value ) )
 				return false;

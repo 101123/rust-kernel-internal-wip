@@ -425,6 +425,88 @@ namespace util {
 	private:
 		uint64_t previous_time_;
 	};
+
+	enum resolved_location {
+		unresolved,
+		registers,
+		stack,
+	};
+
+	template <typename T>
+	class context_search {
+	public:
+		static_assert( sizeof( T ) <= sizeof( uint64_t ) );
+
+		context_search() = delete;
+
+		template <typename C>
+		context_search( _CONTEXT* context, C&& callback, bool stack, size_t depth ) {
+			uint64_t* registers = ( uint64_t* )&context->Rax;
+			constexpr size_t num_registers = ( offsetof( CONTEXT, Rip ) - offsetof( CONTEXT, Rax ) ) / sizeof( uint64_t );
+
+			for ( size_t i = 0; i < num_registers; i++ ) {
+				T value = ( T )registers[ i ];
+
+				if ( callback( value ) ) {
+					value_ = value;
+					location_ = resolved_location::registers;
+					position_ = i;
+					return;
+				}
+			}
+
+			if ( stack ) {
+				for ( size_t i = 0, n = depth / sizeof( T ); i < n; i++ ) {
+					size_t offset = i * sizeof( T );
+					T value = *( T* )( context->Rsp + offset );
+
+					if ( callback( value ) ) {
+						value_ = value;
+						location_ = resolved_location::stack;
+						position_ = offset;
+						return;
+					}
+				}
+			}
+
+			location_ = resolved_location::unresolved;
+			position_ = 0ull;
+		}
+
+		bool resolved() {
+			return location_ != resolved_location::unresolved;
+		}
+
+		T get_value() {
+			return value_;
+		}
+
+		T* ptr_to( _CONTEXT* context ) {
+			if ( location_ == resolved_location::registers ) {
+				uint64_t* registers = ( uint64_t* )&context->Rax;
+				return ( T* )&registers[ position_ ];
+			}
+
+			else if ( location_ == resolved_location::stack ) {
+				return ( T* )( context->Rsp + position_ );
+			}
+
+			return nullptr;
+		}
+
+		T get( _CONTEXT* context ) {
+			if ( auto ptr = ptr_to( context ) ) {
+				return *ptr;
+			}
+
+			return T();
+		}
+
+	private:
+		T value_;
+		resolved_location location_;
+		size_t position_;
+	};
 }
 
 #define H( x ) util::hash_const( x )
