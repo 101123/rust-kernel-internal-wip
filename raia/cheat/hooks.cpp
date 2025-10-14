@@ -706,7 +706,7 @@ void effect_library_setup_effect_hook( rust::effect* effect ) {
 	}
 }
 
-void projectile_update_hook( rust::projectile* projectile ) {
+void projectile_update_pre_hook( rust::projectile* projectile ) {
 	if ( !is_valid_ptr( projectile ) )
 		return;
 
@@ -926,6 +926,8 @@ void hook_handlers::effect_library_setup_effect( _CONTEXT* context, void* user_d
 	effect_library_setup_effect_hook( search.get( context ) );
 }
 
-void hook_handlers::projectile_update( _CONTEXT* context, void* user_data ) {
-	projectile_update_hook( ( rust::projectile* )context->Rcx );
+bool hook_handlers::pre_projectile_update( _CONTEXT* context, void* user_data ) {
+	projectile_update_pre_hook( ( rust::projectile* )context->Rcx );
+
+	return true;
 }

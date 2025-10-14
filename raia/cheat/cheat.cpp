@@ -377,8 +377,8 @@ bool resolve_hooks() {
 		.original = 0ull,
 		.corrupt = 0ull,
 		.ptr_swap = {
-			.pre_handler = nullptr,
-			.post_handler = hook_handlers::projectile_update
+			.pre_handler = hook_handlers::pre_projectile_update,
+			.post_handler = nullptr
 		}
 	};
 
