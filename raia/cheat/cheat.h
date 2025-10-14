@@ -27,6 +27,7 @@ struct hook {
 		struct {
 			bool( *pre_handler )( _CONTEXT*, void* );
 			void( *post_handler )( _CONTEXT*, void* );
+			uintptr_t* ( *find_retaddr )( CONTEXT* );
 
 			uint64_t corrupt_retaddr;
 			uintptr_t retaddr;

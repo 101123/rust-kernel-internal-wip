@@ -139,7 +139,7 @@ bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t
 			else if ( hook.type == hook_type::ptr_swap ) {
 				if ( context->Rip == hook.corrupt ) {
 					// Check if we want to skip the original
-					if ( hook.ptr_swap.pre_handler && !hook.ptr_swap.pre_handler( context, hook.user_data ) ) {
+					if ( hook.ptr_swap.pre_handler && !hook.ptr_swap.find_retaddr && !hook.ptr_swap.pre_handler( context, hook.user_data ) ) {
 						uintptr_t retaddr = *( uintptr_t* )context->Rsp;
 
 						// Emulate a ret
@@ -150,19 +150,21 @@ bool on_exception( EXCEPTION_RECORD* exception_record, CONTEXT* context, uint8_t
 					else {
 						// If we have a post hook
 						if ( hook.ptr_swap.post_handler ) {
-							uintptr_t* retaddr = ( uintptr_t* )context->Rsp;
+							uintptr_t* retaddr = hook.ptr_swap.find_retaddr ? hook.ptr_swap.find_retaddr( context ) : ( uintptr_t* )context->Rsp;
 
-							// Preserve the original return address
-							hook.ptr_swap.retaddr = *retaddr;
+							if ( retaddr ) {
+								// Preserve the original return address
+								hook.ptr_swap.retaddr = *retaddr;
 
-							// Preserve the needed original arguments for the post hook
-							previous_context.Rcx = context->Rcx;
-							previous_context.Rdx = context->Rdx;
-							previous_context.R8 = context->R8;
-							previous_context.R9 = context->R9;
+								// Preserve the needed original arguments for the post hook
+								previous_context.Rcx = context->Rcx;
+								previous_context.Rdx = context->Rdx;
+								previous_context.R8 = context->R8;
+								previous_context.R9 = context->R9;
 
-							// Corrupt the return address
-							*retaddr = hook.ptr_swap.corrupt_retaddr;
+								// Corrupt the return address
+								*retaddr = hook.ptr_swap.corrupt_retaddr;
+							}
 						}
 
 						context->Rip = hook.original;
