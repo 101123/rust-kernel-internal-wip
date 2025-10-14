@@ -26,6 +26,13 @@ ULONG IUnknown::AddRef() {
 }
 
 ULONG IUnknown::Release() {
+    // TODO: Find out what is calling this function with an invalid object, but for now, we can just do this
+    if ( !is_valid_ptr( this ) )
+        return 0u;
+
+    if ( !is_valid_ptr( *( void** )( this ) ) )
+        return 0u;
+
     ULONG( *release )( IUnknown* ) =
         ( decltype( release ) )( ( ( ( *( void*** )( this ) )[ 2 ] ) ) );
 
