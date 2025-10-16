@@ -2657,6 +2657,9 @@ namespace Offsets {
 
 	namespace BufferStream {
 
+		// Offsets
+		constexpr const static size_t _buffer = 0x10;
+
 		// Functions
 		constexpr const static size_t EnsureCapacity = 0x8b5ffa0;
 	}

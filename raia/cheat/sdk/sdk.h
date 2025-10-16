@@ -576,6 +576,24 @@ namespace unity {
 
             return caller( get_fixed_time );
         }
+
+        static float get_real_time_since_startup() {
+            float ( *get_real_time_since_startup )( ) = 
+                decltype( get_real_time_since_startup )( unity_player + Offsets::Time::get_realtimeSinceStartup );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_real_time_since_startup );
+        }
+
+        static int32_t get_frame_count() {
+            int32_t( *get_frame_count )( ) =
+                decltype( get_frame_count )( unity_player + Offsets::Time::get_frameCount );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_frame_count );
+        }
     };
 
     class input {
@@ -2522,5 +2540,10 @@ namespace rust {
         FIELD( sys::string*, player_name, Offsets::DroppedItemContainer::_playerName );
 
         static inline il2cpp_class* klass_;
+    };
+
+    class buffer_stream {
+    public:
+        FIELD( sys::array<uint8_t>*, buffer, Offsets::BufferStream::_buffer );
     };
 }

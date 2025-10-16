@@ -449,3 +449,10 @@ DEFINE_CONTEXT( belt_icons,
 	vector3 lossy_scale;
 	vector3 positions[ 6 ];
 );
+
+DEFINE_CONTEXT( desync,
+	cvar enabled = cvar( H( "Desync" ), false );
+	cvar_f time = cvar_f( H( "Desync Time" ), 0.79f );
+);
+
+inline float last_sent_tick_time;

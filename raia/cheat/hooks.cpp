@@ -354,8 +354,8 @@ void player_walk_movement_client_input_post_hook( rust::player_walk_movement* pl
 	}
 }
 
-void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* player_tick ) {
-	if ( !is_valid_ptr( player_tick ) )
+void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* player_tick, rust::buffer_stream* stream, rust::player_tick* previous ) {
+	if ( !is_valid_ptr( player_tick ) || !is_valid_ptr( stream ) || !is_valid_ptr( previous ) )
 		return;
 
 	rust::model_state* model_state = player_tick->model_state;
@@ -381,6 +381,22 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 			}
 		}
 	}
+
+	float real_time_since_startup = unity::time::get_real_time_since_startup();
+
+	if ( desync.enabled && game_input.get_async_key_state( 'V' ) ) {
+		if ( real_time_since_startup - last_sent_tick_time < desync.time ) {
+			sys::array<uint8_t>* buffer = stream->buffer;
+
+			if ( is_valid_ptr( buffer ) ) {
+				// The first byte of the packet is the packet id, and by setting it to 139, it is silently discarded by the server
+				buffer->buffer[ 0 ] = 139;
+				return;
+			}
+		}
+	}
+
+	last_sent_tick_time = real_time_since_startup;
 }
 
 //
@@ -975,7 +991,7 @@ void hook_handlers::post_player_walk_movement_client_input( _CONTEXT* context, v
 }
 
 bool hook_handlers::pre_protobuf_player_tick_write_to_stream_delta( _CONTEXT* context, void* user_data ) {
-	protobuf_player_tick_write_to_stream_delta_pre_hook( ( rust::player_tick* )context->Rcx );
+	protobuf_player_tick_write_to_stream_delta_pre_hook( ( rust::player_tick* )context->Rcx, ( rust::buffer_stream* )context->Rdx, ( rust::player_tick* )context->R8 );
 
 	return true;
 }

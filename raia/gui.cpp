@@ -954,6 +954,10 @@ void gui::run() {
 
                     left.slider( S( "Field of view" ), S( "%dpx" ), &aimbot.fov, 0u, 800u );
 
+                    if ( left.toggle( S( "Desync" ), &desync.enabled ) ) {
+                        left.slider( S( "Desync time" ), S( "%.2fs" ), &desync.time, 0.f, 0.79f );
+                    }
+
                     left.end();
 
                     right.begin();
