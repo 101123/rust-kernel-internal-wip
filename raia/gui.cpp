@@ -1243,6 +1243,8 @@ void gui::run() {
                         left.slider( S( "Field of view" ), S( "%.0f" ), &fov_modifier.fov, 0.f, 140.f );
                     }
 
+                    left.toggle( S( "Auto drop box" ), &auto_drop_box.enabled );
+
                     left.end();
 
                     right.begin();

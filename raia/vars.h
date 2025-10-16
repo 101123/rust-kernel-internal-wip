@@ -456,3 +456,7 @@ DEFINE_CONTEXT( desync,
 );
 
 inline float last_sent_tick_time;
+
+DEFINE_CONTEXT( auto_drop_box,
+	cvar enabled = cvar( H( "Auto Drop Box" ), false );
+);

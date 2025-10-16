@@ -248,8 +248,37 @@ void features::looking_at( rust::base_player* local_player ) {
 	if ( is_valid_ptr( use ) && use->is_down ) {
 		static util::timer<time_unit::milliseconds> timer( 0ull );
 
-		if ( loot_without_untie && timer.has_elapsed( 100llu ) && looking_at_entity->is( H( "FreeableLootContainer" ) ) ) {
+		if ( loot_without_untie && timer.has_elapsed( 25ull ) && looking_at_entity->is( H( "FreeableLootContainer" ) ) ) {
 			looking_at_entity->server_rpc( S( L"RPC_OpenLoot" ) );
+		}
+	}
+}
+
+void features::drop_box() {
+	if ( !auto_drop_box.enabled )
+		return;
+
+	static util::timer<time_unit::milliseconds> timer( 0ull );
+
+	if ( ( game_input.get_async_key_state( 'V' ) & 0x1 ) && timer.has_elapsed( 50ull ) ) {
+		rust::item_container* container00 = rust::loot_panel::get_container_00();
+		if ( !is_valid_ptr( container00 ) )
+			return;
+
+		sys::list<rust::item*>* items_list = container00->item_list;
+		if ( !is_valid_ptr( items_list ) )
+			return;
+
+		sys::array<rust::item*>* items = items_list->items;
+		if ( !is_valid_ptr( items ) )
+			return;
+
+		for ( int32_t i = 0; i < items_list->size; i++ ) {
+			rust::item* item = items->buffer[ i ];
+			if ( !is_valid_ptr( item ) )
+				continue;
+
+			rust::local_player::item_command( item->uid, S( L"drop" ) );
 		}
 	}
 }

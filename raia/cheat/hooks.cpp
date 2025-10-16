@@ -776,6 +776,7 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 	features::graphics();
 	features::bright_night();
 	features::looking_at( base_player );
+	features::drop_box();
 }
 
 bool console_system_command_pre_hook( rust::console_system::arg* arg, uint64_t command ) {

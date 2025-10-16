@@ -13,4 +13,5 @@ namespace features {
 	void memory_aimbot( const std::pair<rust::base_player*, cached_player>* target );
 	bool update_rocket_trajectory( rust::base_launcher* launcher );
 	void looking_at( rust::base_player* local_player );
+	void drop_box();
 }

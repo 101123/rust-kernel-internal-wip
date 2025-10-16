@@ -2229,6 +2229,26 @@ namespace rust {
 
             return caller( get_entity );
         }
+
+        static void item_command( uint64_t item_id, const sys::string& command ) {
+            void ( *item_command )( uint64_t, sys::string* ) =
+                ( decltype( item_command ) )( game_assembly + Offsets::LocalPlayer::ItemCommand );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            sys::string* _command = caller.push<sys::string>( command );
+
+            return caller( item_command, item_id, _command );
+        }
+
+        static void move_item( uint64_t item_id, uint64_t target_container, int32_t target_slot, int32_t amount ) {
+            void ( *move_item )( uint64_t, uint64_t, int32_t, int32_t ) =
+                ( decltype( move_item ) )( game_assembly + Offsets::LocalPlayer::MoveItem );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( move_item, item_id, target_container, target_slot, amount );
+        }
     };
 
     class item_icon : public unity::behaviour {
@@ -2545,5 +2565,17 @@ namespace rust {
     class buffer_stream {
     public:
         FIELD( sys::array<uint8_t>*, buffer, Offsets::BufferStream::_buffer );
+    };
+
+    class loot_panel {
+    public:
+        static item_container* get_container_00() {
+            item_container* ( *get_container_00 )() =
+                ( decltype( get_container_00 ) )( game_assembly + Offsets::LootPanel::get_Container_00 );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_container_00 );
+        }
     };
 }
