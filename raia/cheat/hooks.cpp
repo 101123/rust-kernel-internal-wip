@@ -349,6 +349,10 @@ void player_walk_movement_client_input_post_hook( rust::player_walk_movement* pl
 		}
 	}
 
+	if ( speedhack.enabled ) {
+		player_walk_movement->target_movement = player_walk_movement->target_movement * speedhack.multiplier;
+	}
+
 	if ( on_ladder ) {
 		model_state->set_flag( rust::model_state::flag::on_ladder, true );
 	}

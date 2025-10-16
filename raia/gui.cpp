@@ -1268,8 +1268,14 @@ void gui::run() {
                     left.toggle( S( "Spider-man" ), &spider_man );
                     left.toggle( S( "Infinite jump" ), &infinite_jump );
                     left.toggle( S( "Omnisprint" ), &omnisprint );
+
+                    if ( left.toggle( S( "Speedhack" ), &speedhack.enabled ) ) {
+                        left.slider( S( "Speed mutiplier" ), S( "%.2fx" ), &speedhack.multiplier, 1.f, 5.f );
+                    }
+
                     left.toggle( S( "No attack restrictions" ), &no_attack_restrictions.enabled );
                     left.toggle( S( "On ladder" ), &on_ladder );
+
                     left.end();
 
                     right.begin();
