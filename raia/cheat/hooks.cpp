@@ -2,12 +2,10 @@
 #include "global.h"	
 #include "cheat/cheat.h"
 #include "cheat/sdk/sdk.h"
-#include "nt.h"
 #include "cheat/entities.h"
 #include "cheat/glow.h"
-#include "gui.h"
-#include "features.h"
-#include "aimbot.h"
+#include "cheat/aimbot.h"
+#include "cheat/features.h"
 
 void reset_local_player() {
 	local_player = {
@@ -767,7 +765,7 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 
 			if ( target ) {
 				if ( aimbot.enabled && aimbot.type == aimbot_type::memory && game_input.get_async_key_state( 'C' ) ) {
-					features::memory_aimbot( target );
+					memory_aimbot( base_projectile, target );
 				}
 			}
 

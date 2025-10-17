@@ -288,8 +288,7 @@ DEFINE_CONTEXT( camera,
 namespace aimbot_type {
 	enum : uint32_t {
 		memory,
-		silent,
-		manipulation
+		silent
 	};
 }
 
@@ -299,7 +298,9 @@ DEFINE_CONTEXT( aimbot,
 	cvar enabled = cvar( H( "Aimbot" ), true );
 	cvar_ui type = cvar_ui( H( "Aimbot Type" ), aimbot_type::memory );
 	cvar_ui fov = cvar_ui( H( "Aimbot FOV" ), 120 );
-	
+	cvar_f recoil = cvar_f( H( "Aimbot Recoil" ), 0.5f );
+	cvar_f smoothing = cvar_f( H( "Aimbot Smoothing" ), 0.5f );
+
 	const std::pair<rust::base_player*, cached_player>* player_target;
 );
 

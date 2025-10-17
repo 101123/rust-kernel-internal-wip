@@ -1,8 +1,6 @@
 #include "features.h"
 #include "sdk/sdk.h"
 #include "vars.h"
-#include "entities.h"
-#include "aimbot.h"
 
 void features::graphics() {
 	if ( fov_modifier.enabled || fov_modifier.dirty ) {
@@ -129,48 +127,6 @@ void features::weapon_modifiers( rust::base_projectile* weapon ) {
 
 		compound_bow->string_hold_duration_max = instant_compound_bow ? 0.f : original_string_hold_duration_max;
 	}
-}
-
-bool calc_angle( const vector3& src, const vector3& dst, vector3& result ) {
-	vector3 direction = dst - src;
-	if ( vector3::sqr_magnitude( direction ) < 0.001f )
-		return false;
-
-	result = vector3( 
-		math::rad2deg( -asinf( direction.y / vector3::magnitude( direction ) ) ), 
-		math::rad2deg( atan2f( direction.x, direction.z ) ), 
-		0.f 
-	);
-
-	return true;
-}
-
-void features::memory_aimbot( const std::pair<rust::base_player*, cached_player>* target ) {
-	rust::player_input* input = local_player.entity->input;
-	if ( !is_valid_ptr( input ) )
-		return;
-
-	vector3 target_position = target->second.bone_data.positions[ 0 ];
-	float travel_time = 0.f;
-
-	if ( !prediction( local_player.eyes_position, target_position, travel_time ) )
-		return;
-
-	vector3 angle;
-	if ( !calc_angle( local_player.eyes_position, target_position, angle ) )
-		return;
-
-	rust::base_entity* parent_entity = local_player.entity->parent_entity;
-	
-	if ( is_valid_ptr( parent_entity ) ) {
-		unity::transform* transform = parent_entity->get_transform();
-
-		if ( is_valid_ptr( transform ) ) {
-			angle.y -= transform->get_euler_angles().y;
-		}
-	}
-
-	input->body_angles = vector2( angle.x, angle.y );
 }
 
 bool features::update_rocket_trajectory( rust::base_launcher* launcher ) {

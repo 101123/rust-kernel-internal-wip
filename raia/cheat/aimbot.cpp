@@ -1,7 +1,7 @@
 #include "aimbot.h"
-
 #include "math/vec2.h"
 #include "vars.h"
+#include "sdk/sdk.h"
 
 #include <algorithm>
 
@@ -73,4 +73,106 @@ bool prediction( const vector3& origin, vector3& target, float& travel_time ) {
 	}
 
 	return false;
+}
+
+bool calc_angle( const vector3& src, const vector3& dst, vector3& result ) {
+	vector3 direction = dst - src;
+	if ( vector3::sqr_magnitude( direction ) < 0.001f )
+		return false;
+
+	result = vector3(
+		math::rad2deg( -asinf( direction.y / vector3::magnitude( direction ) ) ),
+		math::rad2deg( atan2f( direction.x, direction.z ) ),
+		0.f
+	);
+
+	return true;
+}
+
+inline void normalize( float& pitch, float& yaw ) {
+	if ( pitch < -89.f ) pitch = -89.f;
+	else if ( pitch > 89.f ) pitch = 89.f;
+	if ( yaw < -180.f ) yaw += 360.f;
+	else if ( yaw >= 180.f ) yaw -= 360.f;
+}
+
+inline vector2 angular_interpolate( const vector2& a, const vector2& b, float t ) {
+	if ( t == 1.f )
+		return b;
+
+	float pitch = a.x + t * ( b.x - a.x ), yaw;
+
+	if ( fabsf( b.y - a.y ) > 180.f ) {
+		// Go around in the opposite direction
+		yaw = a.y + t * ( b.y - a.y > 0.f ? -1.f : 1.f ) * ( 360.0f - fabsf( b.y - a.y ) );
+	}
+	else {
+		yaw = a.y + t * ( b.y - a.y );
+	}
+
+	normalize( pitch, yaw );
+
+	return vector2( pitch, yaw );
+}
+
+vector2 finalize_angles( const vector2& from, const vector2& to ) {
+	if ( aimbot.smoothing == 0.f ) {
+		vector2 angles = to;
+		normalize( angles.x, angles.y );
+		return angles;
+	}
+
+	return angular_interpolate( from, to, ( 1.f - aimbot.smoothing ) * ( unity::time::get_delta_time() * 30.f ) );
+}
+
+void memory_aimbot( rust::base_projectile* weapon, const std::pair<rust::base_player*, cached_player>* target ) {
+	rust::player_input* input = local_player.entity->input;
+	if ( !is_valid_ptr( input ) )
+		return;
+
+	vector3 target_position = target->second.bone_data.positions[ 0 ];
+	float travel_time = 0.f;
+
+	if ( !prediction( local_player.eyes_position, target_position, travel_time ) )
+		return;
+
+	vector3 angle;
+	if ( !calc_angle( local_player.eyes_position, target_position, angle ) )
+		return;
+
+	vector2 body_angles = input->body_angles;
+
+	if ( aimbot.recoil > 0.f ) {
+		sys::list<rust::held_entity::punch_entry*>* punches = weapon->punches;
+
+		if ( is_valid_ptr( punches ) && is_valid_ptr( punches->items ) ) {
+			float delta_time = unity::time::get_delta_time();
+
+			for ( int32_t i = 0; i < punches->size; i++ ) {
+				rust::held_entity::punch_entry* punch_entry = punches->at( i );
+				if ( !is_valid_ptr( punch_entry ) )
+					continue;
+
+				vector3 amount = punch_entry->amount * ( delta_time / punch_entry->duration );
+
+				if ( vector3::sqr_magnitude( amount ) >= vector3::sqr_magnitude( punch_entry->amount - punch_entry->amount_added ) ) {
+					amount = punch_entry->amount - punch_entry->amount_added;
+				}
+
+				body_angles += amount * aimbot.recoil;
+			}
+		}
+	}
+
+	rust::base_entity* parent_entity = local_player.entity->parent_entity;
+
+	if ( is_valid_ptr( parent_entity ) ) {
+		unity::transform* transform = parent_entity->get_transform();
+
+		if ( is_valid_ptr( transform ) ) {
+			angle.y -= transform->get_euler_angles().y;
+		}
+	}
+
+	input->body_angles = finalize_angles( body_angles, vector2( angle.x, angle.y ) );
 }

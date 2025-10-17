@@ -1,4 +1,4 @@
-#include "gui.h"
+﻿#include "gui.h"
 
 #include "util.h"
 
@@ -949,16 +949,21 @@ void gui::run() {
                     left.toggle( S( "Aimbot" ), &aimbot.enabled );
 
                     if ( aimbot.enabled ) {
-                        left.combo_box( S( "Aimbot type" ), { S( "Memory" ), S( "Silent" ), S( "Manipulation" ) }, &aimbot.type );
+                        left.combo_box( S( "Aimbot type" ), { S( "Memory" ), S( "Silent" ) }, &aimbot.type );
+
+                        if ( aimbot.type == aimbot_type::memory ) {
+                            left.slider( S( "Recoil" ), S( "%.2f" ), &aimbot.recoil, 0.f, 1.f );
+                            left.slider( S( "Smoothing" ), S( "%.2f" ), &aimbot.smoothing, 0.f, 1.f );
+                        }
+
+                        left.slider( S( "Field of view" ), S( "%dpx" ), &aimbot.fov, 0u, 800u );
+
+                        if ( left.toggle( S( "Desync" ), &desync.enabled ) ) {
+                            left.slider( S( "Desync time" ), S( "%.2fs" ), &desync.time, 0.f, 0.79f );
+                        }
+
+                        left.toggle( S( "Bullet teleport" ), &bullet_teleport );
                     }
-
-                    left.slider( S( "Field of view" ), S( "%dpx" ), &aimbot.fov, 0u, 800u );
-
-                    if ( left.toggle( S( "Desync" ), &desync.enabled ) ) {
-                        left.slider( S( "Desync time" ), S( "%.2fs" ), &desync.time, 0.f, 0.79f );
-                    }
-
-                    left.toggle( S( "Bullet teleport" ), &bullet_teleport );
 
                     left.end();
 

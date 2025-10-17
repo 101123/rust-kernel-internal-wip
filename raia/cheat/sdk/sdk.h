@@ -65,6 +65,10 @@ namespace sys {
     public:
         sys::array<T>* items;
         int size;
+
+        T& at( int32_t index ) {
+            return items->buffer[ index ];
+        }
     };
 
     template <typename T>
@@ -607,6 +611,14 @@ namespace unity {
             um::caller& caller = um::get_caller_for_thread();
 
             return caller( get_time );
+        }
+
+        static float get_delta_time() {
+            float ( *get_delta_time )( ) = decltype( get_delta_time )( unity_player + Offsets::Time::get_deltaTime );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_delta_time );
         }
 
         static float get_fixed_time() {
@@ -1987,6 +1999,16 @@ namespace rust {
 
     class held_entity : public base_entity {
     public:
+        class punch_entry {
+        public:
+            FIELD( vector3, amount, Offsets::PunchEntry::amount );
+            FIELD( float, duration, Offsets::PunchEntry::duration );
+            FIELD( float, start_time, Offsets::PunchEntry::startTime );
+            FIELD( vector3, amount_added, Offsets::PunchEntry::amountAdded );
+        };
+
+        FIELD( sys::list<punch_entry*>*, punches, Offsets::HeldEntity::_punches );
+
         static inline il2cpp_class* klass_;
         static inline il2cpp_object* type_object_;
     };
