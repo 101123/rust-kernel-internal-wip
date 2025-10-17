@@ -613,6 +613,8 @@ void draw_raids() {
 	}
 }
 
+bool renderer_init;
+
 void set_draw_overrides() {
 	using T = decltype( cvar_visual::draw_override );
 
@@ -621,8 +623,6 @@ void set_draw_overrides() {
 	bear_trap.draw_override = ( T )draw_bear_trap;
 	sam_site.draw_override = ( T )draw_sam_site;
 }
-
-bool renderer_init;
 
 void on_render( IDXGISwapChain* swapchain ) {
 	if ( !renderer_init ) {

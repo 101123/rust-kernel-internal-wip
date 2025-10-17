@@ -60,7 +60,7 @@ bool prediction( const vector3& origin, vector3& target, float& travel_time ) {
 				vector3 closest_3d_point = line.closest_point( target_3d );
 
 				if ( vector3::distance( closest_3d_point, target_3d ) < 0.01f ) {
-					travel_time = t;
+					travel_time = t - dt + ( dt * ( vector3::distance( previous_position, closest_3d_point ) / vector3::magnitude( velocity * dt ) ) );
 					return true;
 				}
 

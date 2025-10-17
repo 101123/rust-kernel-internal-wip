@@ -958,6 +958,8 @@ void gui::run() {
                         left.slider( S( "Desync time" ), S( "%.2fs" ), &desync.time, 0.f, 0.79f );
                     }
 
+                    left.toggle( S( "Bullet teleport" ), &bullet_teleport );
+
                     left.end();
 
                     right.begin();

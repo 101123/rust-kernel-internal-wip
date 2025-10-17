@@ -73,7 +73,7 @@ void features::weapon_modifiers( rust::base_projectile* weapon ) {
 
 	if ( !weapon_data ) {
 		weapon_data = weapon_data_cache.add( {
-			weapon->prefab_id, weapon->automatic, weapon->aim_sway, weapon->aim_cone, recoil->recoil_yaw_min, recoil->recoil_yaw_max, recoil->recoil_pitch_min, recoil->recoil_pitch_max, } );
+			weapon->prefab_id, weapon->automatic, weapon->aim_sway, weapon->aim_cone, recoil->recoil_yaw_min, recoil->recoil_yaw_max, recoil->recoil_pitch_min, recoil->recoil_pitch_max } );
 	}
 
 	// What the fuck?
