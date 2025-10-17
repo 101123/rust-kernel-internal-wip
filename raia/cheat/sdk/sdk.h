@@ -265,6 +265,15 @@ namespace unity {
         };
     }
 
+    namespace collections {
+        template <typename T>
+        struct native_array {
+            T* buffer;
+            int length;
+            int allocator_label;
+        };
+    }
+
     enum key_code {
         backspace = 8, _delete = 127, tab = 9, clear = 12,
         _return = 13, pause = 19, _escape = 27, space = 32,
@@ -365,6 +374,37 @@ namespace unity {
         use_global,
         ignore,
         collide
+    };
+
+    struct mathf {
+    public:
+        static bool is_power_of_two( int value ) {
+            return ( value & ( value - 1 ) ) == 0;
+        }
+
+        static int clamp( int value, int min, int max ) {
+            return ( value < min ) ? min : ( value > max ) ? max : value;
+        }
+
+        static float clamp( float value, float min, float max ) {
+            return ( value < min ) ? min : ( value > max ) ? max : value;
+        }
+
+        static float clamp01( float value ) {
+            return ( value < 0.f ) ? 0.f : ( value > 1.f ) ? 1.f : value;
+        }
+
+        static int min( int a, int b ) {
+            return a < b ? a : b;
+        }
+
+        static float max( float a, float b ) {
+            return a > b ? a : b;
+        }
+
+        static float lerp( float a, float b, float t ) {
+            return a + ( b - a ) * clamp01( t );
+        }
     };
 
     class object : public il2cpp_object {
@@ -1387,6 +1427,26 @@ namespace rust {
         static inline il2cpp_class* klass_;
     };
 
+    namespace interpolation {
+        struct transform_snapshot {
+            float time;
+            vector3 pos;
+            quaternion rot;
+        };
+    }
+
+    template <typename T>
+    class interpolator {
+    public:
+        FIELD( sys::list<T>*, list, Offsets::Interpolator::list );
+        FIELD( T, last, Offsets::Interpolator::last );
+    };
+
+    class position_lerp {
+    public:
+        FIELD( rust::interpolator<rust::interpolation::transform_snapshot>*, interpolator, Offsets::PositionLerp::interpolator );
+    };
+
     class model {
     public:
         FIELD( unity::transform*, eye_bone, Offsets::Model::eyeBone );
@@ -1430,6 +1490,7 @@ namespace rust {
             reserved19 = -2147483648
         };
 
+        FIELD( rust::position_lerp*, position_lerp, Offsets::BaseEntity::positionLerp );
         FIELD( rust::model*, model, Offsets::BaseEntity::model );
         FIELD( int, flags, Offsets::BaseEntity::flags );
 
@@ -1466,6 +1527,17 @@ namespace rust {
             ( write_arg( net_write, args ), ... );
 
             net_write->send( network::send_info( client->connection ) );
+        }
+
+        vector3 get_world_velocity() {
+            void ( *get_world_velocity )( vector3*, base_entity* ) =
+                ( decltype( get_world_velocity ) )( game_assembly + Offsets::BaseEntity::GetWorldVelocity );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            vector3* world_velocity = caller.push<vector3>();
+            caller( get_world_velocity, world_velocity, this );
+            return *world_velocity;
         }
     };
 
@@ -2378,7 +2450,7 @@ namespace rust {
         }
 
         static bool line_of_sight( vector3 p0, vector3 p1, int32_t layer_mask ) {
-            return !trace( unity::ray( p0, p1 - p0 ), 0.f, nullptr, vector3::distance( p0, p1 ), layer_mask, 0, nullptr );
+            return !trace( unity::ray( p0, p1 - p0 ), 0.f, nullptr, vector3::distance( p0, p1 ), layer_mask, unity::query_trigger_interaction::ignore, nullptr );
         }
 
         static inline static_fields* static_fields_;
@@ -2495,7 +2567,7 @@ namespace rust {
         }
 
         static const char* grid_to_string( vector2i grid, char* buffer, size_t size ) {
-            grid.x = max( grid.x, 0 );
+            grid.x = unity::mathf::max( grid.x, 0 );
             int i = grid.x + 1;
             int buffer_index = 0;
             while ( i > 0 ) {
@@ -2577,5 +2649,201 @@ namespace rust {
 
             return caller( get_container_00 );
         }
+    };
+
+#define BYTE_TO_FLOAT( b ) ( float )b * 0.003921569f
+#define FLOAT_TO_BYTE( f ) ( uint8_t )f * 255.999f;
+#define SHORT_TO_FLOAT( s ) ( float )s * 3.051944E-05f;
+
+    template <typename T>
+    class terrain_map {
+    public:
+        FIELD( int, res, Offsets::TerrainMap::res );
+        FIELD( unity::collections::native_array<T>, src, Offsets::TerrainMap::src );
+
+        int index( float normalized, int res ) {
+            int num = ( int )( normalized * ( float )res );
+            if ( num < 0 ) {
+                return 0;
+            }
+
+            else if ( num <= res - 1 ) {
+                return num;
+            }
+
+            return res - 1;
+        }
+    };
+
+    class terrain_height_map : public terrain_map<uint16_t> {
+    public:
+        FIELD( float, norm_y, Offsets::TerrainHeightMap::normY );
+
+        float get_height( float norm_x, float norm_z, vector3 terrain_position, vector3 terrain_size, int res, uint16_t* height_map ) {
+            return terrain_position.y + get_height_01( norm_x, norm_z, res, height_map ) * terrain_size.y;
+        }
+
+        float get_height_01( float norm_x, float norm_z, int res, uint16_t* height_map ) {
+            int num = res - 1;
+            float num2 = norm_x * ( float )num;
+            float num3 = norm_z * ( float )num;
+            int num4 = unity::mathf::clamp( ( int )num2, 0, num );
+            int num5 = unity::mathf::clamp( ( int )num3, 0, num );
+            int num6 = unity::mathf::min( num4 + 1, num );
+            int num7 = unity::mathf::min( num5 + 1, num );
+            float height = get_height_01( num4, num5, res, height_map );
+            float height2 = get_height_01( num6, num5, res, height_map );
+            float height3 = get_height_01( num4, num7, res, height_map );
+            float height4 = get_height_01( num6, num7, res, height_map );
+            float num8 = num2 - ( float )num4;
+            float num9 = num3 - ( float )num5;
+            float num10 = unity::mathf::lerp( height, height2, num8 );
+            float num11 = unity::mathf::lerp( height3, height4, num8 );
+            return unity::mathf::lerp( num10, num11, num9 );
+        }
+
+        float get_height_01( int x, int z, int res, uint16_t* height_map ) {
+            int index = z * res + x; 
+            return SHORT_TO_FLOAT( height_map[ index ] );
+        }
+
+        vector3 get_normal( float norm_x, float norm_z, int res, uint16_t* height_map, float norm_y ) {
+            int num = res - 1;
+            float num2 = norm_x * ( float )num;
+            float num3 = norm_z * ( float )num;
+            int num4 = unity::mathf::clamp( ( int )num2, 0, num );
+            int num5 = unity::mathf::clamp( ( int )num3, 0, num );
+            int num6 = unity::mathf::min( num4 + 1, num );
+            int num7 = unity::mathf::min( num5 + 1, num );
+            vector3 normal = get_normal( num4, num5, res, height_map, norm_y );
+            vector3 normal2 = get_normal( num6, num5, res, height_map, norm_y );
+            vector3 normal3 = get_normal( num4, num7, res, height_map, norm_y );
+            vector3 normal4 = get_normal( num6, num7, res, height_map, norm_y );
+            float num8 = num2 - ( float )num4;
+            float num9 = num3 - ( float )num5;
+            vector3 vector = vector3::slerp( normal, normal2, num8 );
+            vector3 vector2 = vector3::slerp( normal3, normal4, num8 );
+            return vector3::normalize( vector3::slerp( vector, vector2, num9 ) );
+        }
+
+        vector3 get_normal( int x, int z, int res, uint16_t* height_map, float norm_y ) {
+            int num = res - 1;
+            int num2 = unity::mathf::clamp( x - 1, 0, num );
+            int num3 = unity::mathf::clamp( z - 1, 0, num );
+            int num4 = unity::mathf::clamp( x + 1, 0, num );
+            int num5 = unity::mathf::clamp( z + 1, 0, num );
+            float num6 = ( get_height_01( num4, num3, res, height_map ) - get_height_01( num2, num3, res, height_map ) ) * 0.5f;
+            float num7 = ( get_height_01( num2, num5, res, height_map ) - get_height_01( num2, num3, res, height_map ) ) * 0.5f;
+            return vector3::normalize( vector3( -num6, norm_y, -num7 ) );
+        }
+    };
+
+    class terrain_splat_map : public terrain_map<uint8_t> {
+    public:
+        float get_splat( float norm_x, float norm_z, int mask, int res, uint8_t* splat_map ) {
+            int num = res - 1;
+            float num2 = norm_x * ( float )num;
+            float num3 = norm_z * ( float )num;
+            int num4 = unity::mathf::clamp( ( int )num2, 0, num );
+            int num5 = unity::mathf::clamp( ( int )num3, 0, num );
+            int num6 = unity::mathf::min( num4 + 1, num );
+            int num7 = unity::mathf::min( num5 + 1, num );
+            float num8 = unity::mathf::lerp( get_splat( num4, num5, mask, res, splat_map ), get_splat( num6, num5, mask, res, splat_map ), num2 - ( float )num4 );
+            float num9 = unity::mathf::lerp( get_splat( num4, num7, mask, res, splat_map ), get_splat( num6, num7, mask, res, splat_map ), num2 - ( float )num4 );
+            return unity::mathf::lerp( num8, num9, num3 - ( float )num5 );
+        }
+
+        float get_splat( int x, int z, int mask, int res, uint8_t* splat_map ) {
+            int index = ( mask * res + z ) * res + x;
+            return BYTE_TO_FLOAT( splat_map[ index ] );
+        }
+    };
+
+    class terrain_topology_map : public terrain_map<int32_t> {
+    public:
+        int get_topology( float norm_x, float norm_z, float radius, vector3 terrain_one_over_size, int res, int32_t* topology_map ) {
+            int num = 0;
+            float num2 = terrain_one_over_size.x * radius;
+            float num3 = radius * radius;
+            int num4 = index( norm_x, res );
+            int num5 = index( norm_z, res );
+            int num6 = index( norm_x - num2, res );
+            int num7 = index( norm_x + num2, res );
+            int num8 = index( norm_z - num2, res );
+            int num9 = index( norm_z + num2, res );
+            for ( int i = num8; i <= num9; i++ ) {
+                int num10 = i - num5;
+                int num11 = num10 * num10;
+                for ( int j = num6; j <= num7; j++ ) {
+                    int num12 = j - num4;
+                    if ( ( float )( num12 * num12 + num11 ) <= num3 ) {
+                        num |= topology_map[ i * res + j ];
+                    }
+                }
+            }
+
+            return num;
+        }
+    };
+
+    class terrain_texturing {
+    public:
+        FIELD( float, terrain_size, Offsets::TerrainTexturing::terrainSize );
+        FIELD( int, shore_map_size, Offsets::TerrainTexturing::shoreMapSize );
+        FIELD( float, shore_distance_scale, Offsets::TerrainTexturing::shoreDistanceScale );
+        FIELD( unity::collections::native_array<vector4>, shore_vectors, Offsets::TerrainTexturing::shoreVectors );
+
+        std::pair<vector3, float> get_coarse_vector_to_shore( vector2 uv, int shore_map_size, vector4* shore_vectors, float shore_distance_scale ) {
+            int num = shore_map_size;
+            int num2 = num - 1;
+            float num3 = uv.x * ( float )num2;
+            float num4 = uv.y * ( float )num2;
+            int num5 = ( int )num3;
+            int num6 = ( int )num4;
+            float num7 = num3 - ( float )num5;
+            float num8 = num4 - ( float )num6;
+            num5 = ( ( num5 >= 0 ) ? num5 : 0 );
+            num6 = ( ( num6 >= 0 ) ? num6 : 0 );
+            num5 = ( ( num5 <= num2 ) ? num5 : num2 );
+            num6 = ( ( num6 <= num2 ) ? num6 : num2 );
+            int num9 = ( ( num3 < ( float )num2 ) ? 1 : 0 );
+            int num10 = ( ( num4 < ( float )num2 ) ? num : 0 );
+            int num11 = num6 * num + num5;
+            int num12 = num11 + num9;
+            int num13 = num11 + num10;
+            int num14 = num13 + num9;
+            vector4 xyz = shore_vectors[ num11 ];
+            vector4 xyz2 = shore_vectors[ num12 ];
+            vector4 xyz3 = shore_vectors[ num13 ];
+            vector4 xyz4 = shore_vectors[ num14 ];
+            vector3 vector;
+            vector.x = ( xyz2.x - xyz.x ) * num7 + xyz.x;
+            vector.y = ( xyz2.y - xyz.y ) * num7 + xyz.y;
+            vector.z = ( xyz2.z - xyz.z ) * num7 + xyz.z;
+            vector3 vector2;
+            vector2.x = ( xyz4.x - xyz3.x ) * num7 + xyz3.x;
+            vector2.y = ( xyz4.y - xyz3.y ) * num7 + xyz3.y;
+            vector2.z = ( xyz4.z - xyz3.z ) * num7 + xyz3.z;
+            float num15 = ( vector2.x - vector.x ) * num8 + vector.x;
+            float num16 = ( vector2.y - vector.y ) * num8 + vector.y;
+            float num17 = ( vector2.z - vector.z ) * num8 + vector.z;
+            return { vector3( num15, 0.f, num16 ), num17 * shore_distance_scale };
+        }
+    };
+
+    class terrain_meta {
+    public:
+        class static_fields {
+        public:
+            FIELD( vector3, position, Offsets::TerrainMeta::Position );
+            FIELD( vector3, size, Offsets::TerrainMeta::Size );
+            FIELD( vector3, one_over_size, Offsets::TerrainMeta::OneOverSize );
+            FIELD( terrain_height_map*, height_map, Offsets::TerrainMeta::HeightMap );
+            FIELD( terrain_splat_map*, splat_map, Offsets::TerrainMeta::SplatMap );
+            FIELD( terrain_topology_map*, topology_map, Offsets::TerrainMeta::TopologyMap );
+            FIELD( terrain_texturing*, texturing, Offsets::TerrainMeta::Texturing );
+        };
+
+        static inline static_fields* static_fields_;
     };
 }

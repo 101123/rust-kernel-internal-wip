@@ -193,6 +193,8 @@ namespace util {
 		util::mutex m_mutex;
 	};
 
+#define _max( x, y ) ( x > y ? x : y )
+
 	inline uintptr_t find_pattern_image( uintptr_t image, const char* pattern, const char* mask ) {
 		IMAGE_DOS_HEADER dos_header = *( IMAGE_DOS_HEADER* )( image );
 		IMAGE_NT_HEADERS nt_headers = *( IMAGE_NT_HEADERS* )( image + dos_header.e_lfanew );
@@ -210,7 +212,7 @@ namespace util {
 			}
 
 			uintptr_t result = util::find_pattern( 
-				image + section.VirtualAddress, pattern, mask, max( section.SizeOfRawData, section.Misc.VirtualSize ) );
+				image + section.VirtualAddress, pattern, mask, _max( section.SizeOfRawData, section.Misc.VirtualSize ) );
 
 			if ( result ) {
 				return result;

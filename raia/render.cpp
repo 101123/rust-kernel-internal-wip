@@ -105,15 +105,15 @@ bool get_player_bounds( Bounds& bounds, const w2s_result* w2s, size_t count, flo
 
 	float padding = ( 1.f / distance ) * 75.f;
 
-	bounds.left = floorf( bounds.left - max( padding, 2.f ) );
-	bounds.right = floorf( bounds.right + max( padding, 4.f ) );
-	bounds.top = floorf( bounds.top - max( padding, 2.f ) );
-	bounds.bottom = floorf( bounds.bottom + max( padding, 4.f ) );
+	bounds.left = floorf( bounds.left - std::max( padding, 2.f ) );
+	bounds.right = floorf( bounds.right + std::max( padding, 4.f ) );
+	bounds.top = floorf( bounds.top - std::max( padding, 2.f ) );
+	bounds.bottom = floorf( bounds.bottom + std::max( padding, 4.f ) );
 
-	if ( bounds.top < 0.f && ( bounds.bottom <= max( padding, 4.f ) || bounds.bottom > 1440.f ) )
+	if ( bounds.top < 0.f && ( bounds.bottom <= std::max( padding, 4.f ) || bounds.bottom > 1440.f ) )
 		return false;
 
-	if ( bounds.left < 0.f && bounds.right <= max( padding, 4.f ) )
+	if ( bounds.left < 0.f && bounds.right <= std::max( padding, 4.f ) )
 		return false;
 
 	return true;

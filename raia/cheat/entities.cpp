@@ -281,9 +281,9 @@ const void** get_player_cacher() {
 #define PREFAB( prefab_path ) unity::string_ex::manifest_hash( prefab_path )
 
 bool entity_manager::belongs_in_cache( rust::base_networkable* entity, cache_specifier* specifier ) {
-    if ( entity->klass == rust::base_player::klass_ || entity->klass == rust::scientist_npc::klass_ || 
-        entity->klass == rust::tunnel_dweller::klass_ || entity->klass == rust::underwater_dweller::klass_ || 
-        entity->klass == rust::scarecrow_npc::klass_ || entity->klass == rust::gingerbread_npc::klass_ ) {
+    if ( entity->is<rust::base_player>() || entity->is<rust::scientist_npc>() ||
+        entity->is<rust::tunnel_dweller>() || entity->is<rust::underwater_dweller>() ||
+        entity->is<rust::scarecrow_npc>() || entity->is<rust::gingerbread_npc>() ) {
         *specifier = cache_specifier( get_player_cacher(), nullptr, true );
         return true;
     }

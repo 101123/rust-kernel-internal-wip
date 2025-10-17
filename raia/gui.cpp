@@ -90,7 +90,7 @@ public:
         command.bounds = rect( x, y, 0.f, 0.f );
         command.z_index = current_z_index_;
 
-        int length = min( strlen( text ), sizeof( command.text.buffer ) - 1 );
+        int length = std::min( strlen( text ), sizeof( command.text.buffer ) - 1 );
         memcpy( command.text.buffer, text, length );
         command.text.buffer[ length ] = '\0';
         command.text.font = font;

@@ -122,6 +122,8 @@ public:
 		return to;
 	}
 
+	static vector3 slerp( const vector3& a, const vector3 b, float t );
+
 	static const float epsilon;
 
 	static const vector3 up;

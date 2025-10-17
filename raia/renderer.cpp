@@ -398,7 +398,7 @@ void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint3
 
 	if ( flags & text_flags::drop_shadow ) {
 		// Make the alpha of the drop shadow less than the alpha of the text
-		int alpha = max( ( int )( ( color & IM_COL32_A_MASK ) >> IM_COL32_A_SHIFT ) - 55, 0 );
+		int alpha = std::max( ( int )( ( color & IM_COL32_A_MASK ) >> IM_COL32_A_SHIFT ) - 55, 0 );
 
 		draw_list->AddText( _font, size, ImVec2( x + 1.f, y + 1.f ), IM_COL32( 0, 0, 0, alpha ), text );
 	}
