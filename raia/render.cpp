@@ -648,6 +648,9 @@ void on_render( IDXGISwapChain* swapchain ) {
 	}
 
 	if ( gui::open ) {
+		rust::cursor_manager::static_fields_->i_hold_open = 1;
+		rust::cursor_manager::static_fields_->i_previous_open = 1;
+
 		gui::run();
 	}
 

@@ -68,7 +68,8 @@ class_lookup class_lookups[] = {
 	{ &rust::ui_belt::klass_, nullptr, nullptr, UIBelt_TypeDefinitionIndex },
 	{ &unity::instanced_debug_draw::klass_, nullptr, nullptr, InstancedDebugDraw_TypeDefinitionIndex },
 	{ &rust::player_corpse::klass_, nullptr, nullptr, PlayerCorpse_TypeDefinitionIndex },
-	{ &rust::dropped_item_container::klass_, nullptr, nullptr, DroppedItemContainer_TypeDefinitionIndex }
+	{ &rust::dropped_item_container::klass_, nullptr, nullptr, DroppedItemContainer_TypeDefinitionIndex },
+	{ nullptr, nullptr, &rust::cursor_manager::static_fields_, CursorManager_TypeDefinitionIndex }
 };
 
 parent_class_lookup parent_class_lookups[] = {

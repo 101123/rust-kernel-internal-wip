@@ -130,7 +130,7 @@ void memory_aimbot( rust::base_projectile* weapon, const std::pair<rust::base_pl
 	if ( !is_valid_ptr( input ) )
 		return;
 
-	vector3 target_position = target->second.bone_data.positions[ 0 ];
+	vector3 target_position = target->second.bone_data.positions[ 1 ];
 	float travel_time = 0.f;
 
 	if ( !prediction( local_player.eyes_position, target_position, travel_time ) )

@@ -2872,4 +2872,15 @@ namespace rust {
 
         static inline static_fields* static_fields_;
     };
+
+    class cursor_manager {
+    public:
+        class static_fields {
+        public:
+            FIELD( int, i_hold_open, 0x0 );
+            FIELD( int, i_previous_open, 0x4 );
+        };
+
+        static inline static_fields* static_fields_;
+    };
 }

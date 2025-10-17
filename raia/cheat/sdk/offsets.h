@@ -2771,6 +2771,13 @@ namespace Offsets {
 		constexpr const static size_t noclip = 0x2b3b940;
 	}
 
+#define CursorManager_TypeDefinitionIndex 3894
+
+	namespace CursorManager {
+
+		// Offsets
+	}
+
 	// obf name: ::%427abdb7208abd5a918a8ebbf9ce61b39486d359
 #define ProtoBuf_ProjectileShoot_ClassName "%427abdb7208abd5a918a8ebbf9ce61b39486d359"
 #define ProtoBuf_ProjectileShoot_ClassNameShort "%427abdb7208abd5a918a8ebbf9ce61b39486d359"
