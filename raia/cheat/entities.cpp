@@ -992,6 +992,30 @@ void update_player_avatar( rust::base_player* player, cached_player& cached_play
     }
 }
 
+void update_velocity( rust::base_player* player, cached_player& cached_player ) {
+    unity::transform* transform = player->get_transform();
+    if ( !is_valid_ptr( transform ) )
+        return;
+
+    vector3 position = transform->get_position();
+    vector3 velocity = player->get_world_velocity();
+
+    cached_velocity_data& velocity_data = cached_player.velocity_data;
+
+    if ( velocity == vector3() ) {
+        velocity_data.index = 0;
+    }
+
+    if ( velocity_data.index <= SNAPSHOT_COUNT - 1 ) {
+        velocity_data.snapshots[ velocity_data.index++ ] = cached_position_snapshot( position, unity::time::get_time() );
+    }
+
+    else {
+        memmove( velocity_data.snapshots, velocity_data.snapshots + 1, sizeof( cached_position_snapshot ) * ( SNAPSHOT_COUNT - 1 ) );
+        velocity_data.snapshots[ SNAPSHOT_COUNT - 1 ] = cached_position_snapshot( position, unity::time::get_time() );
+    }
+}
+
 void entity_manager::update() {
     util::scoped_spinlock lock( &cache_lock );
 
@@ -1048,6 +1072,7 @@ void entity_manager::update() {
         update_player_inventory( player, cached_player );
         update_player_visibility( player, cached_player );
         update_player_avatar( player, cached_player );
+        update_velocity( player, cached_player );
     }
 }
 

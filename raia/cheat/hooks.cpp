@@ -629,9 +629,7 @@ void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot*
 
 		if ( aimbot.player_target && aimbot.enabled && aimbot.type == aimbot_type::silent && game_input.get_async_key_state( 'C' ) ) {
 			vector3 target_position = aimbot.player_target->second.bone_data.positions[ 1 ];
-			float travel_time = 0.f;
-
-			if ( !prediction( server_projectile->start_position, target_position, travel_time ) )
+			if ( !prediction( server_projectile->start_position, target_position, get_player_velocity( aimbot.player_target->second ) ) )
 				return;
 
 			vector3 direction = ( target_position - server_projectile->start_position );

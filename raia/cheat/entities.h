@@ -1,5 +1,7 @@
 #pragma once
 
+#define SNAPSHOT_COUNT 25
+
 #include "sdk/declare.h"
 
 #include "math/vec3.h"
@@ -46,11 +48,22 @@ struct cached_bone_data {
 	vector3 positions[ 18 ];
 };
 
+struct cached_position_snapshot {
+	vector3 position;
+	float time;
+};
+
+struct cached_velocity_data {
+	cached_position_snapshot snapshots[ SNAPSHOT_COUNT ];
+	int32_t index;
+};
+
 struct cached_player {
 	bool init;
 	bool scientist;
 	uint64_t steam_id;
 	cached_bone_data bone_data;
+	cached_velocity_data velocity_data;
 	char name[ 256 ];
 	int32_t active_item_idx;
 	int32_t active_item_id;

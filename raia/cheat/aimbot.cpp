@@ -39,7 +39,7 @@ public:
 	}
 };
 
-bool prediction( const vector3& origin, vector3& target, float& travel_time ) {
+bool prediction_no_velocity( const vector3& origin, vector3& target, float& travel_time ) {
 	vector2 target_2d = vector2( target.x, target.z );
 	vector3 target_3d = target;
 
@@ -73,6 +73,42 @@ bool prediction( const vector3& origin, vector3& target, float& travel_time ) {
 	}
 
 	return false;
+}
+
+bool prediction( const vector3& origin, vector3& target, const vector3& target_velocity ) {
+	vector3 target_position = target;
+	float travel_time = 0.f;
+
+	if ( prediction_no_velocity( origin, target, travel_time ) ) {
+		if ( target_velocity == vector3() ) {
+			return true;
+		}
+
+		// Extrapolate the position of the target
+		target = target_position + ( target_velocity * travel_time );
+
+		return prediction_no_velocity( origin, target, travel_time );
+	}
+
+	return false;
+}
+
+vector3 get_player_velocity( const cached_player& cached_player ) {
+	vector3 displacement;
+	float time = 0.f;
+
+	const cached_velocity_data& velocity_data = cached_player.velocity_data;
+
+	for ( int32_t i = 0; i < velocity_data.index - 1; i++ ) {
+		displacement += velocity_data.snapshots[ i + 1 ].position - velocity_data.snapshots[ i ].position;
+		time += velocity_data.snapshots[ i + 1 ].time - velocity_data.snapshots[ i ].time;
+	}
+
+	if ( time == 0.f ) {
+		return vector3();
+	}
+
+	return displacement / time;
 }
 
 bool calc_angle( const vector3& src, const vector3& dst, vector3& result ) {
@@ -133,7 +169,7 @@ void memory_aimbot( rust::base_projectile* weapon, const std::pair<rust::base_pl
 	vector3 target_position = target->second.bone_data.positions[ 1 ];
 	float travel_time = 0.f;
 
-	if ( !prediction( local_player.eyes_position, target_position, travel_time ) )
+	if ( !prediction( local_player.eyes_position, target_position, get_player_velocity( target->second ) ) )
 		return;
 
 	vector3 angle;
