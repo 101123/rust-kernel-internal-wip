@@ -69,6 +69,7 @@ class_lookup class_lookups[] = {
 	{ &unity::instanced_debug_draw::klass_, nullptr, nullptr, InstancedDebugDraw_TypeDefinitionIndex },
 	{ &rust::player_corpse::klass_, nullptr, nullptr, PlayerCorpse_TypeDefinitionIndex },
 	{ &rust::dropped_item_container::klass_, nullptr, nullptr, DroppedItemContainer_TypeDefinitionIndex },
+	{ nullptr, nullptr, &rust::terrain_meta::static_fields_, TerrainMeta_TypeDefinitionIndex },
 	{ nullptr, nullptr, &rust::cursor_manager::static_fields_, CursorManager_TypeDefinitionIndex }
 };
 

@@ -283,6 +283,8 @@ DEFINE_CONTEXT( held_weapon,
 DEFINE_CONTEXT( camera,
 	matrix4x4 view_matrix;
 	vector3 position;
+	vector3 forward;
+	float yaw;
 );
 
 namespace aimbot_type {

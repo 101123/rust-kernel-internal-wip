@@ -191,6 +191,7 @@
     <ClCompile Include="include\imgui\imgui.cpp" />
     <ClCompile Include="include\imgui\imgui_draw.cpp" />
     <ClCompile Include="include\imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="include\uncompress_lzma2.c" />
     <ClCompile Include="include\unity_math\FloatConversion.cpp" />
     <ClCompile Include="include\unity_math\Matrix3x3.cpp" />
     <ClCompile Include="include\unity_math\Matrix4x4.cpp" />
@@ -228,6 +229,7 @@
     <ClInclude Include="include\glfn.h" />
     <ClInclude Include="include\hexrays.h" />
     <ClInclude Include="include\imgui\imgui_impl_dx11.h" />
+    <ClInclude Include="include\uncompress_lzma2.h" />
     <ClInclude Include="include\unity_math\Annotations.h" />
     <ClInclude Include="include\unity_math\FloatConversion.h" />
     <ClInclude Include="include\unity_math\IntegerDefinitions.h" />

@@ -1,7 +1,8 @@
 #include "renderer.h"
 
-#include "dx.h"
+#include "dx.h"	
 #include "um.h"
+#include "util.h"
 
 #include "fonts.h"
 
@@ -10,6 +11,8 @@
 #include <imgui/imgui_impl_dx11.h>
 
 #include <glfn.h>
+
+#include <uncompress_lzma2.h>
 
 #include <memory>
 
@@ -23,67 +26,26 @@ ImDrawListSharedData* shared_data;
 ImDrawList* draw_list;
 ImDrawData* draw_data;
 
-template <typename T>
-class com_ptr {
-public:
-	com_ptr() :
-		object_( nullptr ) {};
-
-	~com_ptr() {
-		if ( object_ ) {
-			object_->Release();
-		}
-	}
-
-	com_ptr( const com_ptr& ) = delete;
-	com_ptr& operator=( const com_ptr& other ) = delete;
-
-	com_ptr( com_ptr&& other ) {
-		object_ = other.object_;
-		other.object_ = nullptr;
-	}
-
-	com_ptr& operator=( com_ptr&& other ) {
-		if ( &other != this ) {
-			if ( object_ ) {
-				object_->Release();
-			}
-
-			object_ = other.object_;
-			other.object_ = nullptr;
-		}
-
-		return *this;
-	}
-
-	T* get() {
-		return object_;
-	}
-
-	T** ptr_to() {
-		return &object_;
-	}
-
-private:
-	T* object_;
-};
-
 class stream_reader {
 public:
 	stream_reader() = delete;
 	stream_reader( const uint8_t* buffer ) :
 		buffer_( buffer ), position_( 0ull ) {};
 
+	uint8_t* get_position() {
+		return ( uint8_t* )( buffer_ + position_ );
+	}
+
 	template <typename T>
 	T read( size_t size = sizeof( T ) ) {
 		T buffer = {};
-		memcpy( &buffer, ( void* )( buffer_ + position_ ), size );
+		memcpy( &buffer, ( void* )get_position(), size );
 		position_ += size;
 		return buffer;
 	}
 
 	uint8_t* read( size_t size ) {
-		uint8_t* buffer = ( uint8_t* )( buffer_ + position_ );
+		uint8_t* buffer = get_position();
 		position_ += size;
 		return buffer;
 	}
@@ -93,7 +55,7 @@ private:
 	size_t position_;
 };
 
-ImFont* create_font( uint8_t* font_data, float font_size, bool uppercase = false ) {
+ImFont* load_font( uint8_t* font_data, float font_size, bool uppercase = false ) {
 	stream_reader stream( font_data );
 
 	uint32_t width = stream.read<uint32_t>();
@@ -165,8 +127,18 @@ ImFont* create_font( uint8_t* font_data, float font_size, bool uppercase = false
 	return font;
 }
 
-ImFont* create_glfn_font( uint8_t* font_data, float font_size, std::initializer_list<std::pair<uint16_t, uint16_t>> ranges ) {
-	stream_reader stream( font_data );
+ImFont* load_compressed_glfn_font( uint8_t* compressed, size_t compressed_size, float font_size, std::initializer_list<std::pair<uint16_t, uint16_t>> ranges ) {
+	stream_reader compressed_stream( compressed );
+
+	size_t uncompressed_size = compressed_stream.read<int>();
+	auto uncompressed = std::make_unique<uint8_t[]>( uncompressed_size );
+	if ( !uncompressed.get() )
+		return nullptr;
+
+	if ( uncompress_lzma2( compressed_stream.get_position(), &compressed_size, uncompressed.get(), &uncompressed_size ) != uncompress_status::UNCOMPRESS_OK )
+		return nullptr;
+
+	stream_reader stream( uncompressed.get() );
 
 	glf_file_header_s header = stream.read<glf_file_header_s>();
 	glf_texture_header_s texture_header = stream.read<glf_texture_header_s>();
@@ -174,8 +146,11 @@ ImFont* create_glfn_font( uint8_t* font_data, float font_size, std::initializer_
 	int width = texture_header.iWidth;
 	int height = texture_header.iHeight;
 
-	uint8_t* grayscale = stream.read( width * height );
 	auto rgba32 = std::make_unique<uint8_t[]>( width * height * 4 );
+	if ( !rgba32.get() )
+		return nullptr;
+
+	uint8_t* grayscale = stream.read( width * height );
 
 	// Convert grayscale to rgb
 	for ( size_t i = 0; i < width * height; i++ ) {
@@ -204,7 +179,7 @@ ImFont* create_glfn_font( uint8_t* font_data, float font_size, std::initializer_
 
 	ImFontAtlasTextureBlockCopy( &texture_data, 0, 0, font_atlas->TexData, texture_rect->x, texture_rect->y, texture_rect->w, texture_rect->h );
 
-	// Needs to be done otherwise the ImTextureData destructor will attempt to free our data
+	// This needs to be done otherwise the ImTextureData destructor will attempt to free our data
 	texture_data.Pixels = nullptr;
 
 	ImFont* font = IM_NEW( ImFont );
@@ -254,7 +229,7 @@ bool renderer::init( IDXGISwapChain* swapchain ) {
 
 	device->GetImmediateContext( &device_context );
 
-	com_ptr<ID3D11Texture2D> back_buffer;
+	util::com_ptr<ID3D11Texture2D> back_buffer;
 	if ( swapchain->GetBuffer( 0, __uuidof( ID3D11Texture2D ), ( void** )back_buffer.ptr_to() ) != S_OK )
 		return false;
 
@@ -277,8 +252,8 @@ bool renderer::init( IDXGISwapChain* swapchain ) {
 	font_atlas->TexMinHeight = 1024;
 	ImFontAtlasBuildInit( font_atlas );
 
-	fonts[ fonts::verdana ] = create_glfn_font( antialiased_verdana_12_glfn, 12.f, { { 0x0, 0xFF }, { 0x400, 0x4FF } } );
-	fonts[ fonts::small_fonts ] = create_font( outlined_smallfonts_8, 8.f, true );
+	fonts[ fonts::verdana ] = load_compressed_glfn_font( antialiased_verdana_12_glfn, sizeof( antialiased_verdana_12_glfn ), 12.f, { { 0x0, 0xFF }, { 0x400, 0x4FF } } );
+	fonts[ fonts::small_fonts ] = load_font( outlined_smallfonts_8, 8.f, true );
 
 	ImGui_ImplDX11_UpdateTexture( font_atlas->TexData );
 

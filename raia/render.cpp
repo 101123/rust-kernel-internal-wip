@@ -516,11 +516,7 @@ void draw_dropped_items( const entity_vector<rust::world_item*, cached_dropped_i
 }
 
 void draw_esp() {
-	auto static_fields = rust::main_camera::static_fields_;
-	if ( !is_valid_ptr( static_fields ) )
-		return;
-
-	unity::camera* main_camera = static_fields->main_camera;
+	unity::camera* main_camera = rust::main_camera::static_fields_->main_camera;
 	if ( !is_valid_ptr( main_camera ) )
 		return;
 
@@ -530,6 +526,8 @@ void draw_esp() {
 
 	camera.view_matrix = native_camera->culling_matrix;
 	camera.position = native_camera->last_position;
+	camera.forward = vector3( camera.view_matrix.data[ 2 ], camera.view_matrix.data[ 6 ], camera.view_matrix.data[ 10 ] );
+	camera.yaw = -atan2f( -camera.forward.x, camera.forward.z );
 
 	util::scoped_spinlock lock( &entity_manager::cache_lock );
 

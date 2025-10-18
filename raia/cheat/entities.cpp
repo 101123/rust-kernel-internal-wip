@@ -897,7 +897,7 @@ bool update_player_inventory( rust::base_player* player, cached_player& cached_p
     sys::array<rust::item*>* items = items_list->items;
     if ( !is_valid_ptr( items ) )
         return false;
-    
+
     int32_t active_item_idx = -1, active_item_id = -1;
     uint64_t active_item_uid = player->cl_active_item;
 
@@ -918,24 +918,24 @@ bool update_player_inventory( rust::base_player* player, cached_player& cached_p
         if ( !is_valid_ptr( info ) )
             return false;
 
-            rust::phrase* display_name = info->display_name;
-            if ( !is_valid_ptr( display_name ) )
-                return false;
+        rust::phrase* display_name = info->display_name;
+        if ( !is_valid_ptr( display_name ) )
+            return false;
 
-            unity::sprite* icon_sprite = info->icon_sprite;
-            if ( !is_valid_ptr( icon_sprite ) )
-                return false;
+        unity::sprite* icon_sprite = info->icon_sprite;
+        if ( !is_valid_ptr( icon_sprite ) )
+            return false;
 
-            unity::texture2d* icon_texture = icon_sprite->get_texture();
-            if ( !is_valid_ptr( icon_texture ) )
-                return false;
+        unity::texture2d* icon_texture = icon_sprite->get_texture();
+        if ( !is_valid_ptr( icon_texture ) )
+            return false;
 
-            ID3D11ShaderResourceView* icon_srv = icon_texture->get_srv();
-            if ( !is_valid_ptr( icon_srv ) )
-                return false;
+        ID3D11ShaderResourceView* icon_srv = icon_texture->get_srv();
+        if ( !is_valid_ptr( icon_srv ) )
+            return false;
 
-            sys::string* legacy_english = display_name->legacy_english;
-            if ( !is_valid_ptr( legacy_english ) )
+        sys::string* legacy_english = display_name->legacy_english;
+        if ( !is_valid_ptr( legacy_english ) )
             return false;
 
         if ( item->uid == active_item_uid ) {

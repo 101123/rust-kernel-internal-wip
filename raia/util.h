@@ -509,6 +509,51 @@ namespace util {
 		resolved_location location_;
 		size_t position_;
 	};
+
+	template <typename T>
+	class com_ptr {
+	public:
+		com_ptr() :
+			object_( nullptr ) {};
+
+		~com_ptr() {
+			if ( object_ ) {
+				object_->Release();
+			}
+		}
+
+		com_ptr( const com_ptr& ) = delete;
+		com_ptr& operator=( const com_ptr& other ) = delete;
+
+		com_ptr( com_ptr&& other ) {
+			object_ = other.object_;
+			other.object_ = nullptr;
+		}
+
+		com_ptr& operator=( com_ptr&& other ) {
+			if ( &other != this ) {
+				if ( object_ ) {
+					object_->Release();
+				}
+
+				object_ = other.object_;
+				other.object_ = nullptr;
+			}
+
+			return *this;
+		}
+
+		T* get() {
+			return object_;
+		}
+
+		T** ptr_to() {
+			return &object_;
+		}
+
+	private:
+		T* object_;
+	};
 }
 
 #define H( x ) util::hash_const( x )

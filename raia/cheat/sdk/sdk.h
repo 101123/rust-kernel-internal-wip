@@ -594,6 +594,17 @@ namespace unity {
 
             return *result;
         }
+
+        quaternion get_rotation() {
+            void ( *get_rotation_injected )( transform*, quaternion* ) =
+                ( decltype( get_rotation_injected ) )( game_assembly + Offsets::Transform::get_rotation_Injected );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            quaternion* rotation = caller.push<quaternion>();
+            caller( get_rotation_injected, this, rotation );
+            return *rotation;
+        }
     };
 
     class camera : public behaviour {

@@ -729,6 +729,9 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 			no_attack_restrictions.reset = true;
 
 			if ( no_attack_restrictions.noclip ) {
+				// We need to call the actual noclip because it calls TerrainCollision.Reset which is necessary
+				rust::convar::debugging::noclip();
+
 				no_attack_restrictions.admin_cheat = !no_attack_restrictions.admin_cheat;
 				no_attack_restrictions.noclip = false;
 			}
