@@ -28,7 +28,8 @@ namespace text_flags {
 	enum : int {
 		none = 0,
 		centered = 1,
-		drop_shadow = 2
+		drop_shadow = 2,
+		outline = 4
 	};
 }
 
