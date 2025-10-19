@@ -11,6 +11,10 @@ namespace math {
         return rad * ( 180.f / M_PI );
     }
 
+    inline constexpr float deg2rad( float deg ) {
+        return deg * ( M_PI / 180.f );
+    }
+
     inline float lerp( float from, float to, float t ) {
         return to * t + from * ( 1.f - t );
     }

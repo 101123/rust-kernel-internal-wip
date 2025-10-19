@@ -23,6 +23,10 @@ public:
 		return vector2( x + value.x, y + value.y );
 	}
 
+	vector2 operator+( float value ) const {
+		return vector2( x + value, y + value );
+	}
+
 	vector2& operator+=( const vector2& value ) {
 		x += value.x; y += value.y; return *this;
 	}

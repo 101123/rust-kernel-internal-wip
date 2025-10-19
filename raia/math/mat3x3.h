@@ -31,4 +31,10 @@ public:
 	float& operator[]( int index ) {
 		return data[ index ];
 	}
+
+	static void set_identity( matrix3x3& m );
+	static void set_basis( matrix3x3& m, const vector3& x, const vector3& y, const vector3& z );
+	static void set_axis_angle( matrix3x3& matrix, const vector3& rotation_axis, float radians );
+	static vector3 multiply( const matrix3x3& matrix, const vector3& v );
+	static bool look_rotation_to_matrix( const vector3& view, const vector3& up, matrix3x3& m );
 };

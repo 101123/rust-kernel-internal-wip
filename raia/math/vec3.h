@@ -17,6 +17,14 @@ public:
 		return &x;
 	}
 
+	float operator[]( int index ) const {
+		return get_ptr()[ index ];
+	}
+
+	float& operator[]( int index ) {
+		return get_ptr()[ index ];
+	}
+
 	vector3 operator+( const vector3& value ) const {
 		return vector3( x + value.x, y + value.y, z + value.z );
 	}
@@ -122,7 +130,7 @@ public:
 		return to;
 	}
 
-	static vector3 slerp( const vector3& a, const vector3 b, float t );
+	static vector3 slerp( const vector3& lhs, const vector3 rhs, float t );
 
 	static const float epsilon;
 

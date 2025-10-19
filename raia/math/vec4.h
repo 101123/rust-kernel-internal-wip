@@ -16,7 +16,11 @@ public:
 	const float* get_ptr() const {
 		return &x;
 	}
+
+	static const vector4 half;
 };
+
+inline const vector4 vector4::half = vector4( 0.5f, 0.5f, 0.5f, 0.5f );
 
 inline vector4 operator*( const vector4& lhs, const vector4& rhs ) {
 	return vector4( lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z, lhs.w * rhs.w );
