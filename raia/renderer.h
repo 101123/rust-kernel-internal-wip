@@ -21,7 +21,7 @@ struct ID3D11ShaderResourceView;
 
 enum fonts {
 	small_fonts,
-	consolas,
+	consolas_bold,
 	verdana,
 	verdana_bold,
 	tahoma,
