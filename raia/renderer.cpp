@@ -253,7 +253,7 @@ bool renderer::init( IDXGISwapChain* swapchain ) {
 	ImFontAtlasBuildInit( font_atlas );
 
 	fonts[ fonts::small_fonts ] = load_font( _smallfonts, 8.f, true );
-	fonts[ fonts::consolas ] = load_compressed_glfn_font( _consolas, sizeof( _consolas ), { { 0x00, 0xFF }, { 0x400, 0x4FF } } );
+	fonts[ fonts::consolas_bold ] = load_compressed_glfn_font( _consolas_bold, sizeof( _consolas_bold ), { { 0x00, 0xFF }, { 0x400, 0x4FF } } );
 	fonts[ fonts::verdana ] = load_compressed_glfn_font( _verdana, sizeof( _verdana ), { { 0x00, 0xFF }, { 0x400, 0x4FF } } );
 	fonts[ fonts::verdana_bold ] = load_compressed_glfn_font( _verdana_bold, sizeof( _verdana_bold ), { { 0x00, 0xFF }, { 0x400, 0x4FF } } );
 	fonts[ fonts::tahoma ] = load_compressed_glfn_font( _tahoma, sizeof( _tahoma ), { { 0x00, 0xFF }, { 0x400, 0x4FF } } );
