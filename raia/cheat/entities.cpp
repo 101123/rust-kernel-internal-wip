@@ -11,6 +11,7 @@ using named_entity_map = ankerl::unordered_dense::map<rust::base_entity*, cached
 using combat_entity_map = ankerl::unordered_dense::map<rust::base_combat_entity*, cached_combat_entity>;
 using dropped_item_map = ankerl::unordered_dense::map<rust::world_item*, cached_dropped_item>;
 using player_map = ankerl::unordered_dense::map<rust::base_player*, cached_player>;
+using building_map = ankerl::unordered_dense::map<rust::building_block*, cached_building>;
 
 struct cached_entities {
     entity_map entities;
@@ -18,6 +19,7 @@ struct cached_entities {
     combat_entity_map combat_entities;
     dropped_item_map dropped_items;
     player_map players;
+    building_map buildings;
 
     // Hackable Crate
     // Tool Cupboard
@@ -66,6 +68,9 @@ void entity_manager::destroy() {
 
     player_map temp_player_map;
     entities.players.swap( temp_player_map );
+
+    building_map temp_building_map;
+    entities.buildings.swap( temp_building_map );
 }
 
 namespace entity_cacher {
@@ -171,10 +176,10 @@ namespace combat_entity_cacher {
         );
     }
 
-    void remove_from_cache( rust::base_combat_entity* entity, cache_specifier* specifier ) {
+    void remove_from_cache( rust::base_combat_entity* combat_entity, cache_specifier* specifier ) {
         combat_entity_map& combat_entities = entity_cache.get().combat_entities;
 
-        auto iterator = combat_entities.find( entity );
+        auto iterator = combat_entities.find( combat_entity );
         if ( iterator == combat_entities.end() )
             return;
 
@@ -258,6 +263,35 @@ namespace player_cacher {
     };
 }
 
+namespace building_cacher {
+    void add_to_cache( rust::building_block* building, cache_specifier* specifier ) {
+        unity::transform* transform = building->get_transform();
+        if ( !is_valid_ptr( transform ) )
+            return;
+
+        building_map& buildings = entity_cache.get().buildings;
+        if ( buildings.contains( building ) )
+            return;
+
+        buildings.insert( { building, cached_building { transform, transform->get_position() } } );
+    }
+
+    void remove_from_cache( rust::building_block* building, cache_specifier* specifier ) {
+        building_map& buildings = entity_cache.get().buildings;
+
+        auto iterator = buildings.find( building );
+        if ( iterator == buildings.end() )
+            return;
+
+        buildings.erase( iterator );
+    }
+
+    const void* cache_functions[] = {
+        add_to_cache,
+        remove_from_cache
+    };
+}
+
 const void** get_entity_cacher() {
     return entity_cacher::cache_functions;
 }
@@ -278,13 +312,22 @@ const void** get_player_cacher() {
     return player_cacher::cache_functions;
 }
 
+const void** get_building_cacher() {
+    return building_cacher::cache_functions;
+}
+
 #define PREFAB( prefab_path ) unity::string_ex::manifest_hash( prefab_path )
 
 bool entity_manager::belongs_in_cache( rust::base_networkable* entity, cache_specifier* specifier ) {
     if ( entity->is<rust::base_player>() || entity->is<rust::scientist_npc>() ||
         entity->is<rust::tunnel_dweller>() || entity->is<rust::underwater_dweller>() ||
         entity->is<rust::scarecrow_npc>() || entity->is<rust::gingerbread_npc>() ) {
-        *specifier = cache_specifier( get_player_cacher(), nullptr, true );
+        *specifier = cache_specifier( get_player_cacher(), nullptr, false );
+        return true;
+    }
+
+    else if ( entity->is<rust::building_block>() ) {
+        *specifier = cache_specifier( get_building_cacher(), nullptr, false );
         return true;
     }
 
@@ -1100,6 +1143,7 @@ entity_collection entity_manager::get_entities() {
         .named_entities = cached_entities.named_entities.values(),
         .combat_entities = cached_entities.combat_entities.values(),
         .dropped_items = cached_entities.dropped_items.values(),
-        .players = cached_entities.players.values()
+        .players = cached_entities.players.values(),
+        .buildings = cached_entities.buildings.values()
     };
 }

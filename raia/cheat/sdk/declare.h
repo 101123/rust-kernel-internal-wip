@@ -36,6 +36,7 @@ namespace rust {
 	class world_item;
 	class projectile;
 	class player_projectile_update;
+	class building_block;
 
 	using networkable_id = uint64_t;
 }

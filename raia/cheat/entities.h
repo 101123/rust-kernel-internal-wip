@@ -86,6 +86,11 @@ struct cached_dropped_item {
 	wchar_t name[ 128 ];
 };
 
+struct cached_building {
+	unity::transform* transform;
+	vector3 position;
+};
+
 template <typename K, typename V>
 using entity_vector = const std::vector<std::pair<K, V>>&;
 
@@ -95,6 +100,7 @@ struct entity_collection {
 	entity_vector<rust::base_combat_entity*, cached_combat_entity> combat_entities;
 	entity_vector<rust::world_item*, cached_dropped_item> dropped_items;
 	entity_vector<rust::base_player*, cached_player> players;
+	entity_vector<rust::building_block*, cached_building> buildings;
 };
 
 namespace entity_manager {

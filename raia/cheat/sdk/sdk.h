@@ -2894,4 +2894,29 @@ namespace rust {
 
         static inline static_fields* static_fields_;
     };
+
+    class building_block : public base_combat_entity {
+    public:
+        FIELD( int, grade, Offsets::BuildingBlock::grade );
+
+        bool has_upgrade_privilege( int grade, uint64_t skin, base_player* player ) {
+            bool ( *has_upgrade_privilege )( building_block*, int, uint64_t, base_player* ) =
+                ( decltype( has_upgrade_privilege ) )( game_assembly + Offsets::BuildingBlock::HasUpgradePrivilege );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( has_upgrade_privilege, this, grade, skin, player );
+        }
+
+        bool can_afford_upgrade( int grade, uint64_t skin, base_player* player ) {
+            bool ( *can_afford_upgrade )( building_block*, int, uint64_t, base_player* ) =
+                ( decltype( can_afford_upgrade ) )( game_assembly + Offsets::BuildingBlock::CanAffordUpgrade );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( can_afford_upgrade, this, grade, skin, player );
+        }
+
+        static inline il2cpp_class* klass_;
+    };
 }
