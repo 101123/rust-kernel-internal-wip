@@ -20,8 +20,12 @@ struct IDXGISwapChain;
 struct ID3D11ShaderResourceView;
 
 enum fonts {
+	small_fonts,
+	consolas,
 	verdana,
-	small_fonts
+	verdana_bold,
+	tahoma,
+	tahoma_bold
 };
 
 namespace text_flags {

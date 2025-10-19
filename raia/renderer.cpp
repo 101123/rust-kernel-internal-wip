@@ -87,7 +87,7 @@ ImFont* load_font( uint8_t* font_data, float font_size, bool uppercase = false )
 	font->CurrentRasterizerDensity = 1.f;
 	font->LegacySize = font_size;
 
-	ImFontBaked* baked = font->GetFontBaked( font_size );
+	ImFontBaked* baked = font->LastBaked = ImFontAtlasBakedAdd( font_atlas, font, font_size, 1.f, ImGuiID() );
 
 	uint32_t glyphs = stream.read<uint32_t>();
 	for ( size_t i = 0; i < glyphs; i++ ) {
@@ -127,7 +127,7 @@ ImFont* load_font( uint8_t* font_data, float font_size, bool uppercase = false )
 	return font;
 }
 
-ImFont* load_compressed_glfn_font( uint8_t* compressed, size_t compressed_size, float font_size, std::initializer_list<std::pair<uint16_t, uint16_t>> ranges ) {
+ImFont* load_compressed_glfn_font( uint8_t* compressed, size_t compressed_size, std::initializer_list<std::pair<uint16_t, uint16_t>> ranges ) {
 	stream_reader compressed_stream( compressed );
 
 	size_t uncompressed_size = compressed_stream.read<int>();
@@ -185,9 +185,9 @@ ImFont* load_compressed_glfn_font( uint8_t* compressed, size_t compressed_size, 
 	ImFont* font = IM_NEW( ImFont );
 	font->ContainerAtlas = font_atlas;
 	font->CurrentRasterizerDensity = 1.f;
-	font->LegacySize = font_size;
+	font->LegacySize = 1.f;
 
-	ImFontBaked* baked = font->GetFontBaked( font_size );
+	ImFontBaked* baked = font->LastBaked = ImFontAtlasBakedAdd( font_atlas, font, 1.f, 1.f, ImGuiID() );
 
 	int size = stream.read<int>();
 	int size_read = 0;
@@ -252,8 +252,12 @@ bool renderer::init( IDXGISwapChain* swapchain ) {
 	font_atlas->TexMinHeight = 1024;
 	ImFontAtlasBuildInit( font_atlas );
 
-	fonts[ fonts::verdana ] = load_compressed_glfn_font( antialiased_verdana_12_glfn, sizeof( antialiased_verdana_12_glfn ), 12.f, { { 0x0, 0xFF }, { 0x400, 0x4FF } } );
-	fonts[ fonts::small_fonts ] = load_font( outlined_smallfonts_8, 8.f, true );
+	fonts[ fonts::small_fonts ] = load_font( _smallfonts, 8.f, true );
+	fonts[ fonts::consolas ] = load_compressed_glfn_font( _consolas, sizeof( _consolas ), { { 0x00, 0xFF }, { 0x400, 0x4FF } } );
+	fonts[ fonts::verdana ] = load_compressed_glfn_font( _verdana, sizeof( _verdana ), { { 0x00, 0xFF }, { 0x400, 0x4FF } } );
+	fonts[ fonts::verdana_bold ] = load_compressed_glfn_font( _verdana_bold, sizeof( _verdana_bold ), { { 0x00, 0xFF }, { 0x400, 0x4FF } } );
+	fonts[ fonts::tahoma ] = load_compressed_glfn_font( _tahoma, sizeof( _tahoma ), { { 0x00, 0xFF }, { 0x400, 0x4FF } } );
+	fonts[ fonts::tahoma_bold ] = load_compressed_glfn_font( _tahoma_bold, sizeof( _tahoma_bold ), { { 0x00, 0xFF }, { 0x400, 0x4FF } } );
 
 	ImGui_ImplDX11_UpdateTexture( font_atlas->TexData );
 

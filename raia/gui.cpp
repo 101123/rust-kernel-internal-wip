@@ -1,4 +1,4 @@
-﻿#include "gui.h"
+#include "gui.h"
 
 #include "util.h"
 
@@ -758,8 +758,8 @@ void draw_gui_background() {
     renderer::draw_filled_rect( top_bar.x, top_bar.y + top_bar.h, top_bar.w, 1.f, COL32( 38, 38, 38, 255 ) );
     renderer::draw_filled_rect( top_bar.x, top_bar.y + top_bar.h + 1.f, top_bar.w, 1.f, COL32( 61, 61, 61, 255 ) );
 
-    renderer::draw_text( top_bar.x + 6.f, top_bar.y + 6.f, 0, 0, gradient_on[ 0 ], "sentian" );
-    renderer::draw_text( top_bar.x + 43.f, top_bar.y + 6.f, 0, 0, COL32( 160, 160, 160, 255 ), ".gg" );
+    renderer::draw_text( top_bar.x + 6.f, top_bar.y + 6.f, fonts::verdana, text_flags::none, gradient_on[ 0 ], "sentian" );
+    renderer::draw_text( top_bar.x + 43.f, top_bar.y + 6.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), ".gg" );
 
     rect bottom_bar = rect( menu_bounds.x + 2.f, menu_bounds.y + ( menu_bounds.h - 18.f ) - 4.f, menu_bounds.w - 4.f, 18.f );
 
@@ -823,7 +823,7 @@ void tab( const char* label, uint32_t value, uint32_t* tab, rect& cursor, float 
         renderer::draw_filled_rect_with_flags( cursor.x + 2.f, cursor.y + 2.f, width - 4.f, cursor.h, COL32( 54, 54, 54, 255 ), 3.f, draw_flags::round_corners_top );
     }
 
-    renderer::draw_text( cursor.x + width / 2.f, cursor.y + 6.f, 0, text_flags::centered, selected ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), label );
+    renderer::draw_text( cursor.x + width / 2.f, cursor.y + 6.f, fonts::verdana, text_flags::centered, selected ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), label );
 }
 
 void visual_impl( group_box& group_box, cvar_visual& visual, const char* label = nullptr, uint32_t max_distance = 500u ) {
