@@ -271,7 +271,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		bool draw_team_id = !cached_player.scientist && ( cached_player.team_id > 0 && cached_player.team_id < 100'000 ) && player_team_id;
 
 		if ( draw_team_id ) {
-			renderer::draw_text( bounds.right + 2.f, bounds.top - 3.f, fonts::small_fonts, text_flags::none, player_team_id_color, util::format_string( S( "%llu" ), cached_player.team_id ) );
+			renderer::draw_text( bounds.right + 2.f, bounds.top - 3.f, fonts::small_fonts, text_flags::none, player_team_id_color, FMT( 32, S( "%llu" ), cached_player.team_id ) );
 		}
 
 		float offset = 0.f; 
@@ -291,7 +291,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 		}
 
 		if ( visuals.distance ) {
-			renderer::draw_text( bounds.left + half, bounds.bottom + 1.f + offset, fonts::small_fonts, text_flags::centered, visuals.distance_color, util::format_string( S( "%dm" ), ( int )distance ) );
+			renderer::draw_text( bounds.left + half, bounds.bottom + 1.f + offset, fonts::small_fonts, text_flags::centered, visuals.distance_color, FMT( 32, S( "%dm" ), ( int )distance ) );
 		}
 
 		if ( aimbot.player_target && player == aimbot.player_target->first && is_valid_ptr( belt_icons.background ) ) {
@@ -301,7 +301,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 
 			float y = ( float )screen_height - ( belt_icons.positions[ 0 ].y + ( icon_height / 2.f ) ) - icon_height - padding;
 
-			renderer::draw_text( belt_icons.positions[ 3 ].x - ( icon_width / 2.f ), y - 8.f - padding, fonts::small_fonts, text_flags::centered, COL32( 255, 255, 255, 255 ), util::format_string( S( "%s's Belt" ), cached_player.name ) );
+			renderer::draw_text( belt_icons.positions[ 3 ].x - ( icon_width / 2.f ), y - 8.f - padding, fonts::small_fonts, text_flags::centered, COL32( 255, 255, 255, 255 ), FMT( 512, S( "%s's Belt" ), cached_player.name ) );
 
 			for ( int32_t i = 0; i < 6; i++ ) {
 				const cached_belt_item& belt_item = cached_player.belt_items[ i ];
@@ -323,7 +323,7 @@ void draw_players( const entity_vector<rust::base_player*, cached_player>& playe
 					}
 
 					if ( belt_item.amount > 1 ) {
-						renderer::draw_text( x + icon_width - 10.f, y + icon_height - 10.f, fonts::small_fonts, text_flags::none, COL32_WHITE, util::format_string( S( "%dx" ), belt_item.amount ) );
+						renderer::draw_text( x + icon_width - 10.f, y + icon_height - 10.f, fonts::small_fonts, text_flags::none, COL32_WHITE, FMT( 64, S( "%dx" ), belt_item.amount ) );
 					}
 				}
 			}
@@ -337,7 +337,7 @@ void draw_entity( const cvar_visual* visuals, const vector2& screen, float dista
 		.set_vertical_spacing( 8.f )
 		.set_flags( text_flags::centered )
 		.draw_text( visuals->display_name, visuals->color )
-		.draw_text( util::format_string( S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
+		.draw_text( FMT( 32, S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
 }
 
 void draw_named_entity( const cvar_visual* visuals, const vector2& screen, float distance, const cached_named_entity* named_entity ) {
@@ -349,11 +349,11 @@ void draw_named_entity( const cvar_visual* visuals, const vector2& screen, float
 
 
 	if ( named_entity->name[ 0 ] != L'\0' ) {
-		visual.draw_text( util::format_string_w( S( L"%ws" ), named_entity->name ), visuals->color );
+		visual.draw_text( FMT( 256, S( L"%ws" ), named_entity->name ), visuals->color );
 	}
 
 	else if ( named_entity->steam_id ) {
-		visual.draw_text( util::format_string( S( "%llu" ), named_entity->steam_id ), visuals->color );
+		visual.draw_text( FMT( 64, S( "%llu" ), named_entity->steam_id ), visuals->color );
 	}
 
 	// This is very lazy, but works fine, since we only have backpacks and corpses in this map
@@ -361,7 +361,7 @@ void draw_named_entity( const cvar_visual* visuals, const vector2& screen, float
 		visual.draw_text( S( "Looted" ), visuals->color );
 	}
 
-	visual.draw_text( util::format_string( S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
+	visual.draw_text( FMT( 32, S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
 }
 
 void draw_combat_entity( const cvar_visual* visuals, const vector2& screen, float distance, const cached_combat_entity* combat_entity ) {
@@ -390,7 +390,7 @@ void draw_locked_by_ent_crate( const cvar_visual* visuals, const vector2& screen
 		visual.draw_text( S( "On Fire" ), visuals->color );
 	}
 
-	visual.draw_text( util::format_string( S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
+	visual.draw_text( FMT( 32, S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
 }
 
 void draw_bear_trap( const cvar_visual* visuals, const vector2& screen, float distance, const cached_combat_entity* combat_entity ) {
@@ -508,10 +508,10 @@ void draw_dropped_items( const entity_vector<rust::world_item*, cached_dropped_i
 			.set_vertical_spacing( 8.f )
 			.set_flags( text_flags::centered )
 			.draw_text( cached_dropped_item.amount > 1 ?
-				util::format_string_w( S( L"%ws (%dx)" ), cached_dropped_item.name, cached_dropped_item.amount ) :
-				util::format_string_w( S( L"%ws" ), cached_dropped_item.name ),
+				FMT( 256, S( L"%ws (%dx)" ), cached_dropped_item.name, cached_dropped_item.amount ) :
+				FMT( 256, S( L"%ws" ), cached_dropped_item.name ),
 				visuals->color )
-			.draw_text( util::format_string( S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
+			.draw_text( FMT( 32, S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
 	}
 }
 
@@ -532,30 +532,6 @@ void draw_esp() {
 	util::scoped_spinlock lock( &entity_manager::cache_lock );
 
 	entity_collection entity_collection = entity_manager::get_entities();
-
-	visual_builder( vector2( 100.f, 100.f ) )
-		.set_font( fonts::verdana )
-		.set_vertical_spacing( 12.f )
-		.set_flags( text_flags::none )
-		.draw_text( util::format_string( "Time: %llu, Velocity: %.2f [%.2f], Drag: %.2f, Gravity Modifier: %.2f, Initial Distance: %.2f, Projectile Velocity Scale: %.2f, Aim Sway Scale: %.2f, Recoil Scale: %.2f, Sight Aim Cone Scale: %.2f, Hip Aim Cone Scale: %.2f, Hash: %u",
-			util::get_time<time_unit::seconds>(),
-			held_weapon.velocity,
-			held_weapon.max_velocity,
-			held_weapon.drag,
-			held_weapon.gravity_modifier,
-			held_weapon.initial_distance,
-			held_weapon.mods.projectile_velocity_scale,
-			held_weapon.mods.aim_sway_scale,
-			held_weapon.mods.recoil_scale,
-			held_weapon.mods.sight_aim_cone_scale,
-			held_weapon.mods.hip_aim_cone_scale,
-			held_weapon.mods.hash ),
-			COL32_WHITE )
-
-		.draw_text( util::format_string( "%d entities", entity_collection.entities.size() ), COL32_WHITE )
-		.draw_text( util::format_string( "%d combat entities", entity_collection.combat_entities.size() ), COL32_WHITE )
-		.draw_text( util::format_string( "%d dropped items", entity_collection.dropped_items.size() ), COL32_WHITE )
-		.draw_text( util::format_string( "%d players", entity_collection.players.size() ), COL32_WHITE );
 
 	draw_entities( entity_collection.entities );
 	draw_named_entities( entity_collection.named_entities );
@@ -597,15 +573,15 @@ void draw_raids() {
 			.set_font( fonts::small_fonts )
 			.set_vertical_spacing( 9.f )
 			.set_flags( text_flags::none )
-			.draw_text( util::format_string( S( "Raid - %dm [%s]" ), ( int )distance, raid.grid ), raid_visuals.color )
-			.draw_text( util::format_string( S( "Last Explosion: %us" ), seconds_since_active ), raid_visuals.color );
+			.draw_text( FMT( 64, S( "Raid - %dm [%s]" ), ( int )distance, raid.grid ), raid_visuals.color )
+			.draw_text( FMT( 64, S( "Last Explosion: %us" ), seconds_since_active ), raid_visuals.color );
 
 		static const char* effect_names[] = { S( "Rockets" ), S( "High Velocity Rockets" ), S( "Incendiary Rockets" ),
 			S( "Explosive Ammo" ), S( "C4" ), S( "Satchel Charges" ), S( "HE Grenades" ), S( "MLRS Rockets" ) };
 
 		for ( size_t i = 0; i < _countof( raid.effects ); i++ ) {
 			if ( raid.effects[ i ] ) {
-				visual.draw_text( util::format_string( S( "%s: %u" ), effect_names[ i ], raid.effects[ i ] ), raid_visuals.color );
+				visual.draw_text( FMT( 64, S( "%s: %u" ), effect_names[ i ], raid.effects[ i ] ), raid_visuals.color );
 			}
 		}
 	}

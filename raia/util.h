@@ -44,31 +44,33 @@ namespace util {
 	template <typename T, size_t N>
 	class array {
 	public:
-		size_t size() { return m_count; }
-		size_t capacity() { return N; }
+		array() : count_( 0ull ) {};
 
-		T& operator[]( size_t index ) { return m_buffer[ index ]; }
-		const T& operator[]( size_t index ) const { return m_buffer[ index ]; }
+		size_t size() const { return count_; }
+		size_t capacity() const { return N; }
 
-		T* begin() { return m_buffer; }
-		const T* begin() const { return m_buffer; }
+		T& operator[]( size_t index ) { return buffer_[ index ]; }
+		const T& operator[]( size_t index ) const { return buffer_[ index ]; }
 
-		T* end() { return m_buffer + m_count; }
-		const T* end() const { return m_buffer + m_count; }
+		T* begin() { return buffer_; }
+		const T* begin() const { return buffer_; }
+
+		T* end() { return buffer_ + count_; }
+		const T* end() const { return buffer_ + count_; }
 
 		T* add( T item ) {
-			if ( m_count < N ) {
-				size_t index = m_count++;
-				m_buffer[ index ] = item;
-				return &m_buffer[ index ];
+			if ( count_ < N ) {
+				size_t index = count_++;
+				buffer_[ index ] = item;
+				return &buffer_[ index ];
 			}
 
 			return nullptr;
 		}
 
 	private:
-		T m_buffer[ N ];
-		size_t m_count;
+		T buffer_[ N ];
+		size_t count_;
 	};
 
 	class mutex {
@@ -382,26 +384,37 @@ namespace util {
 		return RtlRandomEx( ( PULONG )&seed );
 	}
 
-	inline const char* format_string( const char* format, ... ) {
-		char* buffer = ( char* )detail::format_buffer;
+	template <typename T, size_t N> 
+	struct formatted_string {
+		T buffer[ N ];
+
+		operator const T* ( ) {
+			return buffer;
+		}
+	};
+
+	template <size_t N>
+	inline formatted_string<char, N> format_string( const char* format, ... ) {
+		formatted_string<char, N> formatted;
 
 		va_list args;
 		va_start( args, format );
-		vsprintf( buffer, format, args );
+		vsprintf( formatted.buffer, format, args );
 		va_end( args );
 
-		return buffer;
+		return formatted;
 	}
 
-	inline const wchar_t* format_string_w( const wchar_t* format, ... ) {
-		wchar_t* buffer = ( wchar_t* )detail::format_buffer;
+	template <size_t N>
+	inline formatted_string<wchar_t, N> format_string( const wchar_t* format, ... ) {
+		formatted_string<wchar_t, N> formatted;
 
 		va_list args;
 		va_start( args, format );
-		vswprintf( buffer, format, args );
+		vswprintf( formatted.buffer, format, args );
 		va_end( args );
 
-		return buffer;
+		return formatted;
 	}
 
 	template <uint64_t unit = time_unit::nanoseconds>
@@ -412,16 +425,26 @@ namespace util {
 	template <uint64_t unit>
 	class timer {
 	public:
-		timer( uint64_t start_time = get_time() ) :
+		timer( uint64_t start_time = get_time<unit>() ) :
 			previous_time_( start_time ) {}
 
+		uint64_t get_elapsed() {
+			return get_time<unit>() - previous_time_;
+		}
+
 		bool has_elapsed( uint64_t time ) {
-			if ( ( get_time() - previous_time_ ) > ( time * unit ) ) {
-				previous_time_ = get_time();
+			if ( get_elapsed() > ( time * unit ) ) {
+				previous_time_ = get_time<unit>();
 				return true;
 			}
 
 			return false;
+		}
+
+		uint64_t get_delta_time() {
+			uint64_t delta_time = get_time<unit>() - previous_time_;
+			previous_time_ = get_time<unit>();
+			return delta_time;
 		}
 
 	private:
@@ -554,8 +577,70 @@ namespace util {
 	private:
 		T* object_;
 	};
+
+	template <typename T, size_t N>
+	class fifo_queue {
+	public:
+		fifo_queue() :
+			count_( 0ull ), head_( 0ull ), tail_( 0ull ) {};
+
+		size_t size() const { return count_; }
+		size_t capacity() const { return N; }
+
+		bool push( const T& item ) {
+			if ( count_ == N )
+				return false;
+
+			buffer_[ tail_ ] = item;
+			tail_ = ( tail_ + 1llu ) % N;
+			count_++;
+			return true;
+		}
+
+		template <typename... Args>
+		bool emplace_push( Args&&... args ) {
+			if ( count_ == N )
+				return false;
+
+			new ( &buffer_[ tail_ ] ) T( std::forward<Args>( args )... );
+			tail_ = ( tail_ + 1llu ) % N;
+			count_++;
+			return true;
+		}
+
+		bool pop( T& item ) {
+			if ( count_ == 0ull )
+				return false;
+
+			item = buffer_[ head_ ];
+			head_ = ( head_ + 1llu ) % N;
+			count_--;
+			return true;
+		}
+
+		void pop() {
+			if ( count_ > 0ull ) {
+				head_ = ( head_ + 1llu ) % N;
+				count_--;
+			}
+		}
+			
+		template <typename C>
+		void for_each( C&& callback ) {
+			for ( size_t i = 0; i < count_; i++ ) {
+				callback( buffer_[ ( head_ + i ) % N ], i );
+			}
+		}
+
+	private:
+		T buffer_[ N ];
+		size_t count_;
+		size_t head_;
+		size_t tail_;
+	};
 }
 
-#define H( x ) util::hash_const( x )
-#define HW( x ) util::hash_w_const( x )
-#define MS_H( x ) util::ms_hash( x ) 
+#define H( String ) util::hash_const( String )
+#define HW( String ) util::hash_w_const( String )
+#define MS_H( String ) util::ms_hash( String ) 
+#define FMT( Size, Format, ... ) util::format_string<Size>( Format, __VA_ARGS__ )
