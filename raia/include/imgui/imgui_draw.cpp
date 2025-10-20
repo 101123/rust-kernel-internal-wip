@@ -1693,7 +1693,7 @@ void ImDrawList::AddBezierQuadratic(const ImVec2& p1, const ImVec2& p2, const Im
     PathStroke(col, 0, thickness);
 }
 
-void ImDrawList::AddText(ImFont* font, float font_size, const ImVec2& pos, ImU32 col, const char* text_begin, const char* text_end, float wrap_width, const ImVec4* cpu_fine_clip_rect)
+void ImDrawList::AddText(ImFont* font, float font_size, const ImVec2& pos, ImU32 col, const char* text_begin, const char* text_end, float wrap_width, const ImVec4* cpu_fine_clip_rect, bool rich_text)
 {
     if ((col & IM_COL32_A_MASK) == 0)
         return;
@@ -1717,7 +1717,7 @@ void ImDrawList::AddText(ImFont* font, float font_size, const ImVec2& pos, ImU32
         clip_rect.z = ImMin(clip_rect.z, cpu_fine_clip_rect->z);
         clip_rect.w = ImMin(clip_rect.w, cpu_fine_clip_rect->w);
     }
-    font->RenderText(this, font_size, pos, col, clip_rect, text_begin, text_end, wrap_width, cpu_fine_clip_rect != NULL);
+    font->RenderText(this, font_size, pos, col, clip_rect, text_begin, text_end, wrap_width, cpu_fine_clip_rect != NULL, rich_text);
 }
 
 void ImDrawList::AddText(const ImVec2& pos, ImU32 col, const char* text_begin, const char* text_end)
@@ -5490,6 +5490,15 @@ ImVec2 ImFont::CalcTextSizeA(float size, float max_width, float wrap_width, cons
             }
         }
 
+        // Skip rich text
+        if ( *s == '\x02' ) {
+            s += 5;
+        }
+
+        else if ( *s == '\x03' ) {
+            s += 1;
+        }
+
         // Decode and advance source
         const char* prev_s = s;
         unsigned int c = (unsigned int)*s;
@@ -5578,7 +5587,7 @@ void ImFont::RenderChar(ImDrawList* draw_list, float size, const ImVec2& pos, Im
 }
 
 // Note: as with every ImDrawList drawing function, this expects that the font atlas texture is bound.
-void ImFont::RenderText(ImDrawList* draw_list, float size, const ImVec2& pos, ImU32 col, const ImVec4& clip_rect, const char* text_begin, const char* text_end, float wrap_width, bool cpu_fine_clip)
+void ImFont::RenderText(ImDrawList* draw_list, float size, const ImVec2& pos, ImU32 col, const ImVec4& clip_rect, const char* text_begin, const char* text_end, float wrap_width, bool cpu_fine_clip, bool rich_text)
 {
     // Align to be pixel perfect
 begin:
@@ -5648,6 +5657,8 @@ begin:
     const ImU32 col_untinted = col | ~IM_COL32_A_MASK;
     const char* word_wrap_eol = NULL;
 
+    ImU32 original_col = col;
+
     while (s < text_end)
     {
         if (word_wrap_enabled)
@@ -5666,6 +5677,22 @@ begin:
                 s = CalcWordWrapNextLineStartA(s, text_end); // Wrapping skips upcoming blanks
                 continue;
             }
+        }
+
+        // Rich text
+        if ( *s == '\x02' ) {
+            if ( rich_text ) {
+                original_col = col;
+                col = *( const ImU32* )( s + 1 );
+            }
+
+            s += 5;
+        }
+
+        else if ( *s == '\x03' ) {
+            col = original_col;
+
+            s += 1;
         }
 
         // Decode and advance source

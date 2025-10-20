@@ -393,7 +393,7 @@ void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint3
         draw_list->AddText( _font, size, ImVec2( x, y + 1.f ), IM_COL32( 0, 0, 0, alpha ), text );
     }
 
-	draw_list->AddText( _font, size, ImVec2( x, y ), color, text );
+	draw_list->AddText( _font, size, ImVec2( x, y ), color, text, nullptr, 0.f, nullptr, true );
 }
 
 void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const wchar_t* text ) {
