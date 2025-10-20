@@ -198,12 +198,14 @@
     <ClCompile Include="math\quat.cpp" />
     <ClCompile Include="math\vec3.cpp" />
     <ClCompile Include="dx.cpp" />
+    <ClCompile Include="notifications.cpp" />
     <ClCompile Include="render.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="runtime.cpp" />
     <ClCompile Include="um.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="animated_value.h" />
     <ClInclude Include="cheat\aimbot.h" />
     <ClInclude Include="cheat\cheat.h" />
     <ClInclude Include="cheat\entities.h" />
@@ -225,6 +227,8 @@
     <ClInclude Include="include\uncompress_lzma2.h" />
     <ClInclude Include="math\mat3x3.h" />
     <ClInclude Include="math\quat.h" />
+    <ClInclude Include="math\rect.h" />
+    <ClInclude Include="notifications.h" />
     <ClInclude Include="render.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="um.h" />

@@ -6,6 +6,8 @@
 #include "renderer.h"
 #include "gui.h"
 
+#include "notifications.h"
+
 class visual_builder {
 public:
 	visual_builder() = delete;
@@ -607,15 +609,16 @@ void on_render( IDXGISwapChain* swapchain ) {
 		set_draw_overrides();
 	}
 
+	static util::timer<time_unit::milliseconds> timer;
+
+	float delta_time = timer.get_delta_time() / 1000.f;
+
 	renderer::begin_frame();
-
-	renderer::draw_text( 8.f, 5.f, fonts::small_fonts, text_flags::none, COL32( 110, 183, 212, 255 ), S( "sentian" ) );
-	renderer::draw_text( 38.f, 5.f, fonts::small_fonts, text_flags::none, COL32( 255, 255, 255, 255 ), S( ".gg" ) );
-
-	renderer::draw_circle( ( float )screen_width / 2.f, ( float )screen_height / 2.f, ( float )aimbot.fov, 1.f, COL32_WHITE );
 
 	draw_esp();
 	draw_raids();
+
+	notifications::draw( delta_time );
 
 	if ( render_input.get_async_key_state( VK_END ) & 0x1 ) {
 		gui::open = !gui::open;

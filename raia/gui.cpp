@@ -9,6 +9,7 @@
 
 #include "vars.h"
 #include "um.h"
+#include "math/rect.h"
 
 #include "cheat/sdk/sdk.h"
 
@@ -16,10 +17,6 @@
 
 #include <vector>
 #include <algorithm>
-
-struct rect {
-	float x, y, w, h;
-};
 
 enum draw_commands {
 	filled_rect,
@@ -1288,7 +1285,10 @@ void gui::run() {
                     right.begin();
 
                     right.toggle( S( "Admin flags" ), &admin_flags );
-                    right.toggle( S( "Block server commands" ), &block_server_commands );
+
+                    if ( right.toggle( S( "Block server commands" ), &block_server_commands.enabled ) ) {
+                        right.toggle( S( "Notify on block" ), &block_server_commands.notify );
+                    }
 
                     right.end();
 

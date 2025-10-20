@@ -6,6 +6,7 @@
 #include "cheat/glow.h"
 #include "cheat/aimbot.h"
 #include "cheat/features.h"
+#include "notifications.h"
 
 void reset_local_player() {
 	local_player = {
@@ -782,11 +783,29 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 	features::drop_box();
 }
 
+#define COMMAND( Name, Set ) case H( Name ): name = S( Name ); set = Set; break;
+
 bool console_system_command_pre_hook( rust::console_system::arg* arg, uint64_t command ) {
 	if ( !is_valid_ptr( arg ) )
 		return true;
 
-	if ( block_server_commands && arg->option.is_from_server ) {
+	if ( block_server_commands.enabled && arg->option.is_from_server ) {
+		if ( block_server_commands.notify ) {
+			const char* name = nullptr; 
+			bool set = false;
+
+			switch ( command ) {
+				COMMAND( "noclip", false );
+				COMMAND( "debugcamera", false );
+				COMMAND( "camlerp", true );
+				COMMAND( "camlerptilt", true );
+				COMMAND( "camlookspeed", true );
+				COMMAND( "camspeed", true );
+			}
+
+			notifications::push( FMT( 256, S( "The server tried to %s \x02\xFF\x01\x01\xFF""%s\x03, but we blocked it." ), set ? S( "set" ) : S( "run" ), name ) );
+		}
+
 		return false;
 	}
 
