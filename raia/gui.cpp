@@ -545,7 +545,7 @@ public:
 
         draw_list.add_filled_rect_multi_color( draw_bounds.x, draw_bounds.y, fill_width, draw_bounds.h, gradient_on );
 
-        draw_list.add_text( draw_bounds.x + fill_width, draw_bounds.y, fonts::tahoma_bold, text_flags::centered | text_flags::outline, COL32( 160, 160, 160, 255 ), FMT( 32, fmt, *value ) );
+        draw_list.add_text( draw_bounds.x + fill_width, draw_bounds.y + 2.f, fonts::verdana_bold, text_flags::centered | text_flags::outline, COL32( 160, 160, 160, 255 ), FMT( 32, fmt, *value ) );
 
         draw_list.pop_z_index();
 
