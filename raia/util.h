@@ -385,7 +385,7 @@ namespace util {
 	}
 
 	template <typename T, size_t N> 
-	struct formatted_string {
+	struct string {
 		T buffer[ N ];
 
 		operator const T* ( ) {
@@ -394,8 +394,8 @@ namespace util {
 	};
 
 	template <size_t N>
-	inline formatted_string<char, N> format_string( const char* format, ... ) {
-		formatted_string<char, N> formatted;
+	inline string<char, N> format_string( const char* format, ... ) {
+		string<char, N> formatted;
 
 		va_list args;
 		va_start( args, format );
@@ -406,8 +406,8 @@ namespace util {
 	}
 
 	template <size_t N>
-	inline formatted_string<wchar_t, N> format_string( const wchar_t* format, ... ) {
-		formatted_string<wchar_t, N> formatted;
+	inline string<wchar_t, N> format_string( const wchar_t* format, ... ) {
+		string<wchar_t, N> formatted;
 
 		va_list args;
 		va_start( args, format );
