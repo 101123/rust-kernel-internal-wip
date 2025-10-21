@@ -8,6 +8,7 @@
 #include "cheat/sdk/declare.h"
 #include "math/vec3.h"
 #include "math/mat4x4.h"
+#include "jew_string.h"
 
 #include <utility>
 
@@ -63,7 +64,7 @@ struct cvar_visual {
     cvar( H( Name " Enabled" ), Enabled ), \
 	cvar_ui( H( Name " Maximum Distance" ), MaximumDistance ), \
     cvar_ui( H( Name " Color" ), Color ), \
-	Name, nullptr } 
+	J( Name ), nullptr } 
 
 enum trigger_type {
 	toggle,
@@ -428,6 +429,7 @@ inline cvar admin_flags = cvar( H( "Admin Flags" ), false );
 
 DEFINE_CONTEXT( raid_visuals,
 	cvar enabled = cvar( H( "Raid ESP" ), true );
+	cvar notify = cvar( H( "Raid Notifications" ), true );
 	cvar_ui color = cvar_ui( H( "Raid Color" ), COL32_RED );
 	cvar rocket = cvar( H( "Raid Rocket" ), true );
 	cvar high_velocity_rocket = cvar( H( "Raid Hight Velocity Rocket" ), true );
@@ -470,4 +472,33 @@ DEFINE_CONTEXT( auto_drop_box,
 DEFINE_CONTEXT( speedhack,
 	cvar enabled = cvar( H( "Speedhack" ), false );
 	cvar_f multiplier = cvar_f( H( "Speedhack Multiplier" ), 1.5f );
+);
+
+enum minimap_orientation {
+	fixed,
+	rotational
+};
+
+DEFINE_CONTEXT( minimap,
+	cvar enabled = cvar( H( "Minimap" ), true );
+	cvar_ui color = cvar_ui( H( "Minimap Color" ), COL32( 255, 255, 255, 255 ) );
+	cvar_ui orientation = cvar_ui( H( "Minimap Orientation" ), minimap_orientation::rotational );
+	cvar_f size = cvar_f( H( "Minimap Size" ), 300.f );
+	cvar_f zoom = cvar_f( H( "Minimap Zoom" ), 3.f );
+	cvar_f x = cvar_f( H( "Minimap X" ), 300.f );
+	cvar_f y = cvar_f( H( "Minimap Y" ), 300.f );
+
+	ID3D11ShaderResourceView* srv;
+	util::mutex lock;
+);
+
+DEFINE_CONTEXT( auto_upgrade,
+	cvar enabled = cvar( H( "Auto Upgrade" ), false );
+	cvar only_holding_hammer = cvar( H( "Auto Upgrade Only Holding Hammer" ), false );
+	cvar_ui from = cvar_ui( H( "Auto Upgrade From" ), 0u );
+	cvar_ui to = cvar_ui( H( "Auto Upgrade To" ), 2u );
+);
+
+DEFINE_CONTEXT( effects,
+	cvar notify = cvar( H( "Effect Notifications" ), false );
 );

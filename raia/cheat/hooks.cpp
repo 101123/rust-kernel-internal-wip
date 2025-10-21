@@ -905,7 +905,7 @@ void effect_library_setup_effect_hook( rust::effect* effect ) {
 				rust::map_helper::grid_to_string( rust::map_helper::position_to_grid( effect->world_pos ), raid.grid, sizeof( raid.grid ) );
 
 				if ( raid_visuals.notify ) {
-					notifications::push( FMT( 128, "A raid has started in \x02\xFF\x01\x01\xFF""%s\x03 with \x02\xFF\x01\x01\xFF""%s\x03.", raid.grid, raid_descriptors[ i ] ) );
+					notifications::push( FMT( 128, S( "A raid has started in \x02\xFF\x01\x01\xFF""%s\x03 with \x02\xFF\x01\x01\xFF""%s\x03." ), raid.grid, raid_descriptors[ i ] ) );
 				}
 			}
 		}
