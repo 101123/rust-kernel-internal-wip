@@ -25,7 +25,7 @@ struct cached_entity {
 
 struct cached_named_entity : public cached_entity {
 	uint64_t steam_id;
-	wchar_t name[ 128 ];
+	char name[ 256 ];
 };
 
 struct cached_combat_entity : public cached_entity {
@@ -40,7 +40,7 @@ struct cached_belt_item {
 	float condition;
 	float max_condition;
 	int32_t amount;
-	wchar_t name[ 128 ];
+	char name[ 256 ];
 };
 
 struct cached_bone_data {
@@ -83,7 +83,7 @@ struct cached_dropped_item {
 	vector3 position;
 	int32_t amount;
 	int32_t category;
-	wchar_t name[ 128 ];
+	char name[ 256 ];
 };
 
 struct cached_building {

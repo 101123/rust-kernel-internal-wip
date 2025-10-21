@@ -351,7 +351,7 @@ void draw_named_entity( const cvar_visual* visuals, const vector2& screen, float
 
 
 	if ( named_entity->name[ 0 ] != L'\0' ) {
-		visual.draw_text( FMT( 256, S( L"%ws" ), named_entity->name ), visuals->color );
+		visual.draw_text( FMT( 256, S( "%s" ), named_entity->name ), visuals->color );
 	}
 
 	else if ( named_entity->steam_id ) {
@@ -510,8 +510,8 @@ void draw_dropped_items( const entity_vector<rust::world_item*, cached_dropped_i
 			.set_vertical_spacing( 8.f )
 			.set_flags( text_flags::centered )
 			.draw_text( cached_dropped_item.amount > 1 ?
-				FMT( 256, S( L"%ws (%dx)" ), cached_dropped_item.name, cached_dropped_item.amount ) :
-				FMT( 256, S( L"%ws" ), cached_dropped_item.name ),
+				FMT( 256, S( "%s (%dx)" ), cached_dropped_item.name, cached_dropped_item.amount ) :
+				FMT( 256, S( "%s" ), cached_dropped_item.name ),
 				visuals->color )
 			.draw_text( FMT( 32, S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
 	}

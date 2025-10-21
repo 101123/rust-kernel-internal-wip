@@ -808,7 +808,7 @@ void cache_named_entity( rust::base_entity* named_entity, cached_named_entity& c
     cached_named_entity.steam_id = steam_id;
 
     if ( cached_named_entity.name[ 0 ] == L'\0' && is_valid_ptr( player_name ) ) {
-        wcscpy_s( cached_named_entity.name, _countof( cached_named_entity.name ), player_name->buffer );
+        renderer::wstr_to_utf8( player_name->buffer, cached_named_entity.name, sizeof( cached_named_entity.name ) );
     }
 }
 
@@ -834,7 +834,7 @@ bool cache_dropped_item( rust::world_item* world_item, cached_dropped_item& cach
 
     cached_dropped_item.amount = item->amount;
     cached_dropped_item.category = info->category;
-    wcscpy_s( cached_dropped_item.name, _countof( cached_dropped_item.name ), legacy_english->buffer );
+    renderer::wstr_to_utf8( legacy_english->buffer, cached_dropped_item.name, sizeof( cached_dropped_item.name ) );
 
     return cached_dropped_item.init = true;
 }
@@ -993,7 +993,7 @@ bool update_player_inventory( rust::base_player* player, cached_player& cached_p
         belt_item.condition = item->condition;
         belt_item.max_condition = item->max_condition;
         belt_item.amount = item->amount;
-        wcscpy_s( belt_item.name, _countof( belt_item.name ), legacy_english->buffer );
+        renderer::wstr_to_utf8( legacy_english->buffer, belt_item.name, sizeof( belt_item.name ) );
     }
 
     cached_player.active_item_idx = active_item_idx;
@@ -1099,6 +1099,12 @@ void entity_manager::update() {
     for ( auto& [ dropped_item, cached_dropped_item ] : cached_entities.dropped_items ) {
         if ( !cache_dropped_item( dropped_item, cached_dropped_item ) )
             continue;
+
+        rust::item* item = dropped_item->item;
+
+        if ( is_valid_ptr( item ) ) {
+            cached_dropped_item.amount = item->amount;
+        }
 
         cached_dropped_item.position = cached_dropped_item.transform->get_position();
     }
