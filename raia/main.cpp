@@ -1,21 +1,12 @@
-#include "util.h"
 #include "global.h"
-
-#include "sentian/api.h"
-
-#include "cheat/cheat.h"
-#include <cstddef>
-
 #include "cheat/sdk/sdk.h"
+#include "cheat/cheat.h"
 #include "cheat/entities.h"
 #include "cheat/glow.h"
-
-#include "render.h"
-#include "renderer.h"
-
 #include "gui.h"
-
-struct IDXGISwapChain;
+#include "vars.h"
+#include "dx.h"
+#include "render.h"
 
 bool cheat_init = false;
 
@@ -60,6 +51,10 @@ void deinit_cheat() {
 
 	if ( asset_bundle ) {
 		asset_bundle->unload( true );
+	}
+
+	if ( minimap.srv ) {
+		minimap.srv->Release();
 	}
 
 	um::destroy_callers();

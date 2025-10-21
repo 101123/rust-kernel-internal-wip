@@ -33,7 +33,8 @@ namespace text_flags {
 		none = 0,
 		centered = 1,
 		drop_shadow = 2,
-		outline = 4
+		outline = 4,
+		rich_text = 8
 	};
 }
 

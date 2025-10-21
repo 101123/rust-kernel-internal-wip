@@ -375,25 +375,37 @@ void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint3
 		x -= 1.f;
 	}
 
-	// Make the alpha of the drop shadow/outline less than the alpha of the text
-	int alpha = std::max( ( int )( ( color & IM_COL32_A_MASK ) >> IM_COL32_A_SHIFT ) - 55, 0 );
+	auto scale_color = []( uint32_t color, float r, float g, float b, float a ) -> uint32_t {
+		uint8_t* rgba = reinterpret_cast< uint8_t* >( &color );
+
+		return COL32(
+			static_cast< float >( rgba[ 0 ] ) * r,
+			static_cast< float >( rgba[ 1 ] ) * g,
+			static_cast< float >( rgba[ 2 ] ) * b,
+			static_cast< float >( rgba[ 3 ] ) * a
+		);
+	};
+
+	// If we have rich text enabled, make the outer color black because we can't run rich text on outlines
+	uint32_t outer_color = flags & text_flags::rich_text ?
+		scale_color( color, 0.f, 0.f, 0.f, 0.85f ) : scale_color( color, 0.2f, 0.2f, 0.2f, 0.85f );
 
 	if ( flags & text_flags::drop_shadow ) {
-		draw_list->AddText( _font, size, ImVec2( x + 1.f, y + 1.f ), IM_COL32( 0, 0, 0, alpha ), text );
+		draw_list->AddText( _font, size, ImVec2( x + 1.f, y + 1.f ), outer_color, text );
 	}
 
 	else if ( flags & text_flags::outline ) {
-        draw_list->AddText( _font, size, ImVec2( x + 1.f, y + 1.f ), IM_COL32( 0, 0, 0, alpha ), text );
-        draw_list->AddText( _font, size, ImVec2( x - 1.f, y - 1.f ), IM_COL32( 0, 0, 0, alpha ), text );
-        draw_list->AddText( _font, size, ImVec2( x + 1.f, y - 1.f ), IM_COL32( 0, 0, 0, alpha ), text );
-        draw_list->AddText( _font, size, ImVec2( x - 1.f, y + 1.f ), IM_COL32( 0, 0, 0, alpha ), text );
-        draw_list->AddText( _font, size, ImVec2( x + 1.f, y ), IM_COL32( 0, 0, 0, alpha ), text );
-        draw_list->AddText( _font, size, ImVec2( x - 1.f, y ), IM_COL32( 0, 0, 0, alpha ), text );
-        draw_list->AddText( _font, size, ImVec2( x, y - 1.f ), IM_COL32( 0, 0, 0, alpha ), text );
-        draw_list->AddText( _font, size, ImVec2( x, y + 1.f ), IM_COL32( 0, 0, 0, alpha ), text );
+        draw_list->AddText( _font, size, ImVec2( x + 1.f, y + 1.f ), outer_color, text );
+        draw_list->AddText( _font, size, ImVec2( x - 1.f, y - 1.f ), outer_color, text );
+        draw_list->AddText( _font, size, ImVec2( x + 1.f, y - 1.f ), outer_color, text );
+        draw_list->AddText( _font, size, ImVec2( x - 1.f, y + 1.f ), outer_color, text );
+        draw_list->AddText( _font, size, ImVec2( x + 1.f, y ), outer_color, text );
+        draw_list->AddText( _font, size, ImVec2( x - 1.f, y ), outer_color, text );
+        draw_list->AddText( _font, size, ImVec2( x, y - 1.f ), outer_color, text );
+        draw_list->AddText( _font, size, ImVec2( x, y + 1.f ), outer_color, text );
     }
 
-	draw_list->AddText( _font, size, ImVec2( x, y ), color, text, nullptr, 0.f, nullptr, true );
+	draw_list->AddText( _font, size, ImVec2( x, y ), color, text, nullptr, 0.f, nullptr, flags & text_flags::rich_text );
 }
 
 void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const wchar_t* text ) {

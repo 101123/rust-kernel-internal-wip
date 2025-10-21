@@ -40,7 +40,7 @@ public:
 			rect bounds( 8.f * value_.get(), 8.f + ( count++ * 22.f ), size_.x + 20.f, 18.f );
 
 			draw_notification_rect( bounds.x, bounds.y, bounds.w, bounds.h, 0.9f, COL32( 0, 0, 0, 128 ) );
-			renderer::draw_text( bounds.x + 10.f, bounds.y + 5.f, fonts::consolas_bold, text_flags::outline, COL32_WHITE, message_ );
+			renderer::draw_text( bounds.x + 10.f, bounds.y + 5.f, fonts::consolas_bold, text_flags::outline | text_flags::rich_text, COL32_WHITE, message_ );
 
 			if ( finished ) {
 				state_ = notification_state::exit;
