@@ -545,6 +545,9 @@ void draw_esp() {
 	}
 }
 
+const char* raid_effect_names[] = { J( "Rockets" ), J( "High Velocity Rockets" ), J( "Incendiary Rockets" ),
+	J( "Explosive Ammo" ), J( "C4" ), J( "Satchel Charges" ), J( "HE Grenades" ), J( "MLRS Rockets" ) };
+
 void draw_raids() {
 	if ( !raid_visuals.enabled )
 		return;
@@ -578,12 +581,9 @@ void draw_raids() {
 			.draw_text( FMT( 64, S( "Raid - %dm [%s]" ), ( int )distance, raid.grid ), raid_visuals.color )
 			.draw_text( FMT( 64, S( "Last Explosion: %us" ), seconds_since_active ), raid_visuals.color );
 
-		static const char* effect_names[] = { S( "Rockets" ), S( "High Velocity Rockets" ), S( "Incendiary Rockets" ),
-			S( "Explosive Ammo" ), S( "C4" ), S( "Satchel Charges" ), S( "HE Grenades" ), S( "MLRS Rockets" ) };
-
 		for ( size_t i = 0; i < _countof( raid.effects ); i++ ) {
 			if ( raid.effects[ i ] ) {
-				visual.draw_text( FMT( 64, S( "%s: %u" ), effect_names[ i ], raid.effects[ i ] ), raid_visuals.color );
+				visual.draw_text( FMT( 256, S( "%s: %u" ), raid_effect_names[ i ], raid.effects[ i ] ), raid_visuals.color );
 			}
 		}
 	}

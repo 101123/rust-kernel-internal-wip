@@ -405,9 +405,11 @@ bool resolve_hooks() {
 		{ S( L"camspeed" ), command_hook_type::set },
 	};
 
-	for ( auto hooked_command : hooked_commands ) {
+	for ( int32_t i = 0; i < _countof( hooked_commands ); i++ ) {
+		const command_hook& command_info = hooked_commands[ i ];
+
 		// The subsequent find call requires a managed string object
-		sys::string* name = sys::string::create( hooked_command.name );
+		sys::string* name = sys::string::create( command_info.name );
 		if ( !name )
 			return false;
 
@@ -415,7 +417,7 @@ bool resolve_hooks() {
 		if ( !is_valid_ptr( command ) )
 			return false;
 
-		sys::action* action = hooked_command.type == command_hook_type::set ? command->set_override : command->call;
+		sys::action* action = command_info.type == command_hook_type::set ? command->set_override : command->call;
 		if ( !is_valid_ptr( action ) )
 			return false;
 
@@ -425,9 +427,9 @@ bool resolve_hooks() {
 			.value = ( uintptr_t* )action->_address_of_invoke_impl(),
 			.original = 0ull,
 			.corrupt = 0ull,
-			.user_data = ( void* )util::hash_w( hooked_command.name ),
+			.user_data = ( void* )i,
 			.ptr_swap = {
-				.pre_handler = hooked_command.type == command_hook_type::set ?
+				.pre_handler = command_hook.type == command_hook_type::set ?
 					hook_handlers::pre_console_system_command_set : hook_handlers::pre_console_system_command_call,
 
 				.post_handler = nullptr

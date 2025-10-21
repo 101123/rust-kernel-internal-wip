@@ -783,36 +783,39 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 	features::drop_box();
 }
 
-#define COMMAND( Name, Set ) case H( Name ): name = S( Name ); set = Set; break;
+struct command {
+	const char* name;
+	bool set;
+};
 
-bool console_system_command_pre_hook( rust::console_system::arg* arg, uint64_t command ) {
+command blocked_commands[] = {
+	{ J( "noclip" ), false },
+	{ J( "debugcamera" ), false },
+	{ J( "camlerp" ), true },
+	{ J( "camlerptilt" ), true },
+	{ J( "camlookspeed" ), true },
+	{ J( "camspeed" ), true }
+};
+
+bool console_system_command_pre_hook( rust::console_system::arg* arg, int32_t index ) {
 	if ( !is_valid_ptr( arg ) )
 		return true;
 
 	if ( block_server_commands.enabled && arg->option.is_from_server ) {
-		if ( block_server_commands.notify ) {
-			const char* name = nullptr; 
-			bool set = false;
+		if ( block_server_commands.notify && index >= 0 && index < _countof( blocked_commands ) ) {
+			const command& command = blocked_commands[ index ];
 
-			switch ( command ) {
-				COMMAND( "noclip", false );
-				COMMAND( "debugcamera", false );
-				COMMAND( "camlerp", true );
-				COMMAND( "camlerptilt", true );
-				COMMAND( "camlookspeed", true );
-				COMMAND( "camspeed", true );
-			}
-
-			notifications::push( FMT( 256, S( "The server tried to %s \x02\xFF\x01\x01\xFF""%s\x03, but we blocked it." ), set ? S( "set" ) : S( "run" ), name ) );
+			notifications::push( FMT( 256, S( "The server tried to %s \x02\xFF\x01\x01\xFF""%s\x03, but we blocked it." ), command.set ? S( "set" ) : S( "run" ), command.name ) );
 		}
 
 		return false;
 	}
 
-	if ( no_attack_restrictions.enabled && command == H( "noclip" ) ) {
+	// If we try to run noclip, we skip the original because this code may run between our hooks if binded, which we don't want
+	if ( no_attack_restrictions.enabled && index == 0 ) {
 		no_attack_restrictions.noclip = true;
 
-		// We're skipping the original because this code may run between our hooks if binded, which we don't want
+		// Skip original
 		return false;
 	}
 
@@ -828,6 +831,17 @@ uint64_t effect_name_hashes[] = {
 	H( "assets/prefabs/weapons/satchelcharge/effects/satchel-charge-explosion.prefab" ),
 	H( "assets/prefabs/ammo/40mmgrenade/effects/40mm_he_explosion.prefab" ),
 	H( "assets/content/vehicles/mlrs/effects/pfx_mlrs_rocket_explosion_ground.prefab" )
+};
+
+const char* raid_descriptors[] = {
+	J( "a rocket" ),
+	J( "a high velocity rocket" ),
+	J( "an incendiary rocket" ),
+	J( "explosive ammo" ),
+	J( "c4" ),
+	J( "a satchel charge" ),
+	J( "a HE grenade" ),
+	J( "an MLRS rocket" )
 };
 
 void effect_library_setup_effect_hook( rust::effect* effect ) {
@@ -889,8 +903,18 @@ void effect_library_setup_effect_hook( rust::effect* effect ) {
 				raid.effects[ i ]++;
 
 				rust::map_helper::grid_to_string( rust::map_helper::position_to_grid( effect->world_pos ), raid.grid, sizeof( raid.grid ) );
+
+				if ( raid_visuals.notify ) {
+					notifications::push( FMT( 128, "A raid has started in \x02\xFF\x01\x01\xFF""%s\x03 with \x02\xFF\x01\x01\xFF""%s\x03.", raid.grid, raid_descriptors[ i ] ) );
+				}
 			}
 		}
+
+		return;
+	}
+
+	if ( effects.notify ) {
+		notifications::push( pooled_string->buffer );
 	}
 }
 

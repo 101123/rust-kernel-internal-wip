@@ -55,7 +55,7 @@ private:
 	size_t position_;
 };
 
-ImFont* load_font( uint8_t* font_data, float font_size, bool uppercase = false ) {
+ImFont* load_small_fonts( uint8_t* font_data, float font_size ) {
 	stream_reader stream( font_data );
 
 	uint32_t width = stream.read<uint32_t>();
@@ -107,19 +107,30 @@ ImFont* load_font( uint8_t* font_data, float font_size, bool uppercase = false )
 		glyph.V1 = ( ( float )texture_rect->y + ( float )glyph_info.y + ( float )glyph_info.height ) / ( float )font_atlas->TexData->Height;
 
 		ImFontAtlasBakedAddFontGlyph( font_atlas, baked, nullptr, &glyph );
+
+		// Add glyph for duplicated range
+		glyph.Codepoint = glyph_info.id + 0x590;
+
+		ImFontAtlasBakedAddFontGlyph( font_atlas, baked, nullptr, &glyph );
 	}
 
 	// Remap lowercase keys to uppercase
-	if ( uppercase ) {
-		for ( size_t i = 'a'; i <= 'z'; i++ ) {
-			for ( size_t j = 0; j < baked->Glyphs.size(); j++ ) {
-				const ImFontGlyph& glyph = baked->Glyphs[ j ];
-				const uint32_t upper = i - 32u;
+	for ( int32_t c = 'a'; c <= 'z'; c++ ) {
+		uint32_t upper = c - 32;
+		uint32_t lower_remap = c;
+		uint32_t lower_remap_shifted = c + 0x590;
 
-				if ( glyph.Codepoint == upper ) {
-					baked->IndexAdvanceX[ i ] = baked->IndexAdvanceX[ upper ];
-					baked->IndexLookup[ i ] = j;
-				}
+		for ( int32_t j = 0; j < baked->Glyphs.size(); ++j ) {
+			const ImFontGlyph& glyph = baked->Glyphs[ j ];
+
+			if ( glyph.Codepoint == upper ) {
+				baked->IndexAdvanceX[ lower_remap ] = baked->IndexAdvanceX[ upper ];
+				baked->IndexLookup[ lower_remap ] = j;
+			}
+
+			else if ( glyph.Codepoint == upper + 0x590 ) {
+				baked->IndexAdvanceX[ lower_remap_shifted ] = baked->IndexAdvanceX[ upper + 0x590 ];
+				baked->IndexLookup[ lower_remap_shifted ] = j;
 			}
 		}
 	}
@@ -127,7 +138,7 @@ ImFont* load_font( uint8_t* font_data, float font_size, bool uppercase = false )
 	return font;
 }
 
-ImFont* load_compressed_glfn_font( uint8_t* compressed, size_t compressed_size, std::initializer_list<std::pair<uint16_t, uint16_t>> ranges ) {
+ImFont* load_compressed_glfn_font( uint8_t* compressed, size_t compressed_size, std::initializer_list<std::initializer_list<std::pair<uint16_t, uint16_t>>> ranges ) {
 	stream_reader compressed_stream( compressed );
 
 	size_t uncompressed_size = compressed_stream.read<int>();
@@ -193,7 +204,7 @@ ImFont* load_compressed_glfn_font( uint8_t* compressed, size_t compressed_size, 
 	int size_read = 0;
 
 	for ( const auto& range : ranges ) {
-		for ( uint16_t codepoint = range.first; codepoint <= range.second && size_read < size; codepoint++ ) {
+		for ( uint16_t codepoint = range.begin()[ 0 ].first; codepoint <= range.begin()[ 0 ].second && size_read < size; codepoint++ ) {
 			glf_glyph_t glyph_info = stream.read<glf_glyph_t>();
 
 			for ( size_t i = 0; i < glyph_info.nKerningPairs; ++i ) {
@@ -214,7 +225,16 @@ ImFont* load_compressed_glfn_font( uint8_t* compressed, size_t compressed_size, 
 			glyph.U1 = ( ( float )texture_rect->x + ( float )glyph_info.iX + ( float )glyph_info.iWidth ) / ( float )font_atlas->TexData->Width;
 			glyph.V1 = ( ( float )texture_rect->y + ( float )glyph_info.iY + ( float )glyph_info.iHeight ) / ( float )font_atlas->TexData->Height;
 
+			// Add glyph for main range
 			ImFontAtlasBakedAddFontGlyph( font_atlas, baked, nullptr, &glyph );
+
+			// Add glyph for duplicated ranges
+			for ( size_t j = 1; j < range.size(); j++ ) {
+				// Remap to new range
+				glyph.Codepoint = range.begin()[ j ].first + ( codepoint - range.begin()[ 0 ].first );
+
+				ImFontAtlasBakedAddFontGlyph( font_atlas, baked, nullptr, &glyph );
+			}
 
 			size_read += sizeof( glyph_info );
 		}
@@ -252,12 +272,14 @@ bool renderer::init( IDXGISwapChain* swapchain ) {
 	font_atlas->TexMinHeight = 1024;
 	ImFontAtlasBuildInit( font_atlas );
 
-	fonts[ fonts::small_fonts ] = load_font( _smallfonts, 8.f, true );
-	fonts[ fonts::consolas_bold ] = load_compressed_glfn_font( _consolas_bold, sizeof( _consolas_bold ), { { 0x00, 0xFF }, { 0x400, 0x4FF } } );
-	fonts[ fonts::verdana ] = load_compressed_glfn_font( _verdana, sizeof( _verdana ), { { 0x00, 0xFF }, { 0x400, 0x4FF } } );
-	fonts[ fonts::verdana_bold ] = load_compressed_glfn_font( _verdana_bold, sizeof( _verdana_bold ), { { 0x00, 0xFF }, { 0x400, 0x4FF } } );
-	fonts[ fonts::tahoma ] = load_compressed_glfn_font( _tahoma, sizeof( _tahoma ), { { 0x00, 0xFF }, { 0x400, 0x4FF } } );
-	fonts[ fonts::tahoma_bold ] = load_compressed_glfn_font( _tahoma_bold, sizeof( _tahoma_bold ), { { 0x00, 0xFF }, { 0x400, 0x4FF } } );
+	std::initializer_list<std::initializer_list<std::pair<uint16_t, uint16_t>>> ranges = { { { 0x00, 0xFF }, { 0x590, 0x68F } }, { { 0x400, 0x4FF } } };
+
+	fonts[ fonts::small_fonts ] = load_small_fonts( _smallfonts, 8.f );
+	fonts[ fonts::consolas_bold ] = load_compressed_glfn_font( _consolas_bold, sizeof( _consolas_bold ), ranges );
+	fonts[ fonts::verdana ] = load_compressed_glfn_font( _verdana, sizeof( _verdana ), ranges );
+	fonts[ fonts::verdana_bold ] = load_compressed_glfn_font( _verdana_bold, sizeof( _verdana_bold ), ranges );
+	fonts[ fonts::tahoma ] = load_compressed_glfn_font( _tahoma, sizeof( _tahoma ), ranges );
+	fonts[ fonts::tahoma_bold ] = load_compressed_glfn_font( _tahoma_bold, sizeof( _tahoma_bold ), ranges );
 
 	ImGui_ImplDX11_UpdateTexture( font_atlas->TexData );
 

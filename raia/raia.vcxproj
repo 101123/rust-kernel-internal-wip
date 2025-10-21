@@ -225,6 +225,7 @@
     <ClInclude Include="include\hexrays.h" />
     <ClInclude Include="include\imgui\imgui_impl_dx11.h" />
     <ClInclude Include="include\uncompress_lzma2.h" />
+    <ClInclude Include="jew_string.h" />
     <ClInclude Include="math\mat3x3.h" />
     <ClInclude Include="math\quat.h" />
     <ClInclude Include="math\rect.h" />

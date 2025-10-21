@@ -19,6 +19,7 @@ namespace util {
 #define LOG2( Format, ... ) { char _[ 256 ]; snprintf( _, sizeof( _ ), Format, __VA_ARGS__ ); DbgPrintEx( DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, "%s", _ ); }
 
 #include "sentian/api.h"
+#include "jew_string.h"
 
 #include <cstdint>
 
