@@ -137,43 +137,43 @@ struct name_replacement {
 };
 
 name_replacement name_replacements[] = {
-	{ 1545779598, "AK", 'a' }, // rifle.ak
-	{ -1335497659, "AK", 'a' }, // rifle.ak.ice
-	{ 472505338, "AK", 'a' }, // rifle.ak.med
-	{ -139037392, "AK", 'a' }, // rifle.ak.diver
-	{ 2054929933, "AK", 'a' }, // rifle.ak.jungle
+	{ 1545779598, J( "AK" ), 'a' }, // rifle.ak
+	{ -1335497659, ( "AK" ), 'a' }, // rifle.ak.ice
+	{ 472505338, J( "AK" ), 'a' }, // rifle.ak.med
+	{ -139037392, J( "AK" ), 'a' }, // rifle.ak.diver
+	{ 2054929933, J( "AK" ), 'a' }, // rifle.ak.jungle
 	{ -880412831, nullptr, 'b' }, // blunderbuss
-	{ 1588298435, "Bolty", 'c'}, // rifle.bolt
+	{ 1588298435, J( "Bolty" ), 'c'}, // rifle.bolt
 	{ 884424049, nullptr, 'd'}, // bow.compound
 	{ 1965232394, nullptr, 'e' }, // crossbow
-	{ -765183617, "DB", 'f' }, // shotgun.double
+	{ -765183617, J( "DB" ), 'f' }, // shotgun.double
 	{ -75944661, nullptr, 'g' }, // pistol.eoka
-	{ 1914691295, "Glock", 'h' }, // pistol.prototype17
+	{ 1914691295, J( "Glock" ), 'h' }, // pistol.prototype17
 	{ -1123473824, nullptr, 'i' }, // multiplegrenadelauncher
 	{ -92315244, nullptr, 'j'}, // revolver.hc
 	{ -1214542497, nullptr, 'k' }, // hmlmg
 	{ -218009552, nullptr, 'l' }, // homingmissile.launcher
 	{ 2040726127, nullptr, 'm' }, // knife.combat
-	{ -778367295, "L96", 'n' }, // rifle.l96
-	{ -1812555177, "LR300", 'o' }, // rifle.lr300
-	{ 678698219, "M4", 'p' }, // shotgun.m4
-	{ 1673224590, "M15", 'q' }, // pistol.semiauto.a.m15
-	{ 28201841, "M39", 'r' }, // rifle.m39
-	{ -852563019, "M92", 's' }, // pistol.m92
-	{ -2069578888, "M2", 't' }, // lmg.m249
+	{ -778367295, J( "L96" ), 'n' }, // rifle.l96
+	{ -1812555177, J( "LR300" ), 'o' }, // rifle.lr300
+	{ 678698219, J( "Benelli" ), 'p' }, // shotgun.m4
+	{ 1673224590, J( "M15" ), 'q' }, // pistol.semiauto.a.m15
+	{ 28201841, J( "M39" ), 'r' }, // rifle.m39
+	{ -852563019, J( "M92" ), 's' }, // pistol.m92
+	{ -2069578888, J( "M2" ), 't' }, // lmg.m249
 	{ 935606207, nullptr, 'u' }, // minigun
-	{ 1318558775, "MP5", 'v' }, // smg.mp5
+	{ 1318558775, J( "MP5" ), 'v' }, // smg.mp5
 	{ 1953903201, nullptr, 'w' }, // pistol.nailgun
-	{ -1367281941, "Pipey", 'x' }, // shotgun.waterpipe
-	{ 1373971859, "Python", 'y' }, // pistol.python
+	{ -1367281941, J( "Pipey" ), 'x' }, // shotgun.waterpipe
+	{ 1373971859, J( "Python" ), 'y' }, // pistol.python
 	{ 649912614, nullptr, 'z' }, // pistol.revolver
 	{ 442886268, nullptr, 'A' }, // rocket.launcher,
-	{ 795371088, "Pumpy", 'B' }, // shotgun.pump,
-	{ 818877484, "P2", 'C' }, // pistol.semiauto,
-	{ -904863145, "SAR", 'D' }, // rifle.semiauto
+	{ 795371088, J( "Pumpy" ), 'B' }, // shotgun.pump,
+	{ 818877484, J( "P2" ), 'C' }, // pistol.semiauto,
+	{ -904863145, J( "SAR" ), 'D' }, // rifle.semiauto
 	{ -348232115, nullptr, 'E' }, // rifle.sks
-	{ 1796682209, "Custom", 'F' }, // smg.2
-	{ -41440462, "SPAS", 'G' }, // shotgun.spas12
+	{ 1796682209, J( "Custom" ), 'F' }, // smg.2
+	{ -41440462, J( "SPAS" ), 'G' }, // shotgun.spas12
 	{ 2083256995, nullptr, 'H' }, // t1_smg
 };
 
@@ -360,7 +360,7 @@ void draw_named_entity( const cvar_visual* visuals, const vector2& screen, float
 
 	// This is very lazy, but works fine, since we only have backpacks and corpses in this map
 	if ( named_entity->flags & rust::base_entity::flag::reserved2 ) {
-		visual.draw_text( S( "Looted" ), visuals->color );
+		visual.draw_text( J( "Looted" ), visuals->color );
 	}
 
 	visual.draw_text( FMT( 32, S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
@@ -389,7 +389,7 @@ void draw_locked_by_ent_crate( const cvar_visual* visuals, const vector2& screen
 		.draw_text( visuals->display_name, visuals->color );
 
 	if ( entity->flags & rust::base_entity::flag::on_fire ) {
-		visual.draw_text( S( "On Fire" ), visuals->color );
+		visual.draw_text( J( "On Fire" ), visuals->color );
 	}
 
 	visual.draw_text( FMT( 32, S( "%dm" ), ( int )distance ), COL32_MERGE_ALPHA( COL32_WHITE, visuals->color ) );
