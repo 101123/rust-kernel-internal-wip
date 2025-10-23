@@ -928,78 +928,94 @@ void update_player_bones( cached_player& cached_player ) {
     }
 }
 
-bool update_player_inventory( rust::base_player* player, cached_player& cached_player ) {
+void update_player_inventory( rust::base_player* player, cached_player& cached_player ) {
+    // Reset everything here in case anything fails
+    cached_player.active_item_idx = -1;
+    cached_player.active_item_id = -1;
+
+    for ( auto& belt_item : cached_player.belt_items ) {
+        belt_item.present = false;
+    }
+
     rust::item_container* belt = cached_player.inventory->container_belt;
     if ( !is_valid_ptr( belt ) )
-        return false;
+        return;
 
     sys::list<rust::item*>* items_list = belt->item_list;
     if ( !is_valid_ptr( items_list ) || !is_valid_ptr( items_list->items ) )
-        return false;
+        return;
 
     sys::array<rust::item*>* items = items_list->items;
     if ( !is_valid_ptr( items ) )
-        return false;
+        return;
 
-    int32_t active_item_idx = -1, active_item_id = -1;
+    // Sort all the items by position
+    rust::item* ordered_items[ 6 ] = {};
+
+    for ( int32_t i = 0; i < items_list->size; i++ ) {
+        rust::item* item = items->buffer[ i ];
+        if ( !is_valid_ptr( item ) )
+            return;
+
+        if ( item->position < 0 || item->position > 5 )
+            return;
+
+        ordered_items[ item->position ] = item;
+    }
+
     uint64_t active_item_uid = player->cl_active_item;
 
     for ( int32_t i = 0; i < 6; i++ ) {
-        cached_player.belt_items[ i ].present = false;
-    }
-
-    for ( int32_t j = 0; j < items_list->size; j++ ) {
-        // None of these pointers should ever be invalid, so fail if so
-        rust::item* item = items->buffer[ j ];
-        if ( !is_valid_ptr( item ) )
-            return false;
-
-        if ( item->position < 0 || item->position > 5 )
-            return false;
+        rust::item* item = ordered_items[ i ]; cached_belt_item& belt_item = cached_player.belt_items[ i ];
+        if ( !item )
+            continue;
 
         rust::item_definition* info = item->info;
         if ( !is_valid_ptr( info ) )
-            return false;
-
-        rust::phrase* display_name = info->display_name;
-        if ( !is_valid_ptr( display_name ) )
-            return false;
-
-        unity::sprite* icon_sprite = info->icon_sprite;
-        if ( !is_valid_ptr( icon_sprite ) )
-            return false;
-
-        unity::texture2d* icon_texture = icon_sprite->get_texture();
-        if ( !is_valid_ptr( icon_texture ) )
-            return false;
-
-        ID3D11ShaderResourceView* icon_srv = icon_texture->get_srv();
-        if ( !is_valid_ptr( icon_srv ) )
-            return false;
-
-        sys::string* legacy_english = display_name->legacy_english;
-        if ( !is_valid_ptr( legacy_english ) )
-            return false;
+            return;
 
         if ( item->uid == active_item_uid ) {
-            active_item_idx = item->position;
-            active_item_id = info->item_id;
+            cached_player.active_item_idx = i;
+            cached_player.active_item_id = info->item_id;
         }
 
-        cached_belt_item& belt_item = cached_player.belt_items[ item->position ];
-
-        belt_item.present = true;
-        belt_item.srv = icon_srv;
+        // The item is only considered present at this point if it hasn't changed
+        belt_item.present = info->item_id == belt_item.item_id;
         belt_item.condition = item->condition;
         belt_item.max_condition = item->max_condition;
         belt_item.amount = item->amount;
+
+        // If the item has changed, cache the rest of its information
+        if ( belt_item.present )
+            continue;
+
+        rust::phrase* display_name = info->display_name;
+        if ( !is_valid_ptr( display_name ) )
+            return;
+
+        sys::string* legacy_english = display_name->legacy_english;
+        if ( !is_valid_ptr( legacy_english ) )
+            return;
+
+        unity::sprite* icon_sprite = info->icon_sprite;
+        if ( !is_valid_ptr( icon_sprite ) )
+            return;
+
+        unity::texture2d* icon_texture = icon_sprite->get_texture();
+        if ( !is_valid_ptr( icon_texture ) )
+            return;
+
+        ID3D11ShaderResourceView* icon_srv = icon_texture->get_srv();
+        if ( !is_valid_ptr( icon_srv ) )
+            return;
+
+        belt_item.present = true;
+        belt_item.item_id = info->item_id;
+        belt_item.srv = icon_srv;
+
+        // Convert to utf8 here so we don't need to do it every render frame
         renderer::wstr_to_utf8( legacy_english->buffer, belt_item.name, sizeof( belt_item.name ) );
     }
-
-    cached_player.active_item_idx = active_item_idx;
-    cached_player.active_item_id = active_item_id;
-
-    return true;
 }
 
 void update_player_visibility( rust::base_player* player, cached_player& cached_player ) {
@@ -1041,11 +1057,9 @@ void update_velocity( rust::base_player* player, cached_player& cached_player ) 
         return;
 
     vector3 position = transform->get_position();
-    vector3 velocity = player->get_world_velocity();
-
     cached_velocity_data& velocity_data = cached_player.velocity_data;
 
-    if ( velocity == vector3() ) {
+    if ( player->player_model->new_velocity == vector3() ) {
         velocity_data.index = 0;
     }
 

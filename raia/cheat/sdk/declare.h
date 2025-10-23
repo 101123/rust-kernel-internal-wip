@@ -39,6 +39,7 @@ namespace rust {
 	class building_block;
 
 	using networkable_id = uint64_t;
+	using item_id = uint64_t;
 }
 
 struct cached_entity;

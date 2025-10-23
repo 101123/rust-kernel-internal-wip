@@ -1601,6 +1601,7 @@ namespace rust {
     class player_model {
     public:
         FIELD( skinned_multi_mesh*, multi_mesh, Offsets::PlayerModel::_multiMesh );
+        FIELD( vector3, new_velocity, Offsets::PlayerModel::newVelocity );
     };
 
     class player_input {
@@ -1757,7 +1758,7 @@ namespace rust {
         FIELD( float, condition, Offsets::Item::_condition );
         FIELD( float, max_condition, Offsets::Item::_maxCondition );
         FIELD( item_definition*, info, Offsets::Item::info );
-        FIELD( uint64_t, uid, Offsets::Item::uid );
+        FIELD( item_id, uid, Offsets::Item::uid );
         FIELD( int, amount, Offsets::Item::amount );
         FIELD( int, position, Offsets::Item::position );
         FIELD( item_container*, contents, Offsets::Item::contents );

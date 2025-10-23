@@ -37,6 +37,7 @@ struct cached_combat_entity : public cached_entity {
 struct cached_belt_item {
 	bool present;
 	ID3D11ShaderResourceView* srv;
+	int32_t item_id;
 	float condition;
 	float max_condition;
 	int32_t amount;
