@@ -887,7 +887,7 @@ bool cache_player( rust::base_player* player, cached_player& cached_player ) {
     }
 
     cached_player.scientist = !player->is<rust::base_player>();
-    cached_player.steam_id = player->get_user_id();
+    cached_player.user_id = player->get_user_id();
     cached_player.eyes = eyes;
     cached_player.inventory = inventory;
 
@@ -1034,10 +1034,10 @@ void update_player_visibility( rust::base_player* player, cached_player& cached_
 
 void update_player_avatar( rust::base_player* player, cached_player& cached_player ) {
     if ( cached_player.avatar_srv || cached_player.scientist || 
-        !( cached_player.steam_id > 76561197960265728 && cached_player.steam_id < 76561202255233023 ) )
+        !( cached_player.user_id > 76561197960265728 && cached_player.user_id < 76561202255233023 ) )
         return;
 
-    unity::texture* avatar_texture = rust::steam_client_wrapper::get_avatar_texture( cached_player.steam_id );
+    unity::texture* avatar_texture = rust::steam_client_wrapper::get_avatar_texture( cached_player.user_id );
 
     if ( is_valid_ptr( avatar_texture ) ) {
         ID3D11ShaderResourceView* srv = avatar_texture->get_srv();
@@ -1124,12 +1124,18 @@ void entity_manager::update() {
     }
 
     for ( auto& [ player, cached_player ] : cached_entities.players ) {
+        if ( player == local_player.entity )
+            continue;
+
         if ( !cache_player( player, cached_player ) )
             continue;
 
         cached_player.team_id = player->current_team;
         cached_player.player_flags = player->player_flags;
         cached_player.lifestate = player->lifestate;
+
+        if ( !should_update_player( cached_player ) )
+            continue;
 
         update_player_bones( cached_player );
         update_player_inventory( player, cached_player );

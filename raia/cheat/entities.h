@@ -62,7 +62,7 @@ struct cached_velocity_data {
 struct cached_player {
 	bool init;
 	bool scientist;
-	uint64_t steam_id;
+	uint64_t user_id;
 	cached_bone_data bone_data;
 	cached_velocity_data velocity_data;
 	char name[ 256 ];

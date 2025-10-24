@@ -838,9 +838,9 @@ const char* raid_descriptors[] = {
 	J( "a high velocity rocket" ),
 	J( "an incendiary rocket" ),
 	J( "explosive ammo" ),
-	J( "c4" ),
+	J( "C4" ),
 	J( "a satchel charge" ),
-	J( "a HE grenade" ),
+	J( "an HE grenade" ),
 	J( "an MLRS rocket" )
 };
 
