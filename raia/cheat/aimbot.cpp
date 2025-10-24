@@ -80,9 +80,8 @@ bool prediction( const vector3& origin, vector3& target, const vector3& target_v
 	float travel_time = 0.f;
 
 	if ( prediction_no_velocity( origin, target, travel_time ) ) {
-		if ( target_velocity == vector3() ) {
+		if ( target_velocity == vector3() )
 			return true;
-		}
 
 		// Extrapolate the position of the target
 		target = target_position + ( target_velocity * travel_time );

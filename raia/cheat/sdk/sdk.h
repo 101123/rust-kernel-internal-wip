@@ -1174,30 +1174,61 @@ namespace unity {
 
         static inline il2cpp_class* klass_;
     };
+
+    struct bounds {
+        vector3 center;
+        vector3 extents;
+    };
 }
 
 namespace rust {
-    enum bones {
-        neck = 46,
-        head = 47,
-        spine1 = 18,
-        spine3 = 21,
-        spine4 = 22,
-        l_clavicle = 23,
-        r_clavicle = 54,
-        l_upperarm = 24,
-        r_upperarm = 55,
-        l_forearm = 25,
-        r_forearm = 56,
-        l_hand = 26,
-        r_hand = 57,
-        l_hip = 1,
-        r_hip = 13,
-        l_knee = 2,
-        r_knee = 14,
-        l_foot = 3,
-        r_foot = 15
-    };
+    namespace bones {
+        enum : int {
+            neck = 46,
+            head = 47,
+            spine1 = 18,
+            spine3 = 21,
+            spine4 = 22,
+            l_clavicle = 23,
+            r_clavicle = 54,
+            l_upperarm = 24,
+            r_upperarm = 55,
+            l_forearm = 25,
+            r_forearm = 56,
+            l_hand = 26,
+            r_hand = 57,
+            l_hip = 1,
+            r_hip = 13,
+            l_knee = 2,
+            r_knee = 14,
+            l_foot = 3,
+            r_foot = 15
+        };
+    }
+
+    namespace ragdoll_bones {
+        enum : int {
+            neck = 45,
+            head = 46,
+            spine1 = 17,
+            spine3 = 19,
+            spine4 = 20,
+            l_clavicle = 22,
+            r_clavicle = 55,
+            l_upperarm = 23,
+            r_upperarm = 56,
+            l_forearm = 24,
+            r_forearm = 57,
+            l_hand = 25,
+            r_hand = 58,
+            l_hip = 1,
+            r_hip = 11,
+            l_knee = 2,
+            r_knee = 12,
+            l_foot = 3,
+            r_foot = 13
+        };
+    }
     
     namespace item_category {
         enum : int {
@@ -1474,6 +1505,71 @@ namespace rust {
     public:
         FIELD( unity::transform*, eye_bone, Offsets::Model::eyeBone );
         FIELD( sys::array<unity::transform*>*, bone_transforms, Offsets::Model::boneTransforms );
+        
+        static inline il2cpp_object* type_object_;
+    };
+
+    struct obb {
+        quaternion rotation;
+        vector3 position;
+        vector3 extents;
+        vector3 forward;
+        vector3 right;
+        vector3 up;
+        float reject;
+
+        obb() = default;
+        obb( const vector3& position, const vector3& scale, const quaternion& rotation, const unity::bounds& bounds ) {
+            this->rotation = rotation;
+            this->position = position + rotate_vector_by_quaternion( rotation, scale * bounds.center );
+            this->extents = scale * bounds.extents;
+            this->forward = rotate_vector_by_quaternion( rotation, vector3::forward );
+            this->right = rotate_vector_by_quaternion( rotation, vector3::right );
+            this->up = rotate_vector_by_quaternion( rotation, vector3::up );
+            this->reject = vector3::sqr_magnitude( this->extents );
+        }
+
+        vector3 closest_point( const vector3& target ) {
+            struct axis_test {
+                vector3 direction;
+                float extent;
+                bool inside = false;
+            };
+
+            axis_test axes[] = {
+                { this->right, this->extents.x },
+                { this->up, this->extents.y },
+                { this->forward, this->extents.z }
+            };
+
+            vector3 result = this->position;
+            vector3 closest_point = target - this->position;
+
+            for ( auto& axis : axes ) {
+                float projection = vector3::dot( closest_point, axis.direction );
+
+                if ( projection > axis.extent ) {
+                    result += axis.direction * axis.extent;
+                }
+
+                else if ( projection < -axis.extent ) {
+                    result -= axis.direction * axis.extent;
+                }
+
+                else {
+                    result += axis.direction * projection;
+                    axis.inside = true;
+                }
+            }
+
+            for ( const auto& axis : axes ) {
+                if ( !axis.inside ) {
+                    return result;
+                }
+            }
+
+            return target;
+        }
     };
 
     class base_entity : public base_networkable {
@@ -1514,6 +1610,7 @@ namespace rust {
         };
 
         FIELD( rust::position_lerp*, position_lerp, Offsets::BaseEntity::positionLerp );
+        FIELD( unity::bounds, bounds, Offsets::BaseEntity::bounds );
         FIELD( rust::model*, model, Offsets::BaseEntity::model );
         FIELD( int, flags, Offsets::BaseEntity::flags );
 
@@ -1561,6 +1658,22 @@ namespace rust {
             vector3* world_velocity = caller.push<vector3>();
             caller( get_world_velocity, world_velocity, this );
             return *world_velocity;
+        }
+
+        obb world_space_bounds() {
+            unity::transform* transform = this->get_transform();
+            if ( !is_valid_ptr( transform ) )
+                return obb();
+
+            return obb( transform->get_position(), transform->get_lossy_scale(), transform->get_rotation(), bounds );
+        }
+
+        vector3 closest_point( const vector3& position ) {
+            return world_space_bounds().closest_point( position );
+        }
+
+        float distance( const vector3& position ) {
+            return vector3::magnitude( closest_point( position ) - position );
         }
     };
 
@@ -2889,6 +3002,14 @@ namespace rust {
         };
 
         static inline static_fields* static_fields_;
+    };
+
+    enum building_grade {
+        twigs,
+        wood,
+        stone,
+        metal,
+        top_tier
     };
 
     class building_block : public base_combat_entity {

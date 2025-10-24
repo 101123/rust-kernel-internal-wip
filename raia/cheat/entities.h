@@ -87,7 +87,7 @@ struct cached_dropped_item {
 	char name[ 256 ];
 };
 
-struct cached_building {
+struct cached_building_block {
 	unity::transform* transform;
 	vector3 position;
 };
@@ -101,7 +101,7 @@ struct entity_collection {
 	entity_vector<rust::base_combat_entity*, cached_combat_entity> combat_entities;
 	entity_vector<rust::world_item*, cached_dropped_item> dropped_items;
 	entity_vector<rust::base_player*, cached_player> players;
-	entity_vector<rust::building_block*, cached_building> buildings;
+	entity_vector<rust::building_block*, cached_building_block> building_blocks;
 };
 
 namespace entity_manager {

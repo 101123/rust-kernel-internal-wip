@@ -495,8 +495,10 @@ DEFINE_CONTEXT( minimap,
 DEFINE_CONTEXT( auto_upgrade,
 	cvar enabled = cvar( H( "Auto Upgrade" ), false );
 	cvar only_holding_hammer = cvar( H( "Auto Upgrade Only Holding Hammer" ), false );
-	cvar_ui from = cvar_ui( H( "Auto Upgrade From" ), 0u );
-	cvar_ui to = cvar_ui( H( "Auto Upgrade To" ), 2u );
+	cvar_i from = cvar_i( H( "Auto Upgrade From" ), 0 ); /* Twig */
+	cvar_i to = cvar_i( H( "Auto Upgrade To" ), 2 ); /* Stone */
+
+	uint64_t next_upgrade_time;
 );
 
 DEFINE_CONTEXT( effects,

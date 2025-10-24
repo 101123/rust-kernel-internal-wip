@@ -781,6 +781,7 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 	features::bright_night();
 	features::looking_at( base_player );
 	features::drop_box();
+	features::auto_upgrade_impl( local_player.held_entity );
 }
 
 struct command {

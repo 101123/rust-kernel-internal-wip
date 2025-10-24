@@ -49,7 +49,7 @@ public:
 		x *= value; y *= value; z *= value; return *this; 
 	}
 
-	vector3 operator*( const vector3& value ) {
+	vector3 operator*( const vector3& value ) const {
 		return vector3( x * value.x, y * value.y, z * value.z );
 	}
 

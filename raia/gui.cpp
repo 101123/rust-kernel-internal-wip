@@ -556,11 +556,11 @@ public:
         { 0.f, 0.f }, /* None */
         { 0.f, 16.f }, /* Toggle -> Combobox */
         { 0.f, 29.f }, /* Slider -> Combobox */
-        { 0.f, 50.f } /* Combobox -> Combobox */
+        { 0.f, 40.f } /* Combobox -> Combobox */
     };
 
     template <typename T>
-    void combo_box( const char* label, std::initializer_list<const char*> options, T* value ) {
+    void combo_box( const char* label, std::initializer_list<const char*> options, T* value, T start_index = 0 ) {
         auto& draw_list = gui_draw_list.get();
 
         static_assert( std::is_integral_v<T> );
@@ -596,7 +596,7 @@ public:
                 const bool hovered = mouse_in_rect( option_bounds );
 
                 if ( hovered && left_mouse_clicked ) {
-                    *value = static_cast<T>( i );
+                    *value = static_cast<T>( start_index + i );
                     active_hash.current = 0ull;
                 }
 
@@ -608,7 +608,7 @@ public:
 
         draw_styled_rect( combo_bounds );
 
-        draw_list.add_text( position.x + 24.f, position.y + 23.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), options.begin()[ *value ] );
+        draw_list.add_text( position.x + 24.f, position.y + 23.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), options.begin()[ *value - start_index ] );
 
         draw_list.pop_z_index();
 
@@ -1080,6 +1080,8 @@ void gui::run() {
                     visual_impl( right, player_corpse, J( "Player corpse" ) );
                     visual_impl( right, backpack, J( "Backpack" ) );
 
+                    right.toggle( J( "Notify on effect" ), &effects.notify );
+
                     right.end();
 
                     break;
@@ -1254,6 +1256,15 @@ void gui::run() {
                     }
 
                     left.toggle( J( "Auto drop box" ), &auto_drop_box.enabled );
+
+                    left.toggle( J( "Auto upgrade" ), &auto_upgrade.enabled );
+
+                    if ( auto_upgrade.enabled ) {
+                        left.toggle( J( "Only holding hammer" ), &auto_upgrade.only_holding_hammer );
+
+                        left.combo_box( J( "Upgrade from" ), { J( "Any" ), J( "Twig" ), J( "Wood" ), J( "Stone" ), J( "Sheet metal" ) }, &auto_upgrade.from, -1 );
+                        left.combo_box( J( "Upgrade to" ), { J( "Wood" ), J( "Stone" ), J( "Sheet metal" ), J( "Armored" ) }, &auto_upgrade.to, 1 );
+                    }
 
                     left.end();
 

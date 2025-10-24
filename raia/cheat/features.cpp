@@ -1,6 +1,7 @@
 #include "features.h"
 #include "sdk/sdk.h"
 #include "vars.h"
+#include "entities.h"
 
 void features::graphics() {
 	if ( fov_modifier.enabled || fov_modifier.dirty ) {
@@ -236,5 +237,45 @@ void features::drop_box() {
 
 			rust::local_player::item_command( item->uid, S( L"drop" ) );
 		}
+	}
+}
+
+void features::auto_upgrade_impl( rust::held_entity* held_entity ) {
+	if ( !auto_upgrade.enabled )
+		return;
+
+	if ( util::get_time<time_unit::milliseconds>() < auto_upgrade.next_upgrade_time )
+		return;
+
+	if ( auto_upgrade.only_holding_hammer &&
+		( !held_entity || ( !held_entity->is( H( "Hammer" ) ) && !held_entity->is( H( "Toolgun" ) ) ) ) )
+		return;
+
+	util::scoped_spinlock lock( &entity_manager::cache_lock );
+
+	entity_collection entity_collection = entity_manager::get_entities();
+
+	for ( auto [ building_block, cached_building_block ] : entity_collection.building_blocks ) {
+		if ( building_block->grade >= auto_upgrade.to )
+			continue;
+
+		// If a from grade is specified, make sure the building grade matches
+		if ( auto_upgrade.from != -1 && building_block->grade != auto_upgrade.from )
+			continue;
+
+		// Filter with a regular distance check first because replicating the actual distance check on the server is quite costly
+		if ( vector3::distance( local_player.eyes_position, cached_building_block.position ) > 6.f )
+			continue;
+
+		if ( !building_block->can_afford_upgrade( auto_upgrade.to, 0ull, local_player.entity ) )
+			break;
+
+		// We could probably break early here to save some calls
+		if ( !building_block->has_upgrade_privilege( auto_upgrade.to, 0ull, local_player.entity ) )
+			continue;
+
+		building_block->server_rpc( S( L"DoUpgradeToGrade" ), auto_upgrade.to.value, 0ull );
+
+		auto_upgrade.next_upgrade_time = util::get_time<time_unit::milliseconds>() + 50ull;
 	}
 }
