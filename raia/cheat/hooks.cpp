@@ -7,6 +7,7 @@
 #include "cheat/aimbot.h"
 #include "cheat/features.h"
 #include "notifications.h"
+#include "gui.h"
 
 void reset_local_player() {
 	local_player = {
@@ -922,6 +923,9 @@ void effect_library_setup_effect_hook( rust::effect* effect ) {
 void client_update_pre_hook( rust::client* client ) {
 	if ( !is_valid_ptr( client ) )
 		return;
+
+	// Update scroll delta here as this is the only hook we have that runs in the main menu
+	gui::scroll_delta = unity::input::get_mouse_scroll_delta().y;
 
 	rust::list_hash_set<rust::projectile*>* projectiles_instance_list = rust::list_component<rust::projectile>::static_fields_->instance_list;
 

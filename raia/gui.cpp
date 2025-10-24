@@ -1,4 +1,4 @@
-﻿#include "gui.h"
+#include "gui.h"
 
 #include "util.h"
 
@@ -204,7 +204,7 @@ state_history2<bool> left_mouse_state;
 state_history2<vector2> mouse_position;
 state_history2<uint64_t> active_hash;
 
-rect menu_bounds = rect( 400.f, 400.f, 548.f, 480.f );
+rect menu_bounds = rect( 400.f, 400.f, 600.f, 560.f );
 
 bool left_mouse_clicked;
 bool left_mouse_held;
@@ -247,8 +247,8 @@ bool mouse_in_rect( const rect& bounds ) {
     const vector2& position = mouse_position.current;
 
     return
-        position.x >= bounds.x && position.x <= bounds.x + bounds.w &&
-        position.y >= bounds.y && position.y <= bounds.y + bounds.h;
+        position.x >= bounds.x && position.x < bounds.x + bounds.w &&
+        position.y >= bounds.y && position.y < bounds.y + bounds.h;
 }
 
 namespace elements {
@@ -260,11 +260,15 @@ namespace elements {
     };
 }
 
+float scroll_deltas[ 128 ];
+bool dragging_scrollbar_ = false;
+float drag_offset_y_ = 0.f;
+
 class group_box {
 public:
     group_box() = delete;
-    group_box( rect bounds, const char* label = nullptr )
-        : bounds_( bounds ), cursor_( 12.f, 12.f ), previous_id_( elements::none ) {};
+    group_box( rect bounds, float* scroll, const char* label )
+        : bounds_( bounds ), cursor_( 20.f, 23.f - *scroll ), start_cursor_( cursor_ ), scroll_( scroll ), previous_id_( elements::none ), label_( label ) {};
 
     void begin() {
         auto& draw_list = gui_draw_list.get();
@@ -273,20 +277,99 @@ public:
         draw_list.add_filled_rect( bounds_.x + 1.f, bounds_.y + 1.f, bounds_.w - 2.f, bounds_.h - 2.f, COL32( 38, 38, 38, 255 ) );
         draw_list.add_filled_rect( bounds_.x + 2.f, bounds_.y + 2.f, bounds_.w - 4.f, bounds_.h - 4.f, COL32( 50, 50, 50, 255 ) );
 
-        draw_list.push_clip_rect( bounds_.x + 2.f, bounds_.y + 2.f, bounds_.w - 4.f, bounds_.h - 4.f );
+        float label_width = renderer::calc_text_size( fonts::verdana_bold, label_ ).x + 6.f;
+
+        draw_list.add_filled_rect( bounds_.x + 10.f, bounds_.y, label_width, 2.f, COL32( 54, 54, 54, 255 ), 0.f );
+
+        draw_list.add_text( bounds_.x + 13.f, bounds_.y - 3.f, fonts::verdana_bold, text_flags::drop_shadow, COL32_WHITE, label_ );
+
+        draw_list.push_clip_rect( bounds_.x + 2.f, bounds_.y + 7.f, bounds_.w - 4.f, bounds_.h - 10.f );
 
         draw_list.pop_z_index();
     }
 
+    static inline vector2 end_movement[] = {
+        { 0.f, 0.f },
+        { 0.f, 10.f }, /* Toggle */
+        { 0.f, 27.f }, /* Slider */
+        { 0.f, 34.f }, /* Combobox */
+    };
+
     void end() {
+        vector2 cursor = cursor_ + end_movement[ previous_id_ ];
+
+        float start_y = start_cursor_.y;
+        float end_y = cursor.y;
+        float content_height = ( end_y - start_y ) * 1.1f; // total content height
+
+        float visible_height = bounds_.h;
+
+        // Calculate maximum scrollable distance
+        float max_scroll = std::max( 0.0f, content_height - visible_height );
+
+        // Handle scrolling input
+        if ( mouse_in_rect( bounds_ ) ) {
+            *scroll_ -= gui::scroll_delta * 10.f; // scale scroll speed
+            *scroll_ = std::clamp( *scroll_, 0.0f, max_scroll );
+        }
+
         gui_draw_list.get().pop_clip_rect();
+
+        // Draw scrollbar only if content is larger than visible area
+        if ( content_height > visible_height ) {
+            float scrollbar_width = 5.f;
+            float scrollbar_height = ( visible_height / content_height ) * visible_height;
+            float scrollbar_y = bounds_.y + 2.f + ( *scroll_ / max_scroll ) * ( visible_height - scrollbar_height );
+            scrollbar_height -= 4.f;
+
+            float scrollbar_x = bounds_.x + bounds_.w - 7.f;
+
+            // Handle dragging
+            vector2 mouse_pos = mouse_position.current;
+            bool mouse_over_handle = mouse_pos.x >= scrollbar_x && mouse_pos.x <= scrollbar_x + scrollbar_width &&
+                mouse_pos.y >= scrollbar_y && mouse_pos.y <= scrollbar_y + scrollbar_height;
+
+            if ( mouse_over_handle && left_mouse_held && !dragging_scrollbar_ ) {
+                dragging_scrollbar_ = true;
+                drag_offset_y_ = mouse_pos.y - scrollbar_y;
+            }
+
+            if ( !left_mouse_held ) {
+                dragging_scrollbar_ = false;
+            }
+
+            if ( dragging_scrollbar_ ) {
+                float new_handle_y = mouse_pos.y - drag_offset_y_;
+                new_handle_y = std::clamp( new_handle_y, bounds_.y + 2.f, bounds_.y + visible_height - scrollbar_height - 2.f );
+                *scroll_ = ( ( new_handle_y - ( bounds_.y + 2.f ) ) / ( visible_height - scrollbar_height - 4.f ) ) * max_scroll;
+            }
+
+            // Draw scrollbar track
+            gui_draw_list.get().add_filled_rect(
+                bounds_.x + bounds_.w - 8.f,
+                bounds_.y + 1.f,
+                scrollbar_width + 2.f,
+                visible_height - 2.f,
+                COL32( 38, 38, 38, 255 )
+            );
+
+            // Draw scrollbar handle
+            gui_draw_list.get().add_filled_rect(
+                scrollbar_x,
+                scrollbar_y,
+                scrollbar_width,
+                scrollbar_height,
+                COL32( 120, 120, 120, 255 )
+            );
+        }
     }
 
+    // confirmed good
     static inline vector2 toggle_movement[] = {
         { 0.f, 0.f }, /* None */
         { 0.f, 18.f }, /* Toggle -> Toggle */
-        { 0.f, 36.f }, /* Slider -> Toggle */
-        { 0.f, 50.f } /* Combobox -> Toggle */
+        { 0.f, 34.f }, /* Slider -> Toggle */
+        { 0.f, 44.f } /* Combobox -> Toggle */
     };
 
     bool toggle( const char* label, bool* value ) {
@@ -297,7 +380,7 @@ public:
         draw_list.push_z_index( 2 );
 
         const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
-        const rect toggle_bounds = rect( position.x, position.y, 10.f, 10.f );
+        const rect toggle_bounds = rect( position.x, position.y, 8.f, 8.f );
 
         const bool hovered = mouse_in_rect( toggle_bounds );
         const bool nothing_active = active_hash.previous == 0ull && active_hash.current == 0ull;
@@ -307,11 +390,10 @@ public:
             active_hash.current = 0ull;
         }
 
-        draw_list.add_filled_rect( toggle_bounds.x, toggle_bounds.y, toggle_bounds.w, toggle_bounds.h, COL32( 60, 60, 60, 255 ) );
-        draw_list.add_filled_rect( toggle_bounds.x + 1.f, toggle_bounds.y + 1.f, toggle_bounds.w - 2.f, toggle_bounds.h - 2.f, COL32( 38, 38, 38, 255 ) );
-        draw_list.add_filled_rect_multi_color( toggle_bounds.x + 2.f, toggle_bounds.y + 2.f, toggle_bounds.w - 4.f, toggle_bounds.h - 4.f, *value ? gradient_on : gradient_off );
+        draw_list.add_filled_rect( toggle_bounds.x, toggle_bounds.y, toggle_bounds.w, toggle_bounds.h, COL32( 38, 38, 38, 255 ) );
+        draw_list.add_filled_rect_multi_color( toggle_bounds.x + 1.f, toggle_bounds.y + 1.f, toggle_bounds.w - 2.f, toggle_bounds.h - 2.f, *value ? gradient_on : gradient_off );
 
-        draw_list.add_text( position.x + 18.f, position.y + 2.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
+        draw_list.add_text( position.x + 20.f, position.y, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
 
         draw_list.pop_z_index();
 
@@ -326,7 +408,7 @@ public:
         draw_list.push_z_index( 2 );
 
         const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
-        const rect bounds = rect( position.x + bounds_.w - 68.f, position.y - 1.f, 20.f, 10.f );
+        const rect bounds = rect( position.x + bounds_.w - 51.f, position.y - 1.f, 20.f, 10.f );
 
         const bool hovered = mouse_in_rect( bounds );
         const bool nothing_active = active_hash.previous == 0ull && active_hash.current == 0ull;
@@ -340,14 +422,14 @@ public:
 
         if ( active ) {
             for ( uint8_t i = 0; i < 255; i++ ) {
-                if ( render_input.get_async_key_state( i ) & 0x1 ) {
+                if ( game_input.get_async_key_state( i ) & 0x1 ) {
                     *key = i;
                     active_hash.current = 0ull;
                 }
             }
         }
 
-        draw_list.add_text( bounds.x, bounds.y, fonts::small_fonts, text_flags::none, active ? COL32_RED : COL32( 160, 160, 160, 255 ), FMT( 16, S( "[%c]" ), *key ) );
+        draw_list.add_text( bounds.x, bounds.y, fonts::small_fonts, text_flags::none, active ? COL32_RED : COL32( 160, 160, 160, 255 ), FMT( 32, "[%c]", *key ) );
 
         draw_list.pop_z_index();
     }
@@ -358,7 +440,7 @@ public:
         draw_list.push_z_index( 2 );
 
         const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
-        const rect preview_bounds = rect( position.x + bounds_.w - 44.f, position.y, 20.f, 10.f );
+        const rect preview_bounds = rect( position.x + bounds_.w - 68.f, position.y, 20.f, 8.f );
 
         const float color_picker_padding = 6.f;
         const vector2 sv_percentage = vector2( 0.84f, alpha ? 0.84f : 0.935f );
@@ -396,6 +478,7 @@ public:
         else if ( active ) {
             draw_list.set_floating( true );
 
+            // Really shitty hack for alpha but fuck making this shit proper
             draw_styled_rect( rect( color_picker_bounds.x, color_picker_bounds.y, color_picker_bounds.w, color_picker_bounds.h ) );
 
             // Account for 1px black border
@@ -500,9 +583,9 @@ public:
 
     static inline vector2 slider_movement[] = {
         { 0.f, 0.f }, /* None */
-        { 0.f, 16.f }, /* Toggle -> Slider */
-        { 0.f, 29.f }, /* Slider -> Slider */
-        { 0.f, 44.f } /* Combobox -> Slider */
+        { 0.f, 14.f }, /* Toggle -> Slider */
+        { 0.f, 30.f }, /* Slider -> Slider */
+        { 0.f, 40.f } /* Combobox -> Slider */
     };
 
     template <typename T>
@@ -516,7 +599,7 @@ public:
         draw_list.push_z_index( 2 );
 
         const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
-        const rect slider_bounds = rect( position.x + 18.f, position.y + 16.f, bounds_.w - 60.f, 10.f );
+        const rect slider_bounds = rect( position.x + 20.f, position.y + 17.f, bounds_.w - 98.f, 7.f );
 
         const bool hovered = mouse_in_rect( slider_bounds );
         const bool nothing_active = active_hash.previous == 0ull && active_hash.current == 0ull;
@@ -529,7 +612,7 @@ public:
         }
 
         else if ( active && left_mouse_held ) {
-            *value = static_cast<T>( ( std::clamp( mouse_position.current.x - slider_bounds.x, 0.f, slider_bounds.w - 1 ) / ( slider_bounds.w - 1.f ) ) * ( max - min ) + min );
+            *value = static_cast< T >( ( std::clamp( mouse_position.current.x - slider_bounds.x, 0.f, slider_bounds.w - 1 ) / ( slider_bounds.w - 1.f ) ) * ( max - min ) + min );
         }
 
         else if ( active && !left_mouse_held ) {
@@ -540,12 +623,12 @@ public:
 
         draw_styled_rect( slider_bounds );
 
-        const rect draw_bounds = rect( slider_bounds.x + 3.f, slider_bounds.y + 3.f, slider_bounds.w - 6.f, slider_bounds.h - 6.f );
-        float fill_width = draw_bounds.w * std::clamp( static_cast<float>( *value - min ) / static_cast<float>( max - min ), 0.f, 1.f );
+        const rect draw_bounds = rect( slider_bounds.x + 1.f, slider_bounds.y + 1.f, slider_bounds.w - 2.f, slider_bounds.h - 2.f );
+        float fill_width = draw_bounds.w * std::clamp( static_cast< float >( *value - min ) / static_cast< float >( max - min ), 0.f, 1.f );
 
         draw_list.add_filled_rect_multi_color( draw_bounds.x, draw_bounds.y, fill_width, draw_bounds.h, gradient_on );
 
-        draw_list.add_text( draw_bounds.x + fill_width, draw_bounds.y + 2.f, fonts::verdana_bold, text_flags::centered | text_flags::outline, COL32( 160, 160, 160, 255 ), FMT( 32, fmt, *value ) );
+        draw_list.add_text( draw_bounds.x + fill_width, draw_bounds.y + 2.f, fonts::verdana_bold, text_flags::centered | text_flags::outline, COL32( 255, 255, 255, 255 ), FMT( 64, fmt, *value ) );
 
         draw_list.pop_z_index();
 
@@ -554,13 +637,13 @@ public:
 
     static inline vector2 combo_box_movement[] = {
         { 0.f, 0.f }, /* None */
-        { 0.f, 16.f }, /* Toggle -> Combobox */
-        { 0.f, 29.f }, /* Slider -> Combobox */
+        { 0.f, 14.f }, /* Toggle -> Combobox */
+        { 0.f, 30.f }, /* Slider -> Combobox */
         { 0.f, 40.f } /* Combobox -> Combobox */
     };
 
     template <typename T>
-    void combo_box( const char* label, std::initializer_list<const char*> options, T* value, T start_index = 0 ) {
+    void combo_box( const char* label, std::initializer_list<const char*> options, T* value ) {
         auto& draw_list = gui_draw_list.get();
 
         static_assert( std::is_integral_v<T> );
@@ -570,8 +653,8 @@ public:
         draw_list.push_z_index( 3 );
 
         const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
-        const rect combo_bounds = rect( position.x + 18.f, position.y + 16.f, bounds_.w - 60.f, 20.f );
-        const rect options_bounds = rect( combo_bounds.x, combo_bounds.y + 21.f, combo_bounds.w, options.size() * 20.f );
+        const rect combo_bounds = rect( position.x + 20.f, position.y + 15.f, bounds_.w - 98.f, 20.f );
+        const rect options_bounds = rect( combo_bounds.x, combo_bounds.y + 22.f, combo_bounds.w, options.size() * 20.f );
 
         const bool hovered = mouse_in_rect( combo_bounds );
         const bool nothing_active = active_hash.previous == 0ull && active_hash.current == 0ull;
@@ -593,29 +676,34 @@ public:
             for ( size_t i = 0; i < options.size(); i++ ) {
                 const rect option_bounds = rect( options_bounds.x, options_bounds.y + ( i * 20.f ), options_bounds.w, 20.f );
 
+                const bool selected = *value == i;
                 const bool hovered = mouse_in_rect( option_bounds );
 
-                if ( hovered && left_mouse_clicked ) {
-                    *value = static_cast<T>( start_index + i );
-                    active_hash.current = 0ull;
+                if ( hovered ) {
+                    draw_list.add_filled_rect( option_bounds.x + 1.f, option_bounds.y + 1.f, option_bounds.w - 2.f, option_bounds.h - 2.f, COL32( 0, 0, 0, 64 ) );
+
+                    if ( left_mouse_clicked ) {
+                        *value = static_cast< T >( i );
+                        active_hash.current = 0ull;
+                    }
                 }
 
-                draw_list.add_text( options_bounds.x + 6.f, options_bounds.y + 7.f + ( i * 20.f ), fonts::verdana, text_flags::none, hovered ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), options.begin()[ i ] );
+                draw_list.add_text( options_bounds.x + 7.f, options_bounds.y + 7.f + ( i * 20.f ), ( selected || hovered ) ? fonts::verdana_bold : fonts::verdana, text_flags::none, selected ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), options.begin()[ i ] );
             }
         }
 
-        draw_list.add_text( position.x + 18.f, position.y + 4.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
+        draw_list.add_text( position.x + 20.f, position.y + 4.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
 
         draw_styled_rect( combo_bounds );
 
-        draw_list.add_text( position.x + 24.f, position.y + 23.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), options.begin()[ *value - start_index ] );
+        draw_list.add_text( position.x + 27.f, position.y + 22.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), options.begin()[ *value ] );
 
         draw_list.pop_z_index();
 
         previous_id_ = elements::combo_box;
     }
 
-    void multi_combo_box( const char* label, std::initializer_list<std::pair<const char*, bool*>> options) {
+    void multi_combo_box( const char* label, std::initializer_list<std::pair<const char*, bool*>> options ) {
         auto& draw_list = gui_draw_list.get();
 
         cursor_ += combo_box_movement[ ( int )previous_id_ ];
@@ -623,8 +711,8 @@ public:
         draw_list.push_z_index( 3 );
 
         const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
-        const rect combo_bounds = rect( position.x + 18.f, position.y + 16.f, bounds_.w - 60.f, 20.f );
-        const rect options_bounds = rect( combo_bounds.x, combo_bounds.y + 21.f, combo_bounds.w, options.size() * 20.f );
+        const rect combo_bounds = rect( position.x + 20.f, position.y + 15.f, bounds_.w - 98.f, 20.f );
+        const rect options_bounds = rect( combo_bounds.x, combo_bounds.y + 22.f, combo_bounds.w, options.size() * 20.f );
 
         const bool hovered = mouse_in_rect( combo_bounds );
         const bool nothing_active = active_hash.previous == 0ull && active_hash.current == 0ull;
@@ -651,21 +739,19 @@ public:
 
                 const bool hovered = mouse_in_rect( option_bounds );
 
-                if ( hovered && left_mouse_clicked ) {
-                    *value = !*value;
+                if ( hovered ) {
+                    draw_list.add_filled_rect( option_bounds.x + 1.f, option_bounds.y + 1.f, option_bounds.w - 2.f, option_bounds.h - 2.f, COL32( 0, 0, 0, 64 ) );
+
+                    if ( left_mouse_clicked ) {
+                        *value = !*value;
+                    }
                 }
 
-                uint32_t color = COL32( 160, 160, 160, 255 );
-
-                if ( *value ) {
-                    color = COL32( 255, 0, 0, 255 );
-                }
-
-                draw_list.add_text( options_bounds.x + 6.f, options_bounds.y + 7.f + ( i * 20.f ), fonts::verdana, text_flags::none, color, option );
+                draw_list.add_text( options_bounds.x + 7.f, options_bounds.y + 7.f + ( i * 20.f ), *value ? fonts::verdana_bold : fonts::verdana, text_flags::none, *value ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), option );
             }
         }
 
-        draw_list.add_text( position.x + 18.f, position.y + 4.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
+        draw_list.add_text( position.x + 20.f, position.y + 4.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
 
         draw_styled_rect( combo_bounds );
 
@@ -680,12 +766,11 @@ private:
     void draw_styled_rect( const rect& bounds, uint32_t* background_colors = nullptr ) {
         auto& draw_list = gui_draw_list.get();
 
-        draw_list.add_filled_rect( bounds.x, bounds.y, bounds.w, bounds.h, COL32( 60, 60, 60, 255 ) );
-        draw_list.add_filled_rect( bounds.x + 1.f, bounds.y + 1.f, bounds.w - 2.f, bounds.h - 2.f, COL32( 38, 38, 38, 255 ) );
+        draw_list.add_filled_rect( bounds.x, bounds.y, bounds.w, bounds.h, COL32( 38, 38, 38, 255 ) );
 
         background_colors ?
-            draw_list.add_filled_rect_multi_color( bounds.x + 2.f, bounds.y + 2.f, bounds.w - 4.f, bounds.h - 4.f, background_colors ) :
-            draw_list.add_filled_rect( bounds.x + 2.f, bounds.y + 2.f, bounds.w - 4.f, bounds.h - 4.f, COL32( 54, 54, 54, 255 ) );
+            draw_list.add_filled_rect_multi_color( bounds.x + 1.f, bounds.y + 1.f, bounds.w - 2.f, bounds.h - 2.f, background_colors ) :
+            draw_list.add_filled_rect( bounds.x + 1.f, bounds.y + 1.f, bounds.w - 2.f, bounds.h - 2.f, COL32( 54, 54, 54, 255 ) );
     }
 
     void draw_checkerboard( const rect& bounds, float step ) {
@@ -731,7 +816,10 @@ private:
 
     rect bounds_;
     vector2 cursor_;
+    vector2 start_cursor_;
+    float* scroll_;
     int previous_id_;
+    const char* label_;
 };
 
 void gui::init() {
@@ -938,8 +1026,8 @@ void gui::run() {
             break;
     }
 
-    group_box left = group_box( rect( menu_bounds.x + 10.f, menu_bounds.y + 50.f, 260.f, 400.f ), "test" );
-    group_box right = group_box( rect( menu_bounds.x + 10.f + 260.f + 8.f, menu_bounds.y + 50.f, 260.f, 400.f ) );
+    group_box left = group_box( rect( menu_bounds.x + 10.f, menu_bounds.y + 60.f, 256.f, 400.f ), &scroll_deltas[ 0 ], "Aimbot" );
+    group_box right = group_box( rect( menu_bounds.x + 10.f + 260.f + 8.f, menu_bounds.y + 60.f, 256.f, 400.f ), &scroll_deltas[ 1 ], "Other" );
 
     switch ( current_tab ) {
         case tabs::combat: {
@@ -1262,8 +1350,8 @@ void gui::run() {
                     if ( auto_upgrade.enabled ) {
                         left.toggle( J( "Only holding hammer" ), &auto_upgrade.only_holding_hammer );
 
-                        left.combo_box( J( "Upgrade from" ), { J( "Any" ), J( "Twig" ), J( "Wood" ), J( "Stone" ), J( "Sheet metal" ) }, &auto_upgrade.from, -1 );
-                        left.combo_box( J( "Upgrade to" ), { J( "Wood" ), J( "Stone" ), J( "Sheet metal" ), J( "Armored" ) }, &auto_upgrade.to, 1 );
+                        left.combo_box( J( "Upgrade from" ), { J( "Any" ), J( "Twig" ), J( "Wood" ), J( "Stone" ), J( "Sheet metal" ) }, &auto_upgrade.from );
+                        left.combo_box( J( "Upgrade to" ), { J( "Wood" ), J( "Stone" ), J( "Sheet metal" ), J( "Armored" ) }, &auto_upgrade.to );
                     }
 
                     left.end();
