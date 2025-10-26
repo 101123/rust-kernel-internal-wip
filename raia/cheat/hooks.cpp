@@ -915,7 +915,7 @@ void effect_library_setup_effect_hook( rust::effect* effect ) {
 		return;
 	}
 
-	if ( effects.notify ) {
+	if ( events.enabled && events.notify ) {
 		notifications::push( pooled_string->buffer );
 	}
 }

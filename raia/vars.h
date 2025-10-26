@@ -502,6 +502,7 @@ DEFINE_CONTEXT( auto_upgrade,
 	uint64_t next_upgrade_time;
 );
 
-DEFINE_CONTEXT( effects,
-	cvar notify = cvar( H( "Effect Notifications" ), false );
+DEFINE_CONTEXT( events,
+	cvar enabled = cvar( H( "Events" ) );
+	cvar notify = cvar( H( "Event Notifications" ), false );
 );

@@ -263,28 +263,31 @@ namespace elements {
     };
 }
 
-float scroll_deltas[ 128 ];
+uint32_t current_tab;
+uint32_t current_subtab[ 4 ];
+
+float scroll_deltas[ 16 ][ 16 ][ 8 ];
 bool dragging_scrollbar_ = false;
 float drag_offset_y_ = 0.f;
 
 class group_box {
 public:
     group_box() = delete;
-    group_box( rect bounds, float* scroll, const char* label )
-        : bounds_( bounds ), cursor_( 20.f, 23.f - *scroll ), start_cursor_( cursor_ ), scroll_( scroll ), previous_id_( elements::none ), label_( label ) {};
+    group_box( rect bounds, int groupbox )
+        : scroll_( &scroll_deltas[ current_tab ][ current_subtab[ current_tab ] ][ groupbox ] ), bounds_( bounds ), cursor_( 20.f, 23.f - *scroll_ ), start_cursor_( cursor_ ), previous_id_( elements::none ) {};
 
-    void begin() {
+    void begin( const char* label = J( "Main" ) ) {
         auto& draw_list = gui_draw_list.get();
 
         draw_list.add_filled_rect( bounds_.x, bounds_.y, bounds_.w, bounds_.h, COL32( 61, 61, 61, 255 ) );
         draw_list.add_filled_rect( bounds_.x + 1.f, bounds_.y + 1.f, bounds_.w - 2.f, bounds_.h - 2.f, COL32( 38, 38, 38, 255 ) );
         draw_list.add_filled_rect( bounds_.x + 2.f, bounds_.y + 2.f, bounds_.w - 4.f, bounds_.h - 4.f, COL32( 50, 50, 50, 255 ) );
 
-        float label_width = renderer::calc_text_size( fonts::verdana_bold, label_ ).x + 6.f;
+        float label_width = renderer::calc_text_size( fonts::verdana_bold, label ).x + 6.f;
 
         draw_list.add_filled_rect( bounds_.x + 10.f, bounds_.y, label_width, 2.f, COL32( 54, 54, 54, 255 ), 0.f );
 
-        draw_list.add_text( bounds_.x + 13.f, bounds_.y - 3.f, fonts::verdana_bold, text_flags::drop_shadow, COL32_WHITE, label_ );
+        draw_list.add_text( bounds_.x + 13.f, bounds_.y - 3.f, fonts::verdana_bold, text_flags::drop_shadow, COL32_WHITE, label );
 
         draw_list.push_clip_rect( bounds_.x + 2.f, bounds_.y + 7.f, bounds_.w - 4.f, bounds_.h - 10.f );
 
@@ -299,6 +302,8 @@ public:
     };
 
     void end() {
+        auto& draw_list = gui_draw_list.get();
+
         vector2 cursor = cursor_ + end_movement[ previous_id_ ];
 
         float start_y = start_cursor_.y;
@@ -348,7 +353,7 @@ public:
             }
 
             // Draw scrollbar track
-            gui_draw_list.get().add_filled_rect(
+            draw_list.add_filled_rect(
                 bounds_.x + bounds_.w - 8.f,
                 bounds_.y + 1.f,
                 scrollbar_width + 2.f,
@@ -357,13 +362,37 @@ public:
             );
 
             // Draw scrollbar handle
-            gui_draw_list.get().add_filled_rect(
+            draw_list.add_filled_rect(
                 scrollbar_x,
                 scrollbar_y,
                 scrollbar_width,
                 scrollbar_height,
                 COL32( 120, 120, 120, 255 )
             );
+
+            float height = 10.f;
+        
+            draw_list.push_z_index( 10 );
+
+            uint32_t colors_top[ 4 ] = {
+                COL32( 50, 50, 50, 255 ),
+                COL32( 50, 50, 50, 255 ),
+                COL32( 50, 50, 50, 0 ),
+                COL32( 50, 50, 50, 0 ),
+            };
+
+            draw_list.add_filled_rect_multi_color( bounds_.x + 2.f, bounds_.y + 7.f, bounds_.w - 10.f, height, colors_top );
+
+            uint32_t colors_bottom[ 4 ] = {
+                COL32( 50, 50, 50, 0 ),
+                COL32( 50, 50, 50, 0 ),
+                COL32( 50, 50, 50, 255 ),
+                COL32( 50, 50, 50, 255 ),
+            };
+
+            draw_list.add_filled_rect_multi_color( bounds_.x + 2.f, bounds_.y + bounds_.h - height - 3.f, bounds_.w - 10.f, height, colors_bottom );
+
+            draw_list.pop_z_index();
         }
     }
 
@@ -831,12 +860,11 @@ private:
         return ImGui::ColorConvertFloat4ToU32( rgb );
     }
 
+    float* scroll_;
     rect bounds_;
     vector2 cursor_;
     vector2 start_cursor_;
-    float* scroll_;
     int previous_id_;
-    const char* label_;
 };
 
 void gui::init() {
@@ -904,9 +932,6 @@ namespace misc_subtabs {
         movement
     };
 }
-
-uint32_t current_tab;
-uint32_t current_subtab[ 4 ];
 
 void tab( const char* label, uint32_t value, uint32_t* tab, rect& cursor, float padding, bool subtab = false ) {
     float width = renderer::calc_text_size( fonts::verdana, label ).x + padding;
@@ -1044,8 +1069,8 @@ void gui::run() {
             break;
     }
 
-    group_box left = group_box( rect( menu_bounds.x + 10.f, menu_bounds.y + 60.f, 256.f, 400.f ), &scroll_deltas[ 0 ], J( "Aimbot" ) );
-    group_box right = group_box( rect( menu_bounds.x + 10.f + 260.f + 8.f, menu_bounds.y + 60.f, 256.f, 400.f ), &scroll_deltas[ 1 ], J( "Other" ) );
+    group_box left = group_box( rect( menu_bounds.x + 10.f, menu_bounds.y + 60.f, 256.f, 400.f ), 0 );
+    group_box right = group_box( rect( menu_bounds.x + 10.f + 260.f + 8.f, menu_bounds.y + 60.f, 256.f, 400.f ), 1 );
 
     switch ( current_tab ) {
         case tabs::combat: {
@@ -1142,7 +1167,7 @@ void gui::run() {
                 }
 
                 case visual_subtabs::world: {
-                    left.begin();
+                    left.begin( J( "Dropped items" ) );
 
                     visual_impl( left, dropped_weapon, J( "Weapon" ) );
                     visual_impl( left, dropped_construction, J( "Construction" ) );
@@ -1184,10 +1209,14 @@ void gui::run() {
                         right.slider( J( "Maximum distance" ), S( "%um" ), &raid_visuals.maximum_distance, 0u, 5000u );
                     }
 
+                    right.toggle( J( "Events" ), &events.enabled );
+
+                    if ( events.enabled ) {
+                        right.toggle( J( "Notify on event" ), &events.notify );
+                    }
+
                     visual_impl( right, player_corpse, J( "Player corpse" ) );
                     visual_impl( right, backpack, J( "Backpack" ) );
-
-                    right.toggle( J( "Notify on effect" ), &effects.notify );
 
                     right.end();
 
