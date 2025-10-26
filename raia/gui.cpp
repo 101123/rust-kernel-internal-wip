@@ -200,10 +200,13 @@ struct state_history2 {
 
 util::lazy_initializer<ordered_draw_list> gui_draw_list;
 
+uint64_t frame_count;
+
 state_history2<bool> left_mouse_state;
 state_history2<vector2> mouse_position;
 state_history2<rect> ignore_bounds;
 uint64_t active_hash;
+uint64_t activate_hash_frame;
 
 rect menu_bounds = rect( 400.f, 400.f, 600.f, 560.f );
 
@@ -211,6 +214,7 @@ bool left_mouse_clicked;
 bool left_mouse_held;
 
 vector4 color_picker_hsv;
+int color_picker_selected_slider;
 
 uint32_t gradient_on[ 4 ] = {
     COL32( 110, 183, 212, 255 ),
@@ -270,11 +274,271 @@ float scroll_deltas[ 16 ][ 16 ][ 8 ];
 bool dragging_scrollbar_ = false;
 float drag_offset_y_ = 0.f;
 
+const char* key_names[ 256 ] = {
+    J( "NULL" ),
+    J( "M1" ),
+    J( "M2" ),
+    J( "CANCEL" ),
+    J( "M3" ),
+    J( "M4" ),
+    J( "M5" ),
+    J( "RESERVED" ),
+    J( "BACK" ),
+    J( "TAB" ),
+    J( "RESERVED" ),
+    J( "RESERVED" ),
+    J( "CLEAR" ),
+    J( "RETURN" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "SHIFT" ),
+    J( "CONTROL" ),
+    J( "MENU" ),
+    J( "PAUSE" ),
+    J( "CAPITAL" ),
+    J( "KANA/HANGUL" ),
+    J( "UNASSIGNED" ),
+    J( "JUNJA" ),
+    J( "FINAL" ),
+    J( "HANJA/KANJI" ),
+    J( "UNASSIGNED" ),
+    J( "ESCAPE" ),
+    J( "CONVERT" ),
+    J( "NONCONVERT" ),
+    J( "ACCEPT" ),
+    J( "MODECHANGE" ),
+    J( "SPACE" ),
+    J( "PRIOR" ),
+    J( "NEXT" ),
+    J( "END" ),
+    J( "HOME" ),
+    J( "LEFT" ),
+    J( "UP" ),
+    J( "RIGHT" ),
+    J( "DOWN" ),
+    J( "SELECT" ),
+    J( "PRINT" ),
+    J( "EXECUTE" ),
+    J( "SNAPSHOT" ),
+    J( "INSERT" ),
+    J( "DELETE" ),
+    J( "HELP" ),
+    J( "0" ),
+    J( "1" ),
+    J( "2" ),
+    J( "3" ),
+    J( "4" ),
+    J( "5" ),
+    J( "6" ),
+    J( "7" ),
+    J( "8" ),
+    J( "9" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "A" ),
+    J( "B" ),
+    J( "C" ),
+    J( "D" ),
+    J( "E" ),
+    J( "F" ),
+    J( "G" ),
+    J( "H" ),
+    J( "I" ),
+    J( "J" ),
+    J( "K" ),
+    J( "L" ),
+    J( "M" ),
+    J( "N" ),
+    J( "O" ),
+    J( "P" ),
+    J( "Q" ),
+    J( "R" ),
+    J( "S" ),
+    J( "T" ),
+    J( "U" ),
+    J( "V" ),
+    J( "W" ),
+    J( "X" ),
+    J( "Y" ),
+    J( "Z" ),
+    J( "LWIN" ),
+    J( "RWIN" ),
+    J( "APPS" ),
+    J( "UNASSIGNED" ),
+    J( "SLEEP" ),
+    J( "NUM0" ),
+    J( "NUM1" ),
+    J( "NUM2" ),
+    J( "NUM3" ),
+    J( "NUM4" ),
+    J( "NUM5" ),
+    J( "NUM6" ),
+    J( "NUM7" ),
+    J( "NUM8" ),
+    J( "NUM9" ),
+    J( "MULTIPLY" ),
+    J( "ADD" ),
+    J( "SEPARATOR" ),
+    J( "SUBTRACT" ),
+    J( "DECIMAL" ),
+    J( "DIVIDE" ),
+    J( "F1" ),
+    J( "F2" ),
+    J( "F3" ),
+    J( "F4" ),
+    J( "F5" ),
+    J( "F6" ),
+    J( "F7" ),
+    J( "F8" ),
+    J( "F9" ),
+    J( "F10" ),
+    J( "F11" ),
+    J( "F12" ),
+    J( "F13" ),
+    J( "F14" ),
+    J( "F15" ),
+    J( "F16" ),
+    J( "F17" ),
+    J( "F18" ),
+    J( "F19" ),
+    J( "F20" ),
+    J( "F21" ),
+    J( "F22" ),
+    J( "F23" ),
+    J( "F24" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "NUMLOCK" ),
+    J( "SCROLL" ),
+    J( "OEM_SPECIFIC_92" ),
+    J( "OEM_SPECIFIC_93" ),
+    J( "OEM_SPECIFIC_94" ),
+    J( "OEM_SPECIFIC_95" ),
+    J( "OEM_SPECIFIC_96" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "LSHIFT" ),
+    J( "RSHIFT" ),
+    J( "LCONTROL" ),
+    J( "RCONTROL" ),
+    J( "LMENU" ),
+    J( "RMENU" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "BROWSER_BACK" ),
+    J( "BROWSER_FORWARD" ),
+    J( "BROWSER_REFRESH" ),
+    J( "BROWSER_STOP" ),
+    J( "BROWSER_SEARCH" ),
+    J( "BROWSER_FAVORITES" ),
+    J( "BROWSER_HOME" ),
+    J( "VOLUME_MUTE" ),
+    J( "VOLUME_DOWN" ),
+    J( "VOLUME_UP" ),
+    J( "MEDIA_NEXT_TRACK" ),
+    J( "MEDIA_PREV_TRACK" ),
+    J( "LAUNCH_MAIL" ),
+    J( "LAUNCH_MEDIA_SELECT" ),
+    J( "UNASSIGNED" ),
+    J( "UNASSIGNED" ),
+    J( "OEM_1" ),
+    J( "OEM_PLUS" ),
+    J( "OEM_COMMA" ),
+    J( "OEM_MINUS" ),
+    J( "OEM_PERIOD" ),
+    J( "OEM_2" ),
+    J( "OEM_3" ),
+    J( "RESERVED" ),
+    J( "RESERVED" ),
+    J( "GAMEPAD_A" ),
+    J( "GAMEPAD_B" ),
+    J( "GAMEPAD_X" ),
+    J( "GAMEPAD_Y" ),
+    J( "GAMEPAD_RIGHT_SHOULDER" ),
+    J( "GAMEPAD_LEFT_SHOULDER" ),
+    J( "GAMEPAD_LEFT_TRIGGER" ),
+    J( "GAMEPAD_RIGHT_TRIGGER" ),
+    J( "GAMEPAD_DPAD_UP" ),
+    J( "GAMEPAD_DPAD_DOWN" ),
+    J( "GAMEPAD_DPAD_LEFT" ),
+    J( "GAMEPAD_DPAD_RIGHT" ),
+    J( "GAMEPAD_MENU" ),
+    J( "GAMEPAD_VIEW" ),
+    J( "GAMEPAD_LEFT_THUMBSTICK_BUTTON" ),
+    J( "GAMEPAD_RIGHT_THUMBSTICK_BUTTON" ),
+    J( "GAMEPAD_LEFT_THUMBSTICK_UP" ),
+    J( "GAMEPAD_LEFT_THUMBSTICK_DOWN" ),
+    J( "GAMEPAD_LEFT_THUMBSTICK_RIGHT" ),
+    J( "GAMEPAD_LEFT_THUMBSTICK_LEFT" ),
+    J( "GAMEPAD_RIGHT_THUMBSTICK_UP" ),
+    J( "GAMEPAD_RIGHT_THUMBSTICK_DOWN" ),
+    J( "GAMEPAD_RIGHT_THUMBSTICK_RIGHT" ),
+    J( "GAMEPAD_RIGHT_THUMBSTICK_LEFT" ),
+    J( "OEM_4" ),
+    J( "OEM_5" ),
+    J( "OEM_6" ),
+    J( "OEM_7" ),
+    J( "OEM_8" ),
+    J( "RESERVED" ),
+    J( "OEM_SPECIFIC" ),
+    J( "OEM_102" ),
+    J( "OEM_SPECIFIC" ),
+    J( "OEM_SPECIFIC" ),
+    J( "PROCESSKEY" ),
+    J( "OEM_SPECIFIC" ),
+    J( "PACKET" ),
+    J( "UNASSIGNED" ),
+    J( "OEM_SPECIFIC" ),
+    J( "OEM_SPECIFIC" ),
+    J( "OEM_SPECIFIC" ),
+    J( "OEM_SPECIFIC" ),
+    J( "OEM_SPECIFIC" ),
+    J( "OEM_SPECIFIC" ),
+    J( "OEM_SPECIFIC" ),
+    J( "OEM_SPECIFIC" ),
+    J( "OEM_SPECIFIC" ),
+    J( "OEM_SPECIFIC" ),
+    J( "OEM_SPECIFIC" ),
+    J( "OEM_SPECIFIC" ),
+    J( "OEM_SPECIFIC" ),
+    J( "ATTN" ),
+    J( "CRSEL" ),
+    J( "EXSEL" ),
+    J( "EREOF" ),
+    J( "PLAY" ),
+    J( "ZOOM" ),
+    J( "NONAME" ),
+    J( "PA1" ),
+    J( "OEM_CLEAR" ),
+    J( "UNASSIGNED" )
+};
+
 class group_box {
 public:
     group_box() = delete;
     group_box( rect bounds, int groupbox )
-        : scroll_( &scroll_deltas[ current_tab ][ current_subtab[ current_tab ] ][ groupbox ] ), bounds_( bounds ), cursor_( 20.f, 23.f - *scroll_ ), start_cursor_( cursor_ ), previous_id_( elements::none ) {};
+        : scroll_( &scroll_deltas[ current_tab ][ current_subtab[ current_tab ] ][ groupbox ] ), bounds_( bounds ), cursor_( 20.f, 23.f - *scroll_ ),
+        start_cursor_( cursor_ ), previous_id_( elements::none ), horizontal_stack_( 0 ) {};
 
     void begin( const char* label = J( "Main" ) ) {
         auto& draw_list = gui_draw_list.get();
@@ -408,6 +672,7 @@ public:
         auto& draw_list = gui_draw_list.get();
 
         cursor_ += toggle_movement[ ( int )previous_id_ ];
+        horizontal_stack_ = 0;
 
         draw_list.push_z_index( 2 );
 
@@ -450,19 +715,25 @@ public:
 
         if ( hovered && !active_hash && left_mouse_clicked ) {
             active_hash = hash;
+            activate_hash_frame = frame_count;
         }
 
         if ( active ) {
             for ( uint8_t i = 0; i < 255; i++ ) {
-                if ( game_input.get_async_key_state( i ) & 0x1 ) {
-                    *key = i;
+                if ( render_input.get_async_key_state( i ) & 0x1 ) {
+                    if ( i == VK_LBUTTON && ( frame_count - activate_hash_frame < 2 ) )
+                        continue;
+
+                    *key = ( i == VK_ESCAPE ? UINT32_MAX : i );
                     active_hash = 0ull;
                     ignore_bounds.current = rect();
+                    break;
                 }
             }
         }
 
-        draw_list.add_text( bounds.x, bounds.y, fonts::small_fonts, text_flags::none, active ? COL32_RED : COL32( 160, 160, 160, 255 ), FMT( 32, "[%c]", *key ) );
+        draw_list.add_text( bounds.x + 11.f, bounds.y, fonts::small_fonts, text_flags::align_right,
+            active ? COL32_RED : COL32( 160, 160, 160, 200 ), *key == UINT32_MAX ? J( "[-]" ) : FMT( 32, "[%s]", key_names[ *key ] ) );
 
         draw_list.pop_z_index();
     }
@@ -472,8 +743,10 @@ public:
 
         draw_list.push_z_index( 2 );
 
-        const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
-        const rect preview_bounds = rect( position.x + bounds_.w - 68.f, position.y, 20.f, 8.f );
+        const vector2 position = vector2( bounds_.x + cursor_.x - ( horizontal_stack_ * 24.f ), bounds_.y + cursor_.y );
+        const rect preview_bounds = rect( position.x + bounds_.w - 57.f, position.y - 1.f, 17.f, 9.f );
+
+        horizontal_stack_++;
 
         const float color_picker_padding = 6.f;
         const vector2 sv_percentage = vector2( 0.84f, alpha ? 0.84f : 0.935f );
@@ -493,7 +766,7 @@ public:
             COL32( 255, 0, 0, 255 )
         };
 
-        const bool preview_hovered = mouse_in_rect( preview_bounds );
+        const bool preview_hovered = mouse_in_rect( preview_bounds ) && !mouse_in_rect( ignore_bounds.previous );
         const bool color_picker_hovered = mouse_in_rect( color_picker_bounds );
 
         const uint64_t hash = ( uint64_t )value;
@@ -502,10 +775,12 @@ public:
         if ( preview_hovered && left_mouse_clicked ) {
             color_picker_hsv = rgb_to_hsv( *value );
             active_hash = hash;
+            ignore_bounds.current = color_picker_bounds;
         }
 
         if ( active && !color_picker_hovered && left_mouse_clicked ) {
             active_hash = 0ull;
+            color_picker_selected_slider = -1;
             ignore_bounds.current = rect();
         }
 
@@ -520,17 +795,65 @@ public:
             const rect hue_bar_bounds_ = rect( hue_bar_bounds.x + 1.f, hue_bar_bounds.y + 1.f, hue_bar_bounds.w - 2.f, hue_bar_bounds.h - 2.f );
             const rect alpha_bar_bounds_ = rect( alpha_bar_bounds.x + 1.f, alpha_bar_bounds.y + 1.f, alpha_bar_bounds.w - 2.f, alpha_bar_bounds.h - 2.f );
 
-            if ( mouse_in_rect( sv_square_bounds_ ) && left_mouse_held ) {
-                color_picker_hsv.y = ImSaturate( ( mouse_position.current.x - sv_square_bounds_.x ) / ( sv_square_bounds_.w ) );
-                color_picker_hsv.z = 1.f - ImSaturate( ( mouse_position.current.y - sv_square_bounds_.y ) / ( sv_square_bounds_.h ) );
+            bool sv_square_hovered = mouse_in_rect( sv_square_bounds_ );
+            bool hue_bar_hovered = mouse_in_rect( hue_bar_bounds_ );
+            bool alpha_bar_hovered = mouse_in_rect( alpha_bar_bounds_ );
+
+            if ( sv_square_hovered && left_mouse_clicked ) {
+                activate_hash_frame = frame_count;
+                color_picker_selected_slider = 0;
             }
 
-            else if ( mouse_in_rect( hue_bar_bounds_ ) && left_mouse_held ) {
-                color_picker_hsv.x = ImSaturate( ( mouse_position.current.y - hue_bar_bounds_.y ) / ( hue_bar_bounds_.h ) );
+            if ( hue_bar_hovered && left_mouse_clicked ) {
+                activate_hash_frame = frame_count;
+                color_picker_selected_slider = 1;
             }
 
-            else if ( alpha && mouse_in_rect( alpha_bar_bounds_ ) && left_mouse_held ) {
-                ( ( uint8_t* )value )[ 3 ] = ( uint8_t )( ( ( mouse_position.current.x - alpha_bar_bounds_.x ) / alpha_bar_bounds_.w ) * 255.f );
+            if ( alpha_bar_hovered && left_mouse_clicked ) {
+                activate_hash_frame = frame_count;
+                color_picker_selected_slider = 2;
+            }
+
+            bool activated_this_frame = activate_hash_frame == frame_count;
+  
+            if ( color_picker_selected_slider == 0 && left_mouse_held ) {
+                vector2 mouse_pos = vector2( 
+                    std::clamp( mouse_position.current.x, sv_square_bounds.x, sv_square_bounds.x + sv_square_bounds.w ),
+                    std::clamp( mouse_position.current.y, sv_square_bounds.y, sv_square_bounds.y + sv_square_bounds.h )
+                );
+
+                color_picker_hsv.y = ImSaturate( ( mouse_pos.x - sv_square_bounds_.x ) / ( sv_square_bounds_.w ) );
+                color_picker_hsv.z = 1.f - ImSaturate( ( mouse_pos.y - sv_square_bounds_.y ) / ( sv_square_bounds_.h ) );
+            }
+
+            else if ( color_picker_selected_slider == 0 && !left_mouse_held && !activated_this_frame ) {
+                color_picker_selected_slider = -1;
+            }
+
+            else if ( color_picker_selected_slider == 1 && left_mouse_held ) {
+                vector2 mouse_pos = vector2(
+                    std::clamp( mouse_position.current.x, hue_bar_bounds_.x, hue_bar_bounds_.x + hue_bar_bounds_.w ),
+                    std::clamp( mouse_position.current.y, hue_bar_bounds_.y, hue_bar_bounds_.y + hue_bar_bounds_.h )
+                );
+
+                color_picker_hsv.x = ImSaturate( ( mouse_pos.y - hue_bar_bounds_.y ) / ( hue_bar_bounds_.h ) );
+            }
+
+            else if ( color_picker_selected_slider == 1 && !left_mouse_held && !activated_this_frame ) {
+                color_picker_selected_slider = -1;
+            }
+
+            else if ( alpha && color_picker_selected_slider == 2 && left_mouse_held ) {
+                vector2 mouse_pos = vector2(
+                    std::clamp( mouse_position.current.x, alpha_bar_bounds_.x, alpha_bar_bounds_.x + alpha_bar_bounds_.w ),
+                    std::clamp( mouse_position.current.y, alpha_bar_bounds_.y, alpha_bar_bounds_.y + alpha_bar_bounds_.h )
+                );
+
+                ( ( uint8_t* )value )[ 3 ] = ( uint8_t )( ( ( mouse_pos.x - alpha_bar_bounds_.x ) / alpha_bar_bounds_.w ) * 255.f );
+            }
+
+            else if ( color_picker_selected_slider == 2 && !left_mouse_held && !activated_this_frame ) {
+                color_picker_selected_slider = -1;
             }
 
             uint32_t hue_color = hsv_to_rgb( color_picker_hsv.x, 1.f, 1.f );
@@ -629,6 +952,7 @@ public:
         static_assert( std::is_arithmetic_v<T> );
 
         cursor_ += slider_movement[ ( int )previous_id_ ];
+        horizontal_stack_ = 0;
 
         draw_list.push_z_index( 2 );
 
@@ -684,6 +1008,7 @@ public:
         static_assert( std::is_integral_v<T> );
 
         cursor_ += combo_box_movement[ ( int )previous_id_ ];
+        horizontal_stack_ = 0;
 
         draw_list.push_z_index( 3 );
 
@@ -748,6 +1073,7 @@ public:
         auto& draw_list = gui_draw_list.get();
 
         cursor_ += combo_box_movement[ ( int )previous_id_ ];
+        horizontal_stack_ = 0;
 
         draw_list.push_z_index( 3 );
 
@@ -801,7 +1127,29 @@ public:
 
         draw_styled_rect( combo_bounds );
 
-        // draw_list.add_text( position.x + 24.f, position.y + 23.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), options.begin()[ *value ] );
+        int num_selected = 0;
+        char selected_buffer[ 128 ] = {};
+        bool first = true;
+
+        for ( size_t i = 0; i < options.size(); i++ ) {
+            const char* option = options.begin()[ i ].first;
+            bool* value = options.begin()[ i ].second;
+
+            if ( *value ) {
+                if ( first ) {
+                    snprintf( selected_buffer, sizeof( selected_buffer ), "%s", option );
+                    first = false;
+                }
+
+                else {
+                    snprintf( selected_buffer + strlen( selected_buffer ), sizeof( selected_buffer ) - strlen( selected_buffer ), ", %s", option );
+                }
+
+                num_selected++;
+            }
+        }
+
+        draw_list.add_text( position.x + 27.f, position.y + 22.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), num_selected == 0 ? J( "-" ) : selected_buffer );
 
         draw_list.pop_z_index();
 
@@ -864,6 +1212,7 @@ private:
     rect bounds_;
     vector2 cursor_;
     vector2 start_cursor_;
+    int horizontal_stack_;
     int previous_id_;
 };
 
@@ -972,7 +1321,10 @@ void player_visuals_impl( group_box& left, group_box& right, cvar_player_visuals
     left.begin();
 
     left.toggle( J( "Enabled" ), &visuals.enabled );
+
     left.toggle( J( "Visible check" ), &visuals.visible_check );
+    left.color_picker( &visuals.occluded_color );
+    left.color_picker( &visuals.visible_color );
 
     left.toggle( J( "Bounding box" ), &visuals.bounding_box );
     left.color_picker( &visuals.bounding_box_color );
@@ -1006,25 +1358,21 @@ void player_visuals_impl( group_box& left, group_box& right, cvar_player_visuals
 
     right.begin();
 
-    right.toggle( J( "Chams" ), &chams );
-    right.color_picker( &chams_color );
+    right.toggle( J( "Chams" ), &visuals.chams );
 
-    if ( chams ) {
-        right.combo_box( J( "Chams type" ), { J( "Solid" ), J( "Material" ) }, &chams_type );
-    }
+    right.color_picker( &visuals.chams_occluded_color );
+    right.color_picker( &visuals.chams_visible_color );
 
-    right.toggle( J( "Glow" ), &glow );
-    right.color_picker( &glow_outline_color );
-
-    if ( glow ) {
-        right.slider( J( "Glow blur scale" ), S( "%.2f" ), &glow_blur_scale, 0.f, 10.f );
-        right.slider( J( "Glow outline scale" ), S( "%.2f" ), &glow_outline_scale, 0.f, 10.f );
+    if ( visuals.chams ) {
+        right.combo_box( J( "Chams type" ), { J( "Solid" ), J( "Material" ) }, &visuals.chams_type );
     }
 
     right.end();
 }
 
 void gui::run() {
+    frame_count++;
+
     auto& draw_list = gui_draw_list.get();
 
     draw_list.clear();

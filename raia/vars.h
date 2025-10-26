@@ -87,6 +87,10 @@ struct cvar_player_visuals {
 	cvar visible_check;
 	cvar_ui visible_color;
 	cvar_ui occluded_color;
+	cvar chams;
+	cvar_i chams_type;
+	cvar_ui chams_visible_color;
+	cvar_ui chams_occluded_color;
 	cvar bounding_box;
 	cvar_ui bounding_box_color;
 	cvar skeleton;
@@ -110,6 +114,10 @@ struct cvar_player_visuals {
 	cvar( H( Name " Visible Check" ), false ), \
 	cvar_ui( H( Name " Visible Color" ), Color ), \
 	cvar_ui( H( Name " Occluded Color" ), Color ), \
+	cvar( H( Name " Chams" ), true ), \
+	cvar_i( H( Name " Chams Type" ), 0 ), \
+	cvar_ui( H( Name " Chams Visible Color" ), Color ), \
+	cvar_ui( H( Name " Chams Occluded Color" ), Color ), \
 	cvar( H( Name " Bounding Box" ), true ), \
 	cvar_ui( H( Name " Bounding Box Color" ), Color ), \
 	cvar( H( Name " Skeleton" ), true ), \
@@ -413,10 +421,6 @@ DEFINE_CONTEXT( projectile_tracers,
 
 inline cvar_bind zoom = WRAP_BIND( "Zoom", true, trigger_type::hold, 'X' );
 inline cvar_f zoom_fov = cvar_f( H( "Zoom FOV" ), 40.f );
-
-inline cvar chams = cvar( H( "Chams" ), false );
-inline cvar_ui chams_type = cvar_ui( H( "Chams Type" ), 0 );
-inline cvar_ui chams_color = cvar_ui( H( "Chams Color" ), COL32( 255, 255, 255, 255 ) );
 
 inline cvar glow = cvar( H( "Glow" ), false );
 inline cvar_ui glow_outline_color = cvar_ui( H( "Glow Outline Color" ), COL32( 255, 255, 255, 255 ) );

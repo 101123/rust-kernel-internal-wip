@@ -32,9 +32,10 @@ namespace text_flags {
 	enum : int {
 		none = 0,
 		centered = 1,
-		drop_shadow = 2,
-		outline = 4,
-		rich_text = 8
+		align_right = 2,
+		drop_shadow = 4,
+		outline = 8,
+		rich_text = 16,
 	};
 }
 

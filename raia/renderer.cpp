@@ -387,9 +387,9 @@ void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint3
 	ImFont* _font = fonts[ font ];
 	float size = _font->LegacySize;
 
-	if ( flags & text_flags::centered ) {
+	if ( flags & ( text_flags::centered | text_flags::align_right ) ) {
 		ImVec2 text_size = _font->CalcTextSizeA( size, FLT_MAX, 0.f, text );
-		x -= text_size.x / 2.f;
+		x -= ( flags & text_flags::centered ? text_size.x / 2.f : text_size.x );
 	}
 
 	// Small fonts centering "fix"

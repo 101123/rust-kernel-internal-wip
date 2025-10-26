@@ -1,7 +1,7 @@
 #pragma once
 
 #define DEBUG
-#define EAC_LOGS
+// #define EAC_LOGS
 
 #ifdef DEBUG
 #define S( String ) String
