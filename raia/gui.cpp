@@ -202,7 +202,8 @@ util::lazy_initializer<ordered_draw_list> gui_draw_list;
 
 state_history2<bool> left_mouse_state;
 state_history2<vector2> mouse_position;
-state_history2<uint64_t> active_hash;
+state_history2<rect> ignore_bounds;
+uint64_t active_hash;
 
 rect menu_bounds = rect( 400.f, 400.f, 600.f, 560.f );
 
@@ -241,6 +242,8 @@ void update_input() {
         .previous = mouse_position.current,
         .current = mouse_pos
     };
+
+    ignore_bounds.previous = ignore_bounds.current;
 }
 
 bool mouse_in_rect( const rect& bounds ) {
@@ -382,12 +385,13 @@ public:
         const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
         const rect toggle_bounds = rect( position.x, position.y, 8.f, 8.f );
 
-        const bool hovered = mouse_in_rect( toggle_bounds );
-        const bool nothing_active = active_hash.previous == 0ull && active_hash.current == 0ull;
+        const rect click_bounds = rect( position.x, position.y - 2.f, 152.f, 14.f );
+        const bool hovered = mouse_in_rect( click_bounds ) && !mouse_in_rect( ignore_bounds.previous );
 
-        if ( hovered && nothing_active && left_mouse_clicked ) {
+        if ( hovered && left_mouse_clicked ) {
             *value = !*value;
-            active_hash.current = 0ull;
+            active_hash = 0ull;
+            ignore_bounds.current = rect();
         }
 
         draw_list.add_filled_rect( toggle_bounds.x, toggle_bounds.y, toggle_bounds.w, toggle_bounds.h, COL32( 38, 38, 38, 255 ) );
@@ -411,20 +415,20 @@ public:
         const rect bounds = rect( position.x + bounds_.w - 51.f, position.y - 1.f, 20.f, 10.f );
 
         const bool hovered = mouse_in_rect( bounds );
-        const bool nothing_active = active_hash.previous == 0ull && active_hash.current == 0ull;
 
         const uint64_t hash = ( uint64_t )key;
-        const bool active = active_hash.current == hash;
+        const bool active = active_hash == hash;
 
-        if ( hovered && nothing_active && left_mouse_clicked ) {
-            active_hash.current = hash;
+        if ( hovered && !active_hash && left_mouse_clicked ) {
+            active_hash = hash;
         }
 
         if ( active ) {
             for ( uint8_t i = 0; i < 255; i++ ) {
                 if ( game_input.get_async_key_state( i ) & 0x1 ) {
                     *key = i;
-                    active_hash.current = 0ull;
+                    active_hash = 0ull;
+                    ignore_bounds.current = rect();
                 }
             }
         }
@@ -464,15 +468,16 @@ public:
         const bool color_picker_hovered = mouse_in_rect( color_picker_bounds );
 
         const uint64_t hash = ( uint64_t )value;
-        const bool active = active_hash.current == hash;
+        const bool active = active_hash == hash;
 
         if ( preview_hovered && left_mouse_clicked ) {
             color_picker_hsv = rgb_to_hsv( *value );
-            active_hash.current = hash;
+            active_hash = hash;
         }
 
         if ( active && !color_picker_hovered && left_mouse_clicked ) {
-            active_hash.current = 0ull;
+            active_hash = 0ull;
+            ignore_bounds.current = rect();
         }
 
         else if ( active ) {
@@ -601,14 +606,14 @@ public:
         const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
         const rect slider_bounds = rect( position.x + 20.f, position.y + 17.f, bounds_.w - 98.f, 7.f );
 
-        const bool hovered = mouse_in_rect( slider_bounds );
-        const bool nothing_active = active_hash.previous == 0ull && active_hash.current == 0ull;
+        const rect click_bounds = rect( slider_bounds.x, position.y + 2.f, slider_bounds.w, 28.f );
+        const bool hovered = mouse_in_rect( click_bounds ) && !mouse_in_rect( ignore_bounds.previous );
 
         const uint64_t hash = ( uint64_t )value;
-        const bool active = active_hash.current == hash;
+        const bool active = active_hash == hash;
 
-        if ( hovered && nothing_active && left_mouse_clicked ) {
-            active_hash.current = hash;
+        if ( hovered && !active_hash && left_mouse_clicked ) {
+            active_hash = hash;
         }
 
         else if ( active && left_mouse_held ) {
@@ -616,7 +621,8 @@ public:
         }
 
         else if ( active && !left_mouse_held ) {
-            active_hash.current = 0ull;
+            active_hash = 0ull;
+            ignore_bounds.current = rect();
         }
 
         draw_list.add_text( slider_bounds.x, position.y + 4.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
@@ -656,21 +662,24 @@ public:
         const rect combo_bounds = rect( position.x + 20.f, position.y + 15.f, bounds_.w - 98.f, 20.f );
         const rect options_bounds = rect( combo_bounds.x, combo_bounds.y + 22.f, combo_bounds.w, options.size() * 20.f );
 
-        const bool hovered = mouse_in_rect( combo_bounds );
-        const bool nothing_active = active_hash.previous == 0ull && active_hash.current == 0ull;
+        const bool hovered = mouse_in_rect( combo_bounds ) && !mouse_in_rect( ignore_bounds.previous );
 
         const uint64_t hash = ( uint64_t )value;
-        const bool active = active_hash.current == hash;
+        const bool active = active_hash == hash;
 
-        if ( hovered && nothing_active && left_mouse_clicked ) {
-            active_hash.current = hash;
+        if ( hovered && !active_hash && left_mouse_clicked ) {
+            active_hash = hash;
+            ignore_bounds.current = options_bounds;
         }
 
         else if ( active && left_mouse_clicked && !mouse_in_rect( options_bounds ) ) {
-            active_hash.current = 0ull;
+            active_hash = 0ull;
+            ignore_bounds.current = rect();
         }
 
         else if ( active ) {
+            draw_list.set_floating( true );
+
             draw_styled_rect( options_bounds );
 
             for ( size_t i = 0; i < options.size(); i++ ) {
@@ -684,12 +693,15 @@ public:
 
                     if ( left_mouse_clicked ) {
                         *value = static_cast< T >( i );
-                        active_hash.current = 0ull;
+                        active_hash = 0ull;
+                        ignore_bounds.current = rect();
                     }
                 }
 
                 draw_list.add_text( options_bounds.x + 7.f, options_bounds.y + 7.f + ( i * 20.f ), ( selected || hovered ) ? fonts::verdana_bold : fonts::verdana, text_flags::none, selected ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), options.begin()[ i ] );
             }
+
+            draw_list.set_floating( false );
         }
 
         draw_list.add_text( position.x + 20.f, position.y + 4.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
@@ -714,21 +726,24 @@ public:
         const rect combo_bounds = rect( position.x + 20.f, position.y + 15.f, bounds_.w - 98.f, 20.f );
         const rect options_bounds = rect( combo_bounds.x, combo_bounds.y + 22.f, combo_bounds.w, options.size() * 20.f );
 
-        const bool hovered = mouse_in_rect( combo_bounds );
-        const bool nothing_active = active_hash.previous == 0ull && active_hash.current == 0ull;
+        const bool hovered = mouse_in_rect( combo_bounds ) && !mouse_in_rect( ignore_bounds.previous );
 
         const uint64_t hash = ( uint64_t )options.begin()[ 0 ].second;
-        const bool active = active_hash.current == hash;
+        const bool active = active_hash == hash;
 
-        if ( hovered && nothing_active && left_mouse_clicked ) {
-            active_hash.current = hash;
+        if ( hovered && !active_hash && left_mouse_clicked ) {
+            active_hash = hash;
+            ignore_bounds.current = options_bounds;
         }
 
         else if ( active && left_mouse_clicked && !mouse_in_rect( options_bounds ) ) {
-            active_hash.current = 0ull;
+            active_hash = 0ull;
+            ignore_bounds.current = rect();
         }
 
         else if ( active ) {
+            draw_list.set_floating( true );
+
             draw_styled_rect( options_bounds );
 
             for ( size_t i = 0; i < options.size(); i++ ) {
@@ -749,6 +764,8 @@ public:
 
                 draw_list.add_text( options_bounds.x + 7.f, options_bounds.y + 7.f + ( i * 20.f ), *value ? fonts::verdana_bold : fonts::verdana, text_flags::none, *value ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), option );
             }
+
+            draw_list.set_floating( false );
         }
 
         draw_list.add_text( position.x + 20.f, position.y + 4.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
@@ -899,8 +916,9 @@ void tab( const char* label, uint32_t value, uint32_t* tab, rect& cursor, float 
     const bool selected = value == *tab;
 
     if ( mouse_in_rect( rect( cursor.x, cursor.y, width, cursor.h ) ) && left_mouse_clicked ) {
-        active_hash.current = 0ull;
         *tab = value;
+        active_hash = 0ull;
+        ignore_bounds.current = rect();
     }
 
     if ( selected && !subtab ) {
