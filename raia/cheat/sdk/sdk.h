@@ -452,13 +452,13 @@ namespace unity {
         }
 
         template <typename T>
-        sys::array<T*>* get_components() {
-            sys::array<T*>* ( *get_components_internal )( game_object*, il2cpp_object*, bool, bool, bool, bool, void* ) =
+        sys::array<T*>* get_components_in_children() {
+            sys::array<T*>* ( *get_components_internal )( game_object*, il2cpp_object*, bool, bool recursive, bool include_inactive, bool reverse, void* ) =
                 ( decltype( get_components_internal ) )( unity_player + Offsets::GameObject::GetComponentsInternal );
 
             um::caller& caller = um::get_caller_for_thread();
 
-            return caller( get_components_internal, this, T::type_object_, false, false, true, false, nullptr );
+            return caller( get_components_internal, this, T::type_object_, false, true, false, false, nullptr );
         }
 
         template <typename T>
@@ -832,6 +832,33 @@ namespace unity {
             return caller( property_to_id, _name );
         }
 
+        int get_property_count() {
+            int ( *get_property_count )( shader* ) =
+                ( decltype( get_property_count ) )( unity_player + Offsets::Shader::GetPropertyCount );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_property_count, this );
+        }
+
+        sys::string* get_property_name( int index ) {
+            sys::string* ( *get_property_name )( shader*, int ) =
+                ( decltype( get_property_name ) )( unity_player + Offsets::Shader::GetPropertyName );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_property_name, this, index );
+        }
+
+        int get_property_type( int index ) {
+            int ( *get_property_type )( shader*, int ) =
+                ( decltype( get_property_type ) )( unity_player + Offsets::Shader::GetPropertyType );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_property_type, this, index );
+        }
+
         static inline il2cpp_object* type_object_;
     };
 
@@ -881,6 +908,15 @@ namespace unity {
             return caller( set_texture_impl, this, name, value );
         }
 
+        shader* get_shader() {
+            shader* ( *get_shader )( material* ) =
+                ( decltype( get_shader ) )( unity_player + Offsets::Material::get_shader );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_shader, this );
+        }
+
         void set_shader( shader* value) {
             void ( *set_shader )( material*, shader* ) =
                 ( decltype( set_shader ) )( unity_player + Offsets::Material::set_shader );
@@ -894,7 +930,7 @@ namespace unity {
         static inline il2cpp_object* type_object_;
     };
 
-    class renderer : object {
+    class renderer : public component {
     public:
         bool get_enabled() {
             bool ( *get_enabled )( renderer* ) =
@@ -926,6 +962,8 @@ namespace unity {
         internals::renderer* get_native_renderer() {
             return ( internals::renderer* )cached_ptr;
         }
+
+        static inline il2cpp_object* type_object_;
     };
 
     class command_buffer : public il2cpp_object {
@@ -3035,5 +3073,16 @@ namespace rust {
         }
 
         static inline il2cpp_class* klass_;
+    };
+
+    class base_view_model : public unity::behaviour {
+    public:
+        static base_view_model* get_active_model() {
+            base_view_model*( *get_active_model )( ) = ( decltype( get_active_model ) )( game_assembly + Offsets::BaseViewModel::get_ActiveModel );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_active_model );
+        }
     };
 }

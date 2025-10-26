@@ -71,7 +71,8 @@ class_lookup class_lookups[] = {
 	{ &rust::dropped_item_container::klass_, nullptr, nullptr, DroppedItemContainer_TypeDefinitionIndex },
 	{ nullptr, nullptr, &rust::terrain_meta::static_fields_, TerrainMeta_TypeDefinitionIndex },
 	{ nullptr, nullptr, &rust::cursor_manager::static_fields_, CursorManager_TypeDefinitionIndex },
-	{ &rust::building_block::klass_, nullptr, nullptr, BuildingBlock_TypeDefinitionIndex }
+	{ &rust::building_block::klass_, nullptr, nullptr, BuildingBlock_TypeDefinitionIndex },
+	{ nullptr, &unity::renderer::type_object_, nullptr, Renderer_TypeDefinitionIndex }
 };
 
 parent_class_lookup parent_class_lookups[] = {
@@ -164,6 +165,8 @@ bool populate_classes() {
 }
 
 bool bootstrap::init() {
+	DESTROY_BEGIN
+
 	if ( !game_assembly ) {
 		if ( !( game_assembly = util::get_process_module_info( rust_process, H( "GameAssembly.dll" ) ).base_address ) ) {
 			return false;
@@ -182,6 +185,8 @@ bool bootstrap::init() {
 		}
 	}
 
+	DESTROY_END
+
 	return true;
 }
 
@@ -193,6 +198,8 @@ const uint64_t generate_corrupt_value() {
 #define VFUNC( Class, Offset ) ( uintptr_t* )( ( uintptr_t )Class::klass_ + Offset )
 
 bool resolve_hooks() {
+	DESTROY_BEGIN
+
 	uintptr_t il2cpp_codegen_initialize_method_call = util::find_pattern(
 		game_assembly + Offsets::Network_Client::CreateNetworkable, S( "\x48\x8D\x0D\xCC\xCC\xCC\xCC\xE8" ), S( "xxx????x" ), 0x100 );
 
@@ -397,12 +404,12 @@ bool resolve_hooks() {
 	};
 
 	const command_hook hooked_commands[] = {
-		{ S( L"noclip" ), command_hook_type::call },
-		{ S( L"debugcamera" ), command_hook_type::call },
-		{ S( L"camlerp" ), command_hook_type::set },
-		{ S( L"camlerptilt" ), command_hook_type::set },
-		{ S( L"camlookspeed" ), command_hook_type::set },
-		{ S( L"camspeed" ), command_hook_type::set },
+		{ L"noclip", command_hook_type::call },
+		{ L"debugcamera", command_hook_type::call },
+		{ L"camlerp", command_hook_type::set },
+		{ L"camlerptilt", command_hook_type::set },
+		{ L"camlookspeed", command_hook_type::set },
+		{ L"camspeed", command_hook_type::set },
 	};
 
 	for ( int32_t i = 0; i < _countof( hooked_commands ); i++ ) {
@@ -454,6 +461,8 @@ bool resolve_hooks() {
 	hooks.add( base_player_client_input_hook );
 	hooks.add( client_update_hook );
 
+	DESTROY_END
+
 	return true;
 }
 
@@ -465,7 +474,7 @@ bool hook_manager::init() {
 	if ( resolved_hooks )
 		return true;
 
-	resolved_hooks = resolve_hooks();
+	return resolved_hooks = resolve_hooks();
 }
 
 void hook_manager::place_hooks() {

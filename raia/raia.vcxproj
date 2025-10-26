@@ -79,6 +79,7 @@
     <DriverTargetPlatform>Universal</DriverTargetPlatform>
     <Driver_SpectreMitigation>false</Driver_SpectreMitigation>
     <CharacterSet>MultiByte</CharacterSet>
+    <ALLOW_DATE_TIME>1</ALLOW_DATE_TIME>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
@@ -187,6 +188,7 @@
     <ClCompile Include="cheat\features.cpp" />
     <ClCompile Include="cheat\glow.cpp" />
     <ClCompile Include="cheat\hooks.cpp" />
+    <ClCompile Include="destroy.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="include\imgui\imgui.cpp" />
     <ClCompile Include="include\imgui\imgui_draw.cpp" />
@@ -218,6 +220,7 @@
     <ClInclude Include="cheat\sdk\offsets.h" />
     <ClInclude Include="cheat\sdk\sdk.h" />
     <ClInclude Include="cheat\sdk\declare.h" />
+    <ClInclude Include="destroy.h" />
     <ClInclude Include="dx.h" />
     <ClInclude Include="fonts.h" />
     <ClInclude Include="gui.h" />
@@ -225,6 +228,7 @@
     <ClInclude Include="include\hexrays.h" />
     <ClInclude Include="include\imgui\imgui_impl_dx11.h" />
     <ClInclude Include="include\uncompress_lzma2.h" />
+    <ClInclude Include="include\xorstr.hpp" />
     <ClInclude Include="render_string.h" />
     <ClInclude Include="math\mat3x3.h" />
     <ClInclude Include="math\quat.h" />

@@ -11,6 +11,8 @@
 bool cheat_init = false;
 
 bool init_cheat() {
+	DESTROY_BEGIN
+
 	// Resolve game dlls and populate classes in sdk
 	if ( !bootstrap::init() ) {
 #ifdef DEBUG
@@ -33,6 +35,8 @@ bool init_cheat() {
 	// Initialize gui draw list
 	gui::init();
 
+	DESTROY_END
+
 	return true;
 }
 
@@ -40,6 +44,8 @@ bool cheat_deinit = false;
 
 // This function must be called after clearing the d3d handler otherwise the cheat unloads otherwise the hooks stay
 void deinit_cheat() {
+	DESTROY_BEGIN
+
 	hook_manager::remove_hooks();
 	entity_manager::destroy();
 	glow_manager::destroy();
@@ -58,6 +64,8 @@ void deinit_cheat() {
 	}
 
 	um::destroy_callers();
+
+	DESTROY_END
 }
 
 bool is_rust_process() {
@@ -242,6 +250,8 @@ bool on_exit_process( sentian::callback_result* callback, bool last_thread_exit,
 #endif
 
 int main( sentian::driver_api* api, sentian::driver_allocation* allocation ) {
+	DESTROY_BEGIN
+
 	if ( api->version != DRIVER_API_VERSION )
 		return 1;
 
@@ -266,6 +276,8 @@ int main( sentian::driver_api* api, sentian::driver_allocation* allocation ) {
 	driver_api = api;
 	rust_process = process_info.process;
 	rust_pid = process_info.process_id;
+
+	DESTROY_END
 
 	return 0;
 }

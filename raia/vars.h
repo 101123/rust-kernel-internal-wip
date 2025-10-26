@@ -300,6 +300,7 @@ struct cached_player;
 DEFINE_CONTEXT( aimbot,
 	cvar enabled = cvar( H( "Aimbot" ), true );
 	cvar_ui type = cvar_ui( H( "Aimbot Type" ), aimbot_type::memory );
+	cvar_ui key = cvar_ui( H( "Aimbot Key" ), 'C' );
 	cvar_ui fov = cvar_ui( H( "Aimbot FOV" ), 120 );
 	cvar_f recoil = cvar_f( H( "Aimbot Recoil" ), 0.5f );
 	cvar_f smoothing = cvar_f( H( "Aimbot Smoothing" ), 0.5f );

@@ -142,6 +142,7 @@ namespace Offsets {
 		constexpr const static size_t CreateWithShader = 0xaf050;
 		constexpr const static size_t SetBufferImpl = 0xb7490;
 		constexpr const static size_t set_shader = 0xaf740;
+		constexpr const static size_t get_shader = 0xaf5e0;
 	}
 
 #define MaterialPropertyBlock_TypeDefinitionIndex 16778
@@ -161,6 +162,9 @@ namespace Offsets {
 		// Functions
 		constexpr const static size_t Find = 0xad99200;
 		constexpr const static size_t PropertyToID = 0xaa6a0;
+		constexpr const static size_t GetPropertyCount = 0xaea30;
+		constexpr const static size_t GetPropertyName = 0xad8f0;
+		constexpr const static size_t GetPropertyType = 0xadb90;
 	}
 
 #define Mesh_TypeDefinitionIndex 16837
@@ -187,6 +191,7 @@ namespace Offsets {
 		// Functions
 		constexpr const static size_t get_enabled = 0xa1cb0;
 		constexpr const static size_t get_isVisible = 0xa1f20;
+		constexpr const static size_t GetMaterial = 0x9ffe0;
 		constexpr const static size_t GetMaterialArray = 0xa0470;
 	}
 
@@ -344,6 +349,7 @@ namespace Offsets {
 	namespace Application {
 
 		// Functions
+		constexpr const static size_t get_version = 0x5f350;
 		constexpr const static size_t Quit = 0x5d790;
 	}
 
@@ -370,6 +376,14 @@ namespace Offsets {
 
 		// Offsets
 		constexpr const static size_t m_Sprite = 0xd0;
+	}
+
+#define GraphicsSettings_TypeDefinitionIndex 17315
+
+	namespace GraphicsSettings {
+
+		// Functions
+		constexpr const static size_t get_INTERNAL_defaultRenderPipeline = 0x127f00;
 	}
 
 #define BaseNetworkable_TypeDefinitionIndex 5811

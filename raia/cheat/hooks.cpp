@@ -629,7 +629,7 @@ void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot*
 			client_projectile->current_velocity = velocity;
 		}
 
-		if ( aimbot.player_target && aimbot.enabled && aimbot.type == aimbot_type::silent && game_input.get_async_key_state( 'C' ) ) {
+		if ( aimbot.player_target && aimbot.enabled && aimbot.type == aimbot_type::silent && game_input.get_async_key_state( aimbot.key ) ) {
 			vector3 target_position = aimbot.player_target->second.bone_data.positions[ 1 ];
 			if ( !prediction( server_projectile->start_position, target_position, get_player_velocity( aimbot.player_target->second ) ) )
 				return;
@@ -767,7 +767,7 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 			features::weapon_modifiers( base_projectile );
 
 			if ( target ) {
-				if ( aimbot.enabled && aimbot.type == aimbot_type::memory && game_input.get_async_key_state( 'C' ) ) {
+				if ( aimbot.enabled && aimbot.type == aimbot_type::memory && game_input.get_async_key_state( aimbot.key ) ) {
 					memory_aimbot( base_projectile, target );
 				}
 			}
