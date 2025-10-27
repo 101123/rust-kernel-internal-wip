@@ -555,6 +555,17 @@ namespace unity {
             return native_transform->get_position();
         }
 
+        void set_position( const vector3& position ) {
+            void ( *set_position_injected )( transform*, vector3* ) =
+                ( decltype( set_position_injected ) )( unity_player + Offsets::Transform::set_position_Injected );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            vector3* _position = caller.push<vector3>( position );
+
+            caller( set_position_injected, this, _position );
+        }
+
         void get_position_and_rotation( vector3* position, quaternion* rotation ) {
             void ( *get_position_and_rotation )( transform*, vector3*, quaternion* ) = 
                 ( decltype( get_position_and_rotation ) )( unity_player + Offsets::Transform::GetPositionAndRotation );
@@ -1135,6 +1146,18 @@ namespace unity {
             vector3* _direction = caller.push<vector3>( direction );
 
             return caller( raycast_non_alloc, _origin, _direction, results, max_distance, layer_mask, query_trigger_interaction );
+        }
+
+        static bool check_capsule( vector3 start, vector3 end, float radius, int layer_mask, int query_trigger_interaction ) {
+            bool ( *check_capsule )( vector3*, vector3*, float, int, int ) =
+                ( decltype( check_capsule ) )( game_assembly + Offsets::Physics::CheckCapsule );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            vector3* _start = caller.push<vector3>( start );
+            vector3* _end = caller.push<vector3>( end );
+
+            return caller( check_capsule, _start, _end, radius, layer_mask, query_trigger_interaction );
         }
     };
 
@@ -1813,6 +1836,17 @@ namespace rust {
             }
         );
 
+        void teleport_to( const vector3& position, base_player* player ) {
+            void ( *teleport_to )( player_walk_movement*, vector3*, base_player*  ) =
+                ( decltype( teleport_to ) )( game_assembly + Offsets::PlayerWalkMovement::TeleportTo );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            vector3* _position = caller.push<vector3>( position );
+
+            caller( teleport_to, this, _position, player );
+        }
+
         static inline il2cpp_class* klass_;
     };
 
@@ -2000,6 +2034,7 @@ namespace rust {
         );
 
         FIELD( rust::model_state*, model_state, Offsets::BasePlayer::modelState );
+        FIELD( player_tick*, last_sent_tick, Offsets::BasePlayer::lastSentTick );
         FIELD( int, player_flags, Offsets::BasePlayer::playerFlags );
         FIELD( sys::string*, user_id_string, Offsets::BasePlayer::UserIDString );
         FIELD( sys::string*, display_name, Offsets::BasePlayer::_displayName );
@@ -2097,6 +2132,13 @@ namespace rust {
             return model_state->water_level > 0.65f;
         }
 
+        bool is_on_ground() {
+            if ( !is_valid_ptr( model_state ) )
+                return false;
+
+            return model_state->has_flag( rust::model_state::flag::on_ground );
+        }
+
         bool has_player_flag( flag f ) {
             return ( player_flags & f ) == f;
         }
@@ -2125,6 +2167,22 @@ namespace rust {
             um::caller& caller = um::get_caller_for_thread();
 
             return caller( send_projectile_update, this, update );
+        }
+
+        static float get_radius() {
+            return 0.5f;
+        }
+
+        static float get_height( bool ducked ) {
+            if ( ducked ) {
+                return 1.1f;
+            }
+
+            return 1.8f;
+        }
+
+        static float get_jump_height() {
+            return 1.5f;
         }
 
         static inline il2cpp_class* klass_;
@@ -2643,6 +2701,11 @@ namespace rust {
     class antihack {
     public:
         static inline float projectile_forgiveness = 0.495f; /* 0.5f */
+
+        static inline float flyhack_extrusion = 2.f;
+        static inline float flyhack_margin = 0.1f;
+        static inline float flyhack_forgiveness_vertical = 1.f;
+        static inline float flyhack_forgiveness_horizontal = 1.5f;
     };
 
     class server_projectile {
@@ -3077,6 +3140,8 @@ namespace rust {
 
     class base_view_model : public unity::behaviour {
     public:
+        FIELD( bool, use_view_model_camera, Offsets::BaseViewModel::useViewModelCamera );
+
         static base_view_model* get_active_model() {
             base_view_model*( *get_active_model )( ) = ( decltype( get_active_model ) )( game_assembly + Offsets::BaseViewModel::get_ActiveModel );
 

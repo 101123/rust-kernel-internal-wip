@@ -83,7 +83,7 @@ bool prediction( const vector3& origin, vector3& target, const vector3& target_v
 		if ( target_velocity == vector3() )
 			return true;
 
-		// Extrapolate the position of the target
+		// Extrapolate target position
 		target = target_position + ( target_velocity * travel_time );
 
 		return prediction_no_velocity( origin, target, travel_time );

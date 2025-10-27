@@ -214,7 +214,7 @@ bool left_mouse_clicked;
 bool left_mouse_held;
 
 vector4 color_picker_hsv;
-int color_picker_selected_slider;
+int color_picker_selected_slider = -1;
 
 uint32_t gradient_on[ 4 ] = {
     COL32( 110, 183, 212, 255 ),

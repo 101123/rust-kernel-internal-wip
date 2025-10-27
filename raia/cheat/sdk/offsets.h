@@ -368,6 +368,7 @@ namespace Offsets {
 		// Functions
 		constexpr const static size_t Raycast = 0xae63d10;
 		constexpr const static size_t RaycastNonAlloc = 0xae663e0;
+		constexpr const static size_t CheckCapsule = 0xae67c50;
 	}
 
 #define Image_TypeDefinitionIndex 21131
@@ -1044,6 +1045,8 @@ namespace Offsets {
 		constexpr const static size_t DoFixedUpdate_vtableoff = 0x318;
 		constexpr const static size_t FrameUpdate = 0xc6e5f0;
 		constexpr const static size_t FrameUpdate_vtableoff = 0x438;
+		constexpr const static size_t TeleportTo = 0xc69790;
+		constexpr const static size_t TeleportTo_vtableoff = 0x298;
 	}
 
 #define BuildingPrivlidge_TypeDefinitionIndex 3290
@@ -1171,8 +1174,8 @@ namespace Offsets {
 		constexpr const static size_t modelState = 0x50;
 		constexpr const static size_t activeItem = 0x60;
 		constexpr const static size_t parentID = 0x30;
-		constexpr const static size_t intermediatePosition = 0x44;
-		constexpr const static size_t position = 0x38;
+		constexpr const static size_t intermediatePosition = 0x38;
+		constexpr const static size_t position = 0x44;
 		constexpr const static size_t eyePos = 0x24;
 
 		// Functions

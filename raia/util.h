@@ -433,7 +433,7 @@ namespace util {
 		}
 
 		bool has_elapsed( uint64_t time ) {
-			if ( get_elapsed() > ( time * unit ) ) {
+			if ( get_elapsed() > time ) {
 				previous_time_ = get_time<unit>();
 				return true;
 			}
