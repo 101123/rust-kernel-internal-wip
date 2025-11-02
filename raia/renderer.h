@@ -25,7 +25,8 @@ enum fonts {
 	verdana,
 	verdana_bold,
 	tahoma,
-	tahoma_bold
+	tahoma_bold,
+	icons
 };
 
 namespace text_flags {

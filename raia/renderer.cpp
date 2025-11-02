@@ -55,7 +55,7 @@ private:
 	size_t position_;
 };
 
-ImFont* load_small_fonts( uint8_t* font_data, float font_size ) {
+ImFont* load_small_fonts( uint8_t* font_data, ImFont* add = nullptr ) {
 	stream_reader stream( font_data );
 
 	uint32_t width = stream.read<uint32_t>();
@@ -82,15 +82,19 @@ ImFont* load_small_fonts( uint8_t* font_data, float font_size ) {
 	// Needs to be done otherwise the ImTextureData destructor will attempt to free our data
 	texture_data.Pixels = nullptr;
 
-	ImFont* font = IM_NEW( ImFont );
-	font->ContainerAtlas = font_atlas;
-	font->CurrentRasterizerDensity = 1.f;
-	font->LegacySize = font_size;
+	ImFontBaked* baked = add ? add->LastBaked : nullptr;
 
-	ImFontBaked* baked = font->LastBaked = ImFontAtlasBakedAdd( font_atlas, font, font_size, 1.f, ImGuiID() );
+	// Create the font on first call
+	if ( !baked ) {
+		ImFont* font = IM_NEW( ImFont );
+		font->ContainerAtlas = font_atlas;
+		font->CurrentRasterizerDensity = 1.f;
+		font->LegacySize = 8.f;
 
-	uint32_t glyphs = stream.read<uint32_t>();
-	for ( size_t i = 0; i < glyphs; i++ ) {
+		baked = font->LastBaked = ImFontAtlasBakedAdd( font_atlas, font, 8.f, 1.f, ImGuiID() );
+	}
+
+	for ( uint32_t i = 0, n = stream.read<uint32_t>(); i < n; i++ ) {
 		glyph_data glyph_info = stream.read<glyph_data>();
 
 		ImFontGlyph glyph = ImFontGlyph();
@@ -135,7 +139,7 @@ ImFont* load_small_fonts( uint8_t* font_data, float font_size ) {
 		}
 	}
 
-	return font;
+	return baked->ContainerFont;
 }
 
 ImFont* load_compressed_glfn_font( uint8_t* compressed, size_t compressed_size, std::initializer_list<std::initializer_list<std::pair<uint16_t, uint16_t>>> ranges ) {
@@ -274,12 +278,16 @@ bool renderer::init( IDXGISwapChain* swapchain ) {
 
 	std::initializer_list<std::initializer_list<std::pair<uint16_t, uint16_t>>> ranges = { { { 0x00, 0xFF }, { 0x590, 0x68F } }, { { 0x400, 0x4FF } } };
 
-	fonts[ fonts::small_fonts ] = load_small_fonts( _smallfonts, 8.f );
+	// TODO: Find a way to get ascii and cyrillic in the same file
+	ImFont* small_fonts = fonts[ fonts::small_fonts ] = load_small_fonts( _smallfonts );
+	load_small_fonts( _smallfonts_cyrillic, small_fonts );
+
 	fonts[ fonts::consolas_bold ] = load_compressed_glfn_font( _consolas_bold, sizeof( _consolas_bold ), ranges );
 	fonts[ fonts::verdana ] = load_compressed_glfn_font( _verdana, sizeof( _verdana ), ranges );
 	fonts[ fonts::verdana_bold ] = load_compressed_glfn_font( _verdana_bold, sizeof( _verdana_bold ), ranges );
 	fonts[ fonts::tahoma ] = load_compressed_glfn_font( _tahoma, sizeof( _tahoma ), ranges );
 	fonts[ fonts::tahoma_bold ] = load_compressed_glfn_font( _tahoma_bold, sizeof( _tahoma_bold ), ranges );
+	fonts[ fonts::icons ] = load_compressed_glfn_font( _icons, sizeof( _icons ), ranges );
 
 	ImGui_ImplDX11_UpdateTexture( font_atlas->TexData );
 
