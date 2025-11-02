@@ -13,6 +13,8 @@ namespace unity {
 	class behaviour;
 	class transform;
 	class texture;
+	class render_texture;
+	class shader;
 }
 
 namespace rust {

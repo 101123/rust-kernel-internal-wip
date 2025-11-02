@@ -27,17 +27,48 @@ int _BlurTex;
 int _OutlineScale;
 int _OutlineColor;
 
-unity::shader* gui_text_shader;
+int _VisibleColor;
+int _OccludedColor;
 
-unity::material* gui_text_material;
+enum material_index {
+	players,
+	scientists,
+	held_item,
+	hands,
+	max
+};
 
-int gui_text_material_instance_id;
+struct configured_material {
+	unity::material* material;
+	int32_t material_id;
+	uint32_t* colors[ 2 ];
+};
 
-int _Color;
+using configured_materials = std::array<configured_material, material_index::max>;
 
-util::lazy_initializer<std::vector<rust::skinned_multi_mesh*>> multi_mesh_cache;
+configured_materials create_material_collection_from_shader( unity::shader* shader ) {
+	configured_materials collection;
+
+	for ( int32_t i = 0; i < material_index::max; i++ ) {
+		collection[ i ].material = unity::material::ctor( shader );
+		if ( !is_valid_ptr( collection[ i ].material ) )
+			continue;
+
+		collection[ i ].material_id = collection[ i ].material->get_instance_id();
+	}
+
+	return collection;
+}
+
+unity::shader* unlit_shader;
+
+configured_materials unlit_materials;
+
+util::lazy_initializer<std::vector<std::pair<bool, rust::skinned_multi_mesh*>>> multi_mesh_cache;
 
 bool glow_manager::init( unity::asset_bundle* asset_bundle ) {
+	DESTROY_BEGIN
+
 	stencil_shader = asset_bundle->load_asset<unity::shader>( S( L"Color.shader" ) );
 	if ( !stencil_shader )
 		return false;
@@ -81,19 +112,29 @@ bool glow_manager::init( unity::asset_bundle* asset_bundle ) {
 	_OutlineScale = unity::shader::property_to_id( S( L"_OutlineScale" ) );
 	_OutlineColor = unity::shader::property_to_id( S( L"_OutlineColor" ) );
 
-	gui_text_shader = unity::shader::find( S( L"GUI/Text Shader" ) );
-	if ( !gui_text_shader )
+	unlit_shader = asset_bundle->load_asset<unity::shader>( S( L"UnlitShader.shader" ) );
+	if ( !unlit_shader )
 		return false;
 
-	gui_text_material = unity::material::ctor( gui_text_shader );
-	if ( !gui_text_material )
-		return false;
+	il2cpp_gchandle_new( unlit_shader, true );
 
-	gui_text_material_instance_id = gui_text_material->get_instance_id();
+	unlit_materials = create_material_collection_from_shader( unlit_shader );
 
-	_Color = unity::shader::property_to_id( S( L"_Color" ) );
+	unlit_materials[ material_index::players ].colors[ 0 ] = &player_visuals.chams_visible_color.value;
+	unlit_materials[ material_index::players ].colors[ 1 ] = &player_visuals.chams_occluded_color.value;
+	unlit_materials[ material_index::scientists ].colors[ 0 ] = &scientist_visuals.chams_visible_color.value;
+	unlit_materials[ material_index::scientists ].colors[ 1 ] = &scientist_visuals.chams_occluded_color.value;
+	unlit_materials[ material_index::held_item ].colors[ 0 ] = &local_chams.held_item_visible_color.value;
+	unlit_materials[ material_index::held_item ].colors[ 1 ] = &local_chams.held_item_occluded_color.value;
+	unlit_materials[ material_index::hands ].colors[ 0 ] = &local_chams.hands_visible_color.value;
+	unlit_materials[ material_index::hands ].colors[ 1 ] = &local_chams.hands_occluded_color.value;
+
+	_VisibleColor = unity::shader::property_to_id( S( L"_VisibleColor" ) );
+	_OccludedColor = unity::shader::property_to_id( S( L"_OccludedColor" ) );
 
 	multi_mesh_cache.construct();
+
+	DESTROY_END
 
 	return true;
 }
@@ -111,7 +152,7 @@ void glow_manager::add_player( rust::base_player* player ) {
 	if ( !is_valid_ptr( multi_mesh ) )
 		return;
 
-	multi_mesh_cache.get().push_back( multi_mesh );
+	multi_mesh_cache.get().push_back( { player->is<rust::base_player>(), multi_mesh } );
 }
 
 void glow_manager::remove_player( rust::base_player* player ) {
@@ -123,20 +164,70 @@ void glow_manager::remove_player( rust::base_player* player ) {
 	if ( !is_valid_ptr( multi_mesh ) )
 		return;
 
-	std::vector<rust::skinned_multi_mesh*>& multi_meshes = multi_mesh_cache.get();
+	std::vector<std::pair<bool, rust::skinned_multi_mesh*>>& multi_meshes = multi_mesh_cache.get();
 
-	auto it = std::find( multi_meshes.begin(), multi_meshes.end(), multi_mesh );
+	auto it = std::find_if( multi_meshes.begin(), multi_meshes.end(), [&]( const auto& pair ) { return pair.second == multi_mesh; } );
 	if ( it == multi_meshes.end() )
 		return;
 
 	multi_meshes.erase( it );
 }
 
-// TODO: update_chams and render_stencil run the same code for the most part so it can probably be made into a function
 void update_chams() {
-	gui_text_material->set_color( _Color, unity::color( chams_color ) );
+	for ( const auto& material : unlit_materials ) {
+		material.material->set_color( _VisibleColor, unity::color( *material.colors[ 0 ] ) );
+		material.material->set_color( _OccludedColor, unity::color( *material.colors[ 1 ] ) );
+	}
 
-	for ( rust::skinned_multi_mesh* multi_mesh : multi_mesh_cache.get() ) {
+	if ( local_chams.held_item || local_chams.hands ) {
+		rust::base_view_model* active_model = rust::base_view_model::get_active_model();
+
+		if ( is_valid_ptr( active_model ) ) {
+			// This must be set for viewmodel chams to work
+			active_model->use_view_model_camera = false;
+
+			unity::game_object* game_object = active_model->get_game_object();
+
+			if ( is_valid_ptr( game_object ) ) {
+				sys::array<unity::renderer*>* renderers = game_object->get_components_in_children<unity::renderer>();
+
+				if ( is_valid_ptr( renderers ) ) {
+					for ( int32_t i = 0; i < renderers->size; i++ ) {
+						unity::renderer* renderer = renderers->buffer[ i ];
+						if ( !is_valid_ptr( renderer ) )
+							continue;
+
+						sys::string* name = renderer->get_name();
+						if ( !is_valid_ptr( name ) )
+							continue;
+
+						bool hands = util::hash_w( name->buffer ) == H( "hand_mesh" );
+
+						if ( ( hands && !local_chams.hands ) || ( !hands && !local_chams.held_item ) )
+							continue;
+
+						unity::internals::renderer* native_renderer = renderer->get_native_renderer();
+						if ( !is_valid_ptr( native_renderer ) )
+							continue;
+
+						auto materials = native_renderer->materials;
+						if ( !is_valid_ptr( materials.buffer ) )
+							continue;
+
+						for ( size_t i = 0; i < materials.size; i++ ) {
+							materials.buffer[ i ].instance_id = hands ?
+								unlit_materials[ material_index::hands ].material_id : unlit_materials[ material_index::held_item ].material_id;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for ( auto& [ is_player, multi_mesh ] : multi_mesh_cache.get() ) {
+		if ( ( is_player && !player_visuals.chams ) || ( !is_player && !scientist_visuals.chams ) )
+			continue;
+
 		sys::list<unity::renderer*>* renderers_list = multi_mesh->renderers;
 		if ( !is_valid_ptr( renderers_list ) || !is_valid_ptr( renderers_list->items ) )
 			continue;
@@ -158,17 +249,17 @@ void update_chams() {
 			if ( !is_valid_ptr( materials.buffer ) )
 				continue;
 
+			const configured_material& configured_material = is_player ? unlit_materials[ material_index::players ] : unlit_materials[ material_index::scientists ];
+
 			for ( size_t i = 0; i < materials.size; i++ ) {
-				materials.buffer[ i ].instance_id = gui_text_material_instance_id;
+				materials.buffer[ i ].instance_id = configured_material.material_id;
 			}
 		}
 	}
 }
 
 void glow_manager::update() {
-	if ( chams ) {
-		update_chams();
-	}
+	update_chams();
 }
 
 void glow_manager::invalidate_cache() {
@@ -181,7 +272,7 @@ void render_stencil() {
 	command_buffer->set_render_target( unity::render_target_identifier::ctor( stencil_texture ) );
 	command_buffer->clear_render_target( true, true, unity::color( 0.f, 0.f, 0.f, 0.f ) );
 
-	for ( rust::skinned_multi_mesh* multi_mesh : multi_mesh_cache.get() ) {
+	for ( auto& [ _, multi_mesh ] : multi_mesh_cache.get() ) {
 		sys::list<unity::renderer*>* renderers_list = multi_mesh->renderers;
 		if ( !is_valid_ptr( renderers_list ) || !is_valid_ptr( renderers_list->items ) )
 			continue;
@@ -211,13 +302,18 @@ void render_stencil() {
 }
 
 void render_blur() {
-	blur_texture = unity::render_texture::get_temporary( screen_width, screen_height, 0 );
-	unity::render_texture* temp = unity::render_texture::get_temporary( screen_width, screen_height, 0 );
+	vector2i blur_tex_dims = vector2i( screen_width / 2, screen_height / 2 );
+
+	blur_texture = unity::render_texture::get_temporary( blur_tex_dims.x, blur_tex_dims.y, 0 );
+	unity::render_texture* temp = unity::render_texture::get_temporary( blur_tex_dims.x, blur_tex_dims.y, 0 );
 	blur_material->set_float( _BlurScale, glow_blur_scale );
 
 	unity::graphics::blit( stencil_texture, blur_texture, blur_material );
-	unity::graphics::blit( blur_texture, temp, blur_material );
-	unity::graphics::blit( temp, blur_texture, blur_material );
+
+	for ( int32_t i = 0; i < 3; i++ ) {
+		unity::graphics::blit( blur_texture, temp, blur_material );
+		unity::graphics::blit( temp, blur_texture, blur_material );
+	}
 
 	unity::render_texture::release_temporary( temp );
 }

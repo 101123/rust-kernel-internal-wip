@@ -358,6 +358,55 @@ void player_walk_movement_client_input_post_hook( rust::player_walk_movement* pl
 	}
 }
 
+bool test_flying( vector3 old_position, vector3 new_position, bool verify_grounded ) {
+	bool in_air = false;
+
+	vector3 mid_point = ( old_position + new_position ) / 2.f;
+
+	if ( !local_player.entity->on_ladder() ) {
+		float player_radius = rust::base_player::get_radius();
+
+		vector3 capsule_start = mid_point + vector3( 0.f, player_radius - rust::antihack::flyhack_extrusion, 0.f );
+		vector3 capsule_end = mid_point + vector3( 0.f, rust::base_player::get_height( false ) - player_radius, 0.f );
+
+		float check_radius = player_radius - rust::antihack::flyhack_margin;
+
+		in_air = anti_flyhack.in_air = !unity::physics::check_capsule( capsule_start, capsule_end, check_radius, 1503764737, unity::query_trigger_interaction::ignore );
+	}
+
+	if ( in_air ) {
+		vector3 delta = new_position - old_position;
+
+		float vertical_delta = fabsf( delta.y );
+		float horizontal_delta = vector2::magnitude( vector2( delta.x, delta.z ) );
+
+		if ( delta.y >= vector3::epsilon ) {
+			anti_flyhack.vertical += delta.y;
+			anti_flyhack.max_vertical = rust::base_player::get_jump_height() + rust::antihack::flyhack_forgiveness_vertical;
+
+			if ( anti_flyhack.vertical > anti_flyhack.max_vertical ) {
+				return true;
+			}
+		}
+
+		if ( vertical_delta < horizontal_delta ) {
+			anti_flyhack.horizontal += horizontal_delta;
+			anti_flyhack.max_horizontal = 5.f + rust::antihack::flyhack_forgiveness_horizontal;
+
+			if ( anti_flyhack.horizontal > anti_flyhack.max_horizontal ) {
+				return true;
+			}
+		}
+	}
+
+	else {
+		anti_flyhack.vertical = 0.f;
+		anti_flyhack.horizontal = 0.f;
+	}
+
+	return false;
+}
+
 void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* player_tick, rust::buffer_stream* stream, rust::player_tick* previous ) {
 	if ( !is_valid_ptr( player_tick ) || !is_valid_ptr( stream ) || !is_valid_ptr( previous ) )
 		return;
@@ -365,7 +414,15 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 	rust::model_state* model_state = player_tick->model_state;
 
 	if ( is_valid_ptr( model_state ) ) {
-		model_state->set_flag( rust::model_state::flag::flying, false );
+		if ( model_state->has_flag( rust::model_state::flag::flying ) ) {
+			// We need to set the sprinting flag so we can get maximum speed, but only set it when we're moving so it's more believable
+			if ( vector3::sqr_distance( previous->position, player_tick->position ) > 0.f ) {
+				model_state->set_flag( rust::model_state::flag::sprinting, true );
+			}
+
+			// The detection for this on a vanilla server is gone, but keep it in anyways just in case
+			model_state->set_flag( rust::model_state::flag::flying, false );
+		}
 	}
 
 	player_tick->eye_pos = local_player.eyes_position;
@@ -396,6 +453,19 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 				// The first byte of the packet is the packet id, and by setting it to 139, it is silently discarded by the server
 				buffer->buffer[ 0 ] = 139;
 				return;
+			}
+		}
+	}
+
+	if ( anti_flyhack.enabled && test_flying( previous->position, player_tick->position, true ) ) {
+		player_tick->position = previous->position;
+
+		if ( local_player.entity ) {
+			rust::player_walk_movement* movement = local_player.entity->movement;
+
+			if ( is_valid_ptr( movement ) ) {
+				movement->teleport_to( previous->position, local_player.entity );
+				movement->target_movement = vector3();
 			}
 		}
 	}
@@ -454,6 +524,8 @@ const std::pair<rust::base_player*, cached_player>* get_target_for_projectile( r
 
 	for ( const auto& entry : entity_collection.players ) {
 		const cached_player& cached_player = entry.second;
+		if ( entry.first == local_player.entity )
+			continue;
 
 		float distance = line2( 
 			projectile->current_position, 
@@ -973,6 +1045,20 @@ void client_update_pre_hook( rust::client* client ) {
 	}
 }
 
+void player_walk_movement_teleport_to_pre_hook( rust::player_walk_movement* player_walk_movement, vector3* position, rust::base_player* player ) {
+	if ( !is_valid_ptr( player_walk_movement ) || !is_valid_ptr( position ) || !is_valid_ptr( player ) )
+		return;
+
+	if ( player != local_player.entity )
+		return;
+
+	rust::player_tick* last_sent_tick = local_player.entity->last_sent_tick;
+
+	if ( is_valid_ptr( last_sent_tick ) ) {
+		last_sent_tick->position = *position;
+	}
+}
+
 void hook_handlers::network_client_create_networkable( _CONTEXT* context, void* user_data ) {
 	static util::context_search search = util::context_search<rust::base_networkable*>( context,
 		[]( rust::base_networkable* value ) {
@@ -1168,6 +1254,12 @@ void hook_handlers::effect_library_setup_effect( _CONTEXT* context, void* user_d
 
 bool hook_handlers::pre_client_update( _CONTEXT* context, void* user_data ) {
 	client_update_pre_hook( ( rust::client* )context->Rcx );
+
+	return true;
+}
+
+bool hook_handlers::pre_player_walk_movement_teleport_to( _CONTEXT* context, void* user_data ) {
+	player_walk_movement_teleport_to_pre_hook( ( rust::player_walk_movement* )context->Rcx, ( vector3* )context->Rdx, ( rust::base_player* )context->R8 );
 
 	return true;
 }

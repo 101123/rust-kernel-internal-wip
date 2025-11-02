@@ -109,33 +109,33 @@ struct cvar_player_visuals {
 	cvar_i maximum_distance;
 };
 
-#define WRAP_PLAYER_CONFIGURATION( Name, Color ) { \
+#define WRAP_PLAYER_CONFIGURATION( Name, R, G, B, A ) { \
 	cvar( H( Name " Enabled" ), true ), \
 	cvar( H( Name " Visible Check" ), false ), \
-	cvar_ui( H( Name " Visible Color" ), Color ), \
-	cvar_ui( H( Name " Occluded Color" ), Color ), \
-	cvar( H( Name " Chams" ), true ), \
+	cvar_ui( H( Name " Visible Color" ), COL32( R, G, B, A ) ), \
+	cvar_ui( H( Name " Occluded Color" ), COL32( R, G, B, A ) ), \
+	cvar( H( Name " Chams" ), false ), \
 	cvar_i( H( Name " Chams Type" ), 0 ), \
-	cvar_ui( H( Name " Chams Visible Color" ), Color ), \
-	cvar_ui( H( Name " Chams Occluded Color" ), Color ), \
+	cvar_ui( H( Name " Chams Visible Color" ), COL32( R, G, B, A ) ), \
+	cvar_ui( H( Name " Chams Occluded Color" ), COL32( R, G, B, A ) ), \
 	cvar( H( Name " Bounding Box" ), true ), \
-	cvar_ui( H( Name " Bounding Box Color" ), Color ), \
+	cvar_ui( H( Name " Bounding Box Color" ), COL32( R, G, B, 200 ) ), \
 	cvar( H( Name " Skeleton" ), true ), \
-	cvar_ui( H( Name " Skeleton Color" ), Color ), \
+	cvar_ui( H( Name " Skeleton Color" ), COL32( R, G, B, 200 ) ), \
 	cvar( H( Name " Name" ), true ), \
-	cvar_ui( H( Name " Name Color" ), Color ), \
+	cvar_ui( H( Name " Name Color" ), COL32( R, G, B, 200 ) ), \
 	cvar( H( Name " Distance" ), true ), \
-	cvar_ui( H( Name " Distance Color" ), Color ), \
+	cvar_ui( H( Name " Distance Color" ), COL32( R, G, B, 200 ) ), \
 	cvar( H( Name " Held Item" ), true ), \
 	cvar( H( Name " Held Item Icon" ), true ), \
 	cvar( H( Name " Held Item Text" ), true ), \
-	cvar_ui( H( Name " Held Item Color" ), Color ), \
+	cvar_ui( H( Name " Held Item Color" ), COL32( R, G, B, 200 ) ), \
 	cvar( H( Name " Belt" ), true ), \
 	cvar_i( H( Name " Belt Type" ), 0 ), \
 	cvar_i( H( Name " Belt FOV" ), 200 ), \
 	cvar_i( H( Name " Maximum Distance" ), 500 ) }
 
-inline cvar_player_visuals player_visuals = WRAP_PLAYER_CONFIGURATION( "Players", COL32( 255, 255, 255, 255 ) );
+inline cvar_player_visuals player_visuals = WRAP_PLAYER_CONFIGURATION( "Players", 255, 255, 255, 255 );
 inline cvar_visual player_wounded = WRAP_VISUAL( "Wounded Player", true, 500, COL32( 255, 0, 0, 255 ) );
 inline cvar_visual player_sleeper = WRAP_VISUAL( "Sleeper", false, 30, COL32( 255, 255, 255, 255 ) );
 inline cvar_visual player_corpse = WRAP_VISUAL( "Corpse", true, 100, COL32( 255, 255, 255, 255 ) );
@@ -143,7 +143,7 @@ inline cvar player_team_id = cvar( H( "Player Team ID" ), true );
 inline cvar_ui player_team_id_color = cvar_ui( H( "Player Team ID Color" ), COL32( 255, 255, 255, 255 ) );
 inline cvar player_avatar = cvar( H( "Player Avatar" ), true );
 
-inline cvar_player_visuals scientist_visuals = WRAP_PLAYER_CONFIGURATION( "Scientists", COL32( 125, 195, 255, 255 ) );
+inline cvar_player_visuals scientist_visuals = WRAP_PLAYER_CONFIGURATION( "Scientists", 125, 195, 255, 255 );
 
 inline cvar_visual stone_ore = WRAP_VISUAL( "Stone Ore", false, 500, COL32( 189, 195, 199, 255 ) );
 inline cvar_visual metal_ore = WRAP_VISUAL( "Metal Ore", false, 500, COL32( 230, 126, 34, 255 ) );
@@ -509,4 +509,23 @@ DEFINE_CONTEXT( auto_upgrade,
 DEFINE_CONTEXT( events,
 	cvar enabled = cvar( H( "Events" ) );
 	cvar notify = cvar( H( "Event Notifications" ), false );
+);
+
+DEFINE_CONTEXT( local_chams,
+	cvar held_item = cvar( H( "Held Item Chams" ) );
+	cvar_ui held_item_visible_color = cvar_ui( H( "Held Item Chams Visible Color" ) );
+	cvar_ui held_item_occluded_color = cvar_ui( H( "Held Item Chams Occluded Color" ) );
+	cvar hands = cvar( H( "Hands Chams" ) );
+	cvar_ui hands_visible_color = cvar_ui( H( "Hands Chams Visible Color" ) );
+	cvar_ui hands_occluded_color = cvar_ui( H( "Hands Chams Occluded Color" ) );
+);
+
+DEFINE_CONTEXT( anti_flyhack,
+	cvar enabled = cvar( H( "Anti-Flyhack" ), true );
+
+	bool in_air;
+	float vertical;
+	float max_vertical;
+	float horizontal;
+	float max_horizontal;
 );

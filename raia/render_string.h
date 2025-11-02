@@ -32,7 +32,7 @@ public:
 
 private:
     // TODO: Compute actual required size
-    char data_[ N * 5 ] = {};
+    char data_[ N * 2 ] = {};
 };
 
 #define J( String ) \

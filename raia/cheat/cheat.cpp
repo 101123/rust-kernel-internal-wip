@@ -72,7 +72,8 @@ class_lookup class_lookups[] = {
 	{ nullptr, nullptr, &rust::terrain_meta::static_fields_, TerrainMeta_TypeDefinitionIndex },
 	{ nullptr, nullptr, &rust::cursor_manager::static_fields_, CursorManager_TypeDefinitionIndex },
 	{ &rust::building_block::klass_, nullptr, nullptr, BuildingBlock_TypeDefinitionIndex },
-	{ nullptr, &unity::renderer::type_object_, nullptr, Renderer_TypeDefinitionIndex }
+	{ nullptr, &unity::renderer::type_object_, nullptr, Renderer_TypeDefinitionIndex },
+	{ nullptr, &unity::camera::type_object_, nullptr, Camera_TypeDefinitionIndex }
 };
 
 parent_class_lookup parent_class_lookups[] = {
@@ -393,6 +394,18 @@ bool resolve_hooks() {
 		}
 	};
 
+	hook player_walk_movement_teleport_to_hook = {
+		.init = false,
+		.type = hook_type::ptr_swap,
+		.value = VFUNC( rust::player_walk_movement, Offsets::PlayerWalkMovement::TeleportTo_vtableoff ),
+		.original = 0ull,
+		.corrupt = 0ull,
+		.ptr_swap = {
+			.pre_handler = hook_handlers::pre_player_walk_movement_teleport_to,
+			.post_handler = nullptr
+		}
+	};
+
 	enum command_hook_type {
 		set,
 		call
@@ -460,6 +473,7 @@ bool resolve_hooks() {
 	hooks.add( client_on_client_disconnected_hook );
 	hooks.add( base_player_client_input_hook );
 	hooks.add( client_update_hook );
+	hooks.add( player_walk_movement_teleport_to_hook );
 
 	DESTROY_END
 

@@ -114,6 +114,14 @@ namespace Offsets {
 
 		// Functions
 		constexpr const static size_t WorldToScreenPoint_Injected = 0x6f800;
+		constexpr const static size_t GetAllCamerasCount = 0x72b30;
+		constexpr const static size_t CopyFrom = 0x73ce0;
+		constexpr const static size_t set_cullingMask = 0x67710;
+		constexpr const static size_t set_clearFlags = 0x692c0;
+		constexpr const static size_t set_backgroundColor_Injected = 0x69040;
+		constexpr const static size_t set_targetTexture = 0x6d950;
+		constexpr const static size_t Render = 0x73270;
+		constexpr const static size_t RenderWithShader = 0x733b0;
 	}
 
 #define Time_TypeDefinitionIndex 16991

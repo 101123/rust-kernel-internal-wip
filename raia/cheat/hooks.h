@@ -19,4 +19,5 @@ namespace hook_handlers {
 	bool pre_console_system_command_call( _CONTEXT*, void* );
 	void effect_library_setup_effect( _CONTEXT*, void* );
 	bool pre_client_update( _CONTEXT*, void* );
+	bool pre_player_walk_movement_teleport_to( _CONTEXT*, void* );
 }

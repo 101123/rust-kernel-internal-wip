@@ -46,6 +46,18 @@ namespace util {
 	public:
 		array() : count_( 0ull ) {};
 
+		array( const array& other ) {
+			memcpy( buffer_, other.buffer_, sizeof( buffer_ ) );
+			count_ = other.count_;
+		}
+
+		array& operator=( const array& other ) {
+			memcpy( buffer_, other.buffer_, sizeof( buffer_ ) );
+			count_ = other.count_;
+
+			return *this;
+		}
+
 		size_t size() const { return count_; }
 		size_t capacity() const { return N; }
 
@@ -58,7 +70,7 @@ namespace util {
 		T* end() { return buffer_ + count_; }
 		const T* end() const { return buffer_ + count_; }
 
-		T* add( T item ) {
+		T* add( const T& item ) {
 			if ( count_ < N ) {
 				size_t index = count_++;
 				buffer_[ index ] = item;

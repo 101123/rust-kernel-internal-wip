@@ -589,6 +589,25 @@ void draw_raids() {
 	}
 }
 
+void draw_anti_flyhack_bar() {
+	if ( !anti_flyhack.enabled || !anti_flyhack.in_air )
+		return;
+
+	float horizontal = unity::mathf::clamp( anti_flyhack.horizontal / anti_flyhack.max_horizontal, 0.f, 1.f );
+	float vertical = unity::mathf::clamp( anti_flyhack.vertical / anti_flyhack.max_vertical, 0.f, 1.f );
+
+	float x = ( screen_width / 2.f ) - 100.f;
+	float y = 200.f;
+
+	renderer::draw_filled_rect( x, y, 200.f, 6.f, COL32( 0, 0, 0, 255 ) );
+	renderer::draw_filled_rect( x + 1.f, y + 1.f, ( 200.f - 2.f ) * vertical, 4.f, COL32( 120, 225, 80, 255 ) );
+
+	y += 7.f;
+
+	renderer::draw_filled_rect( x, y, 200.f, 6.f, COL32( 0, 0, 0, 255 ) );
+	renderer::draw_filled_rect( x + 1.f, y + 1.f, ( 200.f - 2.f ) * horizontal, 4.f, COL32( 120, 225, 80, 255 ) );
+}
+
 bool renderer_init;
 
 void set_draw_overrides() {
@@ -615,8 +634,9 @@ void on_render( IDXGISwapChain* swapchain ) {
 
 	renderer::begin_frame();
 
-	draw_esp();
 	draw_raids();
+	draw_esp();
+	draw_anti_flyhack_bar();
 
 	notifications::draw( delta_time );
 

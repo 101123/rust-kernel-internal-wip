@@ -349,9 +349,10 @@ namespace unity {
             void( *ctor )( render_target_identifier*, texture* ) = 
                 ( decltype( ctor ) )( game_assembly + Offsets::RenderTargetIdentifier::ctor );
 
+            render_target_identifier* object = ( render_target_identifier* )il2cpp_object_new( render_target_identifier::klass_ );
+
             um::caller& caller = um::get_caller_for_thread();
 
-            render_target_identifier* object = ( render_target_identifier* )il2cpp_object_new( render_target_identifier::klass_ );
             caller( ctor, object, tex );
 
             return object;
@@ -442,6 +443,25 @@ namespace unity {
 
     class game_object : public object {
     public:
+        static game_object* ctor( const sys::string& name ) {
+            void( *internal_create_game_object )( game_object*, sys::string* ) =
+                ( decltype( internal_create_game_object ) )( unity_player + Offsets::GameObject::Internal_CreateGameObject );
+
+            game_object* object = ( game_object* )il2cpp_object_new( game_object::klass_ );
+
+            il2cpp_gchandle_new( object, true );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            sys::string* _name = caller.push<sys::string>( name );
+
+            caller( internal_create_game_object, object, _name );
+
+            object->set_hide_flags( hide_flags::hide_and_dont_save );
+
+            return object;
+        }
+
         template <typename T>
         T* get_component() {
             T* ( *get_component )( game_object*, il2cpp_object* ) = ( decltype( get_component ) )( unity_player + Offsets::GameObject::GetComponent );
@@ -620,9 +640,87 @@ namespace unity {
 
     class camera : public behaviour {
     public:
+        static int get_all_cameras_count() {
+            int ( *get_all_cameras_count )( ) = 
+                decltype( get_all_cameras_count )( unity_player + Offsets::Camera::GetAllCamerasCount );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_all_cameras_count );
+        }
+
+        void copy_from( camera* other ) {
+            void ( *copy_from )( camera*, camera* ) =
+                decltype( copy_from )( unity_player + Offsets::Camera::CopyFrom );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( copy_from, this, other );
+        }
+
+        void set_culling_mask( int culling_mask ) {
+            void ( *set_culling_mask )( camera*, int ) =
+                decltype( set_culling_mask )( unity_player + Offsets::Camera::set_cullingMask );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( set_culling_mask, this, culling_mask );
+        }
+
+        void set_clear_flags( int clear_flags ) {
+            void ( *set_clear_flags )( camera*, int ) =
+                decltype( set_clear_flags )( unity_player + Offsets::Camera::set_clearFlags );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( set_clear_flags, this, clear_flags );
+        }
+
+        void set_background_color( unity::color background_color ) {
+            void ( *set_background_color_injected )( unity::camera*, unity::color* ) =
+                ( decltype( set_background_color_injected ) )( unity_player + Offsets::Camera::set_backgroundColor_Injected );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            unity::color* _background_color = caller.push<unity::color>( background_color );
+
+            caller( set_background_color_injected, this, _background_color );
+        }
+
+        void set_target_texture( render_texture* target_texture ) {
+            void ( *set_target_texture )( camera*, render_texture* ) =
+                decltype( set_target_texture )( unity_player + Offsets::Camera::set_targetTexture );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( set_target_texture, this, target_texture );
+        }
+
+        void render() {
+            void ( *render )( camera* ) =
+                ( decltype( render ) )( unity_player + Offsets::Camera::Render );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            caller( render, this );
+        }
+
+        void render_with_shader( unity::shader* shader, const sys::string& replacement_tag ) {
+            void ( *render_with_shader )( unity::camera*, unity::shader*, sys::string*  ) =
+                ( decltype( render_with_shader ) )( unity_player + Offsets::Camera::RenderWithShader );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            sys::string* _replacement_tag = caller.push<sys::string>( replacement_tag );
+
+            caller( render_with_shader, this, shader, _replacement_tag );
+        }
+
         internals::camera* get_native_camera() {
             return ( internals::camera* )cached_ptr;
         }
+
+        static inline il2cpp_object* type_object_;
     };
 
     class time {
@@ -879,12 +977,14 @@ namespace unity {
             void( *create_with_shader )( material*, shader* ) =
                 ( decltype( create_with_shader ) )( unity_player + Offsets::Material::CreateWithShader );
 
-            um::caller& caller = um::get_caller_for_thread();
-
             material* object = ( material* )il2cpp_object_new( material::klass_ );
 
             il2cpp_gchandle_new( object, true );
+
+            um::caller& caller = um::get_caller_for_thread();
+
             caller( create_with_shader, object, shader_ );
+
             object->set_hide_flags( hide_flags::hide_and_dont_save );
 
             return object;
@@ -983,9 +1083,10 @@ namespace unity {
             void( *ctor )( command_buffer* ) =
                 ( decltype( ctor ) )( game_assembly + Offsets::CommandBuffer::ctor );
 
+            command_buffer* object = ( command_buffer* )il2cpp_object_new( command_buffer::klass_ );
+
             um::caller& caller = um::get_caller_for_thread();
 
-            command_buffer* object = ( command_buffer* )il2cpp_object_new( command_buffer::klass_ );
             caller( ctor, object );
 
             return object;
