@@ -208,26 +208,49 @@ state_history2<rect> ignore_bounds;
 uint64_t active_hash;
 uint64_t activate_hash_frame;
 
-rect menu_bounds = rect( 400.f, 400.f, 600.f, 560.f );
+rect menu_bounds = rect( 400.f, 400.f, 660.f, 480.f );
 
 bool left_mouse_clicked;
 bool left_mouse_held;
 
+bool right_mouse_clicked;
+
 vector4 color_picker_hsv;
 int color_picker_selected_slider = -1;
 
+uint32_t COLOR_A = COL32( 40, 40, 40, 255 );
+uint32_t COLOR_B = COL32( 12, 12, 12, 255 );
+uint32_t COLOR_C = COL32( 23, 23, 23, 255 );
+uint32_t COLOR_D = COL32( 20, 20, 20, 255 );
+uint32_t COLOR_E = COL32( 190, 190, 190, 255 );
+uint32_t COLOR_F = COL32( 12, 12, 12, 255 );
+
 uint32_t gradient_on[ 4 ] = {
-    COL32( 110, 183, 212, 255 ),
-    COL32( 110, 183, 212, 255 ),
-    COL32( 82, 135, 156, 255 ),
-    COL32( 82, 135, 156, 255 )
+    COL32( 255, 255, 255, 255 ),
+    COL32( 255, 255, 255, 255 ),
+    COL32( 210, 210, 210, 255 ),
+    COL32( 210, 210, 210, 255 )
 };
 
 uint32_t gradient_off[ 4 ] = {
-    COL32( 54, 54, 54, 255 ),
-    COL32( 54, 54, 54, 255 ),
-    COL32( 54, 54, 54, 255 ),
-    COL32( 54, 54, 54, 255 )
+    COL32( 77, 77, 77, 255 ),
+    COL32( 77, 77, 77, 255 ),
+    COL32( 52, 52, 52, 255 ),
+    COL32( 52, 52, 52, 255 )
+};
+
+uint32_t slider_gradient[ 4 ] = {
+    COL32( 52, 52, 52, 255 ),
+    COL32( 52, 52, 52, 255 ),
+    COL32( 68, 68, 68, 255 ),
+    COL32( 68, 68, 68, 255 )
+};
+
+uint32_t combo_box_gradient[ 4 ] = {
+    COL32( 31, 31, 31, 255 ),
+    COL32( 31, 31, 31, 255 ),
+    COL32( 36, 36, 36, 255 ),
+    COL32( 36, 36, 36, 255 )
 };
 
 void update_input() {
@@ -543,15 +566,16 @@ public:
     void begin( const char* label = J( "Main" ) ) {
         auto& draw_list = gui_draw_list.get();
 
-        draw_list.add_filled_rect( bounds_.x, bounds_.y, bounds_.w, bounds_.h, COL32( 61, 61, 61, 255 ) );
-        draw_list.add_filled_rect( bounds_.x + 1.f, bounds_.y + 1.f, bounds_.w - 2.f, bounds_.h - 2.f, COL32( 38, 38, 38, 255 ) );
-        draw_list.add_filled_rect( bounds_.x + 2.f, bounds_.y + 2.f, bounds_.w - 4.f, bounds_.h - 4.f, COL32( 50, 50, 50, 255 ) );
+        draw_list.add_filled_rect( bounds_.x, bounds_.y, bounds_.w, bounds_.h, COLOR_F );
+        draw_list.add_filled_rect( bounds_.x + 1.f, bounds_.y + 1.f, bounds_.w - 2.f, bounds_.h - 2.f, COLOR_A );
+        draw_list.add_filled_rect( bounds_.x + 2.f, bounds_.y + 2.f, bounds_.w - 4.f, bounds_.h - 4.f, COLOR_C );
 
-        float label_width = renderer::calc_text_size( fonts::verdana_bold, label ).x + 6.f;
+        if ( label ) {
+            float label_width = renderer::calc_text_size( fonts::verdana_bold, label ).x + 6.f;
 
-        draw_list.add_filled_rect( bounds_.x + 10.f, bounds_.y, label_width, 2.f, COL32( 54, 54, 54, 255 ), 0.f );
-
-        draw_list.add_text( bounds_.x + 13.f, bounds_.y - 3.f, fonts::verdana_bold, text_flags::drop_shadow, COL32_WHITE, label );
+            draw_list.add_filled_rect( bounds_.x + 10.f, bounds_.y, label_width, 2.f, COLOR_D, 0.f );
+            draw_list.add_text( bounds_.x + 13.f, bounds_.y - 3.f, fonts::verdana_bold, text_flags::drop_shadow, COL32( 200, 200, 200, 255 ), label );
+        }
 
         draw_list.push_clip_rect( bounds_.x + 2.f, bounds_.y + 7.f, bounds_.w - 4.f, bounds_.h - 10.f );
 
@@ -622,7 +646,7 @@ public:
                 bounds_.y + 1.f,
                 scrollbar_width + 2.f,
                 visible_height - 2.f,
-                COL32( 38, 38, 38, 255 )
+                COL32( 40, 40, 40, 255 )
             );
 
             // Draw scrollbar handle
@@ -631,7 +655,7 @@ public:
                 scrollbar_y,
                 scrollbar_width,
                 scrollbar_height,
-                COL32( 120, 120, 120, 255 )
+                COL32( 65, 65, 65, 255 )
             );
 
             float height = 10.f;
@@ -639,19 +663,19 @@ public:
             draw_list.push_z_index( 10 );
 
             uint32_t colors_top[ 4 ] = {
-                COL32( 50, 50, 50, 255 ),
-                COL32( 50, 50, 50, 255 ),
-                COL32( 50, 50, 50, 0 ),
-                COL32( 50, 50, 50, 0 ),
+                COL32( 23, 23, 23, 255 ),
+                COL32( 23, 23, 23, 255 ),
+                COL32( 23, 23, 23, 0 ),
+                COL32( 23, 23, 23, 0 ),
             };
 
             draw_list.add_filled_rect_multi_color( bounds_.x + 2.f, bounds_.y + 7.f, bounds_.w - 10.f, height, colors_top );
 
             uint32_t colors_bottom[ 4 ] = {
-                COL32( 50, 50, 50, 0 ),
-                COL32( 50, 50, 50, 0 ),
-                COL32( 50, 50, 50, 255 ),
-                COL32( 50, 50, 50, 255 ),
+                COL32( 23, 23, 23, 0 ),
+                COL32( 23, 23, 23, 0 ),
+                COL32( 23, 23, 23, 255 ),
+                COL32( 23, 23, 23, 255 ),
             };
 
             draw_list.add_filled_rect_multi_color( bounds_.x + 2.f, bounds_.y + bounds_.h - height - 3.f, bounds_.w - 10.f, height, colors_bottom );
@@ -688,10 +712,10 @@ public:
             ignore_bounds.current = rect();
         }
 
-        draw_list.add_filled_rect( toggle_bounds.x, toggle_bounds.y, toggle_bounds.w, toggle_bounds.h, COL32( 38, 38, 38, 255 ) );
+        draw_list.add_filled_rect( toggle_bounds.x, toggle_bounds.y, toggle_bounds.w, toggle_bounds.h, COLOR_B );
         draw_list.add_filled_rect_multi_color( toggle_bounds.x + 1.f, toggle_bounds.y + 1.f, toggle_bounds.w - 2.f, toggle_bounds.h - 2.f, *value ? gradient_on : gradient_off );
 
-        draw_list.add_text( position.x + 20.f, position.y, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
+        draw_list.add_text( position.x + 20.f, position.y, fonts::verdana, text_flags::none, COLOR_E, label );
 
         draw_list.pop_z_index();
 
@@ -861,7 +885,7 @@ public:
             uint32_t first_pass[] = { COL32_WHITE, hue_color, hue_color, COL32_WHITE };
             uint32_t second_pass[] = { 0u, 0u, COL32_BLACK, COL32_BLACK };
 
-            draw_list.add_filled_rect( sv_square_bounds.x, sv_square_bounds.y, sv_square_bounds.w, sv_square_bounds.h, COL32( 38, 38, 38, 255 ) );
+            draw_list.add_filled_rect( sv_square_bounds.x, sv_square_bounds.y, sv_square_bounds.w, sv_square_bounds.h, COLOR_B );
 
             ImVec2 sv_cursor_pos;
 
@@ -873,11 +897,11 @@ public:
 
             const rect sv_cursor_rect = rect( sv_cursor_pos.x - 2.f, sv_cursor_pos.y - 2.f, 4.f, 4.f );
 
-            draw_list.add_filled_rect( sv_cursor_rect.x, sv_cursor_rect.y, sv_cursor_rect.w, sv_cursor_rect.h, COL32( 38, 38, 38, 255 ) );
+            draw_list.add_filled_rect( sv_cursor_rect.x, sv_cursor_rect.y, sv_cursor_rect.w, sv_cursor_rect.h, COLOR_B );
             draw_list.add_filled_rect( sv_cursor_rect.x + 1.f, sv_cursor_rect.y + 1.f, sv_cursor_rect.w - 2.f, sv_cursor_rect.h - 2.f, COL32_WHITE );
 
             // Hue bar
-            draw_list.add_filled_rect( hue_bar_bounds.x, hue_bar_bounds.y, hue_bar_bounds.w, hue_bar_bounds.h, COL32( 38, 38, 38, 255 ) );
+            draw_list.add_filled_rect( hue_bar_bounds.x, hue_bar_bounds.y, hue_bar_bounds.w, hue_bar_bounds.h, COLOR_B );
 
             for ( size_t i = 0; i < 6; i++ ) {
                 uint32_t colors[] = { hue_colors[ i ], hue_colors[ i ], hue_colors[ i + 1 ], hue_colors[ i + 1 ] };
@@ -895,12 +919,12 @@ public:
 
             const rect hue_cursor_rect = rect( hue_bar_bounds_.x - 2.f, bar0_line_y - 2.f, hue_bar_bounds_.w + 4.f, 4.f );
 
-            draw_list.add_filled_rect( hue_cursor_rect.x, hue_cursor_rect.y, hue_cursor_rect.w, hue_cursor_rect.h, COL32( 38, 38, 38, 255 ) );
+            draw_list.add_filled_rect( hue_cursor_rect.x, hue_cursor_rect.y, hue_cursor_rect.w, hue_cursor_rect.h, COLOR_B );
             draw_list.add_filled_rect( hue_cursor_rect.x + 1.f, hue_cursor_rect.y + 1.f, hue_cursor_rect.w - 2.f, hue_cursor_rect.h - 2.f, COL32_WHITE );
 
             // Alpha bar
             if ( alpha ) {
-                draw_list.add_filled_rect( alpha_bar_bounds.x, alpha_bar_bounds.y, alpha_bar_bounds.w, alpha_bar_bounds.h, COL32( 38, 38, 38, 255 ) );
+                draw_list.add_filled_rect( alpha_bar_bounds.x, alpha_bar_bounds.y, alpha_bar_bounds.w, alpha_bar_bounds.h, COLOR_B );
                 draw_checkerboard( rect( alpha_bar_bounds_.x, alpha_bar_bounds_.y, alpha_bar_bounds_.w, alpha_bar_bounds_.h ), alpha_bar_bounds_.w / 24.f );
 
                 uint32_t colors[] = {
@@ -915,7 +939,7 @@ public:
                 const vector2 alpha_cursor_pos = vector2( alpha_bar_bounds_.x + ( ( ( float )( ( uint8_t* )value )[ 3 ] / 255.f ) * alpha_bar_bounds_.w ), alpha_bar_bounds_.y );
                 const rect alpha_cursor_rect = rect( alpha_cursor_pos.x - 2.f, alpha_cursor_pos.y - 2.f, 4.f, alpha_bar_bounds_.h + 4.f );
 
-                draw_list.add_filled_rect( alpha_cursor_rect.x, alpha_cursor_rect.y, alpha_cursor_rect.w, alpha_cursor_rect.h, COL32( 38, 38, 38, 255 ) );
+                draw_list.add_filled_rect( alpha_cursor_rect.x, alpha_cursor_rect.y, alpha_cursor_rect.w, alpha_cursor_rect.h, COLOR_B );
                 draw_list.add_filled_rect( alpha_cursor_rect.x + 1.f, alpha_cursor_rect.y + 1.f, alpha_cursor_rect.w - 2.f, alpha_cursor_rect.h - 2.f, COL32_WHITE );
             }
 
@@ -978,16 +1002,16 @@ public:
             ignore_bounds.current = rect();
         }
 
-        draw_list.add_text( slider_bounds.x, position.y + 4.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
+        draw_list.add_text( slider_bounds.x, position.y + 4.f, fonts::verdana, text_flags::none, COLOR_E, label );
 
-        draw_styled_rect( slider_bounds );
+        draw_styled_rect( slider_bounds, slider_gradient );
 
         const rect draw_bounds = rect( slider_bounds.x + 1.f, slider_bounds.y + 1.f, slider_bounds.w - 2.f, slider_bounds.h - 2.f );
         float fill_width = draw_bounds.w * std::clamp( static_cast< float >( *value - min ) / static_cast< float >( max - min ), 0.f, 1.f );
 
         draw_list.add_filled_rect_multi_color( draw_bounds.x, draw_bounds.y, fill_width, draw_bounds.h, gradient_on );
 
-        draw_list.add_text( draw_bounds.x + fill_width, draw_bounds.y + 2.f, fonts::verdana_bold, text_flags::centered | text_flags::outline, COL32( 255, 255, 255, 255 ), FMT( 64, fmt, *value ) );
+        draw_list.add_text( draw_bounds.x + fill_width, draw_bounds.y + 2.f, fonts::verdana_bold, text_flags::centered | text_flags::outline, COLOR_E, FMT( 64, fmt, *value ) );
 
         draw_list.pop_z_index();
 
@@ -1002,7 +1026,7 @@ public:
     };
 
     template <typename T>
-    void combo_box( const char* label, std::initializer_list<const char*> options, T* value ) {
+    void combo_box( const char* label, std::initializer_list<const char*> options, T* value, T start_index = 0 ) {
         auto& draw_list = gui_draw_list.get();
 
         static_assert( std::is_integral_v<T> );
@@ -1039,30 +1063,30 @@ public:
             for ( size_t i = 0; i < options.size(); i++ ) {
                 const rect option_bounds = rect( options_bounds.x, options_bounds.y + ( i * 20.f ), options_bounds.w, 20.f );
 
-                const bool selected = *value == i;
+                const bool selected = ( *value - start_index ) == i;
                 const bool hovered = mouse_in_rect( option_bounds );
 
                 if ( hovered ) {
                     draw_list.add_filled_rect( option_bounds.x + 1.f, option_bounds.y + 1.f, option_bounds.w - 2.f, option_bounds.h - 2.f, COL32( 0, 0, 0, 64 ) );
 
                     if ( left_mouse_clicked ) {
-                        *value = static_cast< T >( i );
+                        *value = static_cast< T >( start_index + i );
                         active_hash = 0ull;
                         ignore_bounds.current = rect();
                     }
                 }
 
-                draw_list.add_text( options_bounds.x + 7.f, options_bounds.y + 7.f + ( i * 20.f ), ( selected || hovered ) ? fonts::verdana_bold : fonts::verdana, text_flags::none, selected ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), options.begin()[ i ] );
+                draw_list.add_text( options_bounds.x + 7.f, options_bounds.y + 7.f + ( i * 20.f ), ( selected || hovered ) ? fonts::verdana_bold : fonts::verdana, text_flags::none, selected ? gradient_on[ 0 ] : COLOR_E, options.begin()[ i ] );
             }
 
             draw_list.set_floating( false );
         }
 
-        draw_list.add_text( position.x + 20.f, position.y + 4.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
+        draw_list.add_text( position.x + 20.f, position.y + 4.f, fonts::verdana, text_flags::none, COLOR_E, label );
 
-        draw_styled_rect( combo_bounds );
+        draw_styled_rect( combo_bounds, combo_box_gradient );
 
-        draw_list.add_text( position.x + 27.f, position.y + 22.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), options.begin()[ *value ] );
+        draw_list.add_text( position.x + 27.f, position.y + 22.f, fonts::verdana, text_flags::none, COLOR_E, options.begin()[ *value - start_index ] );
 
         draw_list.pop_z_index();
 
@@ -1117,15 +1141,15 @@ public:
                     }
                 }
 
-                draw_list.add_text( options_bounds.x + 7.f, options_bounds.y + 7.f + ( i * 20.f ), *value ? fonts::verdana_bold : fonts::verdana, text_flags::none, *value ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), option );
+                draw_list.add_text( options_bounds.x + 7.f, options_bounds.y + 7.f + ( i * 20.f ), *value ? fonts::verdana_bold : fonts::verdana, text_flags::none, *value ? gradient_on[ 0 ] : COLOR_E, option );
             }
 
             draw_list.set_floating( false );
         }
 
-        draw_list.add_text( position.x + 20.f, position.y + 4.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), label );
+        draw_list.add_text( position.x + 20.f, position.y + 4.f, fonts::verdana, text_flags::none, COLOR_E, label );
 
-        draw_styled_rect( combo_bounds );
+        draw_styled_rect( combo_bounds, combo_box_gradient );
 
         int num_selected = 0;
         char selected_buffer[ 128 ] = {};
@@ -1149,7 +1173,9 @@ public:
             }
         }
 
-        draw_list.add_text( position.x + 27.f, position.y + 22.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), num_selected == 0 ? J( "-" ) : selected_buffer );
+        draw_list.push_clip_rect( combo_bounds.x, combo_bounds.y, combo_bounds.w, combo_bounds.h );
+        draw_list.add_text( position.x + 27.f, position.y + 22.f, fonts::verdana, text_flags::none, COLOR_E, num_selected == 0 ? J( "-" ) : selected_buffer );
+        draw_list.pop_clip_rect();
 
         draw_list.pop_z_index();
 
@@ -1160,11 +1186,11 @@ private:
     void draw_styled_rect( const rect& bounds, uint32_t* background_colors = nullptr ) {
         auto& draw_list = gui_draw_list.get();
 
-        draw_list.add_filled_rect( bounds.x, bounds.y, bounds.w, bounds.h, COL32( 38, 38, 38, 255 ) );
+        draw_list.add_filled_rect( bounds.x, bounds.y, bounds.w, bounds.h, COLOR_B );
 
         background_colors ?
             draw_list.add_filled_rect_multi_color( bounds.x + 1.f, bounds.y + 1.f, bounds.w - 2.f, bounds.h - 2.f, background_colors ) :
-            draw_list.add_filled_rect( bounds.x + 1.f, bounds.y + 1.f, bounds.w - 2.f, bounds.h - 2.f, COL32( 54, 54, 54, 255 ) );
+            draw_list.add_filled_rect( bounds.x + 1.f, bounds.y + 1.f, bounds.w - 2.f, bounds.h - 2.f, COLOR_D );
     }
 
     void draw_checkerboard( const rect& bounds, float step ) {
@@ -1227,24 +1253,31 @@ void gui::destroy() {
 bool init_gui = false;
 
 void draw_gui_background() {
-    renderer::draw_filled_rect( menu_bounds.x, menu_bounds.y, menu_bounds.w, menu_bounds.h, COL32( 40, 40, 40, 255 ) );
-    renderer::draw_filled_rect( menu_bounds.x + 1.f, menu_bounds.y + 1.f, menu_bounds.w - 2.f, menu_bounds.h - 2.f, COL32( 61, 61, 61, 255 ) );
-    renderer::draw_filled_rect( menu_bounds.x + 2.f, menu_bounds.y + 2.f, menu_bounds.w - 4.f, menu_bounds.h - 4.f, COL32( 54, 54, 54, 255 ) );
+    renderer::draw_filled_rect( menu_bounds.x, menu_bounds.y, menu_bounds.w, menu_bounds.h, COLOR_B, 2.f );
+    renderer::draw_filled_rect( menu_bounds.x + 1.f, menu_bounds.y + 1.f, menu_bounds.w - 2.f, menu_bounds.h - 2.f, COLOR_A, 3.f );
+    renderer::draw_filled_rect( menu_bounds.x + 2.f, menu_bounds.y + 2.f, menu_bounds.w - 4.f, menu_bounds.h - 4.f, COLOR_C, 3.f );
+    renderer::draw_filled_rect( menu_bounds.x + 3.f, menu_bounds.y + 3.f, menu_bounds.w - 5.f, menu_bounds.h - 6.f, COLOR_D, 3.f );
 
     rect top_bar = rect( menu_bounds.x + 2.f, menu_bounds.y + 2.f, menu_bounds.w - 4.f, 20.f );
 
-    renderer::draw_filled_rect( top_bar.x, top_bar.y, top_bar.w, top_bar.h, COL32( 50, 50, 50, 255 ) );
-    renderer::draw_filled_rect( top_bar.x, top_bar.y + top_bar.h, top_bar.w, 1.f, COL32( 38, 38, 38, 255 ) );
-    renderer::draw_filled_rect( top_bar.x, top_bar.y + top_bar.h + 1.f, top_bar.w, 1.f, COL32( 61, 61, 61, 255 ) );
+    renderer::draw_filled_rect_with_flags( top_bar.x, top_bar.y, top_bar.w, top_bar.h, COLOR_B, 3.f, draw_flags::round_corners_top );
+    renderer::draw_filled_rect_with_flags( top_bar.x + 1.f, top_bar.y + 1.f, top_bar.w - 2.f, top_bar.h - 2.f, COL32( 16, 16, 16, 255 ), 3.f, draw_flags::round_corners_top );
+    renderer::draw_filled_rect( top_bar.x, top_bar.y + top_bar.h, top_bar.w, 1.f, COLOR_A );
 
     renderer::draw_text( top_bar.x + 6.f, top_bar.y + 6.f, fonts::verdana, text_flags::none, gradient_on[ 0 ], J( "sentian" ) );
-    renderer::draw_text( top_bar.x + 43.f, top_bar.y + 6.f, fonts::verdana, text_flags::none, COL32( 160, 160, 160, 255 ), J( ".gg" ) );
+    renderer::draw_text( top_bar.x + 43.f, top_bar.y + 6.f, fonts::verdana, text_flags::none, COLOR_E, J( ".gg" ) );
 
-    rect bottom_bar = rect( menu_bounds.x + 2.f, menu_bounds.y + ( menu_bounds.h - 18.f ) - 4.f, menu_bounds.w - 4.f, 18.f );
+    rect bottom_bar = rect( menu_bounds.x + 2.f, menu_bounds.y + ( menu_bounds.h - 18.f ) - 4.f, menu_bounds.w - 4.f, 20.f );
 
-    renderer::draw_filled_rect( bottom_bar.x, bottom_bar.y, bottom_bar.w, 1.f, COL32( 61, 61, 61, 255 ) );
-    renderer::draw_filled_rect( bottom_bar.x, bottom_bar.y + 1.f, bottom_bar.w, 1.f, COL32( 38, 38, 38, 255 ) );
-    renderer::draw_filled_rect( bottom_bar.x, bottom_bar.y + 2.f, bottom_bar.w, 18.f, COL32( 50, 50, 50, 255 ) );
+    renderer::draw_filled_rect( bottom_bar.x, bottom_bar.y, bottom_bar.w, 1.f, COLOR_A );
+    renderer::draw_filled_rect_with_flags( bottom_bar.x, bottom_bar.y + 1.f, bottom_bar.w, bottom_bar.h - 1.f, COLOR_B, 3.f, draw_flags::round_corners_bottom );
+    renderer::draw_filled_rect_with_flags( bottom_bar.x + 1.f, bottom_bar.y + 2.f, bottom_bar.w - 2.f, bottom_bar.h - 3.f, COL32( 16, 16, 16, 255 ), 3.f, draw_flags::round_corners_bottom );
+
+    rect side_bar = rect( menu_bounds.x + 2.f, menu_bounds.y + 23.f, 114.f, 435.f );
+
+    renderer::draw_filled_rect( side_bar.x, side_bar.y, side_bar.w, side_bar.h, COL32( 16, 16, 16, 255 ) );
+    renderer::draw_filled_rect( side_bar.x + side_bar.w - 2.f, side_bar.y, 1.f, side_bar.h, COLOR_A );
+    renderer::draw_filled_rect( side_bar.x + side_bar.w - 1.f, side_bar.y, 1.f, side_bar.h, COLOR_F );
 }
 
 enum tabs {
@@ -1297,13 +1330,35 @@ void tab( const char* label, uint32_t value, uint32_t* tab, rect& cursor, float 
 
     if ( selected && !subtab ) {
         renderer::draw_filled_rect_with_flags( cursor.x, cursor.y, width, cursor.h - 1.f, gradient_on[ 0 ], 3.f, draw_flags::round_corners_top );
-        renderer::draw_filled_rect( cursor.x, cursor.y + 3.f, width, cursor.h - 4.f, COL32( 38, 38, 38, 255 ) );
+        renderer::draw_filled_rect( cursor.x, cursor.y + 3.f, width, cursor.h - 4.f, COLOR_B );
 
-        renderer::draw_filled_rect_with_flags( cursor.x + 1.f, cursor.y + 1.f, width - 2.f, cursor.h - 1.f, COL32( 61, 61, 61, 255 ), 3.f, draw_flags::round_corners_top );
-        renderer::draw_filled_rect_with_flags( cursor.x + 2.f, cursor.y + 2.f, width - 4.f, cursor.h, COL32( 54, 54, 54, 255 ), 3.f, draw_flags::round_corners_top );
+        renderer::draw_filled_rect_with_flags( cursor.x + 1.f, cursor.y + 1.f, width - 2.f, cursor.h - 1.f, COLOR_A, 3.f, draw_flags::round_corners_top );
+        renderer::draw_filled_rect_with_flags( cursor.x + 2.f, cursor.y + 2.f, width - 4.f, cursor.h, COLOR_D, 3.f, draw_flags::round_corners_top );
     }
 
-    renderer::draw_text( cursor.x + width / 2.f, cursor.y + 6.f, fonts::verdana, text_flags::centered, selected ? gradient_on[ 0 ] : COL32( 160, 160, 160, 255 ), label );
+    renderer::draw_text( cursor.x + width / 2.f, cursor.y + 6.f, selected ? fonts::verdana_bold : fonts::verdana, text_flags::centered, selected ? gradient_on[ 0 ] : COLOR_E, label );
+}
+
+void subtab( const char* label, uint32_t value, uint32_t* tab, rect& cursor ) {
+    const bool selected = value == *tab;
+
+    if ( mouse_in_rect( rect( cursor.x, cursor.y, 100.f, cursor.h ) ) && left_mouse_clicked ) {
+        *tab = value;
+        active_hash = 0ull;
+        ignore_bounds.current = rect();
+    }
+
+    uint32_t col1 = COL32( 23, 23, 23, 255 );
+    uint32_t col2 = COL32( 16, 16, 16, 255 );
+
+    uint32_t colors[] = { col1, col2, col2, col1 };
+
+    renderer::draw_filled_rect( cursor.x, cursor.y, 1.f, 18.f, gradient_on[ 0 ] );
+    renderer::draw_filled_rect_multi_color( cursor.x + 1.f, cursor.y, 95.f, 18.f, colors );
+
+    renderer::draw_text( cursor.x + 7.f, cursor.y + 5.f, selected ? fonts::verdana_bold : fonts::verdana, text_flags::none, selected ? gradient_on[ 0 ] : COLOR_E, label );
+
+    cursor.y += 21.f;
 }
 
 void visual_impl( group_box& group_box, cvar_visual& visual, const char* label = nullptr, uint32_t max_distance = 500u ) {
@@ -1367,6 +1422,14 @@ void player_visuals_impl( group_box& left, group_box& right, cvar_player_visuals
         right.combo_box( J( "Chams type" ), { J( "Solid" ), J( "Material" ) }, &visuals.chams_type );
     }
 
+    right.toggle( J( "Glow" ), &glow );
+    right.color_picker( &glow_outline_color );
+
+    if ( glow ) {
+        right.slider( J( "Blur" ), S( "%.2f" ), &glow_blur_scale, 0.f, 1.f );
+        right.slider( J( "Outline" ), S( "%.2f" ), &glow_outline_scale, 0.f, 5.f );
+    }
+
     right.end();
 }
 
@@ -1393,32 +1456,32 @@ void gui::run() {
     tab( J( "Visuals" ), tabs::visuals, &current_tab, tabs_cursor, 20.f );
     tab( J( "Combat" ), tabs::combat, &current_tab, tabs_cursor, 20.f );
 
-    rect subtabs_cursor = rect( menu_bounds.x + menu_bounds.w - 5.f, menu_bounds.y + 28.f, 0.f, 20.f );
+    rect subtabs_cursor = rect( menu_bounds.x + 8.f, menu_bounds.y + 29.f + 21.f, 0.f, 20.f );
 
     switch ( current_tab ) {
         case tabs::combat:
-            tab( J( "Aimbot" ), combat_subtabs::aimbot, &current_subtab[ tabs::combat ], subtabs_cursor, 19.f, true );
+            subtab( J( "Aimbot" ), combat_subtabs::aimbot, &current_subtab[ tabs::combat ], subtabs_cursor );
             break;
         case tabs::visuals:
-            tab( J( "Loot" ), visual_subtabs::loot, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
-            tab( J( "Traps" ), visual_subtabs::traps, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
-            tab( J( "Animals" ), visual_subtabs::animals, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
-            tab( J( "Vehicles" ), visual_subtabs::vehicles, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
-            tab( J( "Deployables" ), visual_subtabs::deployables, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
-            tab( J( "Resources" ), visual_subtabs::resources, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
-            tab( J( "World" ), visual_subtabs::world, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
-            tab( J( "Scientists" ), visual_subtabs::scientists, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
-            tab( J( "Players" ), visual_subtabs::players, &current_subtab[ tabs::visuals ], subtabs_cursor, 19.f, true );
+            subtab( J( "Players" ), visual_subtabs::players, &current_subtab[ tabs::visuals ], subtabs_cursor );
+            subtab( J( "Scientists" ), visual_subtabs::scientists, &current_subtab[ tabs::visuals ], subtabs_cursor );
+            subtab( J( "World" ), visual_subtabs::world, &current_subtab[ tabs::visuals ], subtabs_cursor );
+            subtab( J( "Resources" ), visual_subtabs::resources, &current_subtab[ tabs::visuals ], subtabs_cursor );
+            subtab( J( "Deployables" ), visual_subtabs::deployables, &current_subtab[ tabs::visuals ], subtabs_cursor );
+            subtab( J( "Vehicles" ), visual_subtabs::vehicles, &current_subtab[ tabs::visuals ], subtabs_cursor );
+            subtab( J( "Animals" ), visual_subtabs::animals, &current_subtab[ tabs::visuals ], subtabs_cursor );
+            subtab( J( "Traps" ), visual_subtabs::traps, &current_subtab[ tabs::visuals ], subtabs_cursor );
+            subtab( J( "Loot" ), visual_subtabs::loot, &current_subtab[ tabs::visuals ], subtabs_cursor );
             break;
         case tabs::misc:
-            tab( J( "Movement" ), misc_subtabs::movement, &current_subtab[ tabs::misc ], subtabs_cursor, 19.f, true );
-            tab( J( "Visuals" ), misc_subtabs::visuals, &current_subtab[ tabs::misc ], subtabs_cursor, 19.f, true );
-            tab( J( "Quality of life" ), misc_subtabs::quality_of_life, &current_subtab[ tabs::misc ], subtabs_cursor, 19.f, true );
+            subtab( J( "Quality of life" ), misc_subtabs::quality_of_life, &current_subtab[ tabs::misc ], subtabs_cursor );
+            subtab( J( "Visuals" ), misc_subtabs::visuals, &current_subtab[ tabs::misc ], subtabs_cursor);
+            subtab( J( "Movement" ), misc_subtabs::movement, &current_subtab[ tabs::misc ], subtabs_cursor );
             break;
     }
 
-    group_box left = group_box( rect( menu_bounds.x + 10.f, menu_bounds.y + 60.f, 256.f, 400.f ), 0 );
-    group_box right = group_box( rect( menu_bounds.x + 10.f + 260.f + 8.f, menu_bounds.y + 60.f, 256.f, 400.f ), 1 );
+    group_box left = group_box( rect( menu_bounds.x + 126.f, menu_bounds.y + 53.f, 256.f, 395.f ), 0 );
+    group_box right = group_box( rect( menu_bounds.x + 125.f + 260.f + 7.f, menu_bounds.y + 53.f, 256.f, 395.f ), 1 );
 
     switch ( current_tab ) {
         case tabs::combat: {
@@ -1439,7 +1502,10 @@ void gui::run() {
 
                         left.slider( J( "Field of view" ), S( "%dpx" ), &aimbot.fov, 0u, 800u );
 
-                        if ( left.toggle( J( "Desync" ), &desync.enabled ) ) {
+                        left.toggle( J( "Desync" ), &desync.enabled );
+                        left.keybind( &desync.key );
+
+                        if ( desync.enabled ) {
                             left.slider( J( "Desync time" ), S( "%.2fs" ), &desync.time, 0.f, 0.79f );
                         }
 
@@ -1746,8 +1812,8 @@ void gui::run() {
                     if ( auto_upgrade.enabled ) {
                         left.toggle( J( "Only holding hammer" ), &auto_upgrade.only_holding_hammer );
 
-                        left.combo_box( J( "Upgrade from" ), { J( "Any" ), J( "Twig" ), J( "Wood" ), J( "Stone" ), J( "Sheet metal" ) }, &auto_upgrade.from );
-                        left.combo_box( J( "Upgrade to" ), { J( "Wood" ), J( "Stone" ), J( "Sheet metal" ), J( "Armored" ) }, &auto_upgrade.to );
+                        left.combo_box( J( "Upgrade from" ), { J( "Any" ), J( "Twig" ), J( "Wood" ), J( "Stone" ), J( "Sheet metal" ) }, &auto_upgrade.from, -1 );
+                        left.combo_box( J( "Upgrade to" ), { J( "Wood" ), J( "Stone" ), J( "Sheet metal" ), J( "Armored" ) }, &auto_upgrade.to, 1 );
                     }
 
                     left.end();
@@ -1781,8 +1847,16 @@ void gui::run() {
 
                     left.end();
 
-                    right.begin();
-                    
+                    right.begin( J( "Local chams" ) );
+
+                    right.toggle( J( "Held item" ), &local_chams.held_item );
+                    right.color_picker( &local_chams.held_item_occluded_color );
+                    right.color_picker( &local_chams.held_item_visible_color );
+
+                    right.toggle( J( "Hands" ), &local_chams.hands );
+                    right.color_picker( &local_chams.hands_occluded_color );
+                    right.color_picker( &local_chams.hands_visible_color );
+
                     right.end();
 
                     break;
@@ -1795,11 +1869,13 @@ void gui::run() {
                     left.toggle( J( "Omnisprint" ), &omnisprint );
 
                     if ( left.toggle( J( "Speedhack" ), &speedhack.enabled ) ) {
-                        left.slider( J( "Speed mutiplier" ), S( "%.2fx" ), &speedhack.multiplier, 1.f, 5.f );
+                        left.slider( J( "Speed multiplier" ), S( "%.2fx" ), &speedhack.multiplier, 1.f, 5.f );
                     }
 
                     left.toggle( J( "No attack restrictions" ), &no_attack_restrictions.enabled );
                     left.toggle( J( "On ladder" ), &on_ladder );
+
+                    left.toggle( J( "Anti-flyhack" ), &anti_flyhack.enabled );
 
                     left.end();
 
@@ -1816,6 +1892,18 @@ void gui::run() {
                     break;
                 }
             }
+
+            break;
+        }
+
+        case tabs::settings: {
+            left.begin();
+            left.color_picker( &gradient_on[ 0 ] );
+            left.end();
+
+            gradient_on[ 1 ] = gradient_on[ 0 ];
+            gradient_on[ 2 ] = gradient_on[ 0 ] - COL32( 0, 0, 0, 45 );
+            gradient_on[ 3 ] = gradient_on[ 0 ] - COL32( 0, 0, 0, 45 );
 
             break;
         }

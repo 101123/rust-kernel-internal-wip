@@ -47,6 +47,7 @@ enum draw_flags {
 	round_corners_bottom_right = 128,
 	round_corners_none = 256,
 	round_corners_top = round_corners_top_left | round_corners_top_right,
+	round_corners_bottom = round_corners_bottom_left | round_corners_bottom_right,
 };
 
 namespace renderer {
@@ -62,8 +63,8 @@ namespace renderer {
 	void draw_circle( float x, float y, float radius, float thickness, uint32_t color );
 	void draw_filled_circle( float x, float y, float radius, uint32_t color );
 	void draw_line( float x1, float y1, float x2, float y2, float thickness, uint32_t color );
-	void draw_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const char* text );
-	void draw_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const wchar_t* text );
+	void draw_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const char* text, float alpha_outline_scale = 0.85f );
+	void draw_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const wchar_t* text, float alpha_outline_scale = 0.85f );
 	void draw_image( float x, float y, float width, float height, uint32_t color, ID3D11ShaderResourceView* srv );
 	void draw_unity_image( float x, float y, float width, float height, uint32_t color, float rounding, ID3D11ShaderResourceView* srv );
 

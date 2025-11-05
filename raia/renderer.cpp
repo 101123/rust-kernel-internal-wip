@@ -391,7 +391,7 @@ void renderer::draw_line( float x1, float y1, float x2, float y2, float thicknes
 	draw_list->AddLine( ImVec2( x1, y1 ), ImVec2( x2, y2 ), color, thickness );
 }
 
-void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const char* text ) {
+void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const char* text, float alpha_outline_scale ) {
 	ImFont* _font = fonts[ font ];
 	float size = _font->LegacySize;
 
@@ -418,7 +418,7 @@ void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint3
 
 	// If we have rich text enabled, make the outer color black because we can't run rich text on outlines
 	uint32_t outer_color = flags & text_flags::rich_text ?
-		scale_color( color, 0.f, 0.f, 0.f, 0.85f ) : scale_color( color, 0.2f, 0.2f, 0.2f, 0.85f );
+		scale_color( color, 0.f, 0.f, 0.f, alpha_outline_scale ) : scale_color( color, 0.2f, 0.2f, 0.2f, alpha_outline_scale );
 
 	if ( flags & text_flags::drop_shadow ) {
 		draw_list->AddText( _font, size, ImVec2( x + 1.f, y + 1.f ), outer_color, text );
@@ -438,11 +438,11 @@ void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint3
 	draw_list->AddText( _font, size, ImVec2( x, y ), color, text, nullptr, 0.f, nullptr, flags & text_flags::rich_text );
 }
 
-void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const wchar_t* text ) {
+void renderer::draw_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const wchar_t* text, float alpha_outline_scale ) {
 	char buffer[ 512 ];
 	ImTextStrToUtf8( buffer, sizeof( buffer ), ( ImWchar* )text, ( ImWchar* )( text + wcslen( text ) + 1 ) );
 
-	draw_text( x, y, font, flags, color, buffer );
+	draw_text( x, y, font, flags, color, buffer, alpha_outline_scale );
 }
 
 void renderer::draw_image( float x, float y, float width, float height, uint32_t color, ID3D11ShaderResourceView* srv ) {

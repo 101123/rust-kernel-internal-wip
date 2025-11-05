@@ -465,6 +465,7 @@ DEFINE_CONTEXT( belt_icons,
 
 DEFINE_CONTEXT( desync,
 	cvar enabled = cvar( H( "Desync" ), false );
+	cvar_ui key = cvar_ui( H( "Desync Key" ), 'V' );
 	cvar_f time = cvar_f( H( "Desync Time" ), 0.79f );
 );
 

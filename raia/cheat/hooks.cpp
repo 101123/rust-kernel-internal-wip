@@ -445,7 +445,7 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 
 	float real_time_since_startup = unity::time::get_real_time_since_startup();
 
-	if ( desync.enabled && game_input.get_async_key_state( 'V' ) ) {
+	if ( desync.enabled && game_input.get_async_key_state( desync.key ) ) {
 		if ( real_time_since_startup - last_sent_tick_time < desync.time ) {
 			sys::array<uint8_t>* buffer = stream->buffer;
 
