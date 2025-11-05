@@ -628,7 +628,7 @@ namespace unity {
 
         quaternion get_rotation() {
             void ( *get_rotation_injected )( transform*, quaternion* ) =
-                ( decltype( get_rotation_injected ) )( game_assembly + Offsets::Transform::get_rotation_Injected );
+                ( decltype( get_rotation_injected ) )( unity_player + Offsets::Transform::get_rotation_Injected );
 
             um::caller& caller = um::get_caller_for_thread();
 
