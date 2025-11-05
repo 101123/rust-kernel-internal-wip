@@ -139,7 +139,7 @@ public:
 
 private:
     void sort_commands() {
-        uint16_t clip_rect_indices[ 64 ][ 2 ];
+        uint16_t clip_rect_indices[ 128 ][ 2 ];
         uint16_t clip_rect_count = 0;
 
         for ( size_t i = 0; i < commands_.size(); i++ ) {

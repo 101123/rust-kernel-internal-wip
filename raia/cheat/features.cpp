@@ -267,6 +267,10 @@ void features::auto_upgrade_impl( rust::held_entity* held_entity ) {
 		if ( vector3::distance( local_player.eyes_position, cached_building_block.position ) > 6.f )
 			continue;
 
+		// Now we can run the accurate and expensive distance check
+		if ( building_block->distance( local_player.eyes_position ) >= 3.f )
+			continue;
+
 		if ( !building_block->can_afford_upgrade( auto_upgrade.to, 0ull, local_player.entity ) )
 			break;
 
