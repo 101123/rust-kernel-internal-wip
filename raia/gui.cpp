@@ -139,7 +139,7 @@ public:
 
 private:
     void sort_commands() {
-        uint16_t clip_rect_indices[ 128 ][ 2 ];
+        uint16_t clip_rect_indices[ 64 ][ 2 ];
         uint16_t clip_rect_count = 0;
 
         for ( size_t i = 0; i < commands_.size(); i++ ) {
@@ -154,6 +154,13 @@ private:
         }
 
         for ( size_t i = 0; i < clip_rect_count; i++ ) {
+            auto begin_idx = clip_rect_indices[ i ][ 0 ];
+            auto end_idx = clip_rect_indices[ i ][ 1 ];
+
+            // TODO: Fix whatever causes this
+            if ( end_idx <= begin_idx )
+                return;
+
             auto begin = commands_.begin() + clip_rect_indices[ i ][ 0 ] + 1;
             auto end = commands_.begin() + clip_rect_indices[ i ][ 1 ];
 
@@ -609,7 +616,7 @@ public:
             *scroll_ = std::clamp( *scroll_, 0.0f, max_scroll );
         }
 
-        gui_draw_list.get().pop_clip_rect();
+        draw_list.pop_clip_rect();
 
         // Draw scrollbar only if content is larger than visible area
         if ( content_height > visible_height ) {
