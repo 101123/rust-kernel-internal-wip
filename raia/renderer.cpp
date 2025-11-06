@@ -118,24 +118,50 @@ ImFont* load_small_fonts( uint8_t* font_data, ImFont* add = nullptr ) {
 		ImFontAtlasBakedAddFontGlyph( font_atlas, baked, nullptr, &glyph );
 	}
 
-	// Remap lowercase keys to uppercase
-	for ( int32_t c = 'a'; c <= 'z'; c++ ) {
-		uint32_t upper = c - 32;
-		uint32_t lower_remap = c;
-		uint32_t lower_remap_shifted = c + 0x590;
+	// Remap ascii lowercase to uppercase
+	if ( !add ) {
+		for ( int32_t c = 'a'; c <= 'z'; c++ ) {
+			uint32_t upper = c - 32;
+			uint32_t lower_remap = c;
+			uint32_t lower_remap_shifted = c + 0x590;
 
-		for ( int32_t j = 0; j < baked->Glyphs.size(); ++j ) {
-			const ImFontGlyph& glyph = baked->Glyphs[ j ];
+			for ( int32_t j = 0; j < baked->Glyphs.size(); j++ ) {
+				const ImFontGlyph& glyph = baked->Glyphs[ j ];
 
-			if ( glyph.Codepoint == upper ) {
-				baked->IndexAdvanceX[ lower_remap ] = baked->IndexAdvanceX[ upper ];
-				baked->IndexLookup[ lower_remap ] = j;
+				if ( glyph.Codepoint == upper ) {
+					baked->IndexAdvanceX[ lower_remap ] = baked->IndexAdvanceX[ upper ];
+					baked->IndexLookup[ lower_remap ] = j;
+				}
+
+				else if ( glyph.Codepoint == upper + 0x590 ) {
+					baked->IndexAdvanceX[ lower_remap_shifted ] = baked->IndexAdvanceX[ upper + 0x590 ];
+					baked->IndexLookup[ lower_remap_shifted ] = j;
+				}
 			}
+		}
+	}
 
-			else if ( glyph.Codepoint == upper + 0x590 ) {
-				baked->IndexAdvanceX[ lower_remap_shifted ] = baked->IndexAdvanceX[ upper + 0x590 ];
-				baked->IndexLookup[ lower_remap_shifted ] = j;
+	// Remap cyrillic lowercase to uppercase
+	else if ( add ) {
+		for ( int32_t c = 0x430; c <= 0x451; c++ ) {
+			// Handle special character
+			uint32_t upper = ( c == 0x451 ) ? 0x401 : c - 0x20;
+
+			for ( int32_t j = 0; j < baked->Glyphs.size(); j++ ) {
+				if ( baked->Glyphs[ j ].Codepoint == upper ) {
+					baked->IndexAdvanceX[ c ] = baked->IndexAdvanceX[ upper ];
+					baked->IndexLookup[ c ] = j;
+					break;
+				}
 			}
+		}
+	}
+	
+	// Set fallback glyph
+	for ( int32_t i = 0; i < baked->Glyphs.size(); i++ ) {
+		if ( baked->Glyphs[ i ].Codepoint == '?' ) {
+			baked->FallbackGlyphIndex = i;
+			break;
 		}
 	}
 
@@ -241,6 +267,14 @@ ImFont* load_compressed_glfn_font( uint8_t* compressed, size_t compressed_size, 
 			}
 
 			size_read += sizeof( glyph_info );
+		}
+	}
+
+	// Set fallback glyph
+	for ( int32_t i = 0; i < baked->Glyphs.size(); i++ ) {
+		if ( baked->Glyphs[ i ].Codepoint == '?' ) {
+			baked->FallbackGlyphIndex = i;
+			break;
 		}
 	}
 
