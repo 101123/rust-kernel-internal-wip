@@ -865,6 +865,7 @@ struct command {
 command blocked_commands[] = {
 	{ J( "noclip" ), false },
 	{ J( "debugcamera" ), false },
+	{ J( "debugcamera_unfreeze" ), false },
 	{ J( "camlerp" ), true },
 	{ J( "camlerptilt" ), true },
 	{ J( "camlookspeed" ), true },

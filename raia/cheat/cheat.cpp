@@ -419,10 +419,11 @@ bool resolve_hooks() {
 	const command_hook hooked_commands[] = {
 		{ L"noclip", command_hook_type::call },
 		{ L"debugcamera", command_hook_type::call },
+		{ L"debugcamera_unfreeze", command_hook_type::call },
 		{ L"camlerp", command_hook_type::set },
 		{ L"camlerptilt", command_hook_type::set },
 		{ L"camlookspeed", command_hook_type::set },
-		{ L"camspeed", command_hook_type::set },
+		{ L"camspeed", command_hook_type::set }
 	};
 
 	for ( int32_t i = 0; i < _countof( hooked_commands ); i++ ) {
@@ -449,7 +450,7 @@ bool resolve_hooks() {
 			.corrupt = 0ull,
 			.user_data = ( void* )i,
 			.ptr_swap = {
-				.pre_handler = command_hook.type == command_hook_type::set ?
+				.pre_handler = command_info.type == command_hook_type::set ?
 					hook_handlers::pre_console_system_command_set : hook_handlers::pre_console_system_command_call,
 
 				.post_handler = nullptr
