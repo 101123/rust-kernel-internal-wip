@@ -650,6 +650,13 @@ namespace util {
 		size_t head_;
 		size_t tail_;
 	};
+
+	// Make address volatile here so the compiler can't optimize this to a memset call
+	__forceinline void zero_memory( volatile uint8_t* address, size_t size ) {
+		for ( size_t i = 0; i < size; i++ ) {
+			address[ i ] = 0;
+		}
+	}
 }
 
 #define H( String ) util::hash_const( String )

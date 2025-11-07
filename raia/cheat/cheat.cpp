@@ -83,6 +83,8 @@ parent_class_lookup parent_class_lookups[] = {
 };
 
 bool populate_classes() {
+	DESTROY_BEGIN
+
 	static uintptr_t type_info_definition_table_address = util::relative_32(
 		util::find_pattern_image( game_assembly, S( "\x48\xF7\xE1\x48\x8B\xCA\x48\xC1\xE9\x04\xBA\x08\x00\x00\x00" ), S( "xxxxxxxxxxxxxxx" ) ) + 21, 3 );
 
@@ -161,6 +163,8 @@ bool populate_classes() {
 			}
 		}
 	}
+
+	DESTROY_END
 
 	return true;
 }

@@ -292,6 +292,8 @@ ImFont* load_compressed_glfn_font( uint8_t* compressed, size_t compressed_size, 
 }
 
 bool renderer::init( IDXGISwapChain* swapchain ) {
+	DESTROY_BEGIN
+
 	if ( swapchain->GetDevice( __uuidof( ID3D11Device ), ( void** )&device ) != S_OK )
 		return false;
 
@@ -333,6 +335,16 @@ bool renderer::init( IDXGISwapChain* swapchain ) {
 	fonts[ fonts::tahoma_bold ] = load_compressed_glfn_font( _tahoma_bold, sizeof( _tahoma_bold ), ranges );
 	fonts[ fonts::icons ] = load_compressed_glfn_font( _icons, sizeof( _icons ), ranges );
 
+	util::zero_memory( _smallfonts, sizeof( _smallfonts ) );
+	util::zero_memory( _smallfonts_cyrillic, sizeof( _smallfonts_cyrillic ) );
+	util::zero_memory( _consolas_bold, sizeof( _consolas_bold ) );
+	util::zero_memory( _verdana, sizeof( _verdana ) );
+	util::zero_memory( _verdana_bold, sizeof( _verdana_bold ) );
+	util::zero_memory( _smallfonts_cyrillic, sizeof( _smallfonts_cyrillic ) );
+	util::zero_memory( _tahoma, sizeof( _tahoma ) );
+	util::zero_memory( _tahoma_bold, sizeof( _tahoma_bold ) );
+	util::zero_memory( _icons, sizeof( _icons ) );
+
 	ImGui_ImplDX11_UpdateTexture( font_atlas->TexData );
 
 	shared_data = IM_NEW( ImDrawListSharedData );
@@ -352,6 +364,8 @@ bool renderer::init( IDXGISwapChain* swapchain ) {
 	draw_data->FramebufferScale = ImVec2( 1.f, 1.f );
 	draw_data->OwnerViewport = nullptr;
 	draw_data->Textures = nullptr;
+
+	DESTROY_END
 
 	return true;
 }
