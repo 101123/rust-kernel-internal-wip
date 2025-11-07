@@ -1074,7 +1074,7 @@ public:
                 const bool hovered = mouse_in_rect( option_bounds );
 
                 if ( hovered ) {
-                    draw_list.add_filled_rect( option_bounds.x + 1.f, option_bounds.y + 1.f, option_bounds.w - 2.f, option_bounds.h - 2.f, COL32( 0, 0, 0, 64 ) );
+                    draw_list.add_filled_rect( option_bounds.x + 1.f, option_bounds.y + 1.f, option_bounds.w - 2.f, option_bounds.h - 2.f, COL32( 25, 25, 25, 255 ) );
 
                     if ( left_mouse_clicked ) {
                         *value = static_cast< T >( start_index + i );
@@ -1141,7 +1141,7 @@ public:
                 const bool hovered = mouse_in_rect( option_bounds );
 
                 if ( hovered ) {
-                    draw_list.add_filled_rect( option_bounds.x + 1.f, option_bounds.y + 1.f, option_bounds.w - 2.f, option_bounds.h - 2.f, COL32( 0, 0, 0, 64 ) );
+                    draw_list.add_filled_rect( option_bounds.x + 1.f, option_bounds.y + 1.f, option_bounds.w - 2.f, option_bounds.h - 2.f, COL32( 25, 25, 25, 255 ) );
 
                     if ( left_mouse_clicked ) {
                         *value = !*value;
@@ -1180,9 +1180,9 @@ public:
             }
         }
 
-        draw_list.push_clip_rect( combo_bounds.x, combo_bounds.y, combo_bounds.w, combo_bounds.h );
+       // draw_list.push_clip_rect( combo_bounds.x, combo_bounds.y, combo_bounds.w, combo_bounds.h );
         draw_list.add_text( position.x + 27.f, position.y + 22.f, fonts::verdana, text_flags::none, COLOR_E, num_selected == 0 ? J( "-" ) : selected_buffer );
-        draw_list.pop_clip_rect();
+       // draw_list.pop_clip_rect();
 
         draw_list.pop_z_index();
 
@@ -1197,7 +1197,7 @@ private:
 
         background_colors ?
             draw_list.add_filled_rect_multi_color( bounds.x + 1.f, bounds.y + 1.f, bounds.w - 2.f, bounds.h - 2.f, background_colors ) :
-            draw_list.add_filled_rect( bounds.x + 1.f, bounds.y + 1.f, bounds.w - 2.f, bounds.h - 2.f, COLOR_D );
+            draw_list.add_filled_rect( bounds.x + 1.f, bounds.y + 1.f, bounds.w - 2.f, bounds.h - 2.f, COL32(35, 35, 35, 255) );
     }
 
     void draw_checkerboard( const rect& bounds, float step ) {
@@ -1272,7 +1272,7 @@ void draw_gui_background() {
     renderer::draw_filled_rect( top_bar.x, top_bar.y + top_bar.h, top_bar.w, 1.f, COLOR_A );
 
     renderer::draw_text( top_bar.x + 6.f, top_bar.y + 6.f, fonts::verdana, text_flags::none, gradient_on[ 0 ], J( "sentian" ) );
-    renderer::draw_text( top_bar.x + 43.f, top_bar.y + 6.f, fonts::verdana, text_flags::none, COLOR_E, J( ".gg" ) );
+    renderer::draw_text( top_bar.x + 42.f, top_bar.y + 6.f, fonts::verdana, text_flags::none, COLOR_E, J( ".gg" ) );
 
     rect bottom_bar = rect( menu_bounds.x + 2.f, menu_bounds.y + ( menu_bounds.h - 18.f ) - 4.f, menu_bounds.w - 4.f, 20.f );
 
@@ -1391,6 +1391,9 @@ void player_visuals_impl( group_box& left, group_box& right, cvar_player_visuals
     left.toggle( J( "Bounding box" ), &visuals.bounding_box );
     left.color_picker( &visuals.bounding_box_color );
 
+    left.toggle( J( "Health bar" ), &visuals.health_bar );
+    left.toggle( J( "Ammo bar" ), &visuals.ammo_bar );
+
     left.toggle( J( "Skeleton" ), &visuals.skeleton );
     left.color_picker( &visuals.skeleton_color );
 
@@ -1465,455 +1468,417 @@ void gui::run() {
 
     rect subtabs_cursor = rect( menu_bounds.x + 8.f, menu_bounds.y + 29.f + 21.f, 0.f, 20.f );
 
-    switch ( current_tab ) {
-        case tabs::combat:
-            subtab( J( "Aimbot" ), combat_subtabs::aimbot, &current_subtab[ tabs::combat ], subtabs_cursor );
-            break;
-        case tabs::visuals:
-            subtab( J( "Players" ), visual_subtabs::players, &current_subtab[ tabs::visuals ], subtabs_cursor );
-            subtab( J( "Scientists" ), visual_subtabs::scientists, &current_subtab[ tabs::visuals ], subtabs_cursor );
-            subtab( J( "World" ), visual_subtabs::world, &current_subtab[ tabs::visuals ], subtabs_cursor );
-            subtab( J( "Resources" ), visual_subtabs::resources, &current_subtab[ tabs::visuals ], subtabs_cursor );
-            subtab( J( "Deployables" ), visual_subtabs::deployables, &current_subtab[ tabs::visuals ], subtabs_cursor );
-            subtab( J( "Vehicles" ), visual_subtabs::vehicles, &current_subtab[ tabs::visuals ], subtabs_cursor );
-            subtab( J( "Animals" ), visual_subtabs::animals, &current_subtab[ tabs::visuals ], subtabs_cursor );
-            subtab( J( "Traps" ), visual_subtabs::traps, &current_subtab[ tabs::visuals ], subtabs_cursor );
-            subtab( J( "Loot" ), visual_subtabs::loot, &current_subtab[ tabs::visuals ], subtabs_cursor );
-            break;
-        case tabs::misc:
-            subtab( J( "Quality of life" ), misc_subtabs::quality_of_life, &current_subtab[ tabs::misc ], subtabs_cursor );
-            subtab( J( "Visuals" ), misc_subtabs::visuals, &current_subtab[ tabs::misc ], subtabs_cursor);
-            subtab( J( "Movement" ), misc_subtabs::movement, &current_subtab[ tabs::misc ], subtabs_cursor );
-            break;
+    if ( current_tab == tabs::combat ) {
+        subtab( J( "Aimbot" ), combat_subtabs::aimbot, &current_subtab[ tabs::combat ], subtabs_cursor );
+    }
+
+    else if ( current_tab == tabs::visuals ) {
+        subtab( J( "Players" ), visual_subtabs::players, &current_subtab[ tabs::visuals ], subtabs_cursor );
+        subtab( J( "Scientists" ), visual_subtabs::scientists, &current_subtab[ tabs::visuals ], subtabs_cursor );
+        subtab( J( "World" ), visual_subtabs::world, &current_subtab[ tabs::visuals ], subtabs_cursor );
+        subtab( J( "Resources" ), visual_subtabs::resources, &current_subtab[ tabs::visuals ], subtabs_cursor );
+        subtab( J( "Deployables" ), visual_subtabs::deployables, &current_subtab[ tabs::visuals ], subtabs_cursor );
+        subtab( J( "Vehicles" ), visual_subtabs::vehicles, &current_subtab[ tabs::visuals ], subtabs_cursor );
+        subtab( J( "Animals" ), visual_subtabs::animals, &current_subtab[ tabs::visuals ], subtabs_cursor );
+        subtab( J( "Traps" ), visual_subtabs::traps, &current_subtab[ tabs::visuals ], subtabs_cursor );
+        subtab( J( "Loot" ), visual_subtabs::loot, &current_subtab[ tabs::visuals ], subtabs_cursor );
+    }
+
+    else if ( current_tab == tabs::misc ) {
+        subtab( J( "Quality of life" ), misc_subtabs::quality_of_life, &current_subtab[ tabs::misc ], subtabs_cursor );
+        subtab( J( "Visuals" ), misc_subtabs::visuals, &current_subtab[ tabs::misc ], subtabs_cursor );
+        subtab( J( "Movement" ), misc_subtabs::movement, &current_subtab[ tabs::misc ], subtabs_cursor );
     }
 
     group_box left = group_box( rect( menu_bounds.x + 126.f, menu_bounds.y + 53.f, 256.f, 395.f ), 0 );
     group_box right = group_box( rect( menu_bounds.x + 125.f + 260.f + 7.f, menu_bounds.y + 53.f, 256.f, 395.f ), 1 );
 
-    switch ( current_tab ) {
-        case tabs::combat: {
-            switch ( current_subtab[ tabs::combat ] ) {
-                case combat_subtabs::aimbot: {
-                    left.begin();
-
-                    left.toggle( J( "Aimbot" ), &aimbot.enabled );
-                    left.keybind( &aimbot.key );
-
-                    if ( aimbot.enabled ) {
-                        left.combo_box( J( "Aimbot type" ), { J( "Memory" ), J( "Silent" ) }, &aimbot.type );
-
-                        if ( aimbot.type == aimbot_type::memory ) {
-                            left.slider( J( "Recoil" ), S( "%.2f" ), &aimbot.recoil, 0.f, 1.f );
-                            left.slider( J( "Smoothing" ), S( "%.2f" ), &aimbot.smoothing, 0.f, 1.f );
-                        }
-
-                        left.slider( J( "Field of view" ), S( "%dpx" ), &aimbot.fov, 0u, 800u );
-
-                        left.toggle( J( "Desync" ), &desync.enabled );
-                        left.keybind( &desync.key );
-
-                        if ( desync.enabled ) {
-                            left.slider( J( "Desync time" ), S( "%.2fs" ), &desync.time, 0.f, 0.79f );
-                        }
-
-                        left.toggle( J( "Bullet teleport" ), &bullet_teleport );
-                    }
-
-                    left.end();
-
-                    right.begin();
-
-                    right.toggle( J( "Recoil modifier" ), &recoil_modifier.enabled );
-                    if ( recoil_modifier.enabled ) {
-                        right.slider( J( "Yaw scale" ), S( "%.2f" ), &recoil_modifier.yaw_scale, 0.f, 1.f );
-                        right.slider( J( "Pitch scale" ), S( "%.2f" ), &recoil_modifier.pitch_scale, 0.f, 1.f );
-                    }
-
-                    right.toggle( J( "Spread modifier" ), &spread_modifier.enabled );
-                    if ( spread_modifier.enabled ) {
-                        right.slider( J( "Spread scale" ), S( "%.2f" ), &spread_modifier.scale, 0.f, 1.f );
-                    }
-
-                    right.toggle( J( "Sway modifier" ), &sway_modifier.enabled );
-                    if ( sway_modifier.enabled ) {
-                        right.slider( J( "Sway scale" ), S( "%.2f" ), &sway_modifier.scale, 0.f, 1.f );
-                    }
-
-                    right.toggle( J( "Force automatic" ), &force_automatic );
-
-                    right.toggle( J( "Thicker projectiles" ), &thicker_projectiles.enabled );
-                    if ( thicker_projectiles.enabled ) {
-                        right.slider( J( "Thickness" ), S( "%.2fm" ), &thicker_projectiles.thickness, 0.05f, 1.f );
-                    }
-
-                    right.toggle( J( "Faster projectiles" ), &faster_projectiles );
-
-                    right.toggle( J( "Instant eoka" ), &instant_eoka );
-                    right.toggle( J( "Instant compound bow charge" ), &instant_compound_bow );
-
-                    if ( right.toggle( J( "Player hit override" ), &player_hit_override.enabled ) ) {
-                        right.combo_box( J( "Hit bone" ), { J( "Head" ), J( "Neck" ), J( "Chest" ), J( "Random" ) }, &player_hit_override.bone );
-                    }
-                   
-                    if ( right.toggle( J( "Hit patrol helicopter weakspots" ), &hit_patrol_helicopter_weakspots.enabled ) ) {
-                        right.slider( J( "Chance" ), S( "%d%" ), &hit_patrol_helicopter_weakspots.chance, 0u, 100u );
-                    }
-
-                    right.toggle( J( "Projectile tracers" ), &projectile_tracers.enabled );
-                    right.color_picker( &projectile_tracers.color );
-
-                    if ( projectile_tracers.enabled ) {
-                        right.slider( J( "Tracer duration" ), S( "%.2fs" ), &projectile_tracers.duration, 0.5f, 5.f );
-                    }
-
-                    right.end();
-
-                    break;
-                }
-            }
-
-            break;
-        }
-
-        case tabs::visuals: {
-            switch ( current_subtab[ tabs::visuals ] ) {
-                case visual_subtabs::players: {
-                    player_visuals_impl( left, right, player_visuals );
-                    break;
-                }
-
-                case visual_subtabs::scientists: {
-                    player_visuals_impl( left, right, scientist_visuals );
-                    break;
-                }
-
-                case visual_subtabs::world: {
-                    left.begin( J( "Dropped items" ) );
-
-                    visual_impl( left, dropped_weapon, J( "Weapon" ) );
-                    visual_impl( left, dropped_construction, J( "Construction" ) );
-                    visual_impl( left, dropped_items, J( "Items" ) );
-                    visual_impl( left, dropped_resources, J( "Resources" ) );
-                    visual_impl( left, dropped_attire, J( "Attire" ) );
-                    visual_impl( left, dropped_tool, J( "Tool" ) );
-                    visual_impl( left, dropped_medical, J( "Medical" ) );
-                    visual_impl( left, dropped_food, J( "Food" ) );
-                    visual_impl( left, dropped_ammunition, J( "Ammunition" ) );
-                    visual_impl( left, dropped_traps, J( "Traps" ) );
-                    visual_impl( left, dropped_misc, J( "Misc" ) );
-                    visual_impl( left, dropped_component, J( "Component" ) );
-                    visual_impl( left, dropped_electrical, J( "Electrical" ) );
-                    visual_impl( left, dropped_fun, J( "Fun" ) );
-
-                    left.end();
-
-                    right.begin();
-
-                    right.toggle( J( "Raids" ), &raid_visuals.enabled );
-                    right.color_picker( &raid_visuals.color );
-
-                    if ( raid_visuals.enabled ) {
-                        right.toggle( J( "Notify on start" ), &raid_visuals.notify );
-
-                        right.multi_combo_box( J( "Explosives" ), {
-                                { J( "Rocket" ), &raid_visuals.rocket },
-                                { J( "High velocity rocket" ), &raid_visuals.high_velocity_rocket },
-                                { J( "Incendiary rocket" ), &raid_visuals.incendiary_rocket },
-                                { J( "Explosive ammo" ), &raid_visuals.explosive_ammo },
-                                { J( "C4" ), &raid_visuals.c4 },
-                                { J( "Satchel charge" ), &raid_visuals.satchel_charge },
-                                { J( "HE grenade" ), &raid_visuals.he_grenade },
-                                { J( "MLRS rocket" ), &raid_visuals.mlrs_rocket },
-                            } );
-
-                        right.slider( J( "Maximum time" ), S( "%us" ), &raid_visuals.maximum_time, 0u, 600u );
-                        right.slider( J( "Maximum distance" ), S( "%um" ), &raid_visuals.maximum_distance, 0u, 5000u );
-                    }
-
-                    right.toggle( J( "Events" ), &events.enabled );
-
-                    if ( events.enabled ) {
-                        right.toggle( J( "Notify on event" ), &events.notify );
-                    }
-
-                    visual_impl( right, player_corpse, J( "Player corpse" ) );
-                    visual_impl( right, backpack, J( "Backpack" ) );
-
-                    right.end();
-
-                    break;
-                }
-
-                case visual_subtabs::resources: {
-                    left.begin();
-
-                    visual_impl( left, stone_ore, J( "Stone ore" ) );
-                    visual_impl( left, metal_ore, J( "Metal ore" ) );
-                    visual_impl( left, sulfur_ore, J( "Sulfur ore" ) );
-
-                    left.end();
-
-                    right.begin();
-
-                    visual_impl( right, hemp );
-                    visual_impl( right, mushroom );
-                    
-                    visual_impl( right, pumpkin );
-                    visual_impl( right, corn );
-                    visual_impl( right, potato );
-                    visual_impl( right, stone );
-                    visual_impl( right, metal );
-                    visual_impl( right, sulfur );
-                    visual_impl( right, wood );
-
-                    right.end();
-
-                    break;
-                }
-
-                case visual_subtabs::deployables: {
-                    left.begin();
-                    left.end();
-
-                    right.begin();
-                    right.end();
-
-                    break;
-                }
-
-                case visual_subtabs::vehicles: {
-                    left.begin();
-
-                    visual_impl( left, rowboat );
-                    visual_impl( left, rhib );
-                    visual_impl( left, minicopter );
-                    visual_impl( left, scrap_helicopter, J( "Scrap helicopter" ) );
-                    visual_impl( left, attack_helicopter, J( "Attack helicopter" ) );
-                    visual_impl( left, tugboat );
-                    visual_impl( left, submarine );
-                    visual_impl( left, hot_air_balloon, J( "Hot air balloon" ) );
-                    visual_impl( left, diver_propulsion_vehicle, J( "Diver propulsion vehicle" ) );
-
-                    left.end();
-
-                    right.begin();
-                 
-                    visual_impl( right, patrol_helicopter, J( "Patrol helicopter" ), 5000u );
-                    visual_impl( right, bradley );
-
-                    right.end();
-
-                    break;
-                }
-
-                case visual_subtabs::animals: {
-                    left.begin();
-
-                    visual_impl( left, bear );
-                    visual_impl( left, boar );
-                    visual_impl( left, chicken );
-                    visual_impl( left, horse );
-                    visual_impl( left, stag );
-                    visual_impl( left, wolf );
-                    visual_impl( left, shark );
-                    visual_impl( left, bee_swarm, J( "Bee swarm" ) );
-                    visual_impl( left, tiger );
-                    visual_impl( left, panther );
-                    visual_impl( left, crocodile );
-                    visual_impl( left, snake );
-
-                    left.end();
-
-                    right.begin();
-
-                    right.end();
-
-                    break;
-                }
-
-                case visual_subtabs::traps: {
-                    left.begin();
-
-                    visual_impl( left, shotgun_trap, J( "Shotgun trap" ) );
-                    visual_impl( left, flame_turret, J( "Flame turret" ) );
-                    visual_impl( left, land_mine, J( "Land mine" ) );
-     
-                    left.toggle( J( "Bear trap" ), &bear_trap.enabled );
-                    left.color_picker( &bear_trap.color );
-
-                    if ( bear_trap.enabled ) {
-                        left.toggle( J( "Ignore unarmed" ), &bear_trap_ignore_unarmed );
-                        left.slider( J( "Max distance" ), S( "%dm" ), &bear_trap.maximum_distance, 0u, 500u );
-                    }
-
-                    left.toggle( J( "SAM site" ), &sam_site.enabled );
-                    left.color_picker( &sam_site.color );
-
-                    if ( sam_site.enabled ) {
-                        left.toggle( J( "Ignore offline" ), &sam_site_ignore_offline );
-                        left.slider( J( "Max distance" ), S( "%dm" ), &sam_site.maximum_distance, 0u, 500u );
-                    }
-
-                    left.end();
-
-                    right.begin();
-                    right.end();
-
-                    break;
-                }
-
-                case visual_subtabs::loot: {
-                    left.begin();
-
-                    visual_impl( left, red_barrel, J( "Red barrel" ) );
-                    visual_impl( left, blue_barrel, J( "Blue barrel" ) );
-                    visual_impl( left, oil_barrel, J( "Oil barrel" ) );
-                    visual_impl( left, diesel_barrel, J( "Diesel barrel" ) );
-                    visual_impl( left, minecart, J( "Minecart" ) );
-                    visual_impl( left, vehicle_parts, J( "Vehicle parts" ) );
-                    visual_impl( left, tech_parts, J( "Tech parts" ) );
-                    visual_impl( left, supply_drop, J( "Supply drop" ), 5000u );
-
-                    left.end();
-
-                    right.begin();
-
-                    visual_impl( right, food_crate, J( "Food crate" ) );
-                    visual_impl( right, medical_crate, J( "Medical crate" ) );
-                    visual_impl( right, tool_crate, J( "Tool crate" ) );
-                    visual_impl( right, ammo_crate, J( "Ammo crate" ) );
-                    visual_impl( right, fuel_crate, J( "Fuel crate" ) );
-                    visual_impl( right, basic_crate, J( "Basic crate" ) );
-                    visual_impl( right, normal_crate, J( "Normal crate" ) );
-                    visual_impl( right, underwater_crate, J( "Underwater crate" ) );
-                    visual_impl( right, military_crate, J( "Military crate" ) );
-                    visual_impl( right, elite_crate, J( "Elite crate" ) );
-                    visual_impl( right, bradley_crate, J( "Bradley crate" ) );
-                    visual_impl( right, heli_crate, J( "Heli crate" ) );
-
-                    right.end();
-
-                    break;
-                }
-            }
-
-            break;
-        }
-
-        case tabs::misc: {
-            switch ( current_subtab[ tabs::misc ] ) {
-                case misc_subtabs::quality_of_life: {
-                    left.begin();
-                    left.toggle( J( "Instant loot" ), &instant_loot );
-                    left.toggle( J( "Loot without untie" ), &loot_without_untie );
-
-                    left.toggle( J( "Field of view modifier" ), &fov_modifier.enabled );
-                    if ( fov_modifier.enabled ) {
-                        left.slider( J( "Field of view" ), S( "%.0f" ), &fov_modifier.fov, 90.f, 170.f );
-                    }
-
-                    left.toggle( J( "Auto drop box" ), &auto_drop_box.enabled );
-
-                    left.toggle( J( "Auto upgrade" ), &auto_upgrade.enabled );
-
-                    if ( auto_upgrade.enabled ) {
-                        left.toggle( J( "Only holding hammer" ), &auto_upgrade.only_holding_hammer );
-
-                        left.combo_box( J( "Upgrade from" ), { J( "Any" ), J( "Twig" ), J( "Wood" ), J( "Stone" ), J( "Sheet metal" ) }, &auto_upgrade.from, -1 );
-                        left.combo_box( J( "Upgrade to" ), { J( "Wood" ), J( "Stone" ), J( "Sheet metal" ), J( "Armored" ) }, &auto_upgrade.to, 1 );
-                    }
-
-                    left.end();
-
-                    right.begin();
-
-                    right.toggle( J( "Override night" ), &override_night.enabled );
-                    right.color_picker( &ambient_color, false );
-                    right.keybind( &override_night.key );
-
-                    if ( override_night.enabled ) {
-                        right.slider( J( "Ambient multiplier" ), S( "%.2fx" ), &ambient_multiplier, 0.f, 3.f );
-                        right.slider( J( "Ambient saturation" ), S( "%.2f" ), &ambient_saturation, 0.f, 0.5f );
-                    }
-
-                    right.end();
-
-                    break;
-                }
-
-                case misc_subtabs::visuals: {
-                    left.begin();
-
-                    left.toggle( J( "Minimap" ), &minimap.enabled );
-                    left.color_picker( &minimap.color );
-
-                    if ( minimap.enabled ) {
-                        left.slider( J( "Size" ), S( "%.2fpx" ), &minimap.size, 50.f, 800.f );
-                        left.slider( J( "Zoom" ), S( "%.2fx" ), &minimap.zoom, 1.f, 15.f );
-                    }
-
-                    left.end();
-
-                    right.begin( J( "Local chams" ) );
-
-                    right.toggle( J( "Held item" ), &local_chams.held_item );
-                    right.color_picker( &local_chams.held_item_occluded_color );
-                    right.color_picker( &local_chams.held_item_visible_color );
-
-                    right.toggle( J( "Hands" ), &local_chams.hands );
-                    right.color_picker( &local_chams.hands_occluded_color );
-                    right.color_picker( &local_chams.hands_visible_color );
-
-                    right.end();
-
-                    break;
-                }
-
-                case misc_subtabs::movement: {
-                    left.begin();
-                    left.toggle( J( "Spider-man" ), &spider_man );
-                    left.toggle( J( "Infinite jump" ), &infinite_jump );
-                    left.toggle( J( "Omnisprint" ), &omnisprint );
-
-                    if ( left.toggle( J( "Speedhack" ), &speedhack.enabled ) ) {
-                        left.slider( J( "Speed multiplier" ), S( "%.2fx" ), &speedhack.multiplier, 1.f, 5.f );
-                    }
-
-                    left.toggle( J( "No attack restrictions" ), &no_attack_restrictions.enabled );
-                    left.toggle( J( "On ladder" ), &on_ladder );
-
-                    left.toggle( J( "Anti-flyhack" ), &anti_flyhack.enabled );
-
-                    left.end();
-
-                    right.begin();
-
-                    right.toggle( J( "Admin flags" ), &admin_flags );
-
-                    if ( right.toggle( J( "Block server commands" ), &block_server_commands.enabled ) ) {
-                        right.toggle( J( "Notify on block" ), &block_server_commands.notify );
-                    }
-
-                    right.end();
-
-                    break;
-                }
-            }
-
-            break;
-        }
-
-        case tabs::settings: {
+    if ( current_tab == tabs::combat ) {
+        if ( current_subtab[ tabs::combat ] == combat_subtabs::aimbot ) {
             left.begin();
-            left.color_picker( &gradient_on[ 0 ] );
+
+            left.toggle( J( "Aimbot" ), &aimbot.enabled );
+            left.keybind( &aimbot.key );
+
+            if ( aimbot.enabled ) {
+                left.combo_box( J( "Aimbot type" ), { J( "Memory" ), J( "Silent" ) }, &aimbot.type );
+
+                if ( aimbot.type == aimbot_type::memory ) {
+                    left.slider( J( "Recoil" ), S( "%.2f" ), &aimbot.recoil, 0.f, 1.f );
+                    left.slider( J( "Smoothing" ), S( "%.2f" ), &aimbot.smoothing, 0.f, 1.f );
+                }
+
+                left.slider( J( "Field of view" ), S( "%dpx" ), &aimbot.fov, 0u, 800u );
+
+                left.toggle( J( "Desync" ), &desync.enabled );
+                left.keybind( &desync.key );
+
+                if ( desync.enabled ) {
+                    left.slider( J( "Desync time" ), S( "%.2fs" ), &desync.time, 0.f, 0.79f );
+                }
+
+                left.toggle( J( "Bullet teleport" ), &bullet_teleport );
+                left.toggle( J( "Houdini escape" ), &bullet_teleport );
+            }
+
             left.end();
 
-            gradient_on[ 1 ] = gradient_on[ 0 ];
-            gradient_on[ 2 ] = gradient_on[ 0 ] - COL32( 0, 0, 0, 45 );
-            gradient_on[ 3 ] = gradient_on[ 0 ] - COL32( 0, 0, 0, 45 );
+            right.begin();
 
-            break;
+            right.toggle( J( "Recoil modifier" ), &recoil_modifier.enabled );
+            if ( recoil_modifier.enabled ) {
+                right.slider( J( "Yaw scale" ), S( "%.2f" ), &recoil_modifier.yaw_scale, 0.f, 1.f );
+                right.slider( J( "Pitch scale" ), S( "%.2f" ), &recoil_modifier.pitch_scale, 0.f, 1.f );
+            }
+
+            right.toggle( J( "Spread modifier" ), &spread_modifier.enabled );
+            if ( spread_modifier.enabled ) {
+                right.slider( J( "Spread scale" ), S( "%.2f" ), &spread_modifier.scale, 0.f, 1.f );
+            }
+
+            right.toggle( J( "Sway modifier" ), &sway_modifier.enabled );
+            if ( sway_modifier.enabled ) {
+                right.slider( J( "Sway scale" ), S( "%.2f" ), &sway_modifier.scale, 0.f, 1.f );
+            }
+
+            right.toggle( J( "Force automatic" ), &force_automatic );
+
+            right.toggle( J( "Thicker projectiles" ), &thicker_projectiles.enabled );
+            if ( thicker_projectiles.enabled ) {
+                right.slider( J( "Thickness" ), S( "%.2fm" ), &thicker_projectiles.thickness, 0.05f, 1.f );
+            }
+
+            right.toggle( J( "Faster projectiles" ), &faster_projectiles );
+
+            right.toggle( J( "Instant eoka" ), &instant_eoka );
+            right.toggle( J( "Instant compound bow charge" ), &instant_compound_bow );
+
+            if ( right.toggle( J( "Player hit override" ), &player_hit_override.enabled ) ) {
+                right.combo_box( J( "Hit bone" ), { J( "Head" ), J( "Neck" ), J( "Chest" ), J( "Random" ) }, &player_hit_override.bone );
+            }
+
+            if ( right.toggle( J( "Hit patrol helicopter weakspots" ), &hit_patrol_helicopter_weakspots.enabled ) ) {
+                right.slider( J( "Chance" ), S( "%d%" ), &hit_patrol_helicopter_weakspots.chance, 0u, 100u );
+            }
+
+            right.toggle( J( "Projectile tracers" ), &projectile_tracers.enabled );
+            right.color_picker( &projectile_tracers.color );
+
+            if ( projectile_tracers.enabled ) {
+                right.slider( J( "Tracer duration" ), S( "%.2fs" ), &projectile_tracers.duration, 0.5f, 5.f );
+            }
+
+            right.end();
         }
+    }
+
+    else if ( current_tab == tabs::visuals ) {
+        if ( current_subtab[ tabs::visuals ] == visual_subtabs::players ) {
+            player_visuals_impl( left, right, player_visuals );
+        }
+
+        else if ( current_subtab[ tabs::visuals ] == visual_subtabs::scientists ) {
+            player_visuals_impl( left, right, scientist_visuals );
+        }
+
+        else if ( current_subtab[ tabs::visuals ] == visual_subtabs::world ) {
+            left.begin( J( "Dropped items" ) );
+
+            visual_impl( left, dropped_weapon, J( "Weapon" ) );
+            visual_impl( left, dropped_construction, J( "Construction" ) );
+            visual_impl( left, dropped_items, J( "Items" ) );
+            visual_impl( left, dropped_resources, J( "Resources" ) );
+            visual_impl( left, dropped_attire, J( "Attire" ) );
+            visual_impl( left, dropped_tool, J( "Tool" ) );
+            visual_impl( left, dropped_medical, J( "Medical" ) );
+            visual_impl( left, dropped_food, J( "Food" ) );
+            visual_impl( left, dropped_ammunition, J( "Ammunition" ) );
+            visual_impl( left, dropped_traps, J( "Traps" ) );
+            visual_impl( left, dropped_misc, J( "Misc" ) );
+            visual_impl( left, dropped_component, J( "Component" ) );
+            visual_impl( left, dropped_electrical, J( "Electrical" ) );
+            visual_impl( left, dropped_fun, J( "Fun" ) );
+
+            left.end();
+
+            right.begin();
+
+            right.toggle( J( "Raids" ), &raid_visuals.enabled );
+            right.color_picker( &raid_visuals.color );
+
+            if ( raid_visuals.enabled ) {
+                right.toggle( J( "Notify on start" ), &raid_visuals.notify );
+
+                right.multi_combo_box( J( "Explosives" ), {
+                        { J( "Rocket" ), &raid_visuals.rocket },
+                        { J( "High velocity rocket" ), &raid_visuals.high_velocity_rocket },
+                        { J( "Incendiary rocket" ), &raid_visuals.incendiary_rocket },
+                        { J( "Explosive ammo" ), &raid_visuals.explosive_ammo },
+                        { J( "C4" ), &raid_visuals.c4 },
+                        { J( "Satchel charge" ), &raid_visuals.satchel_charge },
+                        { J( "HE grenade" ), &raid_visuals.he_grenade },
+                        { J( "MLRS rocket" ), &raid_visuals.mlrs_rocket },
+                    } );
+
+                right.slider( J( "Maximum time" ), S( "%us" ), &raid_visuals.maximum_time, 0u, 600u );
+                right.slider( J( "Maximum distance" ), S( "%um" ), &raid_visuals.maximum_distance, 0u, 5000u );
+            }
+
+            right.toggle( J( "Events" ), &events.enabled );
+
+            if ( events.enabled ) {
+                right.toggle( J( "Notify on event" ), &events.notify );
+            }
+
+            visual_impl( right, player_corpse, J( "Player corpse" ) );
+            visual_impl( right, backpack, J( "Backpack" ) );
+
+            right.end();
+        }
+
+        else if ( current_subtab[ tabs::visuals ] == visual_subtabs::resources ) {
+            left.begin( J( "Ores" ) );
+
+            visual_impl( left, stone_ore, J( "Stone ore" ) );
+            visual_impl( left, metal_ore, J( "Metal ore" ) );
+            visual_impl( left, sulfur_ore, J( "Sulfur ore" ) );
+            visual_impl( left, wood_pile, J( "Wood pile" ) );
+
+            left.end();
+
+            right.begin( J( "Collectables" ) );
+
+            visual_impl( right, hemp );
+            visual_impl( right, mushroom );
+
+            visual_impl( right, pumpkin );
+            visual_impl( right, corn );
+            visual_impl( right, potato );
+            visual_impl( right, stone );
+            visual_impl( right, metal );
+            visual_impl( right, sulfur );
+            visual_impl( right, wood );
+
+            right.end();
+        }
+
+        else if ( current_subtab[ tabs::visuals ] == visual_subtabs::deployables ) {
+            left.begin();
+            left.end();
+
+            right.begin();
+            right.end();
+        }
+
+        else if ( current_subtab[ tabs::visuals ] == visual_subtabs::vehicles ) {
+            left.begin();
+
+            visual_impl( left, rowboat );
+            visual_impl( left, rhib );
+            visual_impl( left, minicopter );
+            visual_impl( left, scrap_helicopter, J( "Scrap helicopter" ) );
+            visual_impl( left, attack_helicopter, J( "Attack helicopter" ) );
+            visual_impl( left, tugboat );
+            visual_impl( left, submarine );
+            visual_impl( left, hot_air_balloon, J( "Hot air balloon" ) );
+            visual_impl( left, diver_propulsion_vehicle, J( "Diver propulsion vehicle" ) );
+
+            left.end();
+
+            right.begin();
+
+            visual_impl( right, patrol_helicopter, J( "Patrol helicopter" ), 5000u );
+            visual_impl( right, bradley );
+
+            right.end();
+        }
+
+        else if ( current_subtab[ tabs::visuals ] == visual_subtabs::animals ) {
+            left.begin();
+
+            visual_impl( left, bear );
+            visual_impl( left, boar );
+            visual_impl( left, chicken );
+            visual_impl( left, horse );
+            visual_impl( left, stag );
+            visual_impl( left, wolf );
+            visual_impl( left, shark );
+            visual_impl( left, bee_swarm, J( "Bee swarm" ) );
+            visual_impl( left, tiger );
+            visual_impl( left, panther );
+            visual_impl( left, crocodile );
+            visual_impl( left, snake );
+
+            left.end();
+
+            right.begin();
+
+            right.end();
+        }
+
+        else if ( current_subtab[ tabs::visuals ] == visual_subtabs::traps ) {
+            left.begin();
+
+            visual_impl( left, shotgun_trap, J( "Shotgun trap" ) );
+            visual_impl( left, flame_turret, J( "Flame turret" ) );
+            visual_impl( left, land_mine, J( "Land mine" ) );
+
+            left.toggle( J( "Bear trap" ), &bear_trap.enabled );
+            left.color_picker( &bear_trap.color );
+
+            if ( bear_trap.enabled ) {
+                left.toggle( J( "Ignore unarmed" ), &bear_trap_ignore_unarmed );
+                left.slider( J( "Max distance" ), S( "%dm" ), &bear_trap.maximum_distance, 0u, 500u );
+            }
+
+            left.toggle( J( "SAM site" ), &sam_site.enabled );
+            left.color_picker( &sam_site.color );
+
+            if ( sam_site.enabled ) {
+                left.toggle( J( "Ignore offline" ), &sam_site_ignore_offline );
+                left.slider( J( "Max distance" ), S( "%dm" ), &sam_site.maximum_distance, 0u, 500u );
+            }
+
+            left.end();
+
+            right.begin();
+            right.end();
+        }
+
+        else if ( current_subtab[ tabs::visuals ] == visual_subtabs::loot ) {
+            left.begin();
+
+            visual_impl( left, red_barrel, J( "Red barrel" ) );
+            visual_impl( left, blue_barrel, J( "Blue barrel" ) );
+            visual_impl( left, oil_barrel, J( "Oil barrel" ) );
+            visual_impl( left, diesel_barrel, J( "Diesel barrel" ) );
+            visual_impl( left, minecart, J( "Minecart" ) );
+            visual_impl( left, vehicle_parts, J( "Vehicle parts" ) );
+            visual_impl( left, tech_parts, J( "Tech parts" ) );
+            visual_impl( left, supply_drop, J( "Supply drop" ), 5000u );
+
+            left.end();
+
+            right.begin();
+
+            visual_impl( right, food_crate, J( "Food crate" ) );
+            visual_impl( right, medical_crate, J( "Medical crate" ) );
+            visual_impl( right, tool_crate, J( "Tool crate" ) );
+            visual_impl( right, ammo_crate, J( "Ammo crate" ) );
+            visual_impl( right, fuel_crate, J( "Fuel crate" ) );
+            visual_impl( right, basic_crate, J( "Basic crate" ) );
+            visual_impl( right, normal_crate, J( "Normal crate" ) );
+            visual_impl( right, underwater_crate, J( "Underwater crate" ) );
+            visual_impl( right, military_crate, J( "Military crate" ) );
+            visual_impl( right, elite_crate, J( "Elite crate" ) );
+            visual_impl( right, bradley_crate, J( "Bradley crate" ) );
+            visual_impl( right, heli_crate, J( "Heli crate" ) );
+
+            right.end();
+        }
+    }
+
+    else if ( current_tab == tabs::misc ) {
+        if ( current_subtab[ tabs::misc ] == misc_subtabs::quality_of_life ) {
+            left.begin();
+            left.toggle( J( "Instant loot" ), &instant_loot );
+            left.toggle( J( "Loot without untie" ), &loot_without_untie );
+
+            left.toggle( J( "Field of view modifier" ), &fov_modifier.enabled );
+            if ( fov_modifier.enabled ) {
+                left.slider( J( "Field of view" ), S( "%.0f" ), &fov_modifier.fov, 90.f, 170.f );
+            }
+
+            left.toggle( J( "Auto drop box" ), &auto_drop_box.enabled );
+
+            left.toggle( J( "Auto upgrade" ), &auto_upgrade.enabled );
+
+            if ( auto_upgrade.enabled ) {
+                left.toggle( J( "Only holding hammer" ), &auto_upgrade.only_holding_hammer );
+
+                left.combo_box( J( "Upgrade from" ), { J( "Any" ), J( "Twig" ), J( "Wood" ), J( "Stone" ), J( "Sheet metal" ) }, &auto_upgrade.from, -1 );
+                left.combo_box( J( "Upgrade to" ), { J( "Wood" ), J( "Stone" ), J( "Sheet metal" ), J( "Armored" ) }, &auto_upgrade.to, 1 );
+            }
+
+            left.end();
+
+            right.begin();
+
+            right.toggle( J( "Override night" ), &override_night.enabled );
+            right.color_picker( &ambient_color, false );
+            right.keybind( &override_night.key );
+
+            if ( override_night.enabled ) {
+                right.slider( J( "Ambient multiplier" ), S( "%.2fx" ), &ambient_multiplier, 0.f, 3.f );
+                right.slider( J( "Ambient saturation" ), S( "%.2f" ), &ambient_saturation, 0.f, 0.5f );
+            }
+
+            right.end();
+        }
+
+        else if ( current_subtab[ tabs::misc ] == misc_subtabs::visuals ) {
+            left.begin();
+
+            left.toggle( J( "Minimap" ), &minimap.enabled );
+            left.color_picker( &minimap.color );
+
+            if ( minimap.enabled ) {
+                left.slider( J( "Size" ), S( "%.2fpx" ), &minimap.size, 50.f, 800.f );
+                left.slider( J( "Zoom" ), S( "%.2fx" ), &minimap.zoom, 1.f, 15.f );
+            }
+
+            left.end();
+
+            right.begin( J( "Local chams" ) );
+
+            right.toggle( J( "Held item" ), &local_chams.held_item );
+            right.color_picker( &local_chams.held_item_occluded_color );
+            right.color_picker( &local_chams.held_item_visible_color );
+
+            right.toggle( J( "Hands" ), &local_chams.hands );
+            right.color_picker( &local_chams.hands_occluded_color );
+            right.color_picker( &local_chams.hands_visible_color );
+
+            right.end();
+        }
+
+        else if ( current_subtab[ tabs::misc ] == misc_subtabs::movement ) {
+            left.begin();
+            left.toggle( J( "Spider-man" ), &spider_man );
+            left.toggle( J( "Infinite jump" ), &infinite_jump );
+            left.toggle( J( "Omnisprint" ), &omnisprint );
+
+            if ( left.toggle( J( "Speedhack" ), &speedhack.enabled ) ) {
+                left.slider( J( "Speed multiplier" ), S( "%.2fx" ), &speedhack.multiplier, 1.f, 5.f );
+            }
+
+            left.toggle( J( "No attack restrictions" ), &no_attack_restrictions.enabled );
+            left.toggle( J( "On ladder" ), &on_ladder );
+
+            left.toggle( J( "Anti-flyhack" ), &anti_flyhack.enabled );
+
+            left.end();
+
+            right.begin();
+
+            right.toggle( J( "Admin flags" ), &admin_flags );
+
+            if ( right.toggle( J( "Block server commands" ), &block_server_commands.enabled ) ) {
+                right.toggle( J( "Notify on block" ), &block_server_commands.notify );
+            }
+
+            right.end();
+        }
+    }
+
+    else if ( current_tab == tabs::settings ) {
+        left.begin();
+        left.color_picker( &gradient_on[ 0 ] );
+        left.end();
+
+        gradient_on[ 1 ] = gradient_on[ 0 ];
+        gradient_on[ 2 ] = gradient_on[ 0 ] - COL32( 0, 0, 0, 45 );
+        gradient_on[ 3 ] = gradient_on[ 0 ] - COL32( 0, 0, 0, 45 );
     }
 
     draw_list.render();
