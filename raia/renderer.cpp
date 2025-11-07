@@ -55,8 +55,18 @@ private:
 	size_t position_;
 };
 
-ImFont* load_small_fonts( uint8_t* font_data, ImFont* add = nullptr ) {
-	stream_reader stream( font_data );
+ImFont* load_compressed_small_fonts( uint8_t* compressed, size_t compressed_size, ImFont* add = nullptr ) {
+	stream_reader compressed_stream( compressed );
+
+	size_t uncompressed_size = compressed_stream.read<int>();
+	auto uncompressed = std::make_unique<uint8_t[]>( uncompressed_size );
+	if ( !uncompressed.get() )
+		return nullptr;
+
+	if ( uncompress_lzma2( compressed_stream.get_position(), &compressed_size, uncompressed.get(), &uncompressed_size ) != uncompress_status::UNCOMPRESS_OK )
+		return nullptr;
+
+	stream_reader stream( uncompressed.get() );
 
 	uint32_t width = stream.read<uint32_t>();
 	uint32_t height = stream.read<uint32_t>();
@@ -313,8 +323,8 @@ bool renderer::init( IDXGISwapChain* swapchain ) {
 	std::initializer_list<std::initializer_list<std::pair<uint16_t, uint16_t>>> ranges = { { { 0x00, 0xFF }, { 0x590, 0x68F } }, { { 0x400, 0x4FF } } };
 
 	// TODO: Find a way to get ascii and cyrillic in the same file
-	ImFont* small_fonts = fonts[ fonts::small_fonts ] = load_small_fonts( _smallfonts );
-	load_small_fonts( _smallfonts_cyrillic, small_fonts );
+	ImFont* small_fonts = fonts[ fonts::small_fonts ] = load_compressed_small_fonts( _smallfonts, sizeof( _smallfonts ) );
+	load_compressed_small_fonts( _smallfonts_cyrillic, sizeof( _smallfonts_cyrillic ), small_fonts );
 
 	fonts[ fonts::consolas_bold ] = load_compressed_glfn_font( _consolas_bold, sizeof( _consolas_bold ), ranges );
 	fonts[ fonts::verdana ] = load_compressed_glfn_font( _verdana, sizeof( _verdana ), ranges );
