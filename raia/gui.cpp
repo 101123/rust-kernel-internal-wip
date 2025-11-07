@@ -210,6 +210,7 @@ util::lazy_initializer<ordered_draw_list> gui_draw_list;
 uint64_t frame_count;
 
 state_history2<bool> left_mouse_state;
+state_history2<bool> right_mouse_state;
 state_history2<vector2> mouse_position;
 state_history2<rect> ignore_bounds;
 uint64_t active_hash;
@@ -246,11 +247,25 @@ uint32_t gradient_off[ 4 ] = {
     COL32( 52, 52, 52, 255 )
 };
 
+uint32_t gradient_off_hovered[ 4 ] = {
+    COL32( 85, 85, 85, 255 ),
+    COL32( 85, 85, 85, 255 ),
+    COL32( 60, 60, 60, 255 ),
+    COL32( 60, 60, 60, 255 )
+};
+
 uint32_t slider_gradient[ 4 ] = {
     COL32( 52, 52, 52, 255 ),
     COL32( 52, 52, 52, 255 ),
     COL32( 68, 68, 68, 255 ),
     COL32( 68, 68, 68, 255 )
+};
+
+uint32_t slider_gradient_hovered[ 4 ] = {
+    COL32( 62, 62, 62, 255 ),
+    COL32( 62, 62, 62, 255 ),
+    COL32( 78, 78, 78, 255 ),
+    COL32( 78, 78, 78, 255 )
 };
 
 uint32_t combo_box_gradient[ 4 ] = {
@@ -268,6 +283,13 @@ void update_input() {
 
     left_mouse_clicked = left_mouse_state.current && !left_mouse_state.previous;
     left_mouse_held = left_mouse_state.previous && left_mouse_state.current;
+
+    right_mouse_state = {
+        .previous = right_mouse_state.current,
+        .current = unity::input::get_mouse_button( 1 )
+    };
+
+    right_mouse_clicked = right_mouse_state.current && !right_mouse_state.previous;
 
     vector2 mouse_pos = unity::input::get_mouse_position();
     mouse_pos.y = ( float )screen_height - mouse_pos.y;
@@ -720,7 +742,7 @@ public:
         }
 
         draw_list.add_filled_rect( toggle_bounds.x, toggle_bounds.y, toggle_bounds.w, toggle_bounds.h, COLOR_B );
-        draw_list.add_filled_rect_multi_color( toggle_bounds.x + 1.f, toggle_bounds.y + 1.f, toggle_bounds.w - 2.f, toggle_bounds.h - 2.f, *value ? gradient_on : gradient_off );
+        draw_list.add_filled_rect_multi_color( toggle_bounds.x + 1.f, toggle_bounds.y + 1.f, toggle_bounds.w - 2.f, toggle_bounds.h - 2.f, *value ? gradient_on : ( hovered ? gradient_off_hovered : gradient_off ) );
 
         draw_list.add_text( position.x + 20.f, position.y, fonts::verdana, text_flags::none, COLOR_E, label );
 
@@ -734,7 +756,7 @@ public:
     void keybind( uint32_t* key ) {
         auto& draw_list = gui_draw_list.get();
 
-        draw_list.push_z_index( 2 );
+        draw_list.push_z_index( 4 );
 
         const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
         const rect bounds = rect( position.x + bounds_.w - 51.f, position.y - 1.f, 20.f, 10.f );
@@ -742,11 +764,33 @@ public:
         const bool hovered = mouse_in_rect( bounds );
 
         const uint64_t hash = ( uint64_t )key;
+        const uint64_t hash2 = hash + 1;
+
         const bool active = active_hash == hash;
+        const bool active2 = active_hash == hash2;
+
+        static const char* options[] = {
+            J( "Always on" ),
+            J( "On hotkey" ),
+            J( "Toggle" ),
+            J( "Off hotkey" )
+        };
+
+        rect options_bounds = rect( bounds.x - 107.f, bounds.y + 11.f, 100.f, 20.f * _countof( options ) );
 
         if ( hovered && !active_hash && left_mouse_clicked ) {
             active_hash = hash;
             activate_hash_frame = frame_count;
+        }
+
+        else if ( hovered && !active_hash && right_mouse_clicked ) {
+            active_hash = hash2;
+            ignore_bounds.current = options_bounds;
+        }
+
+        else if ( active2 && left_mouse_clicked && !mouse_in_rect( options_bounds ) ) {
+            active_hash = 0ull;
+            ignore_bounds.current = rect();
         }
 
         if ( active ) {
@@ -763,8 +807,27 @@ public:
             }
         }
 
+        else if ( active2 ) {
+            draw_styled_rect( options_bounds );
+
+            for ( int32_t i = 0; i < _countof( options ); i++ ) {
+                const rect option_bounds = rect( options_bounds.x, options_bounds.y + ( i * 20.f ), options_bounds.w, 20.f );
+
+                const bool hovered = mouse_in_rect( option_bounds );
+
+                if ( hovered ) {
+                    if ( left_mouse_clicked ) {
+                        active_hash = 0ull;
+                        ignore_bounds.current = rect();
+                    }
+                }
+
+                draw_list.add_text( options_bounds.x + 7.f, options_bounds.y + 7.f + ( i * 20.f ), hovered ? fonts::verdana_bold : fonts::verdana, text_flags::none, COLOR_E, options[ i ] );
+            }
+        }
+
         draw_list.add_text( bounds.x + 11.f, bounds.y, fonts::small_fonts, text_flags::align_right,
-            active ? COL32_RED : COL32( 160, 160, 160, 200 ), *key == UINT32_MAX ? J( "[-]" ) : FMT( 32, "[%s]", key_names[ *key ] ) );
+            active ? COL32_RED : ( hovered ? COL32( 200, 200, 200, 170 ) : COL32( 160, 160, 160, 170 ) ), *key == UINT32_MAX ? J( "[-]" ) : FMT( 32, "[%s]", key_names[ *key ] ) );
 
         draw_list.pop_z_index();
     }
@@ -1011,7 +1074,7 @@ public:
 
         draw_list.add_text( slider_bounds.x, position.y + 4.f, fonts::verdana, text_flags::none, COLOR_E, label );
 
-        draw_styled_rect( slider_bounds, slider_gradient );
+        draw_styled_rect( slider_bounds, hovered ? slider_gradient_hovered : slider_gradient );
 
         const rect draw_bounds = rect( slider_bounds.x + 1.f, slider_bounds.y + 1.f, slider_bounds.w - 2.f, slider_bounds.h - 2.f );
         float fill_width = draw_bounds.w * std::clamp( static_cast< float >( *value - min ) / static_cast< float >( max - min ), 0.f, 1.f );
