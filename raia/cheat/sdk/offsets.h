@@ -620,11 +620,20 @@ namespace Offsets {
 		constexpr const static size_t newRecoilOverride = 0x80;
 	}
 
+#define BaseProjectile_Magazine_Definition_TypeDefinitionIndex 5949
+
+	namespace BaseProjectile_Magazine_Definition {
+
+		// Offsets
+		constexpr const static size_t builtInSize = 0x0;
+	}
+
 #define BaseProjectile_Magazine_TypeDefinitionIndex 5950
 
 	namespace BaseProjectile_Magazine {
 
 		// Offsets
+		constexpr const static size_t definition = 0x10;
 		constexpr const static size_t capacity = 0x18;
 		constexpr const static size_t contents = 0x1c;
 		constexpr const static size_t ammoType = 0x20;
@@ -1097,6 +1106,7 @@ namespace Offsets {
 		constexpr const static size_t recoil = 0x210;
 		constexpr const static size_t sightAimCone = 0x21c;
 		constexpr const static size_t hipAimCone = 0x228;
+		constexpr const static size_t magazineCapacity = 0x23c;
 		constexpr const static size_t needsOnForEffects = 0x248;
 	}
 
@@ -1248,6 +1258,7 @@ namespace Offsets {
 		// Offsets
 		constexpr const static size_t info = 0xb8;
 		constexpr const static size_t uid = 0xe8;
+		constexpr const static size_t clientAmmoCount = 0xc0;
 		constexpr const static size_t _maxCondition = 0x10;
 		constexpr const static size_t _condition = 0x3c;
 		constexpr const static size_t amount = 0x60;

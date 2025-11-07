@@ -41,6 +41,9 @@ struct cached_belt_item {
 	float condition;
 	float max_condition;
 	int32_t amount;
+	bool has_ammo;
+	int32_t ammo_count;
+	int32_t max_ammo_count;
 	char name[ 256 ];
 };
 

@@ -93,6 +93,8 @@ struct cvar_player_visuals {
 	cvar_ui chams_occluded_color;
 	cvar bounding_box;
 	cvar_ui bounding_box_color;
+	cvar health_bar;
+	cvar ammo_bar;
 	cvar skeleton;
 	cvar_ui skeleton_color;
 	cvar name;
@@ -120,6 +122,8 @@ struct cvar_player_visuals {
 	cvar_ui( H( Name " Chams Occluded Color" ), COL32( R, G, B, A ) ), \
 	cvar( H( Name " Bounding Box" ), true ), \
 	cvar_ui( H( Name " Bounding Box Color" ), COL32( R, G, B, 200 ) ), \
+	cvar( H( Name " Health Bar" ), true ), \
+	cvar( H( Name " Ammo Bar" ), true ), \
 	cvar( H( Name " Skeleton" ), true ), \
 	cvar_ui( H( Name " Skeleton Color" ), COL32( R, G, B, 200 ) ), \
 	cvar( H( Name " Name" ), true ), \

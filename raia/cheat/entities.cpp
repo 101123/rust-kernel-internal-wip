@@ -928,6 +928,44 @@ void update_player_bones( cached_player& cached_player ) {
     }
 }
 
+int32 get_max_ammo_count( rust::item* item ) {
+    rust::base_entity* held_entity = item->held_entity.ent_cached;
+    if ( !is_valid_ptr( held_entity ) )
+        return -1;
+
+    rust::base_projectile* base_projectile = held_entity->as<rust::base_projectile>();
+    if ( !is_valid_ptr( base_projectile ) )
+        return -1;
+
+    rust::base_projectile::magazine* magazine = base_projectile->primary_magazine;
+    if ( !is_valid_ptr( magazine ) )
+        return -1;
+
+    sys::list<rust::base_entity*>* children = base_projectile->children;
+    if ( !is_valid_ptr( children ) || !is_valid_ptr( children->items ) )
+        return -1;
+
+    float magazine_capacity_scale = 1.f;
+
+    for ( int32_t i = 0; i < children->size; i++ ) {
+        rust::base_entity* child = children->at( i );
+        if ( !is_valid_ptr( child ) )
+            continue;
+
+        auto projectile_weapon_mod = child->as<rust::projectile_weapon_mod>();
+        if ( !projectile_weapon_mod )
+            continue;
+
+        rust::projectile_weapon_mod::modifier magazine_capacity = projectile_weapon_mod->magazine_capacity;
+
+        if ( magazine_capacity.enabled ) {
+            magazine_capacity_scale *= magazine_capacity.scalar;
+        }
+    }
+
+    return ( int32_t )ceilf( ( float )magazine->_definition.built_in_size * magazine_capacity_scale );
+}
+
 void update_player_inventory( rust::base_player* player, cached_player& cached_player ) {
     // Reset everything here in case anything fails
     cached_player.active_item_idx = -1;
@@ -974,7 +1012,9 @@ void update_player_inventory( rust::base_player* player, cached_player& cached_p
         if ( !is_valid_ptr( info ) )
             return;
 
-        if ( item->uid == active_item_uid ) {
+        bool active = item->uid == active_item_uid;
+
+        if ( active ) {
             cached_player.active_item_idx = i;
             cached_player.active_item_id = info->item_id;
         }
@@ -984,6 +1024,15 @@ void update_player_inventory( rust::base_player* player, cached_player& cached_p
         belt_item.condition = item->condition;
         belt_item.max_condition = item->max_condition;
         belt_item.amount = item->amount;
+
+        sys::nullable<int32_t> ammo_count = item->client_ammo_count;
+
+        belt_item.has_ammo = ammo_count.has_value;
+
+        if ( active && belt_item.has_ammo ) {
+            belt_item.ammo_count = ammo_count.value;
+            belt_item.max_ammo_count = get_max_ammo_count( item );
+        }
 
         // If the item has changed, cache the rest of its information
         if ( belt_item.present )

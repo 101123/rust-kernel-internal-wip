@@ -102,6 +102,17 @@ namespace sys {
     public:
         FIELD( void*, invoke_impl, 0x18 );
     };
+
+    // These offsets may be incorrect depending on T
+    template <typename T>
+    class nullable {
+    public:
+        FIELD( bool, has_value, 0x0 );
+        FIELD( T, value, 0x4 );
+
+    private:
+        uint8_t _[ 64 ];
+    };
 }
 
 namespace unity {
@@ -2042,6 +2053,7 @@ namespace rust {
         FIELD( float, max_condition, Offsets::Item::_maxCondition );
         FIELD( item_definition*, info, Offsets::Item::info );
         FIELD( item_id, uid, Offsets::Item::uid );
+        FIELD( sys::nullable<int>, client_ammo_count, Offsets::Item::clientAmmoCount );
         FIELD( int, amount, Offsets::Item::amount );
         FIELD( int, position, Offsets::Item::position );
         FIELD( item_container*, contents, Offsets::Item::contents );
@@ -2353,6 +2365,15 @@ namespace rust {
     public:
         class magazine {
         public:
+            class definition {
+            public:
+                FIELD( int, built_in_size, Offsets::BaseProjectile_Magazine_Definition::builtInSize );
+
+            private:
+                uint8_t _[ 16 ];
+            };
+
+            FIELD( definition, _definition, Offsets::BaseProjectile_Magazine::definition );
             FIELD( int, capacity, Offsets::BaseProjectile_Magazine::capacity );
             FIELD( int, contents, Offsets::BaseProjectile_Magazine::contents );
             FIELD( item_definition*, ammo_type, Offsets::BaseProjectile_Magazine::ammoType );
@@ -2760,6 +2781,7 @@ namespace rust {
         FIELD( modifier, recoil, Offsets::ProjectileWeaponMod::recoil );
         FIELD( modifier, sight_aim_cone, Offsets::ProjectileWeaponMod::sightAimCone );
         FIELD( modifier, hip_aim_cone, Offsets::ProjectileWeaponMod::hipAimCone );
+        FIELD( modifier, magazine_capacity, Offsets::ProjectileWeaponMod::magazineCapacity );
         FIELD( bool, needs_on_for_effects, Offsets::ProjectileWeaponMod::needsOnForEffects );
 
         static inline il2cpp_class* klass_;
