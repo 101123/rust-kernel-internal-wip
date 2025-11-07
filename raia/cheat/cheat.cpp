@@ -506,10 +506,17 @@ void hook_manager::place_hooks() {
 
 			// If it's a pointer swap hook, we set the corrupted value to the address of function padding (0xCC)
 			if ( hook.type == hook_type::ptr_swap ) {
-				hook.corrupt = hook.original - 1llu;
+				// Functions are not guaranteed to have padding directly before them, so we just scan up to a page of memory before the function address for some
+				uintptr_t padding = util::find_pattern( hook.original - 0x1000, S( "\xCC\xCC" ), S( "xx" ), 0x1000 );
 
-				// We also need a corrupt return address for post hooks, so find the next 0xCC since function padding is only guaranteed to be at least 1 byte
-				hook.ptr_swap.corrupt_retaddr = util::find_pattern( hook.original, S( "\xCC" ), S( "x" ), 0x1000 );
+				if ( !padding ) {
+					LOG( "Failed to find function padding!\n" );
+				}
+
+				hook.corrupt = padding;
+
+				// We also need a corrupt return address for post hooks
+				hook.ptr_swap.corrupt_retaddr = padding + 0x1;
 			}
 
 			hook.init = true;
