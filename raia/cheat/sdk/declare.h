@@ -41,6 +41,7 @@ namespace rust {
 	class building_block;
 	class player_tick;
 	class base_movement;
+	class player_walk_movement;
 
 	using networkable_id = uint64_t;
 	using item_id = uint64_t;

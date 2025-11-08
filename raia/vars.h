@@ -265,7 +265,7 @@ inline cvar_visual dropped_fun = WRAP_VISUAL( "Dropped Fun", false, 500, COL32( 
 DEFINE_CONTEXT( local_player,
 	rust::base_player* entity;
 	rust::player_eyes* eyes;
-	rust::base_movement* movement;
+	rust::player_walk_movement* movement;
 	rust::item* held_item;
 	rust::held_entity* held_entity;
 

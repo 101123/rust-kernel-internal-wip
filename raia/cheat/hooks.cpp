@@ -31,8 +31,12 @@ bool cache_local_player( rust::base_player* base_player ) {
 	if ( !is_valid_ptr( eyes ) )
 		return false;
 
-	rust::base_movement* movement = base_player->movement;
-	if ( !is_valid_ptr( movement ) )
+	rust::base_movement* base_movement = base_player->movement;
+	if ( !is_valid_ptr( base_movement ) )
+		return false;
+
+	rust::player_walk_movement* movement = base_movement->is<rust::player_walk_movement>();
+	if ( !movement )
 		return false;
 
 	rust::item* held_item = base_player->get_held_item();
@@ -545,12 +549,10 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 	else if ( anti_flyhack.enabled && last_sent_tick.time && test_flying( last_sent_tick.position, player_tick->position, true ) ) {
 		player_tick->position = last_sent_tick.position;
 
-		rust::player_walk_movement* movement = local_player.entity->movement;
+		local_player.movement->teleport_to( previous->position, local_player.entity );
 
-		if ( is_valid_ptr( movement ) ) {
-			movement->teleport_to( previous->position, local_player.entity );
-			movement->target_movement = vector3();
-		}
+		// Reset our desired velocity
+		local_player.movement->target_movement = vector3();
 	}
 
 	// We need to maintain our own last sent tick because our approach for desync does not block BasePlayer.SendClientTick, and thus BasePlayer.lastSentTick is not accurate
@@ -874,13 +876,17 @@ void client_on_client_disconnected_pre_hook( rust::client* client, sys::string* 
 }
 
 bool enter_interactive_debug() {
+	// This should never happen
+	if ( !last_sent_tick.time || !local_player.movement )
+		return false;
+
 	// Preserve the current admin cheat so we can reset it back properly
 	interactive_debug.admin_cheat = local_player.movement->admin_cheat;
 
-	// PlayerTick.eyePos is the camera position, and since we can only enter interactive debug camera while standing, the eyes position is correct
+	// Since we only enter interactive debug camera while our camera mode is CameraMode.FirstPerson/ThirdPerson, PlayerEyes.position is the correct position to send in our player ticks
 	interactive_debug.eyes_position = local_player.eyes_position;
 
-	// PlayerTick.position is the players local position, so if they're parented, we must get the inverse transform point of their position
+	// PlayerTick.position is the player local position, so if they're parented, we must get the inverse transform point of their position
 	rust::base_entity* parent_entity = local_player.entity->parent_entity;
 
 	if ( is_valid_ptr( parent_entity ) ) {
@@ -898,23 +904,10 @@ bool enter_interactive_debug() {
 	}
 
 	// Cache aim angles and look direction so we don't rotate while looking around in interactive debug camera
-	rust::player_tick* last_sent_tick = local_player.entity->last_sent_tick;
-	if ( !is_valid_ptr( last_sent_tick ) )
-		return false;
+	interactive_debug.aim_angles = last_sent_tick.aim_angles;
+	interactive_debug.look_direction = last_sent_tick.look_direction;
 
-	rust::input_message* input_state = last_sent_tick->input_state;
-	if ( !is_valid_ptr( input_state ) )
-		return false;
-
-	rust::model_state* model_state = last_sent_tick->model_state;
-	if ( !is_valid_ptr( model_state ) )
-		return false;
-
-	interactive_debug.aim_angles = input_state->aim_angles;
-	interactive_debug.look_direction = model_state->look_dir;
-	interactive_debug.dirty = true;
-
-	return true;
+	return interactive_debug.dirty = true;
 }
 
 void exit_interactive_debug() {
@@ -939,9 +932,7 @@ void exit_interactive_debug() {
 	}
 
 	// Teleport to the start position
-	if ( auto player_walk_movement = local_player.movement->is<rust::player_walk_movement>() ) {
-		player_walk_movement->teleport_to( reset_position, local_player.entity );
-	}
+	local_player.movement->teleport_to( reset_position, local_player.entity );
 
 	interactive_debug.dirty = false;
 }
@@ -1223,11 +1214,7 @@ void player_walk_movement_teleport_to_pre_hook( rust::player_walk_movement* play
 	if ( player != local_player.entity )
 		return;
 
-	rust::player_tick* last_sent_tick = local_player.entity->last_sent_tick;
-
-	if ( is_valid_ptr( last_sent_tick ) ) {
-		last_sent_tick->position = *position;
-	}
+	last_sent_tick.position = *position;
 }
 
 void hook_handlers::network_client_create_networkable( _CONTEXT* context, void* user_data ) {
