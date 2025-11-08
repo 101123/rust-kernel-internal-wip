@@ -290,7 +290,7 @@ DEFINE_CONTEXT( held_weapon,
 	float initial_distance;
 
 	uint32_t prefab_id;
-	int item_id;
+	int32_t ammo_item_id;
 );
 
 DEFINE_CONTEXT( camera,

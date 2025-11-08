@@ -185,7 +185,7 @@ void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) 
 		projectile_item_info = info;
 	}
 
-	if ( !projectile_item_info || ( ( held_entity->prefab_id == held_weapon.prefab_id && projectile_item_info->item_id == held_weapon.item_id ) && !mod_hash_broken ) )
+	if ( !projectile_item_info || ( ( held_entity->prefab_id == held_weapon.prefab_id && projectile_item_info->item_id == held_weapon.ammo_item_id ) && !mod_hash_broken ) )
 		return;
 
 	unity::game_object* container = projectile_item_info->get_game_object();
@@ -231,7 +231,7 @@ void cache_held_entity( rust::item* held_item, rust::base_entity* held_entity ) 
 	held_weapon.gravity_modifier = projectile->gravity_modifier;
 	held_weapon.initial_distance = projectile->initial_distance;
 	held_weapon.prefab_id = held_entity->prefab_id;
-	held_weapon.item_id = projectile_item_info->item_id;
+	held_weapon.ammo_item_id = projectile_item_info->item_id;
 }
 
 void update_velocity_for_compound_bow( rust::compound_bow_weapon* compound_bow ) {
@@ -1163,7 +1163,7 @@ bool hook_handlers::pre_protobuf_projectile_shoot_write_to_stream( _CONTEXT* con
 				char class_name[ 64 ] = {};
 				memcpy( class_name, klass->name, sizeof( class_name ) - 1llu );
 
-				// This is most likely redundant, but this only runs once, so who cares?
+				// This is most likely redundant, but this only runs once, so it doesn't matter
 				return util::hash( class_name ) == H( "List`1" );
 			}, true, 0x100 );
 

@@ -1957,6 +1957,15 @@ namespace rust {
             caller( teleport_to, this, _position, player );
         }
 
+        void block_jump( float duration ) {
+            void ( *block_jump )( player_walk_movement*, float ) =
+                ( decltype( block_jump ) )( game_assembly + Offsets::PlayerWalkMovement::BlockJump );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            caller( block_jump, this, duration );
+        }
+
         static inline il2cpp_class* klass_;
     };
 
@@ -2826,8 +2835,8 @@ namespace rust {
 
         static inline float flyhack_extrusion = 2.f;
         static inline float flyhack_margin = 0.1f;
-        static inline float flyhack_forgiveness_vertical = 1.f;
-        static inline float flyhack_forgiveness_horizontal = 1.5f;
+        static inline float flyhack_forgiveness_vertical = 0.995f; /* 1.f */
+        static inline float flyhack_forgiveness_horizontal = 1.495f; /* 1.5f */
     };
 
     class server_projectile {
@@ -2893,7 +2902,14 @@ namespace rust {
         static inline il2cpp_class* klass_;
     };
 
-    class effect : public il2cpp_object {
+    class effect_data : public il2cpp_object {
+    public:
+        FIELD( uint64_t, source, Offsets::EffectData::source );
+
+        static inline il2cpp_class* klass_;
+    };
+
+    class effect : public effect_data {
     public:
         FIELD( vector3, world_pos, Offsets::Effect::worldPos );
         FIELD( sys::string*, pooled_string, Offsets::Effect::pooledString );
