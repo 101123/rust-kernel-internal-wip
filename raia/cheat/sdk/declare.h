@@ -40,6 +40,7 @@ namespace rust {
 	class player_projectile_update;
 	class building_block;
 	class player_tick;
+	class base_movement;
 
 	using networkable_id = uint64_t;
 	using item_id = uint64_t;

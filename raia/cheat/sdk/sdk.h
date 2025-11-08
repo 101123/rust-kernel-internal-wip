@@ -623,6 +623,20 @@ namespace unity {
             return *lossy_scale;
         }
 
+        vector3 transform_point( const vector3& position ) {
+            void ( *transform_point_injected )( transform*, vector3*, vector3* ) =
+                ( decltype( transform_point_injected ) )( unity_player + Offsets::Transform::TransformPoint_Injected );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            vector3* _position = caller.push<vector3>( position );
+            vector3* result = caller.push<vector3>();
+
+            caller( transform_point_injected, this, _position, result );
+
+            return *result;
+        }
+
         vector3 inverse_transform_point( const vector3& position ) {
             void ( *inverse_transform_point_injected )( transform*, vector3*, vector3* ) =
                 ( decltype( inverse_transform_point_injected ) )( unity_player + Offsets::Transform::InverseTransformPoint_Injected );
@@ -1994,7 +2008,7 @@ namespace rust {
         };
 
         FIELD( float, water_level, Offsets::ModelState::waterLevel );
-        FIELD( vector3, look_direction, Offsets::ModelState::lookDir );
+        FIELD( vector3, look_dir, Offsets::ModelState::lookDir );
         FIELD( int, flags, Offsets::ModelState::flags );
 
         bool has_flag( flag f ) {
@@ -2573,7 +2587,7 @@ namespace rust {
 
     class input_message {
     public:
-
+        FIELD( vector3, aim_angles, Offsets::InputMessage::aimAngles );
     };
 
     class player_tick {

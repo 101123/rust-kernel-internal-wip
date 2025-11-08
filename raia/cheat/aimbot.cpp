@@ -139,7 +139,7 @@ inline vector2 angular_interpolate( const vector2& a, const vector2& b, float t 
 
 	if ( fabsf( b.y - a.y ) > 180.f ) {
 		// Go around in the opposite direction
-		yaw = a.y + t * ( b.y - a.y > 0.f ? -1.f : 1.f ) * ( 360.0f - fabsf( b.y - a.y ) );
+		yaw = a.y + t * ( b.y - a.y > 0.f ? -1.f : 1.f ) * ( 360.f - fabsf( b.y - a.y ) );
 	}
 	else {
 		yaw = a.y + t * ( b.y - a.y );

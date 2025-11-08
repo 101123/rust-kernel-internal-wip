@@ -265,10 +265,13 @@ inline cvar_visual dropped_fun = WRAP_VISUAL( "Dropped Fun", false, 500, COL32( 
 DEFINE_CONTEXT( local_player,
 	rust::base_player* entity;
 	rust::player_eyes* eyes;
-	vector3 eyes_position;
-	vector3 body_forward;
+	rust::base_movement* movement;
 	rust::item* held_item;
 	rust::held_entity* held_entity;
+
+	vector3 position;
+	vector3 eyes_position;
+	vector3 body_forward;
 );
 
 DEFINE_CONTEXT( held_weapon,
@@ -474,6 +477,7 @@ DEFINE_CONTEXT( desync,
 );
 
 inline float last_sent_tick_time;
+inline float next_tick_time;
 
 DEFINE_CONTEXT( auto_drop_box,
 	cvar enabled = cvar( H( "Auto Drop Box" ), false );
@@ -533,4 +537,18 @@ DEFINE_CONTEXT( anti_flyhack,
 	float max_vertical;
 	float horizontal;
 	float max_horizontal;
+);
+
+DEFINE_CONTEXT( interactive_debug,
+	cvar enabled = cvar( H( "Interactive Debug Camera" ), false );
+
+	bool active;
+	bool dirty;
+	bool parented;
+	bool admin_cheat;
+
+	vector3 position;
+	vector3 eyes_position;
+	vector3 aim_angles;
+	vector3 look_direction;
 );

@@ -13,21 +13,27 @@ void reset_local_player() {
 	local_player = {
 		.entity = nullptr,
 		.eyes = nullptr,
-		.eyes_position = vector3(),
-		.body_forward = vector3(),
+		.movement = nullptr,
 		.held_item = nullptr,
-		.held_entity = nullptr
+		.held_entity = nullptr,
+		.position = vector3(),
+		.eyes_position = vector3(),
+		.body_forward = vector3()
 	};
 }
 
 bool cache_local_player( rust::base_player* base_player ) {
-	rust::player_eyes* eyes = base_player->get_eyes();
-
-	// These must be valid for the local player to be populated
-	if ( !is_valid_ptr( eyes ) ) {
-		reset_local_player();
+	unity::transform* transform = base_player->get_transform();
+	if ( !is_valid_ptr( transform ) )
 		return false;
-	}
+
+	rust::player_eyes* eyes = base_player->get_eyes();
+	if ( !is_valid_ptr( eyes ) )
+		return false;
+
+	rust::base_movement* movement = base_player->movement;
+	if ( !is_valid_ptr( movement ) )
+		return false;
 
 	rust::item* held_item = base_player->get_held_item();
 	rust::held_entity* held_entity = nullptr;
@@ -36,12 +42,16 @@ bool cache_local_player( rust::base_player* base_player ) {
 		held_entity = held_item->held_entity.ent_cached->as<rust::held_entity>();
 	}
 
-	local_player.entity = base_player;
-	local_player.eyes = eyes;
-	local_player.eyes_position = eyes->get_position();
-	local_player.body_forward = eyes->body_forward();
-	local_player.held_item = held_item;
-	local_player.held_entity = held_entity;
+	local_player = {
+		.entity = base_player,
+		.eyes = eyes,
+		.movement = movement,
+		.held_item = held_item,
+		.held_entity = held_entity,
+		.position = transform->get_position(),
+		.eyes_position = eyes->get_position(),
+		.body_forward = eyes->body_forward()
+	};
 
 	return true;
 }
@@ -306,6 +316,10 @@ void player_walk_movement_client_input_pre_hook( rust::player_walk_movement* pla
 	if ( no_attack_restrictions.enabled ) {
 		player_walk_movement->admin_cheat = no_attack_restrictions.admin_cheat;
 	}
+
+	if ( interactive_debug.active ) {
+		player_walk_movement->admin_cheat = true;
+	}
 }
 
 void player_walk_movement_client_input_post_hook( rust::player_walk_movement* player_walk_movement, rust::input_state* input_state, rust::model_state* model_state ) {
@@ -314,6 +328,12 @@ void player_walk_movement_client_input_post_hook( rust::player_walk_movement* pl
 
 	if ( player_walk_movement->owner != local_player.entity )
 		return;
+
+	// If we're flying, set the grounded flag so we look like we're standing in the air
+	if ( model_state->has_flag( rust::model_state::flag::flying ) ) {
+		model_state->set_flag( rust::model_state::flag::on_ground, true );
+		return;
+	}
 
 	if ( no_attack_restrictions.enabled ) {
 		player_walk_movement->admin_cheat = true;
@@ -414,10 +434,13 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 
 	if ( is_valid_ptr( model_state ) ) {
 		if ( model_state->has_flag( rust::model_state::flag::flying ) ) {
-			// We need to set the sprinting flag so we can get maximum speed, but only set it when we're moving so it's more believable
-			if ( vector3::sqr_distance( previous->position, player_tick->position ) > 0.f ) {
+			// Set the sprinting flag if we're not in interactive debug camera and moving
+			if ( !interactive_debug.active && vector3::sqr_distance( previous->position, player_tick->position ) > 0.f ) {
 				model_state->set_flag( rust::model_state::flag::sprinting, true );
 			}
+
+			// Set the grounded flag so we don't look like we're flying
+			model_state->set_flag( rust::model_state::flag::on_ground, true );
 
 			// The detection for this on a vanilla server is gone, but keep it in anyways just in case
 			model_state->set_flag( rust::model_state::flag::flying, false );
@@ -442,21 +465,43 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 		}
 	}
 
-	float real_time_since_startup = unity::time::get_real_time_since_startup();
+	if ( interactive_debug.active ) {
+		player_tick->position = interactive_debug.position;
+		player_tick->eye_pos = interactive_debug.eyes_position;
 
-	if ( desync.enabled && game_input.get_async_key_state( desync.key ) ) {
-		if ( real_time_since_startup - last_sent_tick_time < desync.time ) {
-			sys::array<uint8_t>* buffer = stream->buffer;
+		rust::input_message* input_state = player_tick->input_state;
 
-			if ( is_valid_ptr( buffer ) ) {
-				// The first byte of the packet is the packet id, and by setting it to 139, it is silently discarded by the server
-				buffer->buffer[ 0 ] = 139;
-				return;
-			}
+		if ( is_valid_ptr( input_state ) ) {
+			input_state->aim_angles = interactive_debug.aim_angles;
+		}
+
+		rust::model_state* model_state = player_tick->model_state;
+
+		if ( is_valid_ptr( model_state ) ) {
+			model_state->look_dir = interactive_debug.look_direction;
 		}
 	}
 
-	if ( anti_flyhack.enabled && test_flying( previous->position, player_tick->position, true ) ) {
+	else {
+
+	}
+
+	float real_time_since_startup = unity::time::get_real_time_since_startup();
+
+	sys::array<uint8_t>* buffer = stream->buffer;
+
+	if ( is_valid_ptr( buffer ) ) {
+		bool blocked = real_time_since_startup < next_tick_time;
+		bool desyncing = desync.enabled && game_input.get_async_key_state( desync.key ) && ( real_time_since_startup - last_sent_tick_time < desync.time );
+
+		if ( blocked || desyncing ) {
+			// The first byte of the packet is the packet id, and by setting it to 139, it is silently discarded by the server
+			buffer->buffer[ 0 ] = 139;
+			return;
+		}
+	}
+
+	/*if ( anti_flyhack.enabled && test_flying( previous->position, player_tick->position, true ) ) {
 		player_tick->position = previous->position;
 
 		if ( local_player.entity ) {
@@ -467,7 +512,7 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 				movement->target_movement = vector3();
 			}
 		}
-	}
+	}*/
 
 	last_sent_tick_time = real_time_since_startup;
 }
@@ -791,36 +836,110 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 		return reset_local_player();
 
 	if ( !cache_local_player( base_player ) )
-		return;
+		return reset_local_player();
 
 	cache_belt_icons();
 	
-	rust::base_movement* movement = base_player->movement;
+	if ( interactive_debug.enabled && ( game_input.get_async_key_state( 'V' ) & 0x1 ) ) {
+		interactive_debug.active = !interactive_debug.active;
 
-	if ( is_valid_ptr( movement ) ) {
-		if ( no_attack_restrictions.enabled ) {
-			no_attack_restrictions.reset = true;
+		// Cache information needed for player ticks while in interactive debug camera
+		if ( interactive_debug.active ) {
+			// Preserve the current admin cheat so we can reset it back properly
+			interactive_debug.admin_cheat = local_player.movement->admin_cheat;
 
-			if ( no_attack_restrictions.noclip ) {
-				// We need to call the actual noclip because it calls TerrainCollision.Reset which is necessary
-				rust::convar::debugging::noclip();
+			// PlayerTick.eyePos is the camera position, and since we can only enter interactive debug camera while standing, the eyes position is correct
+			interactive_debug.eyes_position = local_player.eyes_position;
 
-				no_attack_restrictions.admin_cheat = !no_attack_restrictions.admin_cheat;
-				no_attack_restrictions.noclip = false;
+			// PlayerTick.position is local position, so if they're parented, we must get the inverse transform point of their absolute position
+			rust::base_entity* parent_entity = local_player.entity->parent_entity;
+
+			if ( is_valid_ptr( parent_entity ) ) {
+				unity::transform* transform = parent_entity->get_transform();
+
+				if ( is_valid_ptr( transform ) ) {
+					interactive_debug.position = transform->inverse_transform_point( local_player.position );
+				}
+
+				interactive_debug.parented = true;
 			}
 
-			movement->admin_cheat = true;
-		}
-
-		else if ( no_attack_restrictions.reset ) {
-			rust::model_state* model_state = base_player->model_state;
-
-			if ( is_valid_ptr( model_state ) ) {
-				movement->admin_cheat = model_state->has_flag( rust::model_state::flag::flying );
+			else {
+				interactive_debug.position = local_player.position;
+				interactive_debug.parented = false;
 			}
 
-			no_attack_restrictions.reset = false;
+			// Cache aim angles and look direction so we don't rotate while looking around in interactive debug camera
+			rust::player_tick* last_sent_tick = local_player.entity->last_sent_tick;
+
+			if ( is_valid_ptr( last_sent_tick ) ) {
+				rust::input_message* input_state = last_sent_tick->input_state;
+
+				if ( is_valid_ptr( input_state ) ) {
+					interactive_debug.aim_angles = input_state->aim_angles;
+				}
+
+				rust::model_state* model_state = last_sent_tick->model_state;
+
+				if ( is_valid_ptr( model_state ) ) {
+					interactive_debug.look_direction = model_state->look_dir;
+				}
+			}
+
+			interactive_debug.dirty = true;
 		}
+	}
+
+	else if ( ( !interactive_debug.enabled || !interactive_debug.active ) && interactive_debug.dirty ) {
+		next_tick_time = unity::time::get_real_time_since_startup() + 0.25f;
+
+		// Restore the preserved admin cheat
+		local_player.movement->admin_cheat = interactive_debug.admin_cheat;
+
+		vector3 reset_position = interactive_debug.position;
+
+		if ( interactive_debug.parented ) {
+			rust::base_entity* parent_entity = local_player.entity->parent_entity;
+
+			if ( is_valid_ptr( parent_entity ) ) {
+				unity::transform* transform = parent_entity->get_transform();
+
+				if ( is_valid_ptr( transform ) ) {
+					reset_position = transform->transform_point( interactive_debug.position );
+				}
+			}
+		}
+		
+		// Teleport to the start position
+		if ( auto player_walk_movement = local_player.movement->is<rust::player_walk_movement>() ) {
+			player_walk_movement->teleport_to( reset_position, local_player.entity );
+		}
+
+		interactive_debug.dirty = false;
+	}
+
+	if ( no_attack_restrictions.enabled ) {
+		no_attack_restrictions.reset = true;
+
+		if ( no_attack_restrictions.noclip ) {
+			// We need to call the actual noclip because it calls TerrainCollision.Reset which is necessary
+			rust::convar::debugging::noclip();
+
+			no_attack_restrictions.admin_cheat = !no_attack_restrictions.admin_cheat;
+			no_attack_restrictions.noclip = false;
+		}
+
+		local_player.movement->admin_cheat = true;
+	}
+
+	else if ( no_attack_restrictions.reset ) {
+		rust::model_state* model_state = base_player->model_state;
+
+		if ( is_valid_ptr( model_state ) ) {
+			local_player.movement->admin_cheat = model_state->has_flag( rust::model_state::flag::flying );
+		}
+
+		no_attack_restrictions.reset = false;
 	}
 
 	if ( admin_flags ) {
