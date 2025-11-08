@@ -329,7 +329,7 @@ void player_walk_movement_client_input_post_hook( rust::player_walk_movement* pl
 	if ( player_walk_movement->owner != local_player.entity )
 		return;
 
-	// If we're flying, set the grounded flag so we look like we're standing in the air
+	// If we're flying, we set the grounded flag so it doesn't look like we're flying
 	if ( model_state->has_flag( rust::model_state::flag::flying ) ) {
 		model_state->set_flag( rust::model_state::flag::on_ground, true );
 		return;
@@ -426,6 +426,14 @@ bool test_flying( vector3 old_position, vector3 new_position, bool verify_ground
 	return false;
 }
 
+void reset_anti_flyhack() {
+	anti_flyhack.in_air = false;
+	anti_flyhack.vertical = 0.f;
+	anti_flyhack.max_vertical = 0.f;
+	anti_flyhack.horizontal = 0.f;
+	anti_flyhack.max_horizontal = 0.f;
+}
+
 void save_last_sent_tick( rust::player_tick* player_tick, float real_time_since_startup ) {
 	rust::input_message* input_state = player_tick->input_state;
 	if ( !is_valid_ptr( input_state ) )
@@ -444,8 +452,21 @@ void save_last_sent_tick( rust::player_tick* player_tick, float real_time_since_
 	};
 }
 
+void reset_last_sent_tick() {
+	last_sent_tick = {
+		.position = vector3(),
+		.eyes_position = vector3(),
+		.aim_angles = vector3(),
+		.look_direction = vector3(),
+		.time = -1.f
+	};
+}
+
 void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* player_tick, rust::buffer_stream* stream, rust::player_tick* previous ) {
 	if ( !is_valid_ptr( player_tick ) || !is_valid_ptr( stream ) || !is_valid_ptr( previous ) )
+		return;
+	
+	if ( !local_player.entity )
 		return;
 
 	float real_time_since_startup = unity::time::get_real_time_since_startup();
@@ -454,7 +475,7 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 
 	if ( is_valid_ptr( buffer ) ) {
 		// We corrupt the packet if we're purposely delaying it, or if we're desyncing
-		bool block_tick = ( real_time_since_startup < next_tick_time ) ||
+		bool block_tick = last_sent_tick.time && ( real_time_since_startup < next_tick_time ) ||
 			( desync.enabled && game_input.get_async_key_state( desync.key ) && ( real_time_since_startup - last_sent_tick.time < desync.time ) );
 
 		if ( block_tick ) {
@@ -468,15 +489,15 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 
 	if ( is_valid_ptr( model_state ) ) {
 		if ( model_state->has_flag( rust::model_state::flag::flying ) ) {
-			// Set the sprinting flag if we're not in interactive debug camera and moving
-			if ( !interactive_debug.active && vector3::sqr_distance( last_sent_tick.position, player_tick->position ) > 0.f ) {
+			// Set the sprinting flag if we're not in interactive debug camera and we're moving
+			if ( !interactive_debug.active && last_sent_tick.time && vector3::sqr_distance( last_sent_tick.position, player_tick->position ) > 0.f ) {
 				model_state->set_flag( rust::model_state::flag::sprinting, true );
 			}
 
-			// Set the grounded flag so we don't look like we're flying
+			// Set the grounded flag so it doesn't look like we're flying
 			model_state->set_flag( rust::model_state::flag::on_ground, true );
 
-			// The detection for this on a vanilla server is gone, but keep it in anyways just in case
+			// The "Cheat Detected!" ban for having this flag while not an administrator or developer has been removed, but a legitimate player should never have this, so we remove it
 			model_state->set_flag( rust::model_state::flag::flying, false );
 		}
 	}
@@ -490,18 +511,16 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 	*/
 	player_tick->eye_pos = local_player.eyes_position;
 
-	if ( local_player.entity ) {
-		int32_t ideal_view_mode = local_player.entity->get_ideal_view_mode();
+	int32_t ideal_view_mode = local_player.entity->get_ideal_view_mode();
 
-		if ( ideal_view_mode == rust::base_player::camera_mode::eyes ) {
-			rust::model* model = local_player.entity->model;
+	if ( ideal_view_mode == rust::base_player::camera_mode::eyes ) {
+		rust::model* model = local_player.entity->model;
 
-			if ( is_valid_ptr( model ) ) {
-				unity::transform* eye_bone = model->eye_bone;
+		if ( is_valid_ptr( model ) ) {
+			unity::transform* eye_bone = model->eye_bone;
 
-				if ( is_valid_ptr( eye_bone ) ) {
-					player_tick->eye_pos = eye_bone->get_position();
-				}
+			if ( is_valid_ptr( eye_bone ) ) {
+				player_tick->eye_pos = eye_bone->get_position();
 			}
 		}
 	}
@@ -523,19 +542,15 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 		}
 	}
 
-	else {
-		/*if ( anti_flyhack.enabled && test_flying( previous->position, player_tick->position, true ) ) {
-			player_tick->position = previous->position;
+	else if ( anti_flyhack.enabled && last_sent_tick.time && test_flying( last_sent_tick.position, player_tick->position, true ) ) {
+		player_tick->position = last_sent_tick.position;
 
-			if ( local_player.entity ) {
-				rust::player_walk_movement* movement = local_player.entity->movement;
+		rust::player_walk_movement* movement = local_player.entity->movement;
 
-				if ( is_valid_ptr( movement ) ) {
-					movement->teleport_to( previous->position, local_player.entity );
-					movement->target_movement = vector3();
-				}
-			}
-		}*/
+		if ( is_valid_ptr( movement ) ) {
+			movement->teleport_to( previous->position, local_player.entity );
+			movement->target_movement = vector3();
+		}
 	}
 
 	// We need to maintain our own last sent tick because our approach for desync does not block BasePlayer.SendClientTick, and thus BasePlayer.lastSentTick is not accurate
@@ -852,6 +867,8 @@ void client_on_client_disconnected_pre_hook( rust::client* client, sys::string* 
 	glow_manager::invalidate_cache();
 
 	reset_local_player();
+	reset_last_sent_tick();
+	reset_anti_flyhack();
 
 	aimbot.player_target = nullptr;
 }
