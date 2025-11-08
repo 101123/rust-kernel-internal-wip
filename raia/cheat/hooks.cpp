@@ -332,7 +332,6 @@ void player_walk_movement_client_input_post_hook( rust::player_walk_movement* pl
 
 		player_walk_movement->ground_time = time + 0.2f;
 		player_walk_movement->jump_time = time - 1.f;
-		player_walk_movement->land_time = time - 0.4f;
 	}
 
 	if ( omnisprint ) {
