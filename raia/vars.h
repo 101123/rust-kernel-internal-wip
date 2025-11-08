@@ -476,9 +476,6 @@ DEFINE_CONTEXT( desync,
 	cvar_f time = cvar_f( H( "Desync Time" ), 0.79f );
 );
 
-inline float last_sent_tick_time;
-inline float next_tick_time;
-
 DEFINE_CONTEXT( auto_drop_box,
 	cvar enabled = cvar( H( "Auto Drop Box" ), false );
 );
@@ -552,3 +549,13 @@ DEFINE_CONTEXT( interactive_debug,
 	vector3 aim_angles;
 	vector3 look_direction;
 );
+
+DEFINE_CONTEXT( last_sent_tick,
+	vector3 position;
+	vector3 eyes_position;
+	vector3 aim_angles;
+	vector3 look_direction;
+	float time;
+);
+
+inline float next_tick_time;

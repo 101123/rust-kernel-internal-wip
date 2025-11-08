@@ -426,16 +426,50 @@ bool test_flying( vector3 old_position, vector3 new_position, bool verify_ground
 	return false;
 }
 
+void save_last_sent_tick( rust::player_tick* player_tick, float real_time_since_startup ) {
+	rust::input_message* input_state = player_tick->input_state;
+	if ( !is_valid_ptr( input_state ) )
+		return;
+
+	rust::model_state* model_state = player_tick->model_state;
+	if ( !is_valid_ptr( model_state ) )
+		return;
+
+	last_sent_tick = {
+		.position = player_tick->position,
+		.eyes_position = player_tick->eye_pos,
+		.aim_angles = input_state->aim_angles,
+		.look_direction = model_state->look_dir,
+		.time = real_time_since_startup
+	};
+}
+
 void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* player_tick, rust::buffer_stream* stream, rust::player_tick* previous ) {
 	if ( !is_valid_ptr( player_tick ) || !is_valid_ptr( stream ) || !is_valid_ptr( previous ) )
 		return;
+
+	float real_time_since_startup = unity::time::get_real_time_since_startup();
+
+	sys::array<uint8_t>* buffer = stream->buffer;
+
+	if ( is_valid_ptr( buffer ) ) {
+		// We corrupt the packet if we're purposely delaying it, or if we're desyncing
+		bool block_tick = ( real_time_since_startup < next_tick_time ) ||
+			( desync.enabled && game_input.get_async_key_state( desync.key ) && ( real_time_since_startup - last_sent_tick.time < desync.time ) );
+
+		if ( block_tick ) {
+			// The first byte of the packet is the packet id, and by setting it to 139, it is silently discarded by the server
+			buffer->buffer[ 0 ] = 139;
+			return;
+		}
+	}
 
 	rust::model_state* model_state = player_tick->model_state;
 
 	if ( is_valid_ptr( model_state ) ) {
 		if ( model_state->has_flag( rust::model_state::flag::flying ) ) {
 			// Set the sprinting flag if we're not in interactive debug camera and moving
-			if ( !interactive_debug.active && vector3::sqr_distance( previous->position, player_tick->position ) > 0.f ) {
+			if ( !interactive_debug.active && vector3::sqr_distance( last_sent_tick.position, player_tick->position ) > 0.f ) {
 				model_state->set_flag( rust::model_state::flag::sprinting, true );
 			}
 
@@ -447,6 +481,13 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 		}
 	}
 
+	/*
+	* Previously, PlayerTick.eyePos used to be set to PlayerEyes.position, but Rust changed that to be MainCamera.position in order to detect debug camera.
+	* The naive approach to solve this is to set PlayerTick.eyePos back to PlayerEyes.position, but this approach has the problem of being incorrect in a few cases, namely while a player is asleep.
+	* If the player is asleep, their camera mode is set to CameraMode.Eyes, which in turn, inside of PlayerEyes.UpdateCamera, sets MainCamera.position to BaseEntity.model.eyeBone.position, - 
+	* which is a slightly different position from PlayerEyes.position. Server plugins exist that leverage this discrepancy to detect the fact that you're cheating.
+	* We solve this by setting PlayerTick.eyePos to BaseEntity.model.eyeBone.position if your current camera mode is CameraMode.Eyes.
+	*/
 	player_tick->eye_pos = local_player.eyes_position;
 
 	if ( local_player.entity ) {
@@ -483,38 +524,22 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 	}
 
 	else {
+		/*if ( anti_flyhack.enabled && test_flying( previous->position, player_tick->position, true ) ) {
+			player_tick->position = previous->position;
 
-	}
+			if ( local_player.entity ) {
+				rust::player_walk_movement* movement = local_player.entity->movement;
 
-	float real_time_since_startup = unity::time::get_real_time_since_startup();
-
-	sys::array<uint8_t>* buffer = stream->buffer;
-
-	if ( is_valid_ptr( buffer ) ) {
-		bool blocked = real_time_since_startup < next_tick_time;
-		bool desyncing = desync.enabled && game_input.get_async_key_state( desync.key ) && ( real_time_since_startup - last_sent_tick_time < desync.time );
-
-		if ( blocked || desyncing ) {
-			// The first byte of the packet is the packet id, and by setting it to 139, it is silently discarded by the server
-			buffer->buffer[ 0 ] = 139;
-			return;
-		}
-	}
-
-	/*if ( anti_flyhack.enabled && test_flying( previous->position, player_tick->position, true ) ) {
-		player_tick->position = previous->position;
-
-		if ( local_player.entity ) {
-			rust::player_walk_movement* movement = local_player.entity->movement;
-
-			if ( is_valid_ptr( movement ) ) {
-				movement->teleport_to( previous->position, local_player.entity );
-				movement->target_movement = vector3();
+				if ( is_valid_ptr( movement ) ) {
+					movement->teleport_to( previous->position, local_player.entity );
+					movement->target_movement = vector3();
+				}
 			}
-		}
-	}*/
+		}*/
+	}
 
-	last_sent_tick_time = real_time_since_startup;
+	// We need to maintain our own last sent tick because our approach for desync does not block BasePlayer.SendClientTick, and thus BasePlayer.lastSentTick is not accurate
+	save_last_sent_tick( player_tick, real_time_since_startup );
 }
 
 //
@@ -831,6 +856,79 @@ void client_on_client_disconnected_pre_hook( rust::client* client, sys::string* 
 	aimbot.player_target = nullptr;
 }
 
+bool enter_interactive_debug() {
+	// Preserve the current admin cheat so we can reset it back properly
+	interactive_debug.admin_cheat = local_player.movement->admin_cheat;
+
+	// PlayerTick.eyePos is the camera position, and since we can only enter interactive debug camera while standing, the eyes position is correct
+	interactive_debug.eyes_position = local_player.eyes_position;
+
+	// PlayerTick.position is the players local position, so if they're parented, we must get the inverse transform point of their position
+	rust::base_entity* parent_entity = local_player.entity->parent_entity;
+
+	if ( is_valid_ptr( parent_entity ) ) {
+		unity::transform* transform = parent_entity->get_transform();
+		if ( !is_valid_ptr( transform ) )
+			return false;
+
+		interactive_debug.position = transform->inverse_transform_point( local_player.position );
+		interactive_debug.parented = true;
+	}
+
+	else {
+		interactive_debug.position = local_player.position;
+		interactive_debug.parented = false;
+	}
+
+	// Cache aim angles and look direction so we don't rotate while looking around in interactive debug camera
+	rust::player_tick* last_sent_tick = local_player.entity->last_sent_tick;
+	if ( !is_valid_ptr( last_sent_tick ) )
+		return false;
+
+	rust::input_message* input_state = last_sent_tick->input_state;
+	if ( !is_valid_ptr( input_state ) )
+		return false;
+
+	rust::model_state* model_state = last_sent_tick->model_state;
+	if ( !is_valid_ptr( model_state ) )
+		return false;
+
+	interactive_debug.aim_angles = input_state->aim_angles;
+	interactive_debug.look_direction = model_state->look_dir;
+	interactive_debug.dirty = true;
+
+	return true;
+}
+
+void exit_interactive_debug() {
+	// Delay sending player ticks for 0.25 seconds so the client has a few frames to teleport to the start position
+	next_tick_time = unity::time::get_real_time_since_startup() + 0.25f;
+
+	// Restore the preserved admin cheat
+	local_player.movement->admin_cheat = interactive_debug.admin_cheat;
+
+	vector3 reset_position = interactive_debug.position;
+
+	if ( interactive_debug.parented ) {
+		rust::base_entity* parent_entity = local_player.entity->parent_entity;
+
+		if ( is_valid_ptr( parent_entity ) ) {
+			unity::transform* transform = parent_entity->get_transform();
+
+			if ( is_valid_ptr( transform ) ) {
+				reset_position = transform->transform_point( interactive_debug.position );
+			}
+		}
+	}
+
+	// Teleport to the start position
+	if ( auto player_walk_movement = local_player.movement->is<rust::player_walk_movement>() ) {
+		player_walk_movement->teleport_to( reset_position, local_player.entity );
+	}
+
+	interactive_debug.dirty = false;
+}
+
 void base_player_client_input_pre_hook( rust::base_player* base_player, rust::input_state* state ) {
 	if ( !is_valid_ptr( base_player ) || !is_valid_ptr( state ) )
 		return reset_local_player();
@@ -841,81 +939,18 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 	cache_belt_icons();
 	
 	if ( interactive_debug.enabled && ( game_input.get_async_key_state( 'V' ) & 0x1 ) ) {
-		interactive_debug.active = !interactive_debug.active;
+		if ( !interactive_debug.active ) {
+			// We only enter interactive debug if we can successfully cache the information needed for it
+			interactive_debug.active = enter_interactive_debug();
+		}
 
-		// Cache information needed for player ticks while in interactive debug camera
-		if ( interactive_debug.active ) {
-			// Preserve the current admin cheat so we can reset it back properly
-			interactive_debug.admin_cheat = local_player.movement->admin_cheat;
-
-			// PlayerTick.eyePos is the camera position, and since we can only enter interactive debug camera while standing, the eyes position is correct
-			interactive_debug.eyes_position = local_player.eyes_position;
-
-			// PlayerTick.position is local position, so if they're parented, we must get the inverse transform point of their absolute position
-			rust::base_entity* parent_entity = local_player.entity->parent_entity;
-
-			if ( is_valid_ptr( parent_entity ) ) {
-				unity::transform* transform = parent_entity->get_transform();
-
-				if ( is_valid_ptr( transform ) ) {
-					interactive_debug.position = transform->inverse_transform_point( local_player.position );
-				}
-
-				interactive_debug.parented = true;
-			}
-
-			else {
-				interactive_debug.position = local_player.position;
-				interactive_debug.parented = false;
-			}
-
-			// Cache aim angles and look direction so we don't rotate while looking around in interactive debug camera
-			rust::player_tick* last_sent_tick = local_player.entity->last_sent_tick;
-
-			if ( is_valid_ptr( last_sent_tick ) ) {
-				rust::input_message* input_state = last_sent_tick->input_state;
-
-				if ( is_valid_ptr( input_state ) ) {
-					interactive_debug.aim_angles = input_state->aim_angles;
-				}
-
-				rust::model_state* model_state = last_sent_tick->model_state;
-
-				if ( is_valid_ptr( model_state ) ) {
-					interactive_debug.look_direction = model_state->look_dir;
-				}
-			}
-
-			interactive_debug.dirty = true;
+		else {
+			interactive_debug.active = false;
 		}
 	}
 
 	else if ( ( !interactive_debug.enabled || !interactive_debug.active ) && interactive_debug.dirty ) {
-		next_tick_time = unity::time::get_real_time_since_startup() + 0.25f;
-
-		// Restore the preserved admin cheat
-		local_player.movement->admin_cheat = interactive_debug.admin_cheat;
-
-		vector3 reset_position = interactive_debug.position;
-
-		if ( interactive_debug.parented ) {
-			rust::base_entity* parent_entity = local_player.entity->parent_entity;
-
-			if ( is_valid_ptr( parent_entity ) ) {
-				unity::transform* transform = parent_entity->get_transform();
-
-				if ( is_valid_ptr( transform ) ) {
-					reset_position = transform->transform_point( interactive_debug.position );
-				}
-			}
-		}
-		
-		// Teleport to the start position
-		if ( auto player_walk_movement = local_player.movement->is<rust::player_walk_movement>() ) {
-			player_walk_movement->teleport_to( reset_position, local_player.entity );
-		}
-
-		interactive_debug.dirty = false;
+		exit_interactive_debug();
 	}
 
 	if ( no_attack_restrictions.enabled ) {
