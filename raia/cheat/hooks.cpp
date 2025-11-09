@@ -1099,7 +1099,7 @@ bool console_system_command_pre_hook( rust::console_system::arg* arg, int32_t in
 	return true;
 }
 
-uint64_t effect_name_hashes[] = {
+uint64_t raid_effect_path_hashes[] = {
 	H( "assets/prefabs/weapons/rocketlauncher/effects/rocket_explosion.prefab" ),
 	H( "assets/prefabs/weapons/rocketlauncher/effects/rocket_explosion_hv.prefab" ),
 	H( "assets/prefabs/weapons/rocketlauncher/effects/rocket_explosion_incendiary.prefab" ),
@@ -1131,8 +1131,8 @@ void effect_library_setup_effect_hook( rust::effect* effect ) {
 
 	uint64_t effect_name_hash = util::hash_w( pooled_string->buffer );
 
-	for ( size_t i = 0; i < _countof( effect_name_hashes ); i++ ) {
-		if ( effect_name_hash != effect_name_hashes[ i ] )
+	for ( size_t i = 0; i < _countof( raid_effect_path_hashes ); i++ ) {
+		if ( effect_name_hash != raid_effect_path_hashes[ i ] )
 			continue;
 
 		bool present = false;
