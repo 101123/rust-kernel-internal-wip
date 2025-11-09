@@ -551,7 +551,8 @@ DEFINE_CONTEXT( interactive_debug,
 );
 
 DEFINE_CONTEXT( last_sent_tick,
-	vector3 position;
+	vector3 local_position;
+	vector3 global_position;
 	vector3 eyes_position;
 	vector3 aim_angles;
 	vector3 look_direction;

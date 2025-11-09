@@ -3287,4 +3287,52 @@ namespace rust {
             return caller( get_active_model );
         }
     };
+
+    class water_level {
+    public:
+        static bool test( const vector3& pos, bool waves, bool volumes, base_entity* for_entity = nullptr ) {
+            bool ( *test )( vector3*, bool, bool, base_entity* ) =
+                ( decltype( test ) )( game_assembly + Offsets::WaterLevel::Test );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            vector3* _pos = caller.push<vector3>( pos );
+
+            return caller( test, _pos, waves, volumes, for_entity );
+        }
+    };
+
+    enum environment_type {
+        underground = 1, 
+        building = 2,
+        outdoor = 4,
+        elevator = 8,
+        player_construction = 16,
+        train_tunnels = 32,
+        underwater_lab = 64,
+        submarine = 128,
+        building_dark = 256,
+        building_very_dark = 512,
+        no_sunlight = 1024,
+        spatially_aware = 2048,
+        entrance = 4096
+    };
+
+    class environment_manager {
+    public:
+        static environment_type get( const vector3& pos, float radius = 0.01f ) {
+            environment_type( *get )( vector3*, float ) =
+                ( decltype( get ) )( game_assembly + Offsets::EnvironmentManager::Get );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            vector3* _pos = caller.push<vector3>( pos );
+
+            return caller( get, _pos, radius );
+        }
+
+        static bool check( const vector3& pos, environment_type type, float radius = 0.01f ) {
+            return ( get( pos, radius ) & type ) == type;
+        }
+    };
 }

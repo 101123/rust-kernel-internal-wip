@@ -381,12 +381,16 @@ void player_walk_movement_client_input_post_hook( rust::player_walk_movement* pl
 	}
 }
 
-bool test_flying( vector3 old_position, vector3 new_position, bool verify_grounded ) {
+bool test_flying( rust::base_player* player, vector3 old_position, vector3 new_position ) {
 	bool in_air = false;
 
 	vector3 mid_point = ( old_position + new_position ) / 2.f;
 
-	if ( !local_player.entity->on_ladder() ) {
+	bool check_in_air = !player->on_ladder() &&
+		!rust::water_level::test( old_position - vector3( 0.f, rust::antihack::flyhack_extrusion, 0.f ), true, true, player ) &&
+		!rust::environment_manager::check( new_position, rust::environment_type::elevator, 0.01f );
+	
+	if ( check_in_air ) {
 		float player_radius = rust::base_player::get_radius();
 
 		vector3 capsule_start = mid_point + vector3( 0.f, player_radius - rust::antihack::flyhack_extrusion, 0.f );
@@ -394,7 +398,7 @@ bool test_flying( vector3 old_position, vector3 new_position, bool verify_ground
 
 		float check_radius = player_radius - rust::antihack::flyhack_margin;
 
-		in_air = anti_flyhack.in_air = !unity::physics::check_capsule( capsule_start, capsule_end, check_radius, 1503764737, unity::query_trigger_interaction::ignore );
+		in_air = !unity::physics::check_capsule( capsule_start, capsule_end, check_radius, 1503764737, unity::query_trigger_interaction::ignore );
 	}
 
 	if ( in_air ) {
@@ -427,6 +431,8 @@ bool test_flying( vector3 old_position, vector3 new_position, bool verify_ground
 		anti_flyhack.horizontal = 0.f;
 	}
 
+	anti_flyhack.in_air = in_air;
+
 	return false;
 }
 
@@ -438,7 +444,7 @@ void reset_anti_flyhack() {
 	anti_flyhack.max_horizontal = 0.f;
 }
 
-void save_last_sent_tick( rust::player_tick* player_tick, float real_time_since_startup ) {
+void save_last_sent_tick( rust::player_tick* player_tick, const vector3& local_position, const vector3& global_position, float real_time_since_startup ) {
 	rust::input_message* input_state = player_tick->input_state;
 	if ( !is_valid_ptr( input_state ) )
 		return;
@@ -448,7 +454,8 @@ void save_last_sent_tick( rust::player_tick* player_tick, float real_time_since_
 		return;
 
 	last_sent_tick = {
-		.position = player_tick->position,
+		.local_position = local_position,
+		.global_position = global_position,
 		.eyes_position = player_tick->eye_pos,
 		.aim_angles = input_state->aim_angles,
 		.look_direction = model_state->look_dir,
@@ -458,7 +465,8 @@ void save_last_sent_tick( rust::player_tick* player_tick, float real_time_since_
 
 void reset_last_sent_tick() {
 	last_sent_tick = {
-		.position = vector3(),
+		.local_position = vector3(),
+		.global_position = vector3(),
 		.eyes_position = vector3(),
 		.aim_angles = vector3(),
 		.look_direction = vector3(),
@@ -512,6 +520,19 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 		}
 	}
 
+	vector3 tick_local_position = player_tick->position, tick_global_position = tick_local_position;
+
+	// Convert local posititon to global position if we're parented
+	rust::base_entity* parent_entity = local_player.entity->parent_entity;
+
+	if ( is_valid_ptr( parent_entity ) ) {
+		unity::transform* transform = parent_entity->get_transform();
+
+		if ( is_valid_ptr( transform ) ) {
+			tick_global_position = transform->transform_point( tick_local_position );
+		}
+	}
+
 	if ( local_player.entity->lifestate != rust::lifestate::dead && !local_player.entity->has_player_flag( rust::base_player::flag::sleeping ) && !local_player.entity->mounted.ent_cached ) {
 		// Make our model state look legitimate
 		rust::model_state* model_state = player_tick->model_state;
@@ -519,7 +540,7 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 		if ( is_valid_ptr( model_state ) ) {
 			if ( model_state->has_flag( rust::model_state::flag::flying ) ) {
 				// Set the sprinting flag if we're not in interactive debug camera and we're moving
-				if ( !interactive_debug.active && last_sent_tick.time && vector3::sqr_distance( last_sent_tick.position, player_tick->position ) > 0.f ) {
+				if ( !interactive_debug.active && last_sent_tick.time && vector3::sqr_distance( last_sent_tick.global_position, tick_global_position ) > 0.f ) {
 					model_state->set_flag( rust::model_state::flag::sprinting, true );
 				}
 
@@ -548,10 +569,15 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 			}
 		}
 
-		else if ( anti_flyhack.enabled && last_sent_tick.time && test_flying( last_sent_tick.position, player_tick->position, true ) ) {
-			player_tick->position = last_sent_tick.position;
+		else if ( anti_flyhack.enabled && last_sent_tick.time && test_flying( local_player.entity, last_sent_tick.global_position, tick_global_position ) ) {
+			// Set sent tick position to our previous local position
+			player_tick->position = last_sent_tick.local_position;
 
-			local_player.movement->teleport_to( previous->position, local_player.entity );
+			// Set our tick positions to the previous tick positions
+			tick_local_position = last_sent_tick.local_position;
+			tick_global_position = last_sent_tick.global_position;
+
+			local_player.movement->teleport_to( last_sent_tick.global_position, local_player.entity );
 
 			// Reset our desired velocity
 			local_player.movement->target_movement = vector3();
@@ -559,7 +585,7 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 	}
 
 	// We need to maintain our own last sent tick because our approach for desync does not block BasePlayer.SendClientTick, and thus BasePlayer.lastSentTick is not accurate
-	save_last_sent_tick( player_tick, real_time_since_startup );
+	save_last_sent_tick( player_tick, tick_local_position, tick_global_position, real_time_since_startup );
 }
 
 //
@@ -1229,7 +1255,7 @@ void player_walk_movement_teleport_to_pre_hook( rust::player_walk_movement* play
 	if ( player != local_player.entity )
 		return;
 
-	last_sent_tick.position = *position;
+	last_sent_tick.global_position = *position;
 }
 
 void hook_handlers::network_client_create_networkable( _CONTEXT* context, void* user_data ) {
