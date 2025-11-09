@@ -478,31 +478,14 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 	sys::array<uint8_t>* buffer = stream->buffer;
 
 	if ( is_valid_ptr( buffer ) ) {
-		// We corrupt the packet if we're purposely delaying it, or if we're desyncing
-		bool block_tick = last_sent_tick.time && ( real_time_since_startup < next_tick_time ) ||
-			( desync.enabled && game_input.get_async_key_state( desync.key ) && ( real_time_since_startup - last_sent_tick.time < desync.time ) );
+		// We corrupt the packet if we're purposely delaying it or desyncing
+		bool block_tick = last_sent_tick.time && ( ( real_time_since_startup < next_tick_time ) ||
+			( desync.enabled && game_input.get_async_key_state( desync.key ) && ( real_time_since_startup - last_sent_tick.time < desync.time ) ) );
 
 		if ( block_tick ) {
 			// The first byte of the packet is the packet id, and by setting it to 139, it is silently discarded by the server
 			buffer->buffer[ 0 ] = 139;
 			return;
-		}
-	}
-
-	rust::model_state* model_state = player_tick->model_state;
-
-	if ( is_valid_ptr( model_state ) ) {
-		if ( model_state->has_flag( rust::model_state::flag::flying ) ) {
-			// Set the sprinting flag if we're not in interactive debug camera and we're moving
-			if ( !interactive_debug.active && last_sent_tick.time && vector3::sqr_distance( last_sent_tick.position, player_tick->position ) > 0.f ) {
-				model_state->set_flag( rust::model_state::flag::sprinting, true );
-			}
-
-			// Set the grounded flag so it doesn't look like we're flying
-			model_state->set_flag( rust::model_state::flag::on_ground, true );
-
-			// The "Cheat Detected!" ban for having this flag while not an administrator or developer has been removed, but a legitimate player should never have this, so we remove it
-			model_state->set_flag( rust::model_state::flag::flying, false );
 		}
 	}
 
@@ -529,30 +512,50 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 		}
 	}
 
-	if ( interactive_debug.active ) {
-		player_tick->position = interactive_debug.position;
-		player_tick->eye_pos = interactive_debug.eyes_position;
-
-		rust::input_message* input_state = player_tick->input_state;
-
-		if ( is_valid_ptr( input_state ) ) {
-			input_state->aim_angles = interactive_debug.aim_angles;
-		}
-
+	if ( local_player.entity->lifestate != rust::lifestate::dead && !local_player.entity->has_player_flag( rust::base_player::flag::sleeping ) && !local_player.entity->mounted.ent_cached ) {
+		// Make our model state look legitimate
 		rust::model_state* model_state = player_tick->model_state;
 
 		if ( is_valid_ptr( model_state ) ) {
-			model_state->look_dir = interactive_debug.look_direction;
+			if ( model_state->has_flag( rust::model_state::flag::flying ) ) {
+				// Set the sprinting flag if we're not in interactive debug camera and we're moving
+				if ( !interactive_debug.active && last_sent_tick.time && vector3::sqr_distance( last_sent_tick.position, player_tick->position ) > 0.f ) {
+					model_state->set_flag( rust::model_state::flag::sprinting, true );
+				}
+
+				// Set the grounded flag so it doesn't look like we're flying
+				model_state->set_flag( rust::model_state::flag::on_ground, true );
+
+				// The "Cheat Detected!" ban for having this flag while not an administrator or developer has been removed, but a legitimate player should never have this, so we remove it
+				model_state->set_flag( rust::model_state::flag::flying, false );
+			}
 		}
-	}
 
-	else if ( anti_flyhack.enabled && last_sent_tick.time && test_flying( last_sent_tick.position, player_tick->position, true ) ) {
-		player_tick->position = last_sent_tick.position;
+		if ( interactive_debug.active ) {
+			player_tick->position = interactive_debug.position;
+			player_tick->eye_pos = interactive_debug.eyes_position;
 
-		local_player.movement->teleport_to( previous->position, local_player.entity );
+			rust::input_message* input_state = player_tick->input_state;
 
-		// Reset our desired velocity
-		local_player.movement->target_movement = vector3();
+			if ( is_valid_ptr( input_state ) ) {
+				input_state->aim_angles = interactive_debug.aim_angles;
+			}
+
+			rust::model_state* model_state = player_tick->model_state;
+
+			if ( is_valid_ptr( model_state ) ) {
+				model_state->look_dir = interactive_debug.look_direction;
+			}
+		}
+
+		else if ( anti_flyhack.enabled && last_sent_tick.time && test_flying( last_sent_tick.position, player_tick->position, true ) ) {
+			player_tick->position = last_sent_tick.position;
+
+			local_player.movement->teleport_to( previous->position, local_player.entity );
+
+			// Reset our desired velocity
+			local_player.movement->target_movement = vector3();
+		}
 	}
 
 	// We need to maintain our own last sent tick because our approach for desync does not block BasePlayer.SendClientTick, and thus BasePlayer.lastSentTick is not accurate
@@ -880,6 +883,10 @@ bool enter_interactive_debug() {
 	if ( !last_sent_tick.time || !local_player.movement )
 		return false;
 
+	// We can't enter interactive debug camera if we're mounted
+	if ( local_player.entity->mounted.ent_cached )
+		return false;
+
 	// Preserve the current admin cheat so we can reset it back properly
 	interactive_debug.admin_cheat = local_player.movement->admin_cheat;
 
@@ -910,6 +917,14 @@ bool enter_interactive_debug() {
 	return interactive_debug.dirty = true;
 }
 
+bool should_exit_interactive_debug() {
+	if ( !interactive_debug.dirty )
+		return false;
+
+	// We exit if the feature has been turned off or we've mounted an entity since turning it on
+	return !interactive_debug.enabled || !interactive_debug.active || local_player.entity->mounted.ent_cached;
+}
+
 void exit_interactive_debug() {
 	// Delay sending player ticks for 0.25 seconds so the client has a few frames to teleport to the start position
 	next_tick_time = unity::time::get_real_time_since_startup() + 0.25f;
@@ -934,6 +949,7 @@ void exit_interactive_debug() {
 	// Teleport to the start position
 	local_player.movement->teleport_to( reset_position, local_player.entity );
 
+	interactive_debug.active = false;
 	interactive_debug.dirty = false;
 }
 
@@ -944,11 +960,8 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 	if ( !cache_local_player( base_player ) )
 		return reset_local_player();
 
-	cache_belt_icons();
-	
 	if ( interactive_debug.enabled && ( game_input.get_async_key_state( 'V' ) & 0x1 ) ) {
 		if ( !interactive_debug.active ) {
-			// We only enter interactive debug if we can successfully cache the information needed for it
 			interactive_debug.active = enter_interactive_debug();
 		}
 
@@ -957,7 +970,7 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 		}
 	}
 
-	else if ( ( !interactive_debug.enabled || !interactive_debug.active ) && interactive_debug.dirty ) {
+	else if ( should_exit_interactive_debug() ) {
 		exit_interactive_debug();
 	}
 
@@ -1157,6 +1170,8 @@ void effect_library_setup_effect_hook( rust::effect* effect ) {
 void client_update_pre_hook( rust::client* client ) {
 	if ( !is_valid_ptr( client ) )
 		return;
+
+	cache_belt_icons();
 
 	// Update scroll delta here as this is the only hook we have that runs in the main menu
 	gui::scroll_delta = unity::input::get_mouse_scroll_delta().y;

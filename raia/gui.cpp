@@ -1919,6 +1919,8 @@ void gui::run() {
             left.toggle( J( "On ladder" ), &on_ladder );
 
             left.toggle( J( "Anti-flyhack" ), &anti_flyhack.enabled );
+            
+            left.toggle( J( "Interactive debug camera" ), &interactive_debug.enabled );
 
             left.end();
 

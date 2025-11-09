@@ -2155,6 +2155,7 @@ namespace rust {
 
         FIELD( rust::model_state*, model_state, Offsets::BasePlayer::modelState );
         FIELD( player_tick*, last_sent_tick, Offsets::BasePlayer::lastSentTick );
+        FIELD( entity_ref, mounted, Offsets::BasePlayer::mounted );
         FIELD( int, player_flags, Offsets::BasePlayer::playerFlags );
         FIELD( sys::string*, user_id_string, Offsets::BasePlayer::UserIDString );
         FIELD( sys::string*, display_name, Offsets::BasePlayer::_displayName );
