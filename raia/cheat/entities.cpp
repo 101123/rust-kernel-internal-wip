@@ -1200,6 +1200,7 @@ void entity_manager::invalidate_cache() {
     cached_entities& cached_entities = entity_cache.get();
 
     cached_entities.entities.clear();
+    cached_entities.named_entities.clear();
     cached_entities.combat_entities.clear();
     cached_entities.dropped_items.clear();
 
@@ -1208,6 +1209,7 @@ void entity_manager::invalidate_cache() {
     }
 
     cached_entities.players.clear();
+    cached_entities.building_blocks.clear();
 }
 
 entity_collection entity_manager::get_entities() {
