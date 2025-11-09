@@ -1056,6 +1056,7 @@ namespace Offsets {
 		constexpr const static size_t BlockJump = 0x383a7e0;
 		constexpr const static size_t BlockSprint = 0x3843b40;
 		constexpr const static size_t GroundCheck = 0x385afa0;
+		constexpr const static size_t Init = 0x383efc0;
 		constexpr const static size_t ClientInput = 0x386bad0;
 		constexpr const static size_t ClientInput_vtableoff = 0x438;
 		constexpr const static size_t DoFixedUpdate = 0x3865df0;

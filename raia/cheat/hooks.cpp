@@ -496,6 +496,57 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 			return;
 		}
 	}
+	
+	vector3 tick_local_position = player_tick->position, tick_global_position = tick_local_position;
+
+	// Convert local posititon to global position if we're parented
+	rust::base_entity* parent_entity = local_player.entity->parent_entity;
+
+	if ( is_valid_ptr( parent_entity ) ) {
+		unity::transform* transform = parent_entity->get_transform();
+
+		if ( is_valid_ptr( transform ) ) {
+			tick_global_position = transform->transform_point( tick_local_position );
+		}
+	}
+
+	// Make our model state look legitimate
+	rust::model_state* model_state = player_tick->model_state;
+
+	if ( is_valid_ptr( model_state ) ) {
+		if ( model_state->has_flag( rust::model_state::flag::flying ) ) {
+			// Set the sprinting flag if we're not in interactive debug camera and we're moving
+			if ( !interactive_debug.active && last_sent_tick.time && vector3::sqr_distance( last_sent_tick.global_position, tick_global_position ) > 0.f ) {
+				model_state->set_flag( rust::model_state::flag::sprinting, true );
+			}
+
+			// Set the grounded flag so it doesn't look like we're flying
+			model_state->set_flag( rust::model_state::flag::on_ground, true );
+
+			// The "Cheat Detected!" ban for having this flag while not an administrator or developer has been removed, but a legitimate player should never have this, so we remove it
+			model_state->set_flag( rust::model_state::flag::flying, false );
+		}
+	}
+
+	// If we're in interactive debug, replay the tick we cached when we entered
+	if ( interactive_debug.active ) {
+		player_tick->position = interactive_debug.position;
+		player_tick->eye_pos = interactive_debug.eyes_position;
+
+		rust::input_message* input_state = player_tick->input_state;
+
+		if ( is_valid_ptr( input_state ) ) {
+			input_state->aim_angles = interactive_debug.aim_angles;
+		}
+
+		rust::model_state* model_state = player_tick->model_state;
+
+		if ( is_valid_ptr( model_state ) ) {
+			model_state->look_dir = interactive_debug.look_direction;
+		}
+
+		return;
+	}
 
 	/*
 	* Previously, PlayerTick.eyePos used to be set to PlayerEyes.position, but Rust changed that to be MainCamera.position in order to detect debug camera.
@@ -520,56 +571,8 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 		}
 	}
 
-	vector3 tick_local_position = player_tick->position, tick_global_position = tick_local_position;
-
-	// Convert local posititon to global position if we're parented
-	rust::base_entity* parent_entity = local_player.entity->parent_entity;
-
-	if ( is_valid_ptr( parent_entity ) ) {
-		unity::transform* transform = parent_entity->get_transform();
-
-		if ( is_valid_ptr( transform ) ) {
-			tick_global_position = transform->transform_point( tick_local_position );
-		}
-	}
-
-	if ( local_player.entity->lifestate != rust::lifestate::dead && !local_player.entity->has_player_flag( rust::base_player::flag::sleeping ) && !local_player.entity->mounted.ent_cached ) {
-		// Make our model state look legitimate
-		rust::model_state* model_state = player_tick->model_state;
-
-		if ( is_valid_ptr( model_state ) ) {
-			if ( model_state->has_flag( rust::model_state::flag::flying ) ) {
-				// Set the sprinting flag if we're not in interactive debug camera and we're moving
-				if ( !interactive_debug.active && last_sent_tick.time && vector3::sqr_distance( last_sent_tick.global_position, tick_global_position ) > 0.f ) {
-					model_state->set_flag( rust::model_state::flag::sprinting, true );
-				}
-
-				// Set the grounded flag so it doesn't look like we're flying
-				model_state->set_flag( rust::model_state::flag::on_ground, true );
-
-				// The "Cheat Detected!" ban for having this flag while not an administrator or developer has been removed, but a legitimate player should never have this, so we remove it
-				model_state->set_flag( rust::model_state::flag::flying, false );
-			}
-		}
-
-		if ( interactive_debug.active ) {
-			player_tick->position = interactive_debug.position;
-			player_tick->eye_pos = interactive_debug.eyes_position;
-
-			rust::input_message* input_state = player_tick->input_state;
-
-			if ( is_valid_ptr( input_state ) ) {
-				input_state->aim_angles = interactive_debug.aim_angles;
-			}
-
-			rust::model_state* model_state = player_tick->model_state;
-
-			if ( is_valid_ptr( model_state ) ) {
-				model_state->look_dir = interactive_debug.look_direction;
-			}
-		}
-
-		else if ( anti_flyhack.enabled && last_sent_tick.time && test_flying( local_player.entity, last_sent_tick.global_position, tick_global_position ) ) {
+	if ( local_player.entity->lifestate != rust::lifestate::dead && !local_player.entity->has_player_flag( rust::base_player::flag::sleeping ) && !local_player.entity->mounted.ent_cached ) {	
+		if ( anti_flyhack.enabled && last_sent_tick.time && test_flying( local_player.entity, last_sent_tick.global_position, tick_global_position ) ) {
 			// Set sent tick position to our previous local position
 			player_tick->position = last_sent_tick.local_position;
 
@@ -578,6 +581,7 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 			tick_global_position = last_sent_tick.global_position;
 
 			local_player.movement->teleport_to( last_sent_tick.global_position, local_player.entity );
+			local_player.movement->init( local_player.entity );
 
 			// Reset our desired velocity
 			local_player.movement->target_movement = vector3();
@@ -904,9 +908,8 @@ void client_on_client_disconnected_pre_hook( rust::client* client, sys::string* 
 	aimbot.player_target = nullptr;
 }
 
-bool enter_interactive_debug() {
-	// This should never happen
-	if ( !last_sent_tick.time || !local_player.movement )
+bool try_enter_interactive_debug() {
+	if ( !last_sent_tick.time )
 		return false;
 
 	// We can't enter interactive debug camera if we're mounted
@@ -958,7 +961,7 @@ void exit_interactive_debug() {
 	// Restore the preserved admin cheat
 	local_player.movement->admin_cheat = interactive_debug.admin_cheat;
 
-	vector3 reset_position = interactive_debug.position;
+	vector3 start_position = interactive_debug.position;
 
 	if ( interactive_debug.parented ) {
 		rust::base_entity* parent_entity = local_player.entity->parent_entity;
@@ -967,13 +970,14 @@ void exit_interactive_debug() {
 			unity::transform* transform = parent_entity->get_transform();
 
 			if ( is_valid_ptr( transform ) ) {
-				reset_position = transform->transform_point( interactive_debug.position );
+				start_position = transform->transform_point( interactive_debug.position );
 			}
 		}
 	}
 
 	// Teleport to the start position
-	local_player.movement->teleport_to( reset_position, local_player.entity );
+	local_player.movement->teleport_to( start_position, local_player.entity );
+	local_player.movement->init( local_player.entity );
 
 	interactive_debug.active = false;
 	interactive_debug.dirty = false;
@@ -988,7 +992,7 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 
 	if ( interactive_debug.enabled && ( game_input.get_async_key_state( 'V' ) & 0x1 ) ) {
 		if ( !interactive_debug.active ) {
-			interactive_debug.active = enter_interactive_debug();
+			interactive_debug.active = try_enter_interactive_debug();
 		}
 
 		else {
@@ -996,7 +1000,7 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 		}
 	}
 
-	else if ( should_exit_interactive_debug() ) {
+	if ( should_exit_interactive_debug() ) {
 		exit_interactive_debug();
 	}
 
@@ -1024,10 +1028,8 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 		no_attack_restrictions.reset = false;
 	}
 
-	if ( admin_flags ) {
+	if ( admin_flag ) {
 		base_player->set_player_flag( rust::base_player::flag::is_admin, true );
-
-
 	}
 
 	const std::pair<rust::base_player*, cached_player>* target = update_target();

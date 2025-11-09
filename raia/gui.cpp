@@ -313,6 +313,7 @@ bool mouse_in_rect( const rect& bounds ) {
 namespace elements {
     enum : int {
         none,
+        label,
         toggle,
         slider,
         combo_box
@@ -713,9 +714,35 @@ public:
         }
     }
 
+    static inline vector2 label_movement[] = {
+        { 0.f, 0.f }, /* None */
+        { 0.f, 17.f }, /* Label -> Label */
+        { 0.f, 18.f }, /* Toggle -> Label */
+        { 0.f, 0.f }, /* Slider -> Label */
+        { 0.f, 0.f } /* Combobox -> Label */
+    };
+
+    void label( const char* label ) {
+        auto& draw_list = gui_draw_list.get();
+
+        cursor_ += label_movement[ ( int )previous_id_ ];
+        horizontal_stack_ = 0;
+
+        draw_list.push_z_index( 2 );
+
+        const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
+
+        draw_list.add_text( position.x + 20.f, position.y, fonts::verdana, text_flags::none, COLOR_E, label );
+
+        draw_list.pop_z_index();
+
+        previous_id_ = elements::label;
+    }
+
     // confirmed good
     static inline vector2 toggle_movement[] = {
         { 0.f, 0.f }, /* None */
+        { 0.f, 17.f }, /* Label -> Toggle */
         { 0.f, 18.f }, /* Toggle -> Toggle */
         { 0.f, 34.f }, /* Slider -> Toggle */
         { 0.f, 44.f } /* Combobox -> Toggle */
@@ -1034,6 +1061,7 @@ public:
 
     static inline vector2 slider_movement[] = {
         { 0.f, 0.f }, /* None */
+        { 0.f, 0.f }, /* Label -> Slider */
         { 0.f, 14.f }, /* Toggle -> Slider */
         { 0.f, 30.f }, /* Slider -> Slider */
         { 0.f, 40.f } /* Combobox -> Slider */
@@ -1090,6 +1118,7 @@ public:
 
     static inline vector2 combo_box_movement[] = {
         { 0.f, 0.f }, /* None */
+        { 0.f, 0.f }, /* Label -> Combobox */
         { 0.f, 14.f }, /* Toggle -> Combobox */
         { 0.f, 30.f }, /* Slider -> Combobox */
         { 0.f, 40.f } /* Combobox -> Combobox */
@@ -1380,8 +1409,8 @@ namespace visual_subtabs {
 namespace misc_subtabs {
     enum : uint32_t {
         quality_of_life,
-        visuals,
-        movement
+        movement,
+        visuals
     };
 }
 
@@ -1549,8 +1578,8 @@ void gui::run() {
 
     else if ( current_tab == tabs::misc ) {
         subtab( J( "Quality of life" ), misc_subtabs::quality_of_life, &current_subtab[ tabs::misc ], subtabs_cursor );
-        subtab( J( "Visuals" ), misc_subtabs::visuals, &current_subtab[ tabs::misc ], subtabs_cursor );
         subtab( J( "Movement" ), misc_subtabs::movement, &current_subtab[ tabs::misc ], subtabs_cursor );
+        subtab( J( "Visuals" ), misc_subtabs::visuals, &current_subtab[ tabs::misc ], subtabs_cursor );
     }
 
     group_box left = group_box( rect( menu_bounds.x + 126.f, menu_bounds.y + 53.f, 256.f, 395.f ), 0 );
@@ -1865,16 +1894,15 @@ void gui::run() {
 
             left.end();
 
-            right.begin();
+            right.begin( J( "Admin" ) );
 
-            right.toggle( J( "Override night" ), &override_night.enabled );
-            right.color_picker( &ambient_color, false );
-            right.keybind( &override_night.key );
+            right.toggle( J( "Admin flag" ), &admin_flag );
 
-            if ( override_night.enabled ) {
-                right.slider( J( "Ambient multiplier" ), S( "%.2fx" ), &ambient_multiplier, 0.f, 3.f );
-                right.slider( J( "Ambient saturation" ), S( "%.2f" ), &ambient_saturation, 0.f, 0.5f );
+            if ( right.toggle( J( "Block server commands" ), &block_server_commands.enabled ) ) {
+                right.toggle( J( "Notify on block" ), &block_server_commands.notify );
             }
+
+            right.toggle( J( "Interactive debug camera" ), &interactive_debug.enabled );
 
             right.end();
         }
@@ -1888,6 +1916,15 @@ void gui::run() {
             if ( minimap.enabled ) {
                 left.slider( J( "Size" ), S( "%.2fpx" ), &minimap.size, 50.f, 800.f );
                 left.slider( J( "Zoom" ), S( "%.2fx" ), &minimap.zoom, 1.f, 15.f );
+            }
+
+            left.toggle( J( "Override night" ), &override_night.enabled );
+            left.color_picker( &ambient_color, false );
+            left.keybind( &override_night.key );
+
+            if ( override_night.enabled ) {
+                left.slider( J( "Ambient multiplier" ), S( "%.2fx" ), &ambient_multiplier, 0.f, 3.f );
+                left.slider( J( "Ambient saturation" ), S( "%.2f" ), &ambient_saturation, 0.f, 0.5f );
             }
 
             left.end();
@@ -1906,7 +1943,7 @@ void gui::run() {
         }
 
         else if ( current_subtab[ tabs::misc ] == misc_subtabs::movement ) {
-            left.begin();
+            left.begin( J( "Movement" ) );
             left.toggle( J( "Spider-man" ), &spider_man );
             left.toggle( J( "Infinite jump" ), &infinite_jump );
             left.toggle( J( "Omnisprint" ), &omnisprint );
@@ -1918,19 +1955,11 @@ void gui::run() {
             left.toggle( J( "No attack restrictions" ), &no_attack_restrictions.enabled );
             left.toggle( J( "On ladder" ), &on_ladder );
 
-            left.toggle( J( "Anti-flyhack" ), &anti_flyhack.enabled );
-            
-            left.toggle( J( "Interactive debug camera" ), &interactive_debug.enabled );
-
             left.end();
 
-            right.begin();
+            right.begin( J( "Anti-violations" ) );
 
-            right.toggle( J( "Admin flags" ), &admin_flags );
-
-            if ( right.toggle( J( "Block server commands" ), &block_server_commands.enabled ) ) {
-                right.toggle( J( "Notify on block" ), &block_server_commands.notify );
-            }
+            right.toggle( J( "Anti-flyhack kick" ), &anti_flyhack.enabled );
 
             right.end();
         }
@@ -1938,6 +1967,7 @@ void gui::run() {
 
     else if ( current_tab == tabs::settings ) {
         left.begin();
+        left.label( J( "Menu color" ) );
         left.color_picker( &gradient_on[ 0 ] );
         left.end();
 

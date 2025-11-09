@@ -437,7 +437,7 @@ inline cvar_f glow_outline_scale = cvar_f( H( "Glow Outline Scale" ), 0.5f );
 inline cvar loot_without_untie = cvar( H( "Loot Without Untie" ), true );
 inline cvar suicide = cvar( H( "Suicide" ), false );
 
-inline cvar admin_flags = cvar( H( "Admin Flags" ), false );
+inline cvar admin_flag = cvar( H( "Admin Flag" ), false );
 
 DEFINE_CONTEXT( raid_visuals,
 	cvar enabled = cvar( H( "Raid ESP" ), true );

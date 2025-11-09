@@ -1966,6 +1966,15 @@ namespace rust {
             caller( block_jump, this, duration );
         }
 
+        void init( base_player* player ) {
+            void ( *init )( player_walk_movement*, base_player* ) =
+                ( decltype( init ) )( game_assembly + Offsets::PlayerWalkMovement::Init );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            caller( init, this, player );
+        }
+
         static inline il2cpp_class* klass_;
     };
 
