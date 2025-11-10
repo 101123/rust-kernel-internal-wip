@@ -896,16 +896,16 @@ bool cache_player( rust::base_player* player, cached_player& cached_player ) {
     }
 
     else {
-        const char* name = S( "Scientist" );
+        const char* name = J( "Scientist" );
 
         if ( player->is<rust::tunnel_dweller>() ) {
-            name = S( "Tunnel Dweller" );
+            name = J( "Tunnel Dweller" );
         } else if ( player->is<rust::underwater_dweller>() ) {
-            name = S( "Underwater Dweller" );
+            name = J( "Underwater Dweller" );
         } else if ( player->is<rust::scarecrow_npc>() ) {
-            name = S( "Scarecrow" );
+            name = J( "Scarecrow" );
         } else if ( player->is<rust::gingerbread_npc>() ) {
-            name = S( "Gingerbread" );
+            name = J( "Gingerbread" );
         }
 
         strcpy_s( cached_player.name, sizeof( cached_player.name ), name );

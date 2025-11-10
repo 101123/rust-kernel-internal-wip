@@ -1610,7 +1610,6 @@ void gui::run() {
                 }
 
                 left.toggle( J( "Bullet teleport" ), &bullet_teleport );
-                left.toggle( J( "Houdini escape" ), &bullet_teleport );
             }
 
             left.end();

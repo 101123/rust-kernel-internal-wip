@@ -183,7 +183,7 @@ void update_chams() {
 		rust::base_view_model* active_model = rust::base_view_model::get_active_model();
 
 		if ( is_valid_ptr( active_model ) ) {
-			// This must be set for viewmodel chams to work
+			// This must be disabled for viewmodel chams to work
 			active_model->use_view_model_camera = false;
 
 			unity::game_object* game_object = active_model->get_game_object();
