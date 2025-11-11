@@ -1875,9 +1875,15 @@ void gui::run() {
             left.toggle( J( "Instant loot" ), &instant_loot );
             left.toggle( J( "Loot without untie" ), &loot_without_untie );
 
-            left.toggle( J( "Field of view modifier" ), &fov_modifier.enabled );
-            if ( fov_modifier.enabled ) {
-                left.slider( J( "Field of view" ), S( "%.0f" ), &fov_modifier.fov, 90.f, 170.f );
+            if ( left.toggle( J( "FOV changer" ), &fov_changer.enabled ) ) {
+                left.slider( J( "FOV" ), S( "%.0f" ), &fov_changer.fov, 90.f, 170.f );
+            }
+
+            left.toggle( J( "Zoom" ), &zoom.enabled );
+            left.keybind( &zoom.key );
+
+            if ( zoom.enabled ) {
+                left.slider( J( "FOV" ), S( "%.0f" ), &zoom.fov, 10.f, 70.f );
             }
 
             left.toggle( J( "Auto drop box" ), &auto_drop_box.enabled );
@@ -1917,13 +1923,13 @@ void gui::run() {
                 left.slider( J( "Zoom" ), S( "%.2fx" ), &minimap.zoom, 1.f, 15.f );
             }
 
-            left.toggle( J( "Override night" ), &override_night.enabled );
-            left.color_picker( &ambient_color, false );
-            left.keybind( &override_night.key );
+            left.toggle( J( "Bright night" ), &bright_night.enabled );
+            left.color_picker( &bright_night.color, false );
+            left.keybind( &bright_night.key );
 
-            if ( override_night.enabled ) {
-                left.slider( J( "Ambient multiplier" ), S( "%.2fx" ), &ambient_multiplier, 0.f, 3.f );
-                left.slider( J( "Ambient saturation" ), S( "%.2f" ), &ambient_saturation, 0.f, 0.5f );
+            if ( bright_night.enabled ) {
+                left.slider( J( "Ambient multiplier" ), S( "%.2fx" ), &bright_night.multiplier, 0.f, 3.f );
+                left.slider( J( "Saturation" ), S( "%.2f" ), &bright_night.saturation, 0.f, 0.5f );
             }
 
             left.end();

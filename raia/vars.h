@@ -66,21 +66,9 @@ struct cvar_visual {
     cvar_ui( H( Name " Color" ), Color ), \
 	J( Name ), nullptr } 
 
-enum trigger_type {
-	toggle,
-	hold
-};
-
-struct cvar_bind {
-	cvar enabled;
-	cvar_ui trigger_type;
-	cvar_ui key;
-};
-
-#define WRAP_BIND( Name, Enabled, TriggerType, Key ) { \
-    cvar( H( Name " Enabled" ), Enabled ), \
-	cvar_ui( H( Name " Trigger Type" ), TriggerType ), \
-    cvar_ui( H( Name " Key" ), Key ) }
+#define KEYBIND( Name, Key, TriggerType ) \
+    cvar_ui key = cvar_ui( H( Name " Key" ), Key ); \
+    cvar_ui trigger_type = cvar_ui( H( Name " Trigger Type" ), TriggerType );
 
 struct cvar_player_visuals {
 	cvar enabled;
@@ -408,16 +396,27 @@ DEFINE_CONTEXT( block_server_commands,
 	cvar notify = cvar( H( "Block Server Command Notifications" ), true );
 );
 
-inline cvar_bind override_night = WRAP_BIND( "Override Night", true, trigger_type::toggle, 'K' );
-inline cvar_ui ambient_color = cvar_ui( H( "Ambient Color" ), COL32( 85, 50, 75, 255 ) );
-inline cvar_f ambient_multiplier = cvar_f( H( "Ambient Multiplier" ), 2.f );
-inline cvar_f ambient_saturation = cvar_f( H( "Ambient Saturation" ), 0.2f );
-
-DEFINE_CONTEXT( fov_modifier,
-	cvar enabled = cvar( H( "FOV Modifier" ), false );
-	cvar_f fov = cvar_f( H( "FOV" ), 100.f );
+DEFINE_CONTEXT( bright_night,
+	cvar enabled = cvar( H( "Bright Night" ), true );
+	cvar_ui key = cvar_ui( H( "Bright Night Key" ), 'K' );
+	cvar_ui color = cvar_ui( H( "Bright Night Color" ), COL32( 85, 50, 75, 255 ) );
+	cvar_f multiplier = cvar_f( H( "Bright Night Multiplier" ), 2.f );
+	cvar_f saturation = cvar_f( H( "Bright Night Saturation" ), 0.2f );
 
 	bool dirty;
+);
+
+DEFINE_CONTEXT( fov_changer,
+	cvar enabled = cvar( H( "FOV Modifier" ), false );
+	cvar_f fov = cvar_f( H( "FOV" ), 100.f );
+);
+
+DEFINE_CONTEXT( zoom,
+	cvar enabled = cvar( H( "Zoom" ), true );
+	// cvar_ui key = cvar_ui( H( "Zoom Key" ), 'X' );
+	cvar_f fov = cvar_f( H( "Zoom FOV" ), 40.f );
+
+	KEYBIND( "Zoom", 1, 1 )
 );
 
 DEFINE_CONTEXT( projectile_tracers,
@@ -425,9 +424,6 @@ DEFINE_CONTEXT( projectile_tracers,
 	cvar_f duration = cvar_f( H( "Projectile Tracer Duration" ), 2.f );
 	cvar_ui color = cvar_ui( H( "Projectile Tracer Color" ), COL32( 255, 255, 255, 255 ) );
 );
-
-inline cvar_bind zoom = WRAP_BIND( "Zoom", true, trigger_type::hold, 'X' );
-inline cvar_f zoom_fov = cvar_f( H( "Zoom FOV" ), 40.f );
 
 inline cvar glow = cvar( H( "Glow" ), false );
 inline cvar_ui glow_outline_color = cvar_ui( H( "Glow Outline Color" ), COL32( 255, 255, 255, 255 ) );

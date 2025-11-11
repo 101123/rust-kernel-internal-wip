@@ -3,8 +3,8 @@
 #include "sdk/declare.h"
 
 namespace features {
-	void graphics();
-	void bright_night();
+	void camera_impl();
+	void bright_night_impl();
 	void weapon_modifiers( rust::base_projectile* weapon );
 	bool update_rocket_trajectory( rust::base_launcher* launcher );
 	void looking_at( rust::base_player* local_player );

@@ -3,14 +3,24 @@
 #include "vars.h"
 #include "entities.h"
 
-void features::graphics() {
-	if ( fov_modifier.enabled || fov_modifier.dirty ) {
-		rust::convar::graphics::static_fields_->fov = fov_modifier.enabled ? ( float )fov_modifier.fov : 90.f;
-		fov_modifier.dirty = fov_modifier.enabled;
+void features::camera_impl() {
+	float set_fov = 90.f;
+
+	if ( fov_changer.enabled ) {
+		set_fov = fov_changer.fov;
 	}
+
+	if ( zoom.enabled && game_input.get_async_key_state(zoom.key) ) {
+		set_fov = zoom.fov;
+	}
+
+	rust::convar::graphics::static_fields_->fov = set_fov;
 }
 
-void features::bright_night() {
+void features::bright_night_impl() {
+	if ( !bright_night.enabled && !bright_night.dirty )
+		return;
+
 	rust::tod_sky* tod_sky = rust::tod_sky::get_instance();
 	if ( !is_valid_ptr( tod_sky ) )
 		return;
@@ -23,17 +33,28 @@ void features::bright_night() {
 	if ( !is_valid_ptr( ambient_parameters ) )
 		return;
 
-	night_parameters->ambient_multiplier = override_night.enabled ? ( float )ambient_multiplier : 0.f;
-	ambient_parameters->saturation = override_night.enabled ? ( float )ambient_saturation : 1.f;
+	if ( bright_night.enabled ) {
+		night_parameters->ambient_multiplier = bright_night.multiplier;
+		ambient_parameters->saturation = bright_night.saturation;
+	}
 
-	if ( unity::gradient* gradient = night_parameters->ambient_color ) {
-		unity::color color = override_night.enabled ? unity::color( ambient_color ) : unity::color( 0.f, 0.0343f, 0.099f, 1.f );
+	else {
+		night_parameters->ambient_multiplier = 0.f;
+		ambient_parameters->saturation = 1.f;
+	}
+
+	unity::gradient* ambient_color = night_parameters->ambient_color;
+
+	if ( is_valid_ptr( ambient_color ) ) {
+		unity::color color = bright_night.enabled ? unity::color( bright_night.color ) : unity::color( 0.f, 0.0343f, 0.099f, 1.f );
 
 		std::initializer_list<unity::gradient_color_key> color_keys = { { color, 0.f }, { color, 1.f } };
 		std::initializer_list<unity::gradient_alpha_key> alpha_keys = { { 1.f, 0.f }, { 1.f, 1.f } };
 
-		gradient->set_keys( color_keys, alpha_keys );
+		ambient_color->set_keys( color_keys, alpha_keys );
 	}
+
+	bright_night.dirty = true;
 }
 
 struct cached_weapon_data {
@@ -218,11 +239,11 @@ void features::drop_box() {
 	static util::timer<time_unit::milliseconds> timer( 0ull );
 
 	if ( ( game_input.get_async_key_state( 'V' ) & 0x1 ) && timer.has_elapsed( 50ull ) ) {
-		rust::item_container* container00 = rust::loot_panel::get_container_00();
-		if ( !is_valid_ptr( container00 ) )
+		rust::item_container* container_00 = rust::loot_panel::get_container_00();
+		if ( !is_valid_ptr( container_00 ) )
 			return;
 
-		sys::list<rust::item*>* items_list = container00->item_list;
+		sys::list<rust::item*>* items_list = container_00->item_list;
 		if ( !is_valid_ptr( items_list ) )
 			return;
 
