@@ -4,25 +4,25 @@
 
 namespace Offsets {
 	namespace GameAssembly {
-		constexpr const static size_t timestamp = 0x690f239b;
-		constexpr const static size_t gc_handles = 0xd51b230;
-		constexpr const static size_t il2cpp_resolve_icall = 0x5c21f0;
-		constexpr const static size_t il2cpp_array_new = 0x5c2210;
-		constexpr const static size_t il2cpp_assembly_get_image = 0x16150;
-		constexpr const static size_t il2cpp_class_from_name = 0x5c2380;
-		constexpr const static size_t il2cpp_class_get_method_from_name = 0x5c2690;
-		constexpr const static size_t il2cpp_class_get_type = 0x5c2730;
-		constexpr const static size_t il2cpp_domain_get = 0x5c2c90;
-		constexpr const static size_t il2cpp_domain_get_assemblies = 0x5c2cb0;
-		constexpr const static size_t il2cpp_gchandle_get_target = 0x5c3570;
-		constexpr const static size_t il2cpp_gchandle_new = 0x5c3520;
-		constexpr const static size_t il2cpp_gchandle_free = 0x5c3610;
-		constexpr const static size_t il2cpp_method_get_name = 0x2d30;
-		constexpr const static size_t il2cpp_object_new = 0x5c3cc0;
-		constexpr const static size_t il2cpp_type_get_object = 0x5c44b0;
+		constexpr const static size_t timestamp = 0x6913111f;
+		constexpr const static size_t gc_handles = 0xd38cdd0;
+		constexpr const static size_t il2cpp_resolve_icall = 0x5bcd70;
+		constexpr const static size_t il2cpp_array_new = 0x5bcd90;
+		constexpr const static size_t il2cpp_assembly_get_image = 0x26920;
+		constexpr const static size_t il2cpp_class_from_name = 0x5bcf00;
+		constexpr const static size_t il2cpp_class_get_method_from_name = 0x5bd210;
+		constexpr const static size_t il2cpp_class_get_type = 0x5bd2b0;
+		constexpr const static size_t il2cpp_domain_get = 0x5bd810;
+		constexpr const static size_t il2cpp_domain_get_assemblies = 0x5bd830;
+		constexpr const static size_t il2cpp_gchandle_get_target = 0x5be0f0;
+		constexpr const static size_t il2cpp_gchandle_new = 0x5be0a0;
+		constexpr const static size_t il2cpp_gchandle_free = 0x5be190;
+		constexpr const static size_t il2cpp_method_get_name = 0x39f0;
+		constexpr const static size_t il2cpp_object_new = 0x5be840;
+		constexpr const static size_t il2cpp_type_get_object = 0x5bf030;
 	}
 
-#define Object_TypeDefinitionIndex 17063
+#define Object_TypeDefinitionIndex 17059
 
 	namespace Object {
 
@@ -30,7 +30,7 @@ namespace Offsets {
 		constexpr const static size_t m_CachedPtr = 0x10;
 
 		// Functions
-		constexpr const static size_t GetInstanceID = 0xaf7a710;
+		constexpr const static size_t GetInstanceID = 0xadf5240;
 		constexpr const static size_t Destroy = 0x104400;
 		constexpr const static size_t DestroyImmediate = 0x104590;
 		constexpr const static size_t DontDestroyOnLoad = 0x104d10;
@@ -40,7 +40,7 @@ namespace Offsets {
 		constexpr const static size_t set_hideFlags = 0x104f80;
 	}
 
-#define GameObject_TypeDefinitionIndex 17034
+#define GameObject_TypeDefinitionIndex 17030
 
 	namespace GameObject {
 
@@ -58,7 +58,7 @@ namespace Offsets {
 		constexpr const static size_t get_transform = 0xfc270;
 	}
 
-#define Component_TypeDefinitionIndex 17021
+#define Component_TypeDefinitionIndex 17017
 
 	namespace Component {
 
@@ -67,7 +67,7 @@ namespace Offsets {
 		constexpr const static size_t get_transform = 0xf77d0;
 	}
 
-#define Behaviour_TypeDefinitionIndex 17015
+#define Behaviour_TypeDefinitionIndex 17011
 
 	namespace Behaviour {
 
@@ -76,12 +76,12 @@ namespace Offsets {
 		constexpr const static size_t set_enabled = 0xa1de0;
 	}
 
-#define Transform_TypeDefinitionIndex 17098
+#define Transform_TypeDefinitionIndex 17094
 
 	namespace Transform {
 
 		// Functions
-		constexpr const static size_t get_eulerAngles = 0xaf86140;
+		constexpr const static size_t get_eulerAngles = 0xae00e80;
 		constexpr const static size_t GetChild = 0x115600;
 		constexpr const static size_t GetParent = 0x111e60;
 		constexpr const static size_t GetRoot = 0x113f70;
@@ -108,7 +108,7 @@ namespace Offsets {
 		constexpr const static size_t set_rotation_Injected = 0x1117e0;
 	}
 
-#define Camera_TypeDefinitionIndex 16813
+#define Camera_TypeDefinitionIndex 16809
 
 	namespace Camera {
 
@@ -124,7 +124,7 @@ namespace Offsets {
 		constexpr const static size_t RenderWithShader = 0x733b0;
 	}
 
-#define Time_TypeDefinitionIndex 17085
+#define Time_TypeDefinitionIndex 17081
 
 	namespace Time {
 
@@ -138,7 +138,7 @@ namespace Offsets {
 		constexpr const static size_t get_time = 0x10f870;
 	}
 
-#define Material_TypeDefinitionIndex 16876
+#define Material_TypeDefinitionIndex 16872
 
 	namespace Material {
 
@@ -153,29 +153,29 @@ namespace Offsets {
 		constexpr const static size_t get_shader = 0xaf5e0;
 	}
 
-#define MaterialPropertyBlock_TypeDefinitionIndex 16872
+#define MaterialPropertyBlock_TypeDefinitionIndex 16868
 
 	namespace MaterialPropertyBlock {
 
 		// Functions
-		constexpr const static size_t ctor = 0xaf3a610;
+		constexpr const static size_t ctor = 0xadb4df0;
 		constexpr const static size_t SetFloatImpl = 0x9bed0;
 		constexpr const static size_t SetTextureImpl = 0x9c1c0;
 	}
 
-#define Shader_TypeDefinitionIndex 16875
+#define Shader_TypeDefinitionIndex 16871
 
 	namespace Shader {
 
 		// Functions
-		constexpr const static size_t Find = 0xaf3dfa0;
+		constexpr const static size_t Find = 0xadb89d0;
 		constexpr const static size_t PropertyToID = 0xaa6a0;
 		constexpr const static size_t GetPropertyCount = 0xaea30;
 		constexpr const static size_t GetPropertyName = 0xad8f0;
 		constexpr const static size_t GetPropertyType = 0xadb90;
 	}
 
-#define Mesh_TypeDefinitionIndex 16931
+#define Mesh_TypeDefinitionIndex 16927
 
 	namespace Mesh {
 
@@ -192,7 +192,7 @@ namespace Offsets {
 		constexpr const static size_t UploadMeshDataImpl = 0xd6f70;
 	}
 
-#define Renderer_TypeDefinitionIndex 16873
+#define Renderer_TypeDefinitionIndex 16869
 
 	namespace Renderer {
 
@@ -203,7 +203,7 @@ namespace Offsets {
 		constexpr const static size_t GetMaterialArray = 0xa0470;
 	}
 
-#define Texture_TypeDefinitionIndex 16934
+#define Texture_TypeDefinitionIndex 16930
 
 	namespace Texture {
 
@@ -212,19 +212,19 @@ namespace Offsets {
 		constexpr const static size_t GetNativeTexturePtr = 0xdab00;
 	}
 
-#define Texture2D_TypeDefinitionIndex 16936
+#define Texture2D_TypeDefinitionIndex 16932
 
 	namespace Texture2D {
 
 		// Functions
-		constexpr const static size_t ctor = 0xaf53c90;
+		constexpr const static size_t ctor = 0xadcea60;
 		constexpr const static size_t Internal_CreateImpl = 0xdc200;
 		constexpr const static size_t GetRawImageDataSize = 0xde1e0;
 		constexpr const static size_t GetWritableImageData = 0xde090;
 		constexpr const static size_t ApplyImpl = 0xdc5e0;
 	}
 
-#define Sprite_TypeDefinitionIndex 17104
+#define Sprite_TypeDefinitionIndex 17100
 
 	namespace Sprite {
 
@@ -232,21 +232,21 @@ namespace Offsets {
 		constexpr const static size_t get_texture = 0x119300;
 	}
 
-#define RenderTexture_TypeDefinitionIndex 16941
+#define RenderTexture_TypeDefinitionIndex 16937
 
 	namespace RenderTexture {
 
 		// Functions
-		constexpr const static size_t GetTemporary = 0xaf5c940;
+		constexpr const static size_t GetTemporary = 0xadd7690;
 		constexpr const static size_t ReleaseTemporary = 0xe9390;
 	}
 
-#define CommandBuffer_TypeDefinitionIndex 17411
+#define CommandBuffer_TypeDefinitionIndex 17407
 
 	namespace CommandBuffer {
 
 		// Functions
-		constexpr const static size_t ctor = 0xafa0690;
+		constexpr const static size_t ctor = 0xae1b070;
 		constexpr const static size_t Clear = 0x12f580;
 		constexpr const static size_t SetRenderTargetSingle_Internal_Injected = 0x138fc0;
 		constexpr const static size_t ClearRenderTarget_Injected = 0x132050;
@@ -259,48 +259,48 @@ namespace Offsets {
 		constexpr const static size_t Internal_DrawRenderer = 0x12f990;
 	}
 
-#define RenderTargetIdentifier_TypeDefinitionIndex 17387
+#define RenderTargetIdentifier_TypeDefinitionIndex 17383
 
 	namespace RenderTargetIdentifier {
 
 		// Functions
-		constexpr const static size_t ctor = 0xaf9a4e0;
+		constexpr const static size_t ctor = 0xae153c0;
 	}
 
-#define ComputeBuffer_TypeDefinitionIndex 17076
+#define ComputeBuffer_TypeDefinitionIndex 17072
 
 	namespace ComputeBuffer {
 
 		// Functions
-		constexpr const static size_t ctor = 0xaf7e290;
+		constexpr const static size_t ctor = 0xadf8de0;
 		constexpr const static size_t get_count = 0x7c6b0;
-		constexpr const static size_t Release = 0xaf7e4e0;
+		constexpr const static size_t Release = 0xadf9030;
 		constexpr const static size_t InternalSetNativeData = 0xbb930;
 	}
 
-#define GraphicsBuffer_TypeDefinitionIndex 16880
+#define GraphicsBuffer_TypeDefinitionIndex 16876
 
 	namespace GraphicsBuffer {
 
 		// Functions
-		constexpr const static size_t ctor = 0xaf44d40;
+		constexpr const static size_t ctor = 0xadbfa40;
 		constexpr const static size_t get_count = 0x7c6b0;
-		constexpr const static size_t Dispose = 0xaf44a70;
+		constexpr const static size_t Dispose = 0xadbf770;
 		constexpr const static size_t InternalSetNativeData = 0xbb930;
 	}
 
-#define Event_TypeDefinitionIndex 22346
+#define Event_TypeDefinitionIndex 22268
 
 	namespace Event {
 
 		// Functions
-		constexpr const static size_t get_current = 0xafc2dc0;
+		constexpr const static size_t get_current = 0xae3d8e0;
 		constexpr const static size_t get_type = 0x23a320;
 		constexpr const static size_t PopEvent = 0x23b060;
 		constexpr const static size_t Internal_Use = 0x23ac60;
 	}
 
-#define Graphics_TypeDefinitionIndex 16853
+#define Graphics_TypeDefinitionIndex 16849
 
 	namespace Graphics {
 
@@ -309,7 +309,7 @@ namespace Offsets {
 		constexpr const static size_t ExecuteCommandBuffer = 0x89bb0;
 	}
 
-#define Matrix4x4_TypeDefinitionIndex 16964
+#define Matrix4x4_TypeDefinitionIndex 16960
 
 	namespace Matrix4x4 {
 
@@ -317,7 +317,7 @@ namespace Offsets {
 		constexpr const static size_t Ortho_Injected = 0xef280;
 	}
 
-#define AssetBundle_TypeDefinitionIndex 24785
+#define AssetBundle_TypeDefinitionIndex 24797
 
 	namespace AssetBundle {
 
@@ -328,7 +328,7 @@ namespace Offsets {
 		constexpr const static size_t Unload = 0x1cd090;
 	}
 
-#define Screen_TypeDefinitionIndex 16850
+#define Screen_TypeDefinitionIndex 16846
 
 	namespace Screen {
 
@@ -337,7 +337,7 @@ namespace Offsets {
 		constexpr const static size_t get_height = 0x81640;
 	}
 
-#define Input_TypeDefinitionIndex 24677
+#define Input_TypeDefinitionIndex 24675
 
 	namespace Input {
 
@@ -352,16 +352,17 @@ namespace Offsets {
 		constexpr const static size_t GetKeyInt = 0x220880;
 	}
 
-#define Application_TypeDefinitionIndex 16796
+#define Application_TypeDefinitionIndex 16792
 
 	namespace Application {
 
 		// Functions
 		constexpr const static size_t get_version = 0x5f350;
 		constexpr const static size_t Quit = 0x5d790;
+		constexpr const static size_t get_isFocused = 0x5ddc0;
 	}
 
-#define Gradient_TypeDefinitionIndex 16962
+#define Gradient_TypeDefinitionIndex 16958
 
 	namespace Gradient {
 
@@ -369,17 +370,17 @@ namespace Offsets {
 		constexpr const static size_t SetKeys = 0xeee50;
 	}
 
-#define Physics_TypeDefinitionIndex 23634
+#define Physics_TypeDefinitionIndex 23649
 
 	namespace Physics {
 
 		// Functions
-		constexpr const static size_t Raycast = 0xb009250;
-		constexpr const static size_t RaycastNonAlloc = 0xb00b920;
-		constexpr const static size_t CheckCapsule = 0xb00d0f0;
+		constexpr const static size_t Raycast = 0xae83460;
+		constexpr const static size_t RaycastNonAlloc = 0xae85b30;
+		constexpr const static size_t CheckCapsule = 0xae873e0;
 	}
 
-#define Image_TypeDefinitionIndex 21231
+#define Image_TypeDefinitionIndex 21228
 
 	namespace Image {
 
@@ -387,7 +388,7 @@ namespace Offsets {
 		constexpr const static size_t m_Sprite = 0xd0;
 	}
 
-#define GraphicsSettings_TypeDefinitionIndex 17409
+#define GraphicsSettings_TypeDefinitionIndex 17405
 
 	namespace GraphicsSettings {
 
@@ -395,32 +396,40 @@ namespace Offsets {
 		constexpr const static size_t get_INTERNAL_defaultRenderPipeline = 0x127f00;
 	}
 
-#define BaseNetworkable_TypeDefinitionIndex 5764
+#define Cursor_TypeDefinitionIndex 16947
+
+	namespace Cursor {
+
+		// Functions
+		constexpr const static size_t get_visible = 0xed7a0;
+	}
+
+#define BaseNetworkable_TypeDefinitionIndex 4389
 
 	namespace BaseNetworkable {
 
 		// Offsets
 		constexpr const static size_t prefabID = 0x30;
-		constexpr const static size_t net = 0x28;
+		constexpr const static size_t net = 0x58;
 		constexpr const static size_t parentEntity = 0x68;
 		constexpr const static size_t children = 0x40;
 	}
 
-	// obf name: ::%319a7219ff8473dcd97f2fca31ca79c4fc3882f9
-#define BaseNetworkable_Static_ClassName "BaseNetworkable/%319a7219ff8473dcd97f2fca31ca79c4fc3882f9"
-#define BaseNetworkable_Static_ClassNameShort "%319a7219ff8473dcd97f2fca31ca79c4fc3882f9"
-#define BaseNetworkable_Static_TypeDefinitionIndex 5763
+	// obf name: ::%e24d140708fb6596151556472b34dce8ef6ecf0c
+#define BaseNetworkable_Static_ClassName "BaseNetworkable/%e24d140708fb6596151556472b34dce8ef6ecf0c"
+#define BaseNetworkable_Static_ClassNameShort "%e24d140708fb6596151556472b34dce8ef6ecf0c"
+#define BaseNetworkable_Static_TypeDefinitionIndex 4388
 
 	namespace BaseNetworkable_Static {
 
 		// Offsets
-		constexpr const static size_t clientEntities = 0x20;
+		constexpr const static size_t clientEntities = 0x8;
 	}
 
-	// obf name: ::%1f51a2517ef3ffd3b51ac024cf55fdbac84e5bb7
-#define BaseNetworkable_EntityRealm_ClassName "BaseNetworkable/%1f51a2517ef3ffd3b51ac024cf55fdbac84e5bb7"
-#define BaseNetworkable_EntityRealm_ClassNameShort "%1f51a2517ef3ffd3b51ac024cf55fdbac84e5bb7"
-#define BaseNetworkable_EntityRealm_TypeDefinitionIndex 5761
+	// obf name: ::%66323faacf2159c1b2f4947a5b1f230c0bd2b466
+#define BaseNetworkable_EntityRealm_ClassName "BaseNetworkable/%66323faacf2159c1b2f4947a5b1f230c0bd2b466"
+#define BaseNetworkable_EntityRealm_ClassNameShort "%66323faacf2159c1b2f4947a5b1f230c0bd2b466"
+#define BaseNetworkable_EntityRealm_TypeDefinitionIndex 4386
 
 	namespace BaseNetworkable_EntityRealm {
 
@@ -428,27 +437,27 @@ namespace Offsets {
 		constexpr const static size_t entityList = 0x10;
 
 		// Functions
-		constexpr const static size_t Find = 0x3a5f110;
+		constexpr const static size_t Find = 0x2e3a380;
 	}
 
-	// obf name: ::%21cb5c3b47e37e7b22a92604494704285b638558
-#define System_ListDictionary_ClassName "%21cb5c3b47e37e7b22a92604494704285b638558<%ae04c6bbd32a1477fdc1c8cf05109f1d0e965e9c,BaseNetworkable>"
-#define System_ListDictionary_ClassNameShort "%21cb5c3b47e37e7b22a92604494704285b638558"
+	// obf name: ::%78763bea9997b581199e7acecd70d97c15158239
+#define System_ListDictionary_ClassName "%78763bea9997b581199e7acecd70d97c15158239<%098306a25a5044cc572e348a0456e98bb3f02729,BaseNetworkable>"
+#define System_ListDictionary_ClassNameShort "%78763bea9997b581199e7acecd70d97c15158239"
 #define System_ListDictionary_TypeDefinitionIndex -1
 
 	namespace System_ListDictionary {
 
 		// Offsets
-		constexpr const static size_t vals = 0x10;
+		constexpr const static size_t vals = 0x18;
 
 		// Functions
-		constexpr const static size_t TryGetValue = 0x6d3f7c0;
-		constexpr const static size_t TryGetValue_methodinfo = 0xd1bd6f0;
+		constexpr const static size_t TryGetValue = 0x6c7d3c0;
+		constexpr const static size_t TryGetValue_methodinfo = 0xd005710;
 	}
 
-	// obf name: ::%9da2bd96b1b0e8bfd0670320514502a263d23013
-#define System_BufferList_ClassName "%9da2bd96b1b0e8bfd0670320514502a263d23013<BaseNetworkable>"
-#define System_BufferList_ClassNameShort "%9da2bd96b1b0e8bfd0670320514502a263d23013"
+	// obf name: ::%a4f7c601540fa233340e31e3a251c0d9af21b4e0
+#define System_BufferList_ClassName "%a4f7c601540fa233340e31e3a251c0d9af21b4e0<BaseNetworkable>"
+#define System_BufferList_ClassNameShort "%a4f7c601540fa233340e31e3a251c0d9af21b4e0"
 #define System_BufferList_TypeDefinitionIndex -1
 
 	namespace System_BufferList {
@@ -466,10 +475,10 @@ namespace Offsets {
 	namespace SingletonComponent {
 
 		// Offsets
-		constexpr const static size_t Instance = 0x20;
+		constexpr const static size_t Instance = 0x48;
 	}
 
-#define Model_TypeDefinitionIndex 6771
+#define Model_TypeDefinitionIndex 3339
 
 	namespace Model {
 
@@ -480,7 +489,7 @@ namespace Offsets {
 		constexpr const static size_t boneTransforms = 0x50;
 	}
 
-#define BaseEntity_TypeDefinitionIndex 3232
+#define BaseEntity_TypeDefinitionIndex 493
 
 	namespace BaseEntity {
 
@@ -488,30 +497,30 @@ namespace Offsets {
 		constexpr const static size_t bounds = 0xa8;
 		constexpr const static size_t model = 0xd0;
 		constexpr const static size_t flags = 0xd8;
-		constexpr const static size_t triggers = 0x158;
-		constexpr const static size_t positionLerp = 0x130;
+		constexpr const static size_t triggers = 0x90;
+		constexpr const static size_t positionLerp = 0x100;
 
 		// Functions
-		constexpr const static size_t ServerRPC = 0x1f28b90;
-		constexpr const static size_t FindBone = 0x1f2c870;
-		constexpr const static size_t GetWorldVelocity = 0x1f41520;
-		constexpr const static size_t GetParentVelocity = 0x1f41520;
+		constexpr const static size_t ServerRPC = 0x2c55290;
+		constexpr const static size_t FindBone = 0x2c5e830;
+		constexpr const static size_t GetWorldVelocity = 0x2c93a40;
+		constexpr const static size_t GetParentVelocity = 0x2c64de0;
 	}
 
-	// obf name: ::%57cbc0c6f930f9e6e9991010e9bd25c6a26d5b3f
-#define PositionLerp_ClassName "%57cbc0c6f930f9e6e9991010e9bd25c6a26d5b3f"
-#define PositionLerp_ClassNameShort "%57cbc0c6f930f9e6e9991010e9bd25c6a26d5b3f"
-#define PositionLerp_TypeDefinitionIndex 2597
+	// obf name: ::%7ee7c7ccbc97168d644522051a8d9a638526c4ee
+#define PositionLerp_ClassName "%7ee7c7ccbc97168d644522051a8d9a638526c4ee"
+#define PositionLerp_ClassNameShort "%7ee7c7ccbc97168d644522051a8d9a638526c4ee"
+#define PositionLerp_TypeDefinitionIndex 1493
 
 	namespace PositionLerp {
 
 		// Offsets
-		constexpr const static size_t interpolator = 0x30;
+		constexpr const static size_t interpolator = 0x38;
 	}
 
-	// obf name: ::%e5b7ceec0e3aa6667558a0945312784fbeb6ccda
-#define Interpolator_ClassName "%e5b7ceec0e3aa6667558a0945312784fbeb6ccda<%7d8fe19b229fb41e6871a5f1ddcef98b6fe6511e>"
-#define Interpolator_ClassNameShort "%e5b7ceec0e3aa6667558a0945312784fbeb6ccda"
+	// obf name: ::%ee05c1732c9268a0a8ee605e9cef2d8bcee5d29a
+#define Interpolator_ClassName "%ee05c1732c9268a0a8ee605e9cef2d8bcee5d29a<%101a5910c4bb2b5069c9fdb77f7f9ad0a02cd16a>"
+#define Interpolator_ClassNameShort "%ee05c1732c9268a0a8ee605e9cef2d8bcee5d29a"
 #define Interpolator_TypeDefinitionIndex -1
 
 	namespace Interpolator {
@@ -521,7 +530,7 @@ namespace Offsets {
 		constexpr const static size_t last = 0x10;
 	}
 
-#define BaseCombatEntity_TypeDefinitionIndex 6709
+#define BaseCombatEntity_TypeDefinitionIndex 5657
 
 	namespace BaseCombatEntity {
 
@@ -535,7 +544,7 @@ namespace Offsets {
 		constexpr const static size_t lastNotifyFrame = 0x258;
 	}
 
-#define SkeletonProperties_TypeDefinitionIndex 763
+#define SkeletonProperties_TypeDefinitionIndex 6665
 
 	namespace SkeletonProperties {
 
@@ -544,7 +553,7 @@ namespace Offsets {
 		constexpr const static size_t quickLookup = 0x28;
 	}
 
-#define SkeletonProperties_BoneProperty_TypeDefinitionIndex 761
+#define SkeletonProperties_BoneProperty_TypeDefinitionIndex 6663
 
 	namespace SkeletonProperties_BoneProperty {
 
@@ -553,7 +562,7 @@ namespace Offsets {
 		constexpr const static size_t area = 0x20;
 	}
 
-#define DamageProperties_TypeDefinitionIndex 6969
+#define DamageProperties_TypeDefinitionIndex 3598
 
 	namespace DamageProperties {
 
@@ -562,7 +571,7 @@ namespace Offsets {
 		constexpr const static size_t bones = 0x20;
 	}
 
-#define DamageProperties_HitAreaProperty_TypeDefinitionIndex 6968
+#define DamageProperties_HitAreaProperty_TypeDefinitionIndex 3597
 
 	namespace DamageProperties_HitAreaProperty {
 
@@ -571,10 +580,10 @@ namespace Offsets {
 		constexpr const static size_t damage = 0x14;
 	}
 
-	// obf name: ::%9a9736971eeb4378257b6e3e3a9d4dfb86fe0ce1
-#define DamageTypeList_ClassName "%9a9736971eeb4378257b6e3e3a9d4dfb86fe0ce1"
-#define DamageTypeList_ClassNameShort "%9a9736971eeb4378257b6e3e3a9d4dfb86fe0ce1"
-#define DamageTypeList_TypeDefinitionIndex 4032
+	// obf name: ::%49fbc04a01434ad5bacdc41af8545264d5cabb6a
+#define DamageTypeList_ClassName "%49fbc04a01434ad5bacdc41af8545264d5cabb6a"
+#define DamageTypeList_ClassNameShort "%49fbc04a01434ad5bacdc41af8545264d5cabb6a"
+#define DamageTypeList_TypeDefinitionIndex 6171
 
 	namespace DamageTypeList {
 
@@ -582,7 +591,7 @@ namespace Offsets {
 		constexpr const static size_t types = 0x10;
 	}
 
-#define ProtectionProperties_TypeDefinitionIndex 3683
+#define ProtectionProperties_TypeDefinitionIndex 5965
 
 	namespace ProtectionProperties {
 
@@ -590,7 +599,7 @@ namespace Offsets {
 		constexpr const static size_t amounts = 0x28;
 	}
 
-#define ItemDefinition_TypeDefinitionIndex 4266
+#define ItemDefinition_TypeDefinitionIndex 4852
 
 	namespace ItemDefinition {
 
@@ -603,10 +612,10 @@ namespace Offsets {
 		constexpr const static size_t stackable = 0x78;
 		constexpr const static size_t rarity = 0x90;
 		constexpr const static size_t condition = 0xb8;
-		constexpr const static size_t ItemModWearable = 0x188;
+		constexpr const static size_t ItemModWearable = 0x170;
 	}
 
-#define RecoilProperties_TypeDefinitionIndex 5836
+#define RecoilProperties_TypeDefinitionIndex 806
 
 	namespace RecoilProperties {
 
@@ -620,7 +629,7 @@ namespace Offsets {
 		constexpr const static size_t newRecoilOverride = 0x80;
 	}
 
-#define BaseProjectile_Magazine_Definition_TypeDefinitionIndex 7217
+#define BaseProjectile_Magazine_Definition_TypeDefinitionIndex 5001
 
 	namespace BaseProjectile_Magazine_Definition {
 
@@ -628,7 +637,7 @@ namespace Offsets {
 		constexpr const static size_t builtInSize = 0x0;
 	}
 
-#define BaseProjectile_Magazine_TypeDefinitionIndex 7218
+#define BaseProjectile_Magazine_TypeDefinitionIndex 5002
 
 	namespace BaseProjectile_Magazine {
 
@@ -639,7 +648,7 @@ namespace Offsets {
 		constexpr const static size_t ammoType = 0x20;
 	}
 
-#define AttackEntity_TypeDefinitionIndex 6880
+#define AttackEntity_TypeDefinitionIndex 5616
 
 	namespace AttackEntity {
 
@@ -652,11 +661,11 @@ namespace Offsets {
 		constexpr const static size_t timeSinceDeploy = 0x2b0;
 
 		// Functions
-		constexpr const static size_t SpectatorNotifyTick = 0x484c260;
-		constexpr const static size_t StartAttackCooldown = 0x484e810;
+		constexpr const static size_t SpectatorNotifyTick = 0x3a8b5a0;
+		constexpr const static size_t StartAttackCooldown = 0x3a87790;
 	}
 
-#define BaseProjectile_TypeDefinitionIndex 7223
+#define BaseProjectile_TypeDefinitionIndex 5007
 
 	namespace BaseProjectile {
 
@@ -681,56 +690,56 @@ namespace Offsets {
 		constexpr const static size_t hipAimConeOffset = 0x3d0;
 
 		// Functions
-		constexpr const static size_t LaunchProjectile = 0x4c4e110;
-		constexpr const static size_t LaunchProjectileClientSide = 0x4c4c320;
-		constexpr const static size_t ScaleRepeatDelay = 0x4c48df0;
-		constexpr const static size_t GetAimCone = 0x4c47900;
-		constexpr const static size_t GetAimCone_vtableoff = 0x3fc8;
-		constexpr const static size_t UpdateAmmoDisplay = 0x4c33b20;
-		constexpr const static size_t UpdateAmmoDisplay_vtableoff = 0x3dd8;
+		constexpr const static size_t LaunchProjectile = 0x349ecd0;
+		constexpr const static size_t LaunchProjectileClientSide = 0x349ef60;
+		constexpr const static size_t ScaleRepeatDelay = 0x349b0c0;
+		constexpr const static size_t GetAimCone = 0x34a3ed0;
+		constexpr const static size_t GetAimCone_vtableoff = 0x4068;
+		constexpr const static size_t UpdateAmmoDisplay = 0x3498460;
+		constexpr const static size_t UpdateAmmoDisplay_vtableoff = 0x3ec8;
 	}
 
-#define BaseLauncher_TypeDefinitionIndex 6378
+#define BaseLauncher_TypeDefinitionIndex 4533
 
 	namespace BaseLauncher {
 
 		// Offsets
 	}
 
-#define SpinUpWeapon_TypeDefinitionIndex 4015
+#define SpinUpWeapon_TypeDefinitionIndex 4930
 
 	namespace SpinUpWeapon {
 
 		// Offsets
 	}
 
-	// obf name: ::%5fd71201ea98cf9272d6478e7513d82189b8dd65
-#define HitTest_ClassName "%5fd71201ea98cf9272d6478e7513d82189b8dd65"
-#define HitTest_ClassNameShort "%5fd71201ea98cf9272d6478e7513d82189b8dd65"
-#define HitTest_TypeDefinitionIndex 7131
+	// obf name: ::%d1192a78ab4a34ed95c396962a5891a69b9a9038
+#define HitTest_ClassName "%d1192a78ab4a34ed95c396962a5891a69b9a9038"
+#define HitTest_ClassNameShort "%d1192a78ab4a34ed95c396962a5891a69b9a9038"
+#define HitTest_TypeDefinitionIndex 7
 
 	namespace HitTest {
 
 		// Offsets
-		constexpr const static size_t type = 0xac;
-		constexpr const static size_t AttackRay = 0x30;
-		constexpr const static size_t RayHit = 0x68;
-		constexpr const static size_t damageProperties = 0x98;
-		constexpr const static size_t gameObject = 0xb0;
-		constexpr const static size_t collider = 0x58;
-		constexpr const static size_t ignoredTypes = 0xc8;
-		constexpr const static size_t HitTransform = 0xd8;
-		constexpr const static size_t HitPart = 0x64;
-		constexpr const static size_t HitMaterial = 0xc0;
-		constexpr const static size_t DidHit = 0x20;
-		constexpr const static size_t MaxDistance = 0x60;
-		constexpr const static size_t HitPoint = 0x24;
-		constexpr const static size_t HitNormal = 0xa0;
-		constexpr const static size_t ignoreEntity = 0x18;
-		constexpr const static size_t HitEntity = 0x48;
+		constexpr const static size_t type = 0x8c;
+		constexpr const static size_t AttackRay = 0xac;
+		constexpr const static size_t RayHit = 0x10;
+		constexpr const static size_t damageProperties = 0x80;
+		constexpr const static size_t gameObject = 0xa0;
+		constexpr const static size_t collider = 0xd0;
+		constexpr const static size_t ignoredTypes = 0x60;
+		constexpr const static size_t HitTransform = 0x50;
+		constexpr const static size_t HitPart = 0x78;
+		constexpr const static size_t HitMaterial = 0x58;
+		constexpr const static size_t DidHit = 0x3c;
+		constexpr const static size_t MaxDistance = 0x48;
+		constexpr const static size_t HitNormal = 0x6c;
+		constexpr const static size_t HitPoint = 0x90;
+		constexpr const static size_t ignoreEntity = 0x40;
+		constexpr const static size_t HitEntity = 0xc8;
 	}
 
-#define Projectile_TypeDefinitionIndex 4928
+#define Projectile_TypeDefinitionIndex 420
 
 	namespace Projectile {
 
@@ -742,10 +751,10 @@ namespace Offsets {
 		constexpr const static size_t initialDistance = 0x44;
 		constexpr const static size_t swimScale = 0xf0;
 		constexpr const static size_t swimSpeed = 0xfc;
-		constexpr const static size_t owner = 0x120;
-		constexpr const static size_t sourceProjectilePrefab = 0x108;
-		constexpr const static size_t mod = 0x1d0;
-		constexpr const static size_t hitTest = 0x110;
+		constexpr const static size_t owner = 0x1e0;
+		constexpr const static size_t sourceProjectilePrefab = 0x1d0;
+		constexpr const static size_t mod = 0x110;
+		constexpr const static size_t hitTest = 0x120;
 		constexpr const static size_t launchTime = 0x174;
 		constexpr const static size_t currentVelocity = 0x154;
 		constexpr const static size_t currentPosition = 0x160;
@@ -759,41 +768,41 @@ namespace Offsets {
 		constexpr const static size_t integrity = 0x134;
 
 		// Functions
-		constexpr const static size_t CalculateEffectScale = 0x3157a50;
-		constexpr const static size_t CalculateEffectScale_vtableoff = 0x3f8;
-		constexpr const static size_t SetEffectScale = 0x313f5a0;
-		constexpr const static size_t UpdateVelocity = 0x3158650;
-		constexpr const static size_t Retire = 0x31361b0;
-		constexpr const static size_t DoHit = 0x3129820;
+		constexpr const static size_t CalculateEffectScale = 0x255be60;
+		constexpr const static size_t CalculateEffectScale_vtableoff = 0x418;
+		constexpr const static size_t SetEffectScale = 0x2534fd0;
+		constexpr const static size_t UpdateVelocity = 0x252a6f0;
+		constexpr const static size_t Retire = 0x253c9d0;
+		constexpr const static size_t DoHit = 0x2559200;
 	}
 
-	// obf name: ::%08f7e76630592c8728ce8448006e74da002fbc71
-#define HitInfo_ClassName "%08f7e76630592c8728ce8448006e74da002fbc71"
-#define HitInfo_ClassNameShort "%08f7e76630592c8728ce8448006e74da002fbc71"
-#define HitInfo_TypeDefinitionIndex 493
+	// obf name: ::%1671fffcb5ee642648a31fcc87f518da4325bfa3
+#define HitInfo_ClassName "%1671fffcb5ee642648a31fcc87f518da4325bfa3"
+#define HitInfo_ClassNameShort "%1671fffcb5ee642648a31fcc87f518da4325bfa3"
+#define HitInfo_TypeDefinitionIndex 6188
 
 	namespace HitInfo {
 
 		// Offsets
-		constexpr const static size_t damageProperties = 0xd8;
-		constexpr const static size_t damageTypes = 0xe8;
+		constexpr const static size_t damageProperties = 0x98;
+		constexpr const static size_t damageTypes = 0x18;
 
 		// Functions
-		constexpr const static size_t get_boneArea = 0x2d9e100;
+		constexpr const static size_t get_boneArea = 0x41389c0;
 	}
 
-	// obf name: ::%634bd5afd1fbe2c2f5f33ffb78dd711a2bc698ad
-#define GameTrace_ClassName "%634bd5afd1fbe2c2f5f33ffb78dd711a2bc698ad"
-#define GameTrace_ClassNameShort "%634bd5afd1fbe2c2f5f33ffb78dd711a2bc698ad"
-#define GameTrace_TypeDefinitionIndex 607
+	// obf name: ::%ce7a29d1dd9dc7c28eee55b7427136ee2df5c2d7
+#define GameTrace_ClassName "%ce7a29d1dd9dc7c28eee55b7427136ee2df5c2d7"
+#define GameTrace_ClassNameShort "%ce7a29d1dd9dc7c28eee55b7427136ee2df5c2d7"
+#define GameTrace_TypeDefinitionIndex 6930
 
 	namespace GameTrace {
 
 		// Functions
-		constexpr const static size_t Trace = 0x39dbef0;
+		constexpr const static size_t Trace = 0x49eba40;
 	}
 
-#define BaseMelee_TypeDefinitionIndex 5517
+#define BaseMelee_TypeDefinitionIndex 3354
 
 	namespace BaseMelee {
 
@@ -806,11 +815,11 @@ namespace Offsets {
 		constexpr const static size_t canThrowAsProjectile = 0x331;
 
 		// Functions
-		constexpr const static size_t ProcessAttack = 0x371f690;
-		constexpr const static size_t DoThrow = 0x3715a60;
+		constexpr const static size_t ProcessAttack = 0x20db850;
+		constexpr const static size_t DoThrow = 0x20de620;
 	}
 
-#define FlintStrikeWeapon_TypeDefinitionIndex 5873
+#define FlintStrikeWeapon_TypeDefinitionIndex 229
 
 	namespace FlintStrikeWeapon {
 
@@ -820,7 +829,7 @@ namespace Offsets {
 		constexpr const static size_t _didSparkThisFrame = 0x420;
 	}
 
-#define CompoundBowWeapon_TypeDefinitionIndex 3624
+#define CompoundBowWeapon_TypeDefinitionIndex 1590
 
 	namespace CompoundBowWeapon {
 
@@ -829,26 +838,25 @@ namespace Offsets {
 		constexpr const static size_t stringBonusVelocity = 0x434;
 
 		// Functions
-		constexpr const static size_t GetStringBonusScale = 0x23a0710;
+		constexpr const static size_t GetStringBonusScale = 0xbc92c0;
 	}
 
-	// obf name: ::%28ba1a708507345b93a467053e03a55ee3af70e0
-#define ItemContainer_ClassName "%28ba1a708507345b93a467053e03a55ee3af70e0"
-#define ItemContainer_ClassNameShort "%28ba1a708507345b93a467053e03a55ee3af70e0"
-#define ItemContainer_TypeDefinitionIndex 6431
+	// obf name: ::%291fcc9d063986aab1d5d29df1fe654e71505230
+#define ItemContainer_ClassName "%291fcc9d063986aab1d5d29df1fe654e71505230"
+#define ItemContainer_ClassNameShort "%291fcc9d063986aab1d5d29df1fe654e71505230"
+#define ItemContainer_TypeDefinitionIndex 5729
 
 	namespace ItemContainer {
 
 		// Offsets
-		constexpr const static size_t uid = 0x78;
-		constexpr const static size_t itemList = 0x50;
+		constexpr const static size_t uid = 0x28;
+		constexpr const static size_t itemList = 0x68;
 
 		// Functions
-		constexpr const static size_t FindItemsByItemID = 0x0;
-		constexpr const static size_t GetSlot = 0x42a6740;
+		constexpr const static size_t GetSlot = 0x3c79b80;
 	}
 
-#define PlayerLoot_TypeDefinitionIndex 1140
+#define PlayerLoot_TypeDefinitionIndex 4900
 
 	namespace PlayerLoot {
 
@@ -856,22 +864,21 @@ namespace Offsets {
 		constexpr const static size_t containers = 0x38;
 	}
 
-#define PlayerInventory_TypeDefinitionIndex 705
+#define PlayerInventory_TypeDefinitionIndex 6159
 
 	namespace PlayerInventory {
 
 		// Offsets
-		constexpr const static size_t containerMain = 0x38;
-		constexpr const static size_t containerWear = 0x58;
+		constexpr const static size_t containerWear = 0x28;
+		constexpr const static size_t containerMain = 0x60;
 		constexpr const static size_t containerBelt = 0x78;
 		constexpr const static size_t loot = 0x48;
 
 		// Functions
-		constexpr const static size_t Initialize = 0x4695790;
-		constexpr const static size_t FindItemsByItemID = 0x0;
+		constexpr const static size_t Initialize = 0x40dff20;
 	}
 
-#define PlayerEyes_TypeDefinitionIndex 947
+#define PlayerEyes_TypeDefinitionIndex 5974
 
 	namespace PlayerEyes {
 
@@ -880,95 +887,95 @@ namespace Offsets {
 		constexpr const static size_t bodyRotation = 0x50;
 
 		// Functions
-		constexpr const static size_t get_position = 0x4e872f0;
-		constexpr const static size_t get_rotation = 0x4e8bfe0;
-		constexpr const static size_t set_rotation = 0x4ea86f0;
-		constexpr const static size_t HeadForward = 0x4e8c270;
+		constexpr const static size_t get_position = 0x3ed1c20;
+		constexpr const static size_t get_rotation = 0x3ebbe10;
+		constexpr const static size_t set_rotation = 0x3ead830;
+		constexpr const static size_t HeadForward = 0x3eb6c60;
 	}
 
-	// obf name: ::%1f0a57613d51bfc82652113edf6256b02f576770
-#define PlayerEyes_Static_ClassName "PlayerEyes/%1f0a57613d51bfc82652113edf6256b02f576770"
-#define PlayerEyes_Static_ClassNameShort "%1f0a57613d51bfc82652113edf6256b02f576770"
-#define PlayerEyes_Static_TypeDefinitionIndex 946
+	// obf name: ::%66726173fbd049099b78b5fb2de318c870b24f71
+#define PlayerEyes_Static_ClassName "PlayerEyes/%66726173fbd049099b78b5fb2de318c870b24f71"
+#define PlayerEyes_Static_ClassNameShort "%66726173fbd049099b78b5fb2de318c870b24f71"
+#define PlayerEyes_Static_TypeDefinitionIndex 5973
 
 	namespace PlayerEyes_Static {
 
 		// Offsets
-		constexpr const static size_t EyeOffset = 0x16c;
+		constexpr const static size_t EyeOffset = 0x3c;
 	}
 
-	// obf name: ::%b50eeb562c8139594d5616d6908ca4f615c316c8
-#define PlayerBelt_ClassName "%b50eeb562c8139594d5616d6908ca4f615c316c8"
-#define PlayerBelt_ClassNameShort "%b50eeb562c8139594d5616d6908ca4f615c316c8"
-#define PlayerBelt_TypeDefinitionIndex 5019
+	// obf name: ::%9eb36966bc3c5c65de6d06d6c9c8374ce8a97183
+#define PlayerBelt_ClassName "%9eb36966bc3c5c65de6d06d6c9c8374ce8a97183"
+#define PlayerBelt_ClassNameShort "%9eb36966bc3c5c65de6d06d6c9c8374ce8a97183"
+#define PlayerBelt_TypeDefinitionIndex 5861
 
 	namespace PlayerBelt {
 
 		// Functions
-		constexpr const static size_t ChangeSelect = 0x3257dd0;
-		constexpr const static size_t GetActiveItem = 0x3259e80;
+		constexpr const static size_t ChangeSelect = 0x3dbe210;
+		constexpr const static size_t GetActiveItem = 0x3db82f0;
 	}
 
-	// obf name: ::%6e643d0010c13217a5d86e1ff89b67fffa4bb04f
-#define LocalPlayer_ClassName "%6e643d0010c13217a5d86e1ff89b67fffa4bb04f"
-#define LocalPlayer_ClassNameShort "%6e643d0010c13217a5d86e1ff89b67fffa4bb04f"
-#define LocalPlayer_TypeDefinitionIndex 5385
+	// obf name: ::%d49418a7c4dcc6ab8f0fbc0d8abc9e0ba71113d4
+#define LocalPlayer_ClassName "%d49418a7c4dcc6ab8f0fbc0d8abc9e0ba71113d4"
+#define LocalPlayer_ClassNameShort "%d49418a7c4dcc6ab8f0fbc0d8abc9e0ba71113d4"
+#define LocalPlayer_TypeDefinitionIndex 2514
 
 	namespace LocalPlayer {
 
 		// Functions
-		constexpr const static size_t ItemCommand = 0x35c15a0;
-		constexpr const static size_t MoveItem = 0x35c7b80;
-		constexpr const static size_t get_Entity = 0x35b8690;
+		constexpr const static size_t ItemCommand = 0x1668a10;
+		constexpr const static size_t MoveItem = 0x16726d0;
+		constexpr const static size_t get_Entity = 0x1666b30;
 	}
 
-	// obf name: ::%2d292b7f4eac3b9f6a76ef3f8ece36bb1d8ebc8d
-#define LocalPlayer_Static_ClassName "%6e643d0010c13217a5d86e1ff89b67fffa4bb04f/%2d292b7f4eac3b9f6a76ef3f8ece36bb1d8ebc8d"
-#define LocalPlayer_Static_ClassNameShort "%2d292b7f4eac3b9f6a76ef3f8ece36bb1d8ebc8d"
-#define LocalPlayer_Static_TypeDefinitionIndex 5384
+	// obf name: ::%1c3f3e015dc6a8d54507c3a6705e57aa818574ab
+#define LocalPlayer_Static_ClassName "%d49418a7c4dcc6ab8f0fbc0d8abc9e0ba71113d4/%1c3f3e015dc6a8d54507c3a6705e57aa818574ab"
+#define LocalPlayer_Static_ClassNameShort "%1c3f3e015dc6a8d54507c3a6705e57aa818574ab"
+#define LocalPlayer_Static_TypeDefinitionIndex 2513
 
 	namespace LocalPlayer_Static {
 
 		// Offsets
-		constexpr const static size_t Entity = 0x40;
+		constexpr const static size_t Entity = 0x200;
 	}
 
-	// obf name: ::%815f36d8efdefc38b014b131c5ca625a29a11ece
-#define BasePlayer_Static_ClassName "BasePlayer/%815f36d8efdefc38b014b131c5ca625a29a11ece"
-#define BasePlayer_Static_ClassNameShort "%815f36d8efdefc38b014b131c5ca625a29a11ece"
-#define BasePlayer_Static_TypeDefinitionIndex 6236
+	// obf name: ::%66af625cc078d684001cd7c06f3230789f7b5cfe
+#define BasePlayer_Static_ClassName "BasePlayer/%66af625cc078d684001cd7c06f3230789f7b5cfe"
+#define BasePlayer_Static_ClassNameShort "%66af625cc078d684001cd7c06f3230789f7b5cfe"
+#define BasePlayer_Static_TypeDefinitionIndex 2871
 
 	namespace BasePlayer_Static {
 
 		// Offsets
-		constexpr const static size_t visiblePlayerList = 0x17e8;
+		constexpr const static size_t visiblePlayerList = 0x11a8;
 	}
 
-#define BasePlayer_TypeDefinitionIndex 6237
+#define BasePlayer_TypeDefinitionIndex 2872
 
 	namespace BasePlayer {
 
 		// Offsets
-		constexpr const static size_t playerModel = 0x478;
-		constexpr const static size_t input = 0x2d0;
-		constexpr const static size_t movement = 0x5b0;
+		constexpr const static size_t playerModel = 0x550;
+		constexpr const static size_t input = 0x458;
+		constexpr const static size_t movement = 0x400;
 		constexpr const static size_t currentTeam = 0x470;
 		constexpr const static size_t clActiveItem = 0x4a0;
-		constexpr const static size_t modelState = 0x290;
+		constexpr const static size_t modelState = 0x270;
 		constexpr const static size_t playerFlags = 0x5a8;
-		constexpr const static size_t eyes = 0x360;
-		constexpr const static size_t playerRigidbody = 0x4d8;
+		constexpr const static size_t eyes = 0x5c8;
+		constexpr const static size_t playerRigidbody = 0x2c8;
 		constexpr const static size_t userID = 0x5f0;
-		constexpr const static size_t UserIDString = 0x458;
-		constexpr const static size_t inventory = 0x3c0;
-		constexpr const static size_t _displayName = 0x5c0;
-		constexpr const static size_t _lookingAt = 0x2b8;
+		constexpr const static size_t UserIDString = 0x318;
+		constexpr const static size_t inventory = 0x360;
+		constexpr const static size_t _displayName = 0x350;
+		constexpr const static size_t _lookingAt = 0x2f0;
 		constexpr const static size_t lastSentTickTime = 0x564;
-		constexpr const static size_t lastSentTick = 0x320;
+		constexpr const static size_t lastSentTick = 0x5b8;
 		constexpr const static size_t mounted = 0x4e0;
-		constexpr const static size_t Belt = 0x550;
-		constexpr const static size_t _lookingAtEntity = 0x610;
-		constexpr const static size_t currentGesture = 0x600;
+		constexpr const static size_t Belt = 0x5d8;
+		constexpr const static size_t _lookingAtEntity = 0x4b0;
+		constexpr const static size_t currentGesture = 0x5e8;
 		constexpr const static size_t weaponMoveSpeedScale = 0x680;
 		constexpr const static size_t clothingBlocksAiming = 0x684;
 		constexpr const static size_t clothingMoveSpeedReduction = 0x688;
@@ -976,65 +983,64 @@ namespace Offsets {
 		constexpr const static size_t equippingBlocked = 0x694;
 
 		// Functions
-		constexpr const static size_t ClientUpdateLocalPlayer = 0x4075560;
-		constexpr const static size_t Menu_AssistPlayer = 0x3f00150;
-		constexpr const static size_t OnViewModeChanged = 0x402f820;
-		constexpr const static size_t ChatMessage = 0x3faf250;
-		constexpr const static size_t IsOnGround = 0x3eedaa0;
-		constexpr const static size_t GetSpeed = 0x3f9f950;
-		constexpr const static size_t SendProjectileUpdate = 0x3fe2c00;
-		constexpr const static size_t SendProjectileAttack = 0x3f80510;
-		constexpr const static size_t CanBuild = 0x401a520;
-		constexpr const static size_t GetMounted = 0x3f99630;
-		constexpr const static size_t GetHeldEntity = 0x3f86f90;
-		constexpr const static size_t get_inventory = 0x3f402c0;
-		constexpr const static size_t get_eyes = 0x4054c50;
-		constexpr const static size_t SendClientTick = 0x3f8ddb0;
-		constexpr const static size_t ClientInput = 0x3f5e650;
-		constexpr const static size_t ClientInput_vtableoff = 0x3ac8;
-		constexpr const static size_t MaxHealth = 0x3fae9c0;
-		constexpr const static size_t MaxHealth_vtableoff = 0x2dd8;
-		constexpr const static size_t OnAttacked = 0x3f03b90;
-		constexpr const static size_t OnAttacked_vtableoff = 0x1f08;
-		constexpr const static size_t get_idealViewMode = 0x404e730;
+		constexpr const static size_t ClientUpdateLocalPlayer = 0x1a91e90;
+		constexpr const static size_t Menu_AssistPlayer = 0x1a07850;
+		constexpr const static size_t OnViewModeChanged = 0x19e25b0;
+		constexpr const static size_t ChatMessage = 0x1ac6e80;
+		constexpr const static size_t IsOnGround = 0x1a17330;
+		constexpr const static size_t GetSpeed = 0x1b59360;
+		constexpr const static size_t SendProjectileUpdate = 0x1aa9070;
+		constexpr const static size_t CanBuild = 0x1ae0d80;
+		constexpr const static size_t GetMounted = 0x1a98470;
+		constexpr const static size_t GetHeldEntity = 0x1a961c0;
+		constexpr const static size_t get_inventory = 0x1a72d60;
+		constexpr const static size_t get_eyes = 0x1acf4b0;
+		constexpr const static size_t SendClientTick = 0x1a40ed0;
+		constexpr const static size_t ClientInput = 0x1a7f840;
+		constexpr const static size_t ClientInput_vtableoff = 0x3bc8;
+		constexpr const static size_t MaxHealth = 0x1a1f0b0;
+		constexpr const static size_t MaxHealth_vtableoff = 0x1d98;
+		constexpr const static size_t OnAttacked = 0x1b0a680;
+		constexpr const static size_t OnAttacked_vtableoff = 0xe38;
+		constexpr const static size_t get_idealViewMode = 0x1a2f870;
 	}
 
-#define ScientistNPC_TypeDefinitionIndex 328
+#define ScientistNPC_TypeDefinitionIndex 1945
 
 	namespace ScientistNPC {
 
 		// Offsets
 	}
 
-#define TunnelDweller_TypeDefinitionIndex 2664
+#define TunnelDweller_TypeDefinitionIndex 1607
 
 	namespace TunnelDweller {
 
 		// Offsets
 	}
 
-#define UnderwaterDweller_TypeDefinitionIndex 182
+#define UnderwaterDweller_TypeDefinitionIndex 5670
 
 	namespace UnderwaterDweller {
 
 		// Offsets
 	}
 
-#define ScarecrowNPC_TypeDefinitionIndex 5231
+#define ScarecrowNPC_TypeDefinitionIndex 3769
 
 	namespace ScarecrowNPC {
 
 		// Offsets
 	}
 
-#define GingerbreadNPC_TypeDefinitionIndex 2183
+#define GingerbreadNPC_TypeDefinitionIndex 93
 
 	namespace GingerbreadNPC {
 
 		// Offsets
 	}
 
-#define BaseMovement_TypeDefinitionIndex 5415
+#define BaseMovement_TypeDefinitionIndex 5110
 
 	namespace BaseMovement {
 
@@ -1043,31 +1049,31 @@ namespace Offsets {
 		constexpr const static size_t Owner = 0x28;
 	}
 
-#define PlayerWalkMovement_TypeDefinitionIndex 597
+#define PlayerWalkMovement_TypeDefinitionIndex 4827
 
 	namespace PlayerWalkMovement {
 
 		// Offsets
-		constexpr const static size_t capsule = 0xd8;
-		constexpr const static size_t ladder = 0xe8;
+		constexpr const static size_t capsule = 0xf0;
+		constexpr const static size_t ladder = 0xd8;
 		constexpr const static size_t modify = 0x1b8;
 
 		// Functions
-		constexpr const static size_t BlockJump = 0x383a7e0;
-		constexpr const static size_t BlockSprint = 0x3843b40;
-		constexpr const static size_t GroundCheck = 0x385afa0;
-		constexpr const static size_t Init = 0x383efc0;
-		constexpr const static size_t ClientInput = 0x386bad0;
-		constexpr const static size_t ClientInput_vtableoff = 0x438;
-		constexpr const static size_t DoFixedUpdate = 0x3865df0;
-		constexpr const static size_t DoFixedUpdate_vtableoff = 0x378;
-		constexpr const static size_t FrameUpdate = 0x386afd0;
-		constexpr const static size_t FrameUpdate_vtableoff = 0x1a8;
-		constexpr const static size_t TeleportTo = 0x38607c0;
-		constexpr const static size_t TeleportTo_vtableoff = 0x3a8;
+		constexpr const static size_t Init = 0x323eba0;
+		constexpr const static size_t BlockJump = 0x325e190;
+		constexpr const static size_t BlockSprint = 0x3246560;
+		constexpr const static size_t GroundCheck = 0x323b020;
+		constexpr const static size_t ClientInput = 0x3248600;
+		constexpr const static size_t ClientInput_vtableoff = 0x3d8;
+		constexpr const static size_t DoFixedUpdate = 0x3244ad0;
+		constexpr const static size_t DoFixedUpdate_vtableoff = 0x1b8;
+		constexpr const static size_t FrameUpdate = 0x326c220;
+		constexpr const static size_t FrameUpdate_vtableoff = 0x3f8;
+		constexpr const static size_t TeleportTo = 0x32399e0;
+		constexpr const static size_t TeleportTo_vtableoff = 0x238;
 	}
 
-#define BuildingPrivlidge_TypeDefinitionIndex 6203
+#define BuildingPrivlidge_TypeDefinitionIndex 6791
 
 	namespace BuildingPrivlidge {
 
@@ -1076,7 +1082,7 @@ namespace Offsets {
 		constexpr const static size_t cachedProtectedMinutes = 0x388;
 	}
 
-#define WorldItem_TypeDefinitionIndex 6934
+#define WorldItem_TypeDefinitionIndex 2709
 
 	namespace WorldItem {
 
@@ -1085,7 +1091,7 @@ namespace Offsets {
 		constexpr const static size_t item = 0x1b0;
 	}
 
-#define HackableLockedCrate_TypeDefinitionIndex 4445
+#define HackableLockedCrate_TypeDefinitionIndex 992
 
 	namespace HackableLockedCrate {
 
@@ -1094,7 +1100,7 @@ namespace Offsets {
 		constexpr const static size_t hackSeconds = 0x3a8;
 	}
 
-#define ProjectileWeaponMod_TypeDefinitionIndex 215
+#define ProjectileWeaponMod_TypeDefinitionIndex 5049
 
 	namespace ProjectileWeaponMod {
 
@@ -1112,7 +1118,7 @@ namespace Offsets {
 		constexpr const static size_t needsOnForEffects = 0x248;
 	}
 
-#define ProjectileWeaponMod_Modifier_TypeDefinitionIndex 211
+#define ProjectileWeaponMod_Modifier_TypeDefinitionIndex 5045
 
 	namespace ProjectileWeaponMod_Modifier {
 		constexpr const static size_t enabled = 0x0;
@@ -1120,21 +1126,21 @@ namespace Offsets {
 		constexpr const static size_t offset = 0x8;
 	}
 
-	// obf name: ::%f0267d300992b3de7f9b5fa8b1bfede2185e7c6a
-#define ConsoleSystem_ClassName "%f0267d300992b3de7f9b5fa8b1bfede2185e7c6a"
-#define ConsoleSystem_ClassNameShort "%f0267d300992b3de7f9b5fa8b1bfede2185e7c6a"
-#define ConsoleSystem_TypeDefinitionIndex 23619
+	// obf name: ::%10f0671cb5dd7148fdc54e242b89e51bf4acdcb8
+#define ConsoleSystem_ClassName "%10f0671cb5dd7148fdc54e242b89e51bf4acdcb8"
+#define ConsoleSystem_ClassNameShort "%10f0671cb5dd7148fdc54e242b89e51bf4acdcb8"
+#define ConsoleSystem_TypeDefinitionIndex 23602
 
 	namespace ConsoleSystem {
 
 		// Functions
-		constexpr const static size_t Run = 0x638efb0;
+		constexpr const static size_t Run = 0x62a5c30;
 	}
 
-	// obf name: ::%52e72efa3e4ea3b96e9d12feaec0bbc52cee261c
-#define ConsoleSystem_Index_Static_ClassName "%f0267d300992b3de7f9b5fa8b1bfede2185e7c6a/%b1e414bf7de63ce834c52a9616965a45d5722de0.%52e72efa3e4ea3b96e9d12feaec0bbc52cee261c"
-#define ConsoleSystem_Index_Static_ClassNameShort "%52e72efa3e4ea3b96e9d12feaec0bbc52cee261c"
-#define ConsoleSystem_Index_Static_TypeDefinitionIndex 23612
+	// obf name: ::%c93514fb1e834ec0db1cea819ee8a2b250bfd323
+#define ConsoleSystem_Index_Static_ClassName "%10f0671cb5dd7148fdc54e242b89e51bf4acdcb8/%c57e089bcdcce47080a39527f5f66dfa7a68f085.%c93514fb1e834ec0db1cea819ee8a2b250bfd323"
+#define ConsoleSystem_Index_Static_ClassNameShort "%c93514fb1e834ec0db1cea819ee8a2b250bfd323"
+#define ConsoleSystem_Index_Static_TypeDefinitionIndex 23595
 
 	namespace ConsoleSystem_Index_Static {
 
@@ -1142,16 +1148,16 @@ namespace Offsets {
 		constexpr const static size_t All = 0x78;
 	}
 
-#define LootableCorpse_TypeDefinitionIndex 2654
+#define LootableCorpse_TypeDefinitionIndex 3728
 
 	namespace LootableCorpse {
 
 		// Offsets
 		constexpr const static size_t playerSteamID = 0x2b8;
-		constexpr const static size_t _playerName = 0x2a8;
+		constexpr const static size_t _playerName = 0x2c8;
 	}
 
-#define DroppedItemContainer_TypeDefinitionIndex 3900
+#define DroppedItemContainer_TypeDefinitionIndex 907
 
 	namespace DroppedItemContainer {
 
@@ -1160,75 +1166,75 @@ namespace Offsets {
 		constexpr const static size_t _playerName = 0x270;
 	}
 
-#define MainCamera_TypeDefinitionIndex 5036
+#define MainCamera_TypeDefinitionIndex 4839
 
 	namespace MainCamera {
 
 		// Offsets 
-		constexpr const static size_t mainCamera = 0x90;
-		constexpr const static size_t mainCameraTransform = 0x38;
+		constexpr const static size_t mainCamera = 0xc0;
+		constexpr const static size_t mainCameraTransform = 0x60;
 
 		// Functions
-		constexpr const static size_t Update = 0x32a99c0;
-		constexpr const static size_t OnPreCull = 0x32a8280;
-		constexpr const static size_t Trace = 0x32a2ef0;
+		constexpr const static size_t Update = 0x32a5330;
+		constexpr const static size_t OnPreCull = 0x32b0e30;
+		constexpr const static size_t Trace = 0x32ac1f0;
 	}
 
-#define CameraMan_TypeDefinitionIndex 5623
+#define CameraMan_TypeDefinitionIndex 1502
 
 	namespace CameraMan {
 
 		// Offsets
 	}
 
-	// obf name: ::%d2e46eef5c0cb68dda8ae81ada94adc24015a272
-#define PlayerTick_ClassName "%d2e46eef5c0cb68dda8ae81ada94adc24015a272"
-#define PlayerTick_ClassNameShort "%d2e46eef5c0cb68dda8ae81ada94adc24015a272"
-#define PlayerTick_TypeDefinitionIndex 7618
+	// obf name: ::%8f1bf919eb255550a4f86fe3ac7951ed6195bbd1
+#define PlayerTick_ClassName "%8f1bf919eb255550a4f86fe3ac7951ed6195bbd1"
+#define PlayerTick_ClassNameShort "%8f1bf919eb255550a4f86fe3ac7951ed6195bbd1"
+#define PlayerTick_TypeDefinitionIndex 7399
 
 	namespace PlayerTick {
 
 		// Offsets
-		constexpr const static size_t inputState = 0x30;
-		constexpr const static size_t modelState = 0x48;
-		constexpr const static size_t activeItem = 0x40;
-		constexpr const static size_t parentID = 0x50;
-		constexpr const static size_t position = 0x10;
-		constexpr const static size_t eyePos = 0x24;
+		constexpr const static size_t inputState = 0x20;
+		constexpr const static size_t modelState = 0x38;
+		constexpr const static size_t activeItem = 0x18;
+		constexpr const static size_t parentID = 0x40;
+		constexpr const static size_t position = 0x28;
+		constexpr const static size_t eyePos = 0x48;
 
 		// Functions
-		constexpr const static size_t WriteToStreamDelta = 0x8e47300;
+		constexpr const static size_t WriteToStreamDelta = 0x955a300;
 		constexpr const static size_t WriteToStreamDelta_vtableoff = 0x1b8;
-		constexpr const static size_t WriteToStream = 0x8e40560;
+		constexpr const static size_t WriteToStream = 0x954ee10;
 		constexpr const static size_t WriteToStream_vtableoff = 0x1d8;
 	}
 
-	// obf name: ::%08d9e6ebf99bc5825e15c2e0970fed6857bd20cb
-#define InputMessage_ClassName "%08d9e6ebf99bc5825e15c2e0970fed6857bd20cb"
-#define InputMessage_ClassNameShort "%08d9e6ebf99bc5825e15c2e0970fed6857bd20cb"
-#define InputMessage_TypeDefinitionIndex 7544
+	// obf name: ::%c244fd8658d70d50cc7ce3e9d6448977d1ea318b
+#define InputMessage_ClassName "%c244fd8658d70d50cc7ce3e9d6448977d1ea318b"
+#define InputMessage_ClassNameShort "%c244fd8658d70d50cc7ce3e9d6448977d1ea318b"
+#define InputMessage_TypeDefinitionIndex 7576
 
 	namespace InputMessage {
 
 		// Offsets
-		constexpr const static size_t buttons = 0x20;
-		constexpr const static size_t aimAngles = 0x10;
-		constexpr const static size_t mouseDelta = 0x28;
+		constexpr const static size_t buttons = 0x2c;
+		constexpr const static size_t mouseDelta = 0x10;
+		constexpr const static size_t aimAngles = 0x20;
 	}
 
-	// obf name: ::%4b88400350cf62216335c3e6292827a724f7a09e
-#define InputState_ClassName "%4b88400350cf62216335c3e6292827a724f7a09e"
-#define InputState_ClassNameShort "%4b88400350cf62216335c3e6292827a724f7a09e"
-#define InputState_TypeDefinitionIndex 2853
+	// obf name: ::%0fab0faecdedde7b4956a9474849e2b341cd06f6
+#define InputState_ClassName "%0fab0faecdedde7b4956a9474849e2b341cd06f6"
+#define InputState_ClassNameShort "%0fab0faecdedde7b4956a9474849e2b341cd06f6"
+#define InputState_TypeDefinitionIndex 1177
 
 	namespace InputState {
 
 		// Offsets
-		constexpr const static size_t current = 0x18;
+		constexpr const static size_t current = 0x20;
 		constexpr const static size_t previous = 0x10;
 	}
 
-#define PlayerInput_TypeDefinitionIndex 2833
+#define PlayerInput_TypeDefinitionIndex 3455
 
 	namespace PlayerInput {
 
@@ -1237,71 +1243,71 @@ namespace Offsets {
 		constexpr const static size_t bodyAngles = 0x44;
 	}
 
-	// obf name: ::%8fa5cf4951c8ad73c878c110bfd5863da7669549
-#define ModelState_ClassName "%8fa5cf4951c8ad73c878c110bfd5863da7669549"
-#define ModelState_ClassNameShort "%8fa5cf4951c8ad73c878c110bfd5863da7669549"
-#define ModelState_TypeDefinitionIndex 7398
+	// obf name: ::%6c058dd2eb8b72556c78c17e8461c0a2be178024
+#define ModelState_ClassName "%6c058dd2eb8b72556c78c17e8461c0a2be178024"
+#define ModelState_ClassNameShort "%6c058dd2eb8b72556c78c17e8461c0a2be178024"
+#define ModelState_TypeDefinitionIndex 7348
 
 	namespace ModelState {
 
 		// Offsets
-		constexpr const static size_t flags = 0x10;
+		constexpr const static size_t flags = 0x2c;
 		constexpr const static size_t waterLevel = 0x28;
-		constexpr const static size_t lookDir = 0x44;
+		constexpr const static size_t lookDir = 0x70;
 	}
 
-	// obf name: ::%705ed9788f875b88e6eccbc30499caa6a6d77bfc
-#define Item_ClassName "%705ed9788f875b88e6eccbc30499caa6a6d77bfc"
-#define Item_ClassNameShort "%705ed9788f875b88e6eccbc30499caa6a6d77bfc"
-#define Item_TypeDefinitionIndex 4238
+	// obf name: ::%8016b155b4f1594b1720b9bd4612f832fb134af1
+#define Item_ClassName "%8016b155b4f1594b1720b9bd4612f832fb134af1"
+#define Item_ClassNameShort "%8016b155b4f1594b1720b9bd4612f832fb134af1"
+#define Item_TypeDefinitionIndex 521
 
 	namespace Item {
 
 		// Offsets
-		constexpr const static size_t info = 0xb8;
-		constexpr const static size_t uid = 0x90;
-		constexpr const static size_t clientAmmoCount = 0x38;
-		constexpr const static size_t _condition = 0x70;
-		constexpr const static size_t _maxCondition = 0xa4;
-		constexpr const static size_t position = 0x6c;
-		constexpr const static size_t amount = 0xa0;
-		constexpr const static size_t parent = 0xc8;
-		constexpr const static size_t contents = 0xe0;
-		constexpr const static size_t worldEnt = 0x48;
-		constexpr const static size_t heldEntity = 0x80;
+		constexpr const static size_t info = 0x28;
+		constexpr const static size_t uid = 0xe0;
+		constexpr const static size_t clientAmmoCount = 0x80;
+		constexpr const static size_t _condition = 0x98;
+		constexpr const static size_t _maxCondition = 0xc8;
+		constexpr const static size_t position = 0x24;
+		constexpr const static size_t amount = 0xd0;
+		constexpr const static size_t contents = 0x18;
+		constexpr const static size_t parent = 0xc0;
+		constexpr const static size_t heldEntity = 0x58;
+		constexpr const static size_t worldEnt = 0xa8;
 
 		// Functions
-		constexpr const static size_t get_iconSprite = 0x2a32940;
+		constexpr const static size_t get_iconSprite = 0x2f63260;
 	}
 
-	// obf name: ::%d14c36427718255cc840e29a218c75a1d722c22f
-#define WaterLevel_ClassName "%d14c36427718255cc840e29a218c75a1d722c22f"
-#define WaterLevel_ClassNameShort "%d14c36427718255cc840e29a218c75a1d722c22f"
-#define WaterLevel_TypeDefinitionIndex 5673
+	// obf name: ::%201271282f7c693f781385474ef0d16ec4022bb5
+#define WaterLevel_ClassName "%201271282f7c693f781385474ef0d16ec4022bb5"
+#define WaterLevel_ClassNameShort "%201271282f7c693f781385474ef0d16ec4022bb5"
+#define WaterLevel_TypeDefinitionIndex 1020
 
 	namespace WaterLevel {
 
 		// Functions
-		constexpr const static size_t Test = 0x3925b20;
-		constexpr const static size_t GetWaterLevel = 0x39306a0;
+		constexpr const static size_t Test = 0x4ed2d20;
+		constexpr const static size_t GetWaterLevel = 0x4ebab80;
 	}
 
-	// obf name: ::%b16a97fd54d7b4c3598216cd73471038c066f841
-#define ConVar_Graphics_Static_ClassName "%44a3bc4d62fdc41bf09d0e30ce6d6da2a10df7e0/%b16a97fd54d7b4c3598216cd73471038c066f841"
-#define ConVar_Graphics_Static_ClassNameShort "%b16a97fd54d7b4c3598216cd73471038c066f841"
-#define ConVar_Graphics_Static_TypeDefinitionIndex 2491
+	// obf name: ::%98a5634a94d352af28c4cb47d7f652964ebce0e4
+#define ConVar_Graphics_Static_ClassName "%b16327b208302c4af9b812f3c9d84d0c8811d548/%98a5634a94d352af28c4cb47d7f652964ebce0e4"
+#define ConVar_Graphics_Static_ClassNameShort "%98a5634a94d352af28c4cb47d7f652964ebce0e4"
+#define ConVar_Graphics_Static_TypeDefinitionIndex 2087
 
 	namespace ConVar_Graphics_Static {
 
 		// Offsets
-		constexpr const static size_t _fov = 0x270;
+		constexpr const static size_t _fov = 0x324;
 
 		// Functions
-		constexpr const static size_t _fov_getter = 0x4452470;
-		constexpr const static size_t _fov_setter = 0x444f690;
+		constexpr const static size_t _fov_getter = 0x2574bc0;
+		constexpr const static size_t _fov_setter = 0x2597800;
 	}
 
-#define BaseFishingRod_TypeDefinitionIndex 1658
+#define BaseFishingRod_TypeDefinitionIndex 4372
 
 	namespace BaseFishingRod {
 
@@ -1311,15 +1317,15 @@ namespace Offsets {
 		constexpr const static size_t MaxCastDistance = 0x284;
 		constexpr const static size_t BobberPreview = 0x290;
 		constexpr const static size_t clientStrainAmountNormalised = 0x2d0;
-		constexpr const static size_t strainGainMod = 0x2d8;
+		constexpr const static size_t strainGainMod = 0x2f8;
 		constexpr const static size_t aimAnimationReady = 0x2e8;
 
 		// Functions
-		constexpr const static size_t UpdateLineRenderer = 0xdf6b30;
-		constexpr const static size_t EvaluateFishingPosition = 0xe14460;
+		constexpr const static size_t UpdateLineRenderer = 0x2db46a0;
+		constexpr const static size_t EvaluateFishingPosition = 0x2dc19f0;
 	}
 
-#define FishingBobber_TypeDefinitionIndex 957
+#define FishingBobber_TypeDefinitionIndex 3116
 
 	namespace FishingBobber {
 
@@ -1327,62 +1333,62 @@ namespace Offsets {
 		constexpr const static size_t bobberRoot = 0x288;
 	}
 
-#define GameManifest_TypeDefinitionIndex 3073
+#define GameManifest_TypeDefinitionIndex 1264
 
 	namespace GameManifest {
 
 		// Functions
-		constexpr const static size_t GUIDToObject = 0x1db06b0;
+		constexpr const static size_t GUIDToObject = 0x51570b0;
 	}
 
-	// obf name: ::%d67ea1a2ff6508b623bc6ccedc56fa1702f23eb6
-#define GameManager_ClassName "%d67ea1a2ff6508b623bc6ccedc56fa1702f23eb6"
-#define GameManager_ClassNameShort "%d67ea1a2ff6508b623bc6ccedc56fa1702f23eb6"
-#define GameManager_TypeDefinitionIndex 6783
+	// obf name: ::%cff8cb7abf463eca00390c72592d7775f5bf6f1a
+#define GameManager_ClassName "%cff8cb7abf463eca00390c72592d7775f5bf6f1a"
+#define GameManager_ClassNameShort "%cff8cb7abf463eca00390c72592d7775f5bf6f1a"
+#define GameManager_TypeDefinitionIndex 3629
 
 	namespace GameManager {
 
 		// Offsets
-		constexpr const static size_t pool = 0x18;
+		constexpr const static size_t pool = 0x10;
 
 		// Functions
-		constexpr const static size_t CreatePrefab = 0x4766b00;
+		constexpr const static size_t CreatePrefab = 0x23fa9d0;
 	}
 
-	// obf name: ::%e6785243f8be7d4f5700c9187600b1b16b8128a0
-#define GameManager_Static_ClassName "%d67ea1a2ff6508b623bc6ccedc56fa1702f23eb6/%e6785243f8be7d4f5700c9187600b1b16b8128a0"
-#define GameManager_Static_ClassNameShort "%e6785243f8be7d4f5700c9187600b1b16b8128a0"
-#define GameManager_Static_TypeDefinitionIndex 6782
+	// obf name: ::%d9adec66eb1372e6cb3105f4966362f5c9cadf5c
+#define GameManager_Static_ClassName "%cff8cb7abf463eca00390c72592d7775f5bf6f1a/%d9adec66eb1372e6cb3105f4966362f5c9cadf5c"
+#define GameManager_Static_ClassNameShort "%d9adec66eb1372e6cb3105f4966362f5c9cadf5c"
+#define GameManager_Static_TypeDefinitionIndex 3628
 
 	namespace GameManager_Static {
 
 		// Offsets
-		constexpr const static size_t client = 0x20;
+		constexpr const static size_t client = 0x10;
 	}
 
-	// obf name: ::%9c8db1612deafe421bc6a228fe42125d4b414d18
-#define PrefabPoolCollection_ClassName "%9c8db1612deafe421bc6a228fe42125d4b414d18"
-#define PrefabPoolCollection_ClassNameShort "%9c8db1612deafe421bc6a228fe42125d4b414d18"
-#define PrefabPoolCollection_TypeDefinitionIndex 741
+	// obf name: ::%4d538b7466a94a591fe8864317760c8464683551
+#define PrefabPoolCollection_ClassName "%4d538b7466a94a591fe8864317760c8464683551"
+#define PrefabPoolCollection_ClassNameShort "%4d538b7466a94a591fe8864317760c8464683551"
+#define PrefabPoolCollection_TypeDefinitionIndex 2667
 
 	namespace PrefabPoolCollection {
 
 		// Offsets
-		constexpr const static size_t storage = 0x10;
+		constexpr const static size_t storage = 0x18;
 	}
 
-	// obf name: ::%aeb2d8dc61d2f852c8e7f09b3f78801f0f4a9263
-#define PrefabPool_ClassName "%aeb2d8dc61d2f852c8e7f09b3f78801f0f4a9263"
-#define PrefabPool_ClassNameShort "%aeb2d8dc61d2f852c8e7f09b3f78801f0f4a9263"
-#define PrefabPool_TypeDefinitionIndex 912
+	// obf name: ::%1563dfa550c391cc7b564c364e9b539fe36d4682
+#define PrefabPool_ClassName "%1563dfa550c391cc7b564c364e9b539fe36d4682"
+#define PrefabPool_ClassNameShort "%1563dfa550c391cc7b564c364e9b539fe36d4682"
+#define PrefabPool_TypeDefinitionIndex 1519
 
 	namespace PrefabPool {
 
 		// Offsets
-		constexpr const static size_t stack = 0x20;
+		constexpr const static size_t stack = 0x18;
 	}
 
-#define ItemModProjectile_TypeDefinitionIndex 2084
+#define ItemModProjectile_TypeDefinitionIndex 2939
 
 	namespace ItemModProjectile {
 
@@ -1397,7 +1403,7 @@ namespace Offsets {
 		constexpr const static size_t category = 0x60;
 	}
 
-#define CraftingQueue_TypeDefinitionIndex 6636
+#define CraftingQueue_TypeDefinitionIndex 4780
 
 	namespace CraftingQueue {
 
@@ -1405,18 +1411,18 @@ namespace Offsets {
 		constexpr const static size_t icons = 0x30;
 	}
 
-	// obf name: ::%4f0bb4bdf94adcb12cfc4d303e2d172e0444da43
-#define CraftingQueue_Static_ClassName "CraftingQueue/%4f0bb4bdf94adcb12cfc4d303e2d172e0444da43"
-#define CraftingQueue_Static_ClassNameShort "%4f0bb4bdf94adcb12cfc4d303e2d172e0444da43"
-#define CraftingQueue_Static_TypeDefinitionIndex 6635
+	// obf name: ::%64e2e8c06c08861804058a06bc0863fa858354bb
+#define CraftingQueue_Static_ClassName "CraftingQueue/%64e2e8c06c08861804058a06bc0863fa858354bb"
+#define CraftingQueue_Static_ClassNameShort "%64e2e8c06c08861804058a06bc0863fa858354bb"
+#define CraftingQueue_Static_TypeDefinitionIndex 4779
 
 	namespace CraftingQueue_Static {
 
 		// Offsets
-		constexpr const static size_t isCrafting = 0x30;
+		constexpr const static size_t isCrafting = 0x1a;
 	}
 
-#define CraftingQueueIcon_TypeDefinitionIndex 672
+#define CraftingQueueIcon_TypeDefinitionIndex 7031
 
 	namespace CraftingQueueIcon {
 
@@ -1425,57 +1431,57 @@ namespace Offsets {
 		constexpr const static size_t item = 0x60;
 	}
 
-	// obf name: ::%a950aef3dceb782f1b39889949518a9d1a309c5d
-#define Planner_Static_ClassName "Planner/%a950aef3dceb782f1b39889949518a9d1a309c5d"
-#define Planner_Static_ClassNameShort "%a950aef3dceb782f1b39889949518a9d1a309c5d"
-#define Planner_Static_TypeDefinitionIndex 3928
+	// obf name: ::%eeb9c69b845222fcb0d9040dc634863ad5ef53b8
+#define Planner_Static_ClassName "Planner/%eeb9c69b845222fcb0d9040dc634863ad5ef53b8"
+#define Planner_Static_ClassNameShort "%eeb9c69b845222fcb0d9040dc634863ad5ef53b8"
+#define Planner_Static_TypeDefinitionIndex 2206
 
 	namespace Planner_Static {
 
 		// Offsets
-		constexpr const static size_t guide = 0x140;
+		constexpr const static size_t guide = 0x98;
 	}
 
-	// obf name: ::%eb419074937ce9361a905a86dc9bf27c991cb78e
-#define Planner_Guide_ClassName "Planner/%eb419074937ce9361a905a86dc9bf27c991cb78e"
-#define Planner_Guide_ClassNameShort "%eb419074937ce9361a905a86dc9bf27c991cb78e"
-#define Planner_Guide_TypeDefinitionIndex 3924
+	// obf name: ::%471f40032c2cd1cf29ed5a559b9f6c91f6c08ba7
+#define Planner_Guide_ClassName "Planner/%471f40032c2cd1cf29ed5a559b9f6c91f6c08ba7"
+#define Planner_Guide_ClassNameShort "%471f40032c2cd1cf29ed5a559b9f6c91f6c08ba7"
+#define Planner_Guide_TypeDefinitionIndex 2202
 
 	namespace Planner_Guide {
 
 		// Offsets
-		constexpr const static size_t lastPlacement = 0x50;
+		constexpr const static size_t lastPlacement = 0x60;
 	}
 
-#define Planner_TypeDefinitionIndex 3929
+#define Planner_TypeDefinitionIndex 2207
 
 	namespace Planner {
 
 		// Offsets
-		constexpr const static size_t _currentConstruction = 0x268;
+		constexpr const static size_t _currentConstruction = 0x270;
 	}
 
-#define Construction_TypeDefinitionIndex 3885
+#define Construction_TypeDefinitionIndex 6506
 
 	namespace Construction {
 
 		// Offsets
 		constexpr const static size_t holdToPlaceDuration = 0xfc;
-		constexpr const static size_t grades = 0x178;
+		constexpr const static size_t grades = 0x148;
 	}
 
-#define BuildingBlock_TypeDefinitionIndex 3269
+#define BuildingBlock_TypeDefinitionIndex 1147
 
 	namespace BuildingBlock {
 
 		// Offsets
-		constexpr const static size_t blockDefinition = 0x308;
+		constexpr const static size_t blockDefinition = 0x318;
 	}
 
 	// obf name: ::HeldEntity
 #define HeldEntity_ClassName "HeldEntity"
 #define HeldEntity_ClassNameShort "HeldEntity"
-#define HeldEntity_TypeDefinitionIndex 2736
+#define HeldEntity_TypeDefinitionIndex 6970
 
 	namespace HeldEntity {
 
@@ -1485,24 +1491,24 @@ namespace Offsets {
 		constexpr const static size_t viewModel = 0x228;
 
 		// Functions
-		constexpr const static size_t OnDeploy = 0x190c150;
+		constexpr const static size_t OnDeploy = 0x4a36db0;
 	}
 
-	// obf name: ::%e3e6626cc16924fba1fa853b1eceeb9f94403f70
-#define PunchEntry_ClassName "HeldEntity/%e3e6626cc16924fba1fa853b1eceeb9f94403f70"
-#define PunchEntry_ClassNameShort "%e3e6626cc16924fba1fa853b1eceeb9f94403f70"
-#define PunchEntry_TypeDefinitionIndex 2734
+	// obf name: ::%d4ff8d1b2a59ca0fe2e735a6dce23c7944c45fd3
+#define PunchEntry_ClassName "HeldEntity/%d4ff8d1b2a59ca0fe2e735a6dce23c7944c45fd3"
+#define PunchEntry_ClassNameShort "%d4ff8d1b2a59ca0fe2e735a6dce23c7944c45fd3"
+#define PunchEntry_TypeDefinitionIndex 6968
 
 	namespace PunchEntry {
 
 		// Offsets
-		constexpr const static size_t startTime = 0x10;
-		constexpr const static size_t duration = 0x2c;
-		constexpr const static size_t amount = 0x14;
-		constexpr const static size_t amountAdded = 0x20;
+		constexpr const static size_t duration = 0x28;
+		constexpr const static size_t startTime = 0x2c;
+		constexpr const static size_t amountAdded = 0x10;
+		constexpr const static size_t amount = 0x1c;
 	}
 
-#define IronSights_TypeDefinitionIndex 904
+#define IronSights_TypeDefinitionIndex 3740
 
 	namespace IronSights {
 
@@ -1511,7 +1517,7 @@ namespace Offsets {
 		constexpr const static size_t ironsightsOverride = 0x68;
 	}
 
-#define IronSightOverride_TypeDefinitionIndex 1848
+#define IronSightOverride_TypeDefinitionIndex 4304
 
 	namespace IronSightOverride {
 
@@ -1520,21 +1526,23 @@ namespace Offsets {
 		constexpr const static size_t fovBias = 0x30;
 	}
 
-#define BaseViewModel_TypeDefinitionIndex 5986
+#define BaseViewModel_TypeDefinitionIndex 7089
 
 	namespace BaseViewModel {
 
 		// Offsets
 		constexpr const static size_t useViewModelCamera = 0x40;
-		constexpr const static size_t ironSights = 0xe8;
-		constexpr const static size_t model = 0x80;
-		constexpr const static size_t lower = 0xa0;
+		constexpr const static size_t ironSights = 0xe0;
+		constexpr const static size_t model = 0xb8;
+		constexpr const static size_t lower = 0xd0;
 
 		// Functions
-		constexpr const static size_t get_ActiveModel = 0x3cb2ac0;
+		constexpr const static size_t get_ActiveModel = 0x4ba7660;
+		constexpr const static size_t OnCameraPositionChanged = 0x4ba5c40;
+		constexpr const static size_t OnCameraPositionChanged_vtableoff = 0x288;
 	}
 
-#define ViewModel_TypeDefinitionIndex 3635
+#define ViewModel_TypeDefinitionIndex 5626
 
 	namespace ViewModel {
 
@@ -1542,11 +1550,11 @@ namespace Offsets {
 		constexpr const static size_t instance = 0x28;
 
 		// Functions
-		constexpr const static size_t PlayInt = 0x23b6960;
-		constexpr const static size_t PlayString = 0x23b9ba0;
+		constexpr const static size_t PlayInt = 0x3a93f30;
+		constexpr const static size_t PlayString = 0x3a92410;
 	}
 
-#define MedicalTool_TypeDefinitionIndex 3523
+#define MedicalTool_TypeDefinitionIndex 4886
 
 	namespace MedicalTool {
 
@@ -1554,7 +1562,7 @@ namespace Offsets {
 		constexpr const static size_t resetTime = 0x2f8;
 	}
 
-#define WaterBody_TypeDefinitionIndex 1085
+#define WaterBody_TypeDefinitionIndex 3228
 
 	namespace WaterBody {
 
@@ -1562,26 +1570,26 @@ namespace Offsets {
 		constexpr const static size_t meshFilter = 0x60;
 	}
 
-	// obf name: ::%2634340c88b66dbf3ebcb398921c1333f35383f4
-#define WaterSystem_Static_ClassName "WaterSystem/%2634340c88b66dbf3ebcb398921c1333f35383f4"
-#define WaterSystem_Static_ClassNameShort "%2634340c88b66dbf3ebcb398921c1333f35383f4"
-#define WaterSystem_Static_TypeDefinitionIndex 2010
+	// obf name: ::%27a1507ff0e44e79c3d2f41c580fd64d9b33cd04
+#define WaterSystem_Static_ClassName "WaterSystem/%27a1507ff0e44e79c3d2f41c580fd64d9b33cd04"
+#define WaterSystem_Static_ClassNameShort "%27a1507ff0e44e79c3d2f41c580fd64d9b33cd04"
+#define WaterSystem_Static_TypeDefinitionIndex 5722
 
 	namespace WaterSystem_Static {
 
 		// Offsets
-		constexpr const static size_t Ocean = 0x40;
+		constexpr const static size_t Ocean = 0x0;
 	}
 
-#define WaterSystem_TypeDefinitionIndex 2011
+#define WaterSystem_TypeDefinitionIndex 5723
 
 	namespace WaterSystem {
 
 		// Functions
-		constexpr const static size_t get_Ocean = 0x11fdac0;
+		constexpr const static size_t get_Ocean = 0x3c1f750;
 	}
 
-#define TerrainMeta_TypeDefinitionIndex 4759
+#define TerrainMeta_TypeDefinitionIndex 295
 
 	namespace TerrainMeta {
 
@@ -1589,22 +1597,22 @@ namespace Offsets {
 		constexpr const static size_t Position = 0x18;
 		constexpr const static size_t Size = 0x24;
 		constexpr const static size_t OneOverSize = 0x30;
-		constexpr const static size_t Collision = 0x540;
-		constexpr const static size_t HeightMap = 0x148;
-		constexpr const static size_t SplatMap = 0x630;
-		constexpr const static size_t TopologyMap = 0x428;
-		constexpr const static size_t Texturing = 0x420;
+		constexpr const static size_t Collision = 0x688;
+		constexpr const static size_t HeightMap = 0xa0;
+		constexpr const static size_t SplatMap = 0x520;
+		constexpr const static size_t TopologyMap = 0x658;
+		constexpr const static size_t Texturing = 0x5a0;
 	}
 
-#define TerrainCollision_TypeDefinitionIndex 7101
+#define TerrainCollision_TypeDefinitionIndex 2978
 
 	namespace TerrainCollision {
 
 		// Functions
-		constexpr const static size_t GetIgnore = 0x4aa0360;
+		constexpr const static size_t GetIgnore = 0x1c6b010;
 	}
 
-#define TerrainHeightMap_TypeDefinitionIndex 5661
+#define TerrainHeightMap_TypeDefinitionIndex 974
 
 	namespace TerrainHeightMap {
 
@@ -1612,7 +1620,7 @@ namespace Offsets {
 		constexpr const static size_t normY = 0x70;
 	}
 
-#define TerrainSplatMap_TypeDefinitionIndex 3379
+#define TerrainSplatMap_TypeDefinitionIndex 5677
 
 	namespace TerrainSplatMap {
 
@@ -1620,7 +1628,7 @@ namespace Offsets {
 		constexpr const static size_t num = 0x74;
 	}
 
-#define TerrainTexturing_TypeDefinitionIndex 6074
+#define TerrainTexturing_TypeDefinitionIndex 6716
 
 	namespace TerrainTexturing {
 
@@ -1631,18 +1639,18 @@ namespace Offsets {
 		constexpr const static size_t shoreVectors = 0xa8;
 	}
 
-	// obf name: ::%216c8741e4d2a92c865e4b9f3e84fd471503293f
-#define World_Static_ClassName "%f94f8690f41971b1f099d684aed47352de20314b/%216c8741e4d2a92c865e4b9f3e84fd471503293f"
-#define World_Static_ClassNameShort "%216c8741e4d2a92c865e4b9f3e84fd471503293f"
-#define World_Static_TypeDefinitionIndex 5106
+	// obf name: ::%69a71773d3f6e09d78cfbe861cc5fa3418306165
+#define World_Static_ClassName "%76715f05db082223753425d5f8a9ee9378a32161/%69a71773d3f6e09d78cfbe861cc5fa3418306165"
+#define World_Static_ClassNameShort "%69a71773d3f6e09d78cfbe861cc5fa3418306165"
+#define World_Static_TypeDefinitionIndex 2195
 
 	namespace World_Static {
 
 		// Offsets
-		constexpr const static size_t _size = 0x2d0;
+		constexpr const static size_t _size = 0x7c;
 	}
 
-#define ItemIcon_TypeDefinitionIndex 1748
+#define ItemIcon_TypeDefinitionIndex 2629
 
 	namespace ItemIcon {
 
@@ -1650,68 +1658,68 @@ namespace Offsets {
 		constexpr const static size_t backgroundImage = 0xe8;
 
 		// Functions
-		constexpr const static size_t TryToMove = 0xee6af0;
-		constexpr const static size_t TryToMove_vtableoff = 0x3a8;
-		constexpr const static size_t RunTimedAction = 0xefb840;
+		constexpr const static size_t TryToMove = 0x17494e0;
+		constexpr const static size_t TryToMove_vtableoff = 0x398;
+		constexpr const static size_t RunTimedAction = 0x175f390;
 	}
 
-	// obf name: ::%b7e81b88b98fb3bb1f1c1e1bf5ce047f1dc8854e
-#define ItemIcon_Static_ClassName "ItemIcon/%b7e81b88b98fb3bb1f1c1e1bf5ce047f1dc8854e"
-#define ItemIcon_Static_ClassNameShort "%b7e81b88b98fb3bb1f1c1e1bf5ce047f1dc8854e"
-#define ItemIcon_Static_TypeDefinitionIndex 1747
+	// obf name: ::%fdb83a08afe36aa4834b0631407515c51f44c17d
+#define ItemIcon_Static_ClassName "ItemIcon/%fdb83a08afe36aa4834b0631407515c51f44c17d"
+#define ItemIcon_Static_ClassNameShort "%fdb83a08afe36aa4834b0631407515c51f44c17d"
+#define ItemIcon_Static_TypeDefinitionIndex 2628
 
 	namespace ItemIcon_Static {
 
 		// Offsets
-		constexpr const static size_t containerLootStartTimes = 0x18;
+		constexpr const static size_t containerLootStartTimes = 0x8;
 	}
 
-	// obf name: ::%23c14cef0ffd7e256c0348206d28bab151b7297c
-#define EffectData_ClassName "%23c14cef0ffd7e256c0348206d28bab151b7297c"
-#define EffectData_ClassNameShort "%23c14cef0ffd7e256c0348206d28bab151b7297c"
-#define EffectData_TypeDefinitionIndex 7543
+	// obf name: ::%f3d590fbd8480647e55ee84221617da65992b797
+#define EffectData_ClassName "%f3d590fbd8480647e55ee84221617da65992b797"
+#define EffectData_ClassNameShort "%f3d590fbd8480647e55ee84221617da65992b797"
+#define EffectData_TypeDefinitionIndex 7386
 
 	namespace EffectData {
 
 		// Offsets
-		constexpr const static size_t source = 0x28;
+		constexpr const static size_t source = 0x20;
 	}
 
-	// obf name: ::%94610652915d0e7843f3130f3b2978581a9880e5
-#define Effect_ClassName "%94610652915d0e7843f3130f3b2978581a9880e5"
-#define Effect_ClassNameShort "%94610652915d0e7843f3130f3b2978581a9880e5"
-#define Effect_TypeDefinitionIndex 2750
+	// obf name: ::%76dea61e7fd9a4e6637da14ec1476dc0ce5f6350
+#define Effect_ClassName "%76dea61e7fd9a4e6637da14ec1476dc0ce5f6350"
+#define Effect_ClassNameShort "%76dea61e7fd9a4e6637da14ec1476dc0ce5f6350"
+#define Effect_TypeDefinitionIndex 3074
 
 	namespace Effect {
 
 		// Offsets
-		constexpr const static size_t pooledString = 0x60;
-		constexpr const static size_t worldPos = 0xa8;
+		constexpr const static size_t pooledString = 0xa8;
+		constexpr const static size_t worldPos = 0x74;
 	}
 
-	// obf name: ::%5ce9fcfdc093233e8b561542ed2e98e5c2c624c4
-#define EffectLibrary_ClassName "%5ce9fcfdc093233e8b561542ed2e98e5c2c624c4"
-#define EffectLibrary_ClassNameShort "%5ce9fcfdc093233e8b561542ed2e98e5c2c624c4"
-#define EffectLibrary_TypeDefinitionIndex 2640
+	// obf name: ::%dd5bdb0b94747da135889bb823d43cfb39b4772a
+#define EffectLibrary_ClassName "%dd5bdb0b94747da135889bb823d43cfb39b4772a"
+#define EffectLibrary_ClassNameShort "%dd5bdb0b94747da135889bb823d43cfb39b4772a"
+#define EffectLibrary_TypeDefinitionIndex 4375
 
 	namespace EffectLibrary {
-		constexpr const static size_t SetupEffect = 0x1842f60;
+		constexpr const static size_t SetupEffect = 0x2de8de0;
 	}
 
-	// obf name: ::%016ae150da6528f8493208cff3bbfe5a57e06216
-#define EffectNetwork_ClassName "%016ae150da6528f8493208cff3bbfe5a57e06216"
-#define EffectNetwork_ClassNameShort "%016ae150da6528f8493208cff3bbfe5a57e06216"
-#define EffectNetwork_TypeDefinitionIndex 3961
+	// obf name: ::%3581cb976b5bc8aa6801801c166c4a6b25a8e648
+#define EffectNetwork_ClassName "%3581cb976b5bc8aa6801801c166c4a6b25a8e648"
+#define EffectNetwork_ClassNameShort "%3581cb976b5bc8aa6801801c166c4a6b25a8e648"
+#define EffectNetwork_TypeDefinitionIndex 732
 
 	namespace EffectNetwork {
 
 		// Functions
 	}
 
-	// obf name: ::%5488e71757fdce3c6af17bd7be9fdc05c1ee6892
-#define EffectNetwork_Static_ClassName "%016ae150da6528f8493208cff3bbfe5a57e06216/%5488e71757fdce3c6af17bd7be9fdc05c1ee6892"
-#define EffectNetwork_Static_ClassNameShort "%5488e71757fdce3c6af17bd7be9fdc05c1ee6892"
-#define EffectNetwork_Static_TypeDefinitionIndex 3960
+	// obf name: ::%a3b7016c1950f301e2be3d95999145268f778ff4
+#define EffectNetwork_Static_ClassName "%3581cb976b5bc8aa6801801c166c4a6b25a8e648/%a3b7016c1950f301e2be3d95999145268f778ff4"
+#define EffectNetwork_Static_ClassNameShort "%a3b7016c1950f301e2be3d95999145268f778ff4"
+#define EffectNetwork_Static_TypeDefinitionIndex 731
 
 	namespace EffectNetwork_Static {
 
@@ -1719,10 +1727,10 @@ namespace Offsets {
 		constexpr const static size_t effect = 0x18;
 
 		// Functions
-		constexpr const static size_t cctor = 0x2787fe0;
+		constexpr const static size_t cctor = 0x4067d70;
 	}
 
-#define BuildingBlock_TypeDefinitionIndex 3269
+#define BuildingBlock_TypeDefinitionIndex 1147
 
 	namespace BuildingBlock {
 
@@ -1730,119 +1738,119 @@ namespace Offsets {
 		constexpr const static size_t grade = 0x2f8;
 
 		// Functions
-		constexpr const static size_t GetBuildMenu = 0x2013c60;
-		constexpr const static size_t HasUpgradePrivilege = 0x1ffd7b0;
-		constexpr const static size_t CanAffordUpgrade = 0x2004de0;
+		constexpr const static size_t GetBuildMenu = 0x5050a30;
+		constexpr const static size_t HasUpgradePrivilege = 0x50362c0;
+		constexpr const static size_t CanAffordUpgrade = 0x506a9a0;
 	}
 
-	// obf name: ::%aea70d960a779878a6e850c3cb898437ed357501
-#define GameObjectEx_ClassName "%aea70d960a779878a6e850c3cb898437ed357501"
-#define GameObjectEx_ClassNameShort "%aea70d960a779878a6e850c3cb898437ed357501"
-#define GameObjectEx_TypeDefinitionIndex 25
+	// obf name: ::%5110d05a99e6c6d5ac54bc2fa1a432a28b6db224
+#define GameObjectEx_ClassName "%5110d05a99e6c6d5ac54bc2fa1a432a28b6db224"
+#define GameObjectEx_ClassNameShort "%5110d05a99e6c6d5ac54bc2fa1a432a28b6db224"
+#define GameObjectEx_TypeDefinitionIndex 5604
 
 	namespace GameObjectEx {
 
 		// Functions
-		constexpr const static size_t ToBaseEntity = 0xb51bb0;
+		constexpr const static size_t ToBaseEntity = 0x3a7da10;
 	}
 
-#define UIDeathScreen_TypeDefinitionIndex 6176
+#define UIDeathScreen_TypeDefinitionIndex 371
 
 	namespace UIDeathScreen {
 
 		// Functions
-		constexpr const static size_t SetVisible = 0x3eb0620;
+		constexpr const static size_t SetVisible = 0x20ede20;
 	}
 
-	// obf name: ::%0cf6a2e1ae3a91be35a09403dac1b54a1c58de15
-#define BaseScreenShake_Static_ClassName "BaseScreenShake/%0cf6a2e1ae3a91be35a09403dac1b54a1c58de15"
-#define BaseScreenShake_Static_ClassNameShort "%0cf6a2e1ae3a91be35a09403dac1b54a1c58de15"
-#define BaseScreenShake_Static_TypeDefinitionIndex 3542
+	// obf name: ::%ce68584997c442fc8cad7c52bc284c30c54ae9c6
+#define BaseScreenShake_Static_ClassName "BaseScreenShake/%ce68584997c442fc8cad7c52bc284c30c54ae9c6"
+#define BaseScreenShake_Static_ClassNameShort "%ce68584997c442fc8cad7c52bc284c30c54ae9c6"
+#define BaseScreenShake_Static_TypeDefinitionIndex 1210
 
 	namespace BaseScreenShake_Static {
 
 		// Offsets
-		constexpr const static size_t list = 0x60;
+		constexpr const static size_t list = 0x78;
 	}
 
-#define FlashbangOverlay_TypeDefinitionIndex 3557
+#define FlashbangOverlay_TypeDefinitionIndex 351
 
 	namespace FlashbangOverlay {
 
 		// Offsets
-		constexpr const static size_t Instance = 0x10;
-		constexpr const static size_t flashLength = 0x40;
+		constexpr const static size_t Instance = 0x8;
+		constexpr const static size_t flashLength = 0x48;
 	}
 
-	// obf name: ::%9fc1e618d71f3d53afb63624110246f117446d40
-#define StringPool_ClassName "%9fc1e618d71f3d53afb63624110246f117446d40"
-#define StringPool_ClassNameShort "%9fc1e618d71f3d53afb63624110246f117446d40"
-#define StringPool_TypeDefinitionIndex 6244
+	// obf name: ::%3f9bec337daf673e7478d3f5ce62adbafb7c62a0
+#define StringPool_ClassName "%3f9bec337daf673e7478d3f5ce62adbafb7c62a0"
+#define StringPool_ClassNameShort "%3f9bec337daf673e7478d3f5ce62adbafb7c62a0"
+#define StringPool_TypeDefinitionIndex 2439
 
 	namespace StringPool {
 
 		// Offsets
-		constexpr const static size_t toNumber = 0x0;
+		constexpr const static size_t toNumber = 0x10;
 
 		// Functions
-		constexpr const static size_t Get = 0x40ae7f0;
+		constexpr const static size_t Get = 0x1514620;
 	}
 
-	// obf name: ::%51b8917f5c5f49b45f4246e19d81987800bcaafd
-#define Network_Networkable_ClassName "%51b8917f5c5f49b45f4246e19d81987800bcaafd"
-#define Network_Networkable_ClassNameShort "%51b8917f5c5f49b45f4246e19d81987800bcaafd"
-#define Network_Networkable_TypeDefinitionIndex 18423
+	// obf name: ::%c5a94eb6d6f67c30227627252029c30530f767f7
+#define Network_Networkable_ClassName "%c5a94eb6d6f67c30227627252029c30530f767f7"
+#define Network_Networkable_ClassNameShort "%c5a94eb6d6f67c30227627252029c30530f767f7"
+#define Network_Networkable_TypeDefinitionIndex 18757
 
 	namespace Network_Networkable {
 
 		// Offsets
-		constexpr const static size_t ID = 0x30;
+		constexpr const static size_t ID = 0x20;
 	}
 
-	// obf name: ::%ba146df80124ea910527d3be1f0a6ae611e61ccf
-#define Network_Net_ClassName "%ba146df80124ea910527d3be1f0a6ae611e61ccf"
-#define Network_Net_ClassNameShort "%ba146df80124ea910527d3be1f0a6ae611e61ccf"
-#define Network_Net_TypeDefinitionIndex 7826
+	// obf name: ::%3a0799e51ac46cfeb2a4ee06197e3a9f9e4c7c97
+#define Network_Net_ClassName "%3a0799e51ac46cfeb2a4ee06197e3a9f9e4c7c97"
+#define Network_Net_ClassNameShort "%3a0799e51ac46cfeb2a4ee06197e3a9f9e4c7c97"
+#define Network_Net_TypeDefinitionIndex 10080
 
 	namespace Network_Net {
 
 		// Offsets
-		constexpr const static size_t cl = 0x40;
+		constexpr const static size_t cl = 0x8;
 	}
 
-	// obf name: ::%a6bad2278ee5c789f8a38ad50108da888b68748c
-#define Network_Client_ClassName "%a6bad2278ee5c789f8a38ad50108da888b68748c"
-#define Network_Client_ClassNameShort "%a6bad2278ee5c789f8a38ad50108da888b68748c"
-#define Network_Client_TypeDefinitionIndex 18482
+	// obf name: ::%2c60280aa5174b0e7a74215bf29c03d73603c2c4
+#define Network_Client_ClassName "%2c60280aa5174b0e7a74215bf29c03d73603c2c4"
+#define Network_Client_ClassNameShort "%2c60280aa5174b0e7a74215bf29c03d73603c2c4"
+#define Network_Client_TypeDefinitionIndex 18761
 
 	namespace Network_Client {
 
 		// Offsets
-		constexpr const static size_t Connection = 0x100;
-		constexpr const static size_t ConnectedPort = 0xd4;
-		constexpr const static size_t ServerName = 0xd8;
-		constexpr const static size_t ConnectedAddress = 0xf8;
+		constexpr const static size_t Connection = 0xf8;
+		constexpr const static size_t ConnectedPort = 0x110;
+		constexpr const static size_t ConnectedAddress = 0xd8;
+		constexpr const static size_t ServerName = 0xe8;
 
 		// Offsets
-		constexpr const static size_t CreateNetworkable = 0x6471ae0;
-		constexpr const static size_t DestroyNetworkable = 0x6471570;
+		constexpr const static size_t CreateNetworkable = 0x636bdb0;
+		constexpr const static size_t DestroyNetworkable = 0x636b6a0;
 	}
 
-	// obf name: ::%04121e0e0818055d8871bd6bd418cea9a0ced388
-#define Network_BaseNetwork_ClassName "%04121e0e0818055d8871bd6bd418cea9a0ced388"
-#define Network_BaseNetwork_ClassNameShort "%04121e0e0818055d8871bd6bd418cea9a0ced388"
-#define Network_BaseNetwork_TypeDefinitionIndex 18456
+	// obf name: ::%d7b7d0101ea0612ec6c8f428570f1c7669f783a7
+#define Network_BaseNetwork_ClassName "%d7b7d0101ea0612ec6c8f428570f1c7669f783a7"
+#define Network_BaseNetwork_ClassNameShort "%d7b7d0101ea0612ec6c8f428570f1c7669f783a7"
+#define Network_BaseNetwork_TypeDefinitionIndex 18739
 
 	namespace Network_BaseNetwork {
 
 		// Functions
-		constexpr const static size_t StartWrite = 0x642f1b0;
+		constexpr const static size_t StartWrite = 0x63212f0;
 	}
 
-	// obf name: ::%ac91827f5991d96be15455269f3e4eb58f41c47b
-#define Network_SendInfo_ClassName "%ac91827f5991d96be15455269f3e4eb58f41c47b"
-#define Network_SendInfo_ClassNameShort "%ac91827f5991d96be15455269f3e4eb58f41c47b"
-#define Network_SendInfo_TypeDefinitionIndex 18468
+	// obf name: ::%cd45767e2bd25aaf253385545641dcd4ad1e2517
+#define Network_SendInfo_ClassName "%cd45767e2bd25aaf253385545641dcd4ad1e2517"
+#define Network_SendInfo_ClassNameShort "%cd45767e2bd25aaf253385545641dcd4ad1e2517"
+#define Network_SendInfo_TypeDefinitionIndex 18751
 
 	namespace Network_SendInfo {
 
@@ -1854,10 +1862,10 @@ namespace Offsets {
 		constexpr const static size_t connection = 0x18;
 	}
 
-	// obf name: ::%849b275fad2844ea729c57cb84eb0d5ed5748d6a
-#define Network_Message_ClassName "%849b275fad2844ea729c57cb84eb0d5ed5748d6a"
-#define Network_Message_ClassNameShort "%849b275fad2844ea729c57cb84eb0d5ed5748d6a"
-#define Network_Message_TypeDefinitionIndex 18453
+	// obf name: ::%e1afd20100f1be760731c347795748f4c17f095e
+#define Network_Message_ClassName "%e1afd20100f1be760731c347795748f4c17f095e"
+#define Network_Message_ClassNameShort "%e1afd20100f1be760731c347795748f4c17f095e"
+#define Network_Message_TypeDefinitionIndex 18766
 
 	namespace Network_Message {
 
@@ -1866,50 +1874,50 @@ namespace Offsets {
 		constexpr const static size_t read = 0x10;
 	}
 
-	// obf name: ::%79c7a11983530b2693c506eba2ee64d34848475c
-#define Network_NetRead_ClassName "%79c7a11983530b2693c506eba2ee64d34848475c"
-#define Network_NetRead_ClassNameShort "%79c7a11983530b2693c506eba2ee64d34848475c"
-#define Network_NetRead_TypeDefinitionIndex 18444
+	// obf name: ::%c98fc297a3a4b8aebb2053d3b13f521eff4cda36
+#define Network_NetRead_ClassName "%c98fc297a3a4b8aebb2053d3b13f521eff4cda36"
+#define Network_NetRead_ClassNameShort "%c98fc297a3a4b8aebb2053d3b13f521eff4cda36"
+#define Network_NetRead_TypeDefinitionIndex 18787
 
 	namespace Network_NetRead {
 
 		// Offsets
-		constexpr const static size_t stream = 0x30;
+		constexpr const static size_t stream = 0x38;
 	}
 
-	// obf name: ::%bcc73477fe5ee5442c4774bd11e2652608fcf080
-#define Network_NetWrite_ClassName "%bcc73477fe5ee5442c4774bd11e2652608fcf080"
-#define Network_NetWrite_ClassNameShort "%bcc73477fe5ee5442c4774bd11e2652608fcf080"
-#define Network_NetWrite_TypeDefinitionIndex 18480
+	// obf name: ::%db3fe2b8a7bac2d3a5d6d6e22840eedb135466ce
+#define Network_NetWrite_ClassName "%db3fe2b8a7bac2d3a5d6d6e22840eedb135466ce"
+#define Network_NetWrite_ClassNameShort "%db3fe2b8a7bac2d3a5d6d6e22840eedb135466ce"
+#define Network_NetWrite_TypeDefinitionIndex 18741
 
 	namespace Network_NetWrite {
 
 		// Offsets
-		constexpr const static size_t stream = 0x38;
+		constexpr const static size_t stream = 0x40;
 
 		// Functions
-		constexpr const static size_t WriteByte = 0x646be20;
-		constexpr const static size_t String = 0x646fc60;
-		constexpr const static size_t Send = 0x64690e0;
+		constexpr const static size_t WriteByte = 0x6339480;
+		constexpr const static size_t String = 0x6336400;
+		constexpr const static size_t Send = 0x633d7a0;
 	}
 
-#define LootPanel_TypeDefinitionIndex 7180
+#define LootPanel_TypeDefinitionIndex 3968
 
 	namespace LootPanel {
 
 		// Functions
-		constexpr const static size_t get_Container_00 = 0x4bd0410;
+		constexpr const static size_t get_Container_00 = 0x29221c0;
 	}
 
-#define UIInventory_TypeDefinitionIndex 2999
+#define UIInventory_TypeDefinitionIndex 5288
 
 	namespace UIInventory {
 
 		// Functions
-		constexpr const static size_t Close = 0x1cd8dc0;
+		constexpr const static size_t Close = 0x3788160;
 	}
 
-#define GrowableEntity_TypeDefinitionIndex 4932
+#define GrowableEntity_TypeDefinitionIndex 4355
 
 	namespace GrowableEntity {
 
@@ -1918,7 +1926,7 @@ namespace Offsets {
 		constexpr const static size_t State = 0x2d0;
 	}
 
-#define PlantProperties_TypeDefinitionIndex 4630
+#define PlantProperties_TypeDefinitionIndex 1105
 
 	namespace PlantProperties {
 
@@ -1926,7 +1934,7 @@ namespace Offsets {
 		constexpr const static size_t stages = 0x28;
 	}
 
-#define PlantProperties_Stage_TypeDefinitionIndex 4629
+#define PlantProperties_Stage_TypeDefinitionIndex 1104
 
 	namespace PlantProperties_Stage {
 
@@ -1934,7 +1942,7 @@ namespace Offsets {
 		constexpr const static size_t resources = 0xc;
 	}
 
-#define Text_TypeDefinitionIndex 21302
+#define Text_TypeDefinitionIndex 21299
 
 	namespace Text {
 
@@ -1942,7 +1950,7 @@ namespace Offsets {
 		constexpr const static size_t m_Text = 0xd8;
 	}
 
-#define TOD_Sky_TypeDefinitionIndex 8943
+#define TOD_Sky_TypeDefinitionIndex 8266
 
 	namespace TOD_Sky {
 
@@ -1956,29 +1964,29 @@ namespace Offsets {
 		constexpr const static size_t Ambient = 0x98;
 
 		// Functions
-		constexpr const static size_t get_Instance = 0x8856d0;
+		constexpr const static size_t get_Instance = 0x6f77d0;
 	}
 
-	// obf name: ::%1950ba55a6493b3267a327011f991f41463b2ba8
-#define TOD_Sky_Static_ClassName "TOD_Sky/%1950ba55a6493b3267a327011f991f41463b2ba8"
-#define TOD_Sky_Static_ClassNameShort "%1950ba55a6493b3267a327011f991f41463b2ba8"
-#define TOD_Sky_Static_TypeDefinitionIndex 8942
+	// obf name: ::%9de37b63d4d81d87592796b34dde9a329c7313b2
+#define TOD_Sky_Static_ClassName "TOD_Sky/%9de37b63d4d81d87592796b34dde9a329c7313b2"
+#define TOD_Sky_Static_ClassNameShort "%9de37b63d4d81d87592796b34dde9a329c7313b2"
+#define TOD_Sky_Static_TypeDefinitionIndex 8265
 
 	namespace TOD_Sky_Static {
 
 		// Offsets
-		constexpr const static size_t instances = 0xc8;
+		constexpr const static size_t instances = 0x70;
 	}
 
-#define TOD_CycleParameters_TypeDefinitionIndex 9821
+#define TOD_CycleParameters_TypeDefinitionIndex 9022
 
 	namespace TOD_CycleParameters {
 
 		// Functions
-		constexpr const static size_t get_DateTime = 0xa488d0;
+		constexpr const static size_t get_DateTime = 0x885220;
 	}
 
-#define TOD_AtmosphereParameters_TypeDefinitionIndex 9616
+#define TOD_AtmosphereParameters_TypeDefinitionIndex 8449
 
 	namespace TOD_AtmosphereParameters {
 
@@ -1986,7 +1994,7 @@ namespace Offsets {
 		constexpr const static size_t RayleighMultiplier = 0x10;
 	}
 
-#define TOD_DayParameters_TypeDefinitionIndex 9027
+#define TOD_DayParameters_TypeDefinitionIndex 9788
 
 	namespace TOD_DayParameters {
 
@@ -1994,7 +2002,7 @@ namespace Offsets {
 		constexpr const static size_t SkyColor = 0x28;
 	}
 
-#define TOD_NightParameters_TypeDefinitionIndex 7809
+#define TOD_NightParameters_TypeDefinitionIndex 8685
 
 	namespace TOD_NightParameters {
 
@@ -2005,7 +2013,7 @@ namespace Offsets {
 		constexpr const static size_t AmbientMultiplier = 0x5c;
 	}
 
-#define TOD_StarParameters_TypeDefinitionIndex 7976
+#define TOD_StarParameters_TypeDefinitionIndex 9260
 
 	namespace TOD_StarParameters {
 
@@ -2014,7 +2022,7 @@ namespace Offsets {
 		constexpr const static size_t Brightness = 0x14;
 	}
 
-#define TOD_CloudParameters_TypeDefinitionIndex 7844
+#define TOD_CloudParameters_TypeDefinitionIndex 8732
 
 	namespace TOD_CloudParameters {
 
@@ -2022,7 +2030,7 @@ namespace Offsets {
 		constexpr const static size_t Brightness = 0x30;
 	}
 
-#define TOD_AmbientParameters_TypeDefinitionIndex 9023
+#define TOD_AmbientParameters_TypeDefinitionIndex 9846
 
 	namespace TOD_AmbientParameters {
 
@@ -2030,7 +2038,7 @@ namespace Offsets {
 		constexpr const static size_t Saturation = 0x14;
 	}
 
-#define UIHUD_TypeDefinitionIndex 5306
+#define UIHUD_TypeDefinitionIndex 4274
 
 	namespace UIHUD {
 
@@ -2038,7 +2046,7 @@ namespace Offsets {
 		constexpr const static size_t Hunger = 0x28;
 	}
 
-#define HudElement_TypeDefinitionIndex 289
+#define HudElement_TypeDefinitionIndex 6562
 
 	namespace HudElement {
 
@@ -2046,7 +2054,7 @@ namespace Offsets {
 		constexpr const static size_t lastValue = 0x30;
 	}
 
-#define UIBelt_TypeDefinitionIndex 4731
+#define UIBelt_TypeDefinitionIndex 6600
 
 	namespace UIBelt {
 
@@ -2054,7 +2062,7 @@ namespace Offsets {
 		constexpr const static size_t ItemIcons = 0x20;
 	}
 
-#define ItemModCompostable_TypeDefinitionIndex 4680
+#define ItemModCompostable_TypeDefinitionIndex 4153
 
 	namespace ItemModCompostable {
 
@@ -2073,16 +2081,16 @@ namespace Offsets {
 		constexpr const static size_t guid = 0x10;
 	}
 
-#define EnvironmentManager_TypeDefinitionIndex 1485
+#define EnvironmentManager_TypeDefinitionIndex 6631
 
 	namespace EnvironmentManager {
 
 		// Functions
-		constexpr const static size_t Get = 0xc6ea00;
+		constexpr const static size_t Get = 0x4657ec0;
 	}
 
 	// obf name: ::Phrase
-#define Translate_Phrase_ClassName "%90cab61e283c4aa1a238cee513f386fbfaac0ed0/Phrase"
+#define Translate_Phrase_ClassName "%ef838a2b1121f69925dfcebaa55455fd5ec4bdbe/Phrase"
 #define Translate_Phrase_ClassNameShort "Phrase"
 #define Translate_Phrase_TypeDefinitionIndex 24410
 
@@ -2092,7 +2100,7 @@ namespace Offsets {
 		constexpr const static size_t legacyEnglish = 0x20;
 	}
 
-#define ResourceDispenser_GatherPropertyEntry_TypeDefinitionIndex 6505
+#define ResourceDispenser_GatherPropertyEntry_TypeDefinitionIndex 5015
 
 	namespace ResourceDispenser_GatherPropertyEntry {
 
@@ -2102,7 +2110,7 @@ namespace Offsets {
 		constexpr const static size_t conditionLost = 0x18;
 	}
 
-#define ResourceDispenser_GatherProperties_TypeDefinitionIndex 6506
+#define ResourceDispenser_GatherProperties_TypeDefinitionIndex 5016
 
 	namespace ResourceDispenser_GatherProperties {
 
@@ -2112,7 +2120,7 @@ namespace Offsets {
 		constexpr const static size_t Flesh = 0x20;
 	}
 
-#define UIChat_TypeDefinitionIndex 6848
+#define UIChat_TypeDefinitionIndex 1871
 
 	namespace UIChat {
 
@@ -2128,30 +2136,30 @@ namespace Offsets {
 	namespace ListComponent {
 
 		// Offsets
-		constexpr const static size_t InstanceList = 0x18;
+		constexpr const static size_t InstanceList = 0x48;
 	}
 
-	// obf name: ::%f14a4aa3f25cf47b7a6d23908365b3b06af2b032
-#define ListHashSet_ClassName "%f14a4aa3f25cf47b7a6d23908365b3b06af2b032<UIChat>"
-#define ListHashSet_ClassNameShort "%f14a4aa3f25cf47b7a6d23908365b3b06af2b032"
+	// obf name: ::%a03b56a37ef5f1042cc89fc719e52219a2395575
+#define ListHashSet_ClassName "%a03b56a37ef5f1042cc89fc719e52219a2395575<UIChat>"
+#define ListHashSet_ClassNameShort "%a03b56a37ef5f1042cc89fc719e52219a2395575"
 #define ListHashSet_TypeDefinitionIndex -1
 
 	namespace ListHashSet {
 
 		// Offsets
-		constexpr const static size_t vals = 0x10;
+		constexpr const static size_t vals = 0x18;
 	}
 
-#define PatrolHelicopter_TypeDefinitionIndex 3839
+#define PatrolHelicopter_TypeDefinitionIndex 2341
 
 	namespace PatrolHelicopter {
 
 		// Offsets
 		constexpr const static size_t mainRotor = 0x278;
-		constexpr const static size_t weakspots = 0x3e8;
+		constexpr const static size_t weakspots = 0x3f0;
 	}
 
-#define Chainsaw_TypeDefinitionIndex 1738
+#define Chainsaw_TypeDefinitionIndex 1754
 
 	namespace Chainsaw {
 
@@ -2159,40 +2167,40 @@ namespace Offsets {
 		constexpr const static size_t ammo = 0x38c;
 	}
 
-	// obf name: ::%e86757185c3602f90d3ca242d190a98555130db1
-#define CameraUpdateHook_Static_ClassName "CameraUpdateHook/%e86757185c3602f90d3ca242d190a98555130db1"
-#define CameraUpdateHook_Static_ClassNameShort "%e86757185c3602f90d3ca242d190a98555130db1"
-#define CameraUpdateHook_Static_TypeDefinitionIndex 1527
+	// obf name: ::%a1c57da571c1c4c0130b04130a7b048a8218bf9f
+#define CameraUpdateHook_Static_ClassName "CameraUpdateHook/%a1c57da571c1c4c0130b04130a7b048a8218bf9f"
+#define CameraUpdateHook_Static_ClassNameShort "%a1c57da571c1c4c0130b04130a7b048a8218bf9f"
+#define CameraUpdateHook_Static_TypeDefinitionIndex 4206
 
 	namespace CameraUpdateHook_Static {
 
 		// Offsets
-		constexpr const static size_t action = 0x100;
+		constexpr const static size_t action = 0x88;
 	}
 
-#define SteamClientWrapper_TypeDefinitionIndex 4664
+#define SteamClientWrapper_TypeDefinitionIndex 5846
 
 	namespace SteamClientWrapper {
 
 		// Functions
-		constexpr const static size_t GetAvatarTexture = 0x2dda640;
+		constexpr const static size_t GetAvatarTexture = 0x3d8ce60;
 	}
 
-	// obf name: ::%6ff64142c432a57b536e2d81883a156160c2a253
-#define AimConeUtil_ClassName "%6ff64142c432a57b536e2d81883a156160c2a253"
-#define AimConeUtil_ClassNameShort "%6ff64142c432a57b536e2d81883a156160c2a253"
-#define AimConeUtil_TypeDefinitionIndex 1714
+	// obf name: ::%48be176a41cc4bddee0a1338943ee74f258d690b
+#define AimConeUtil_ClassName "%48be176a41cc4bddee0a1338943ee74f258d690b"
+#define AimConeUtil_ClassNameShort "%48be176a41cc4bddee0a1338943ee74f258d690b"
+#define AimConeUtil_TypeDefinitionIndex 517
 
 	namespace AimConeUtil {
 
 		// Functions
-		constexpr const static size_t GetModifiedAimConeDirection = 0xeba700;
+		constexpr const static size_t GetModifiedAimConeDirection = 0x30b9720;
 	}
 
-	// obf name: ::%b7c9bbf24f77a08639f2e8c384c19d763935e2ff
-#define Buttons_ConButton_ClassName "%46d543a5ffea0258dd9e68c01fd1167aa518f930/%b7c9bbf24f77a08639f2e8c384c19d763935e2ff"
-#define Buttons_ConButton_ClassNameShort "%b7c9bbf24f77a08639f2e8c384c19d763935e2ff"
-#define Buttons_ConButton_TypeDefinitionIndex 1904
+	// obf name: ::%c387b4f4bf5eec97967672e3c9419129ff2420de
+#define Buttons_ConButton_ClassName "%831a561502fe074c74078660a3fbca132ec8863d/%c387b4f4bf5eec97967672e3c9419129ff2420de"
+#define Buttons_ConButton_ClassNameShort "%c387b4f4bf5eec97967672e3c9419129ff2420de"
+#define Buttons_ConButton_TypeDefinitionIndex 62
 
 	namespace Buttons_ConButton {
 
@@ -2200,47 +2208,47 @@ namespace Offsets {
 		constexpr const static size_t IsDown = 0x18;
 	}
 
-	// obf name: ::%ee852aef4ce642a283042e21cd7292658014494b
-#define Buttons_Static_ClassName "%46d543a5ffea0258dd9e68c01fd1167aa518f930/%ee852aef4ce642a283042e21cd7292658014494b"
-#define Buttons_Static_ClassNameShort "%ee852aef4ce642a283042e21cd7292658014494b"
-#define Buttons_Static_TypeDefinitionIndex 1905
+	// obf name: ::%eb869b2a59452107181deea9b3e4c43cc507ca21
+#define Buttons_Static_ClassName "%831a561502fe074c74078660a3fbca132ec8863d/%eb869b2a59452107181deea9b3e4c43cc507ca21"
+#define Buttons_Static_ClassNameShort "%eb869b2a59452107181deea9b3e4c43cc507ca21"
+#define Buttons_Static_TypeDefinitionIndex 63
 
 	namespace Buttons_Static {
 
 		// Offsets
-		constexpr const static size_t Pets = 0x5c8;
-		constexpr const static size_t Attack = 0x3e0;
-		constexpr const static size_t Attack2 = 0x6f8;
-		constexpr const static size_t Forward = 0x2e0;
-		constexpr const static size_t Backward = 0x2b8;
-		constexpr const static size_t Right = 0x238;
+		constexpr const static size_t Pets = 0x860;
+		constexpr const static size_t Attack = 0x470;
+		constexpr const static size_t Attack2 = 0xa30;
+		constexpr const static size_t Forward = 0x6d0;
+		constexpr const static size_t Backward = 0xc80;
+		constexpr const static size_t Right = 0x430;
 		constexpr const static size_t Left = 0x30;
-		constexpr const static size_t Sprint = 0x330;
-		constexpr const static size_t Use = 0xc68;
+		constexpr const static size_t Sprint = 0x580;
+		constexpr const static size_t Use = 0x950;
 
 		// Functions
-		constexpr const static size_t Pets_setter = 0x4449590;
+		constexpr const static size_t Pets_setter = 0x25898d0;
 	}
 
-#define PlayerModel_TypeDefinitionIndex 1402
+#define PlayerModel_TypeDefinitionIndex 5708
 
 	namespace PlayerModel {
 
 		// Offsets
-		constexpr const static size_t _multiMesh = 0x2b8;
+		constexpr const static size_t _multiMesh = 0x270;
 		constexpr const static size_t position = 0x1e8;
 		constexpr const static size_t newVelocity = 0x20c;
 	}
 
-#define SkinnedMultiMesh_TypeDefinitionIndex 866
+#define SkinnedMultiMesh_TypeDefinitionIndex 1073
 
 	namespace SkinnedMultiMesh {
 
 		// Offsets
-		constexpr const static size_t Renderers = 0x40;
+		constexpr const static size_t Renderers = 0x58;
 	}
 
-#define BaseMountable_TypeDefinitionIndex 4041
+#define BaseMountable_TypeDefinitionIndex 6328
 
 	namespace BaseMountable {
 
@@ -2250,16 +2258,16 @@ namespace Offsets {
 		constexpr const static size_t canWieldItems = 0x2a4;
 	}
 
-#define ProgressBar_TypeDefinitionIndex 1313
+#define ProgressBar_TypeDefinitionIndex 428
 
 	namespace ProgressBar {
 
 		// Offsets
 		constexpr const static size_t Instance = 0x10;
-		constexpr const static size_t timeCounter = 0x2c;
+		constexpr const static size_t timeCounter = 0x24;
 	}
 
-#define BowWeapon_TypeDefinitionIndex 6734
+#define BowWeapon_TypeDefinitionIndex 6942
 
 	namespace BowWeapon {
 
@@ -2268,51 +2276,51 @@ namespace Offsets {
 		constexpr const static size_t wasAiming = 0x420;
 	}
 
-#define CrossbowWeapon_TypeDefinitionIndex 2711
+#define CrossbowWeapon_TypeDefinitionIndex 3800
 
 	namespace CrossbowWeapon {
 
 		// Offsets
 	}
 
-#define MiniCrossbow_TypeDefinitionIndex 5766
+#define MiniCrossbow_TypeDefinitionIndex 2746
 
 	namespace MiniCrossbow {
 
 		// Offsets
 	}
 
-	// obf name: ::%625823cc072e8419acc8a03585f7f8f7435a2a66
-#define ConVar_Admin_Static_ClassName "%a337290e60635e9345591fb3e5b5ae82b3f894ba/%625823cc072e8419acc8a03585f7f8f7435a2a66"
-#define ConVar_Admin_Static_ClassNameShort "%625823cc072e8419acc8a03585f7f8f7435a2a66"
-#define ConVar_Admin_Static_TypeDefinitionIndex 3387
+	// obf name: ::%bd5d22beed06d7be7deeed6ff5b579002e16dfa2
+#define ConVar_Admin_Static_ClassName "%7a89a8f44890266a2e7ab0b22801008bb426e635/%bd5d22beed06d7be7deeed6ff5b579002e16dfa2"
+#define ConVar_Admin_Static_ClassNameShort "%bd5d22beed06d7be7deeed6ff5b579002e16dfa2"
+#define ConVar_Admin_Static_TypeDefinitionIndex 3057
 
 	namespace ConVar_Admin_Static {
 
 		// Offsets
-		constexpr const static size_t admintime = 0x130;
+		constexpr const static size_t admintime = 0x1ac;
 
 		// Functions
-		constexpr const static size_t admintime_getter = 0x44518b0;
-		constexpr const static size_t admintime_setter = 0x4485940;
+		constexpr const static size_t admintime_getter = 0x2596510;
+		constexpr const static size_t admintime_setter = 0x25c3010;
 	}
 
-	// obf name: ::%c2ae7c5cbc925380cdee7c77e493a39c03a37b2b
-#define ConVar_Player_Static_ClassName "%ace601a73fc99fe7989c08f1581b5d8e842f8e8f/%c2ae7c5cbc925380cdee7c77e493a39c03a37b2b"
-#define ConVar_Player_Static_ClassNameShort "%c2ae7c5cbc925380cdee7c77e493a39c03a37b2b"
-#define ConVar_Player_Static_TypeDefinitionIndex 5519
+	// obf name: ::%ec4bee0b946099fdc1931ecc2a16aff4c6620e21
+#define ConVar_Player_Static_ClassName "%58a04f16b61841472404ae71a094f06353f685b8/%ec4bee0b946099fdc1931ecc2a16aff4c6620e21"
+#define ConVar_Player_Static_ClassNameShort "%ec4bee0b946099fdc1931ecc2a16aff4c6620e21"
+#define ConVar_Player_Static_TypeDefinitionIndex 2029
 
 	namespace ConVar_Player_Static {
 
 		// Offsets
-		constexpr const static size_t clientTickInterval = 0xe0;
+		constexpr const static size_t clientTickInterval = 0x50;
 
 		// Functions
-		constexpr const static size_t clientTickRate_getter = 0x4469fd0;
-		constexpr const static size_t clientTickRate_setter = 0x446f1c0;
+		constexpr const static size_t clientTickRate_getter = 0x257ba80;
+		constexpr const static size_t clientTickRate_setter = 0x2593880;
 	}
 
-#define ColliderInfo_TypeDefinitionIndex 3030
+#define ColliderInfo_TypeDefinitionIndex 5433
 
 	namespace ColliderInfo {
 
@@ -2320,7 +2328,7 @@ namespace Offsets {
 		constexpr const static size_t flags = 0x20;
 	}
 
-#define CodeLock_TypeDefinitionIndex 134
+#define CodeLock_TypeDefinitionIndex 3111
 
 	namespace CodeLock {
 
@@ -2330,63 +2338,60 @@ namespace Offsets {
 		constexpr const static size_t HasGuestAuth = 0x229;
 	}
 
-#define AutoTurret_TypeDefinitionIndex 3887
+#define AutoTurret_TypeDefinitionIndex 1900
 
 	namespace AutoTurret {
 
 		// Offsets
-		constexpr const static size_t authorizedPlayers = 0x0;
+		constexpr const static size_t authorizedPlayers = 0x378;
 		constexpr const static size_t lastYaw = 0x3d0;
 		constexpr const static size_t muzzlePos = 0x3f0;
 		constexpr const static size_t gun_yaw = 0x408;
 		constexpr const static size_t gun_pitch = 0x410;
 		constexpr const static size_t sightRange = 0x418;
-
-		// Functions
-		constexpr const static size_t IsAuthed = 0x0;
 	}
 
-#define Client_TypeDefinitionIndex 3810
+#define Client_TypeDefinitionIndex 3966
 
 	namespace Client {
 
 		// Functions
-		constexpr const static size_t OnClientDisconnected = 0x25843b0;
+		constexpr const static size_t OnClientDisconnected = 0x28e0c60;
 		constexpr const static size_t OnClientDisconnected_vtableoff = 0x1b8;
 	}
 
-	// obf name: ::%d9fb19535c70c85ed2489517ef2efeba67dfa589
-#define ItemManager_Static_ClassName "%687148435474bbc5ee7ed6c44b4ff2a3a33b39fc/%d9fb19535c70c85ed2489517ef2efeba67dfa589"
-#define ItemManager_Static_ClassNameShort "%d9fb19535c70c85ed2489517ef2efeba67dfa589"
-#define ItemManager_Static_TypeDefinitionIndex 5906
+	// obf name: ::%cef213936538c1310da14d9b836584457684ce4a
+#define ItemManager_Static_ClassName "%d924fa423fa97b89ef66f419db0fddc7d15fcc10/%cef213936538c1310da14d9b836584457684ce4a"
+#define ItemManager_Static_ClassNameShort "%cef213936538c1310da14d9b836584457684ce4a"
+#define ItemManager_Static_TypeDefinitionIndex 6224
 
 	namespace ItemManager_Static {
 
 		// Offsets
-		constexpr const static size_t itemList = 0xa8;
-		constexpr const static size_t itemDictionary = 0x170;
-		constexpr const static size_t itemDictionaryByName = 0x88;
+		constexpr const static size_t itemList = 0x20;
+		constexpr const static size_t itemDictionary = 0x138;
+		constexpr const static size_t itemDictionaryByName = 0x30;
 	}
 
-	// obf name: ::%61e14019cc535adc295a5d4fa6e17c1e311e24d9
-#define ConVar_Server_Static_ClassName "%8ff4e6dc10172b4c6b23c89705bc82d87b88e9cd/%61e14019cc535adc295a5d4fa6e17c1e311e24d9"
-#define ConVar_Server_Static_ClassNameShort "%61e14019cc535adc295a5d4fa6e17c1e311e24d9"
-#define ConVar_Server_Static_TypeDefinitionIndex 1523
+	// obf name: ::%087c6457a9d6d27e8d76223574c7599fe9c6d87c
+#define ConVar_Server_Static_ClassName "%f2d385dc901b12b7e4a9fe736cbbe139ec10d9bd/%087c6457a9d6d27e8d76223574c7599fe9c6d87c"
+#define ConVar_Server_Static_ClassNameShort "%087c6457a9d6d27e8d76223574c7599fe9c6d87c"
+#define ConVar_Server_Static_TypeDefinitionIndex 4599
 
 	namespace ConVar_Server_Static {
 
 		// Offsets
 	}
 
-#define ServerAdminUGCEntry_TypeDefinitionIndex 6621
+#define ServerAdminUGCEntry_TypeDefinitionIndex 4222
 
 	namespace ServerAdminUGCEntry {
 
 		// Functions
-		constexpr const static size_t ReceivedDataFromServer = 0x45e9d70;
+		constexpr const static size_t ReceivedDataFromServer = 0x2b6ac70;
 	}
 
-#define LoadingScreen_TypeDefinitionIndex 417
+#define LoadingScreen_TypeDefinitionIndex 4879
 
 	namespace LoadingScreen {
 
@@ -2394,7 +2399,7 @@ namespace Offsets {
 		constexpr const static size_t panel = 0x30;
 	}
 
-#define MixerSnapshotManager_TypeDefinitionIndex 4190
+#define MixerSnapshotManager_TypeDefinitionIndex 5481
 
 	namespace MixerSnapshotManager {
 
@@ -2403,82 +2408,82 @@ namespace Offsets {
 		constexpr const static size_t loadingSnapshot = 0x30;
 	}
 
-#define MapView_Static_ClassName "MapView/%941e3c074f1a8d4b888f9c245ba4d1c2f0c41d7d"
-#define MapView_Static_ClassNameShort "%941e3c074f1a8d4b888f9c245ba4d1c2f0c41d7d"
-#define MapView_TypeDefinitionIndex 1077
+#define MapView_Static_ClassName "MapView/%4cc5cc0ee3f1d9535fdba7138135cce69484ff3f"
+#define MapView_Static_ClassNameShort "%4cc5cc0ee3f1d9535fdba7138135cce69484ff3f"
+#define MapView_TypeDefinitionIndex 6720
 
 	namespace MapView {
 
 		// Functions
-		constexpr const static size_t WorldPosToImagePos = 0x5030560;
+		constexpr const static size_t WorldPosToImagePos = 0x4783df0;
 	}
 
-	// obf name: ::%9a2d82794f4aee71ea521e8d132032ca5b4ffdea
-#define GamePhysics_Static_ClassName "%be6984e6016f9b5058b65b9a3523537fc67cb630/%9a2d82794f4aee71ea521e8d132032ca5b4ffdea"
-#define GamePhysics_Static_ClassNameShort "%9a2d82794f4aee71ea521e8d132032ca5b4ffdea"
-#define GamePhysics_Static_TypeDefinitionIndex 7064
+	// obf name: ::%8c9912b1aba9d9f222e8df797949dfe206d570e1
+#define GamePhysics_Static_ClassName "%416658db1332ba9ff3c9259cd4a209206221b367/%8c9912b1aba9d9f222e8df797949dfe206d570e1"
+#define GamePhysics_Static_ClassNameShort "%8c9912b1aba9d9f222e8df797949dfe206d570e1"
+#define GamePhysics_Static_TypeDefinitionIndex 3484
 
 	namespace GamePhysics_Static {
 
 		// Offsets
-		constexpr const static size_t hitBuffer = 0x50;
+		constexpr const static size_t hitBuffer = 0x0;
 	}
 
-	// obf name: ::%be6984e6016f9b5058b65b9a3523537fc67cb630
-#define GamePhysics_ClassName "%be6984e6016f9b5058b65b9a3523537fc67cb630"
-#define GamePhysics_ClassNameShort "%be6984e6016f9b5058b65b9a3523537fc67cb630"
-#define GamePhysics_TypeDefinitionIndex 7065
+	// obf name: ::%416658db1332ba9ff3c9259cd4a209206221b367
+#define GamePhysics_ClassName "%416658db1332ba9ff3c9259cd4a209206221b367"
+#define GamePhysics_ClassNameShort "%416658db1332ba9ff3c9259cd4a209206221b367"
+#define GamePhysics_TypeDefinitionIndex 3485
 
 	namespace GamePhysics {
 
 		// Functions
-		constexpr const static size_t Trace = 0x4a2c2b0;
-		constexpr const static size_t LineOfSightInternal = 0x4a21030;
-		constexpr const static size_t Verify = 0x4a39440;
+		constexpr const static size_t Trace = 0x2225040;
+		constexpr const static size_t LineOfSightInternal = 0x222a560;
+		constexpr const static size_t Verify = 0x225d5c0;
 	}
 
-#define InstancedDebugDraw_TypeDefinitionIndex 153
+#define InstancedDebugDraw_TypeDefinitionIndex 7006
 
 	namespace InstancedDebugDraw {
 
 		// Functions
-		constexpr const static size_t AddInstance = 0xb71950;
+		constexpr const static size_t AddInstance = 0x4a70630;
 	}
 
-	// obf name: ::%6ca47319e53e516f981c04c71f616633d785c6ab
-#define RaycastHitEx_ClassName "%6ca47319e53e516f981c04c71f616633d785c6ab"
-#define RaycastHitEx_ClassNameShort "%6ca47319e53e516f981c04c71f616633d785c6ab"
-#define RaycastHitEx_TypeDefinitionIndex 3980
+	// obf name: ::%96dd8f3cc5662a19393bbf3c00ef60d4108f648b
+#define RaycastHitEx_ClassName "%96dd8f3cc5662a19393bbf3c00ef60d4108f648b"
+#define RaycastHitEx_ClassNameShort "%96dd8f3cc5662a19393bbf3c00ef60d4108f648b"
+#define RaycastHitEx_TypeDefinitionIndex 1085
 
 	namespace RaycastHitEx {
 
 		// Functions
-		constexpr const static size_t GetEntity = 0x27a6c40;
+		constexpr const static size_t GetEntity = 0x4fe4450;
 	}
 
-	// obf name: ::%4141dcf862af6c15f4251261efd7fe794514e398
-#define OnParentDestroyingEx_ClassName "%4141dcf862af6c15f4251261efd7fe794514e398"
-#define OnParentDestroyingEx_ClassNameShort "%4141dcf862af6c15f4251261efd7fe794514e398"
-#define OnParentDestroyingEx_TypeDefinitionIndex 2864
+	// obf name: ::%ee053878fb53654402c09ebae3f49673559ea562
+#define OnParentDestroyingEx_ClassName "%ee053878fb53654402c09ebae3f49673559ea562"
+#define OnParentDestroyingEx_ClassNameShort "%ee053878fb53654402c09ebae3f49673559ea562"
+#define OnParentDestroyingEx_TypeDefinitionIndex 7075
 
 	namespace OnParentDestroyingEx {
 
 		// Functions
-		constexpr const static size_t BroadcastOnParentDestroying = 0x1a8ffc0;
+		constexpr const static size_t BroadcastOnParentDestroying = 0x4b330d0;
 	}
 
-	// obf name: ::%0d3315e09b65c551bbc821012409ef8470ccd94b
-#define ConsoleNetwork_ClassName "%0d3315e09b65c551bbc821012409ef8470ccd94b"
-#define ConsoleNetwork_ClassNameShort "%0d3315e09b65c551bbc821012409ef8470ccd94b"
-#define ConsoleNetwork_TypeDefinitionIndex 1671
+	// obf name: ::%e26b9b586f457cb2055d810c31dd0f9702dc1df4
+#define ConsoleNetwork_ClassName "%e26b9b586f457cb2055d810c31dd0f9702dc1df4"
+#define ConsoleNetwork_ClassNameShort "%e26b9b586f457cb2055d810c31dd0f9702dc1df4"
+#define ConsoleNetwork_TypeDefinitionIndex 4064
 
 	namespace ConsoleNetwork {
 
 		// Functions
-		constexpr const static size_t ClientRunOnServer = 0xe3c040;
+		constexpr const static size_t ClientRunOnServer = 0x2a0dcd0;
 	}
 
-#define ThrownWeapon_TypeDefinitionIndex 3075
+#define ThrownWeapon_TypeDefinitionIndex 6983
 
 	namespace ThrownWeapon {
 
@@ -2486,7 +2491,7 @@ namespace Offsets {
 		constexpr const static size_t maxThrowVelocity = 0x2e0;
 	}
 
-#define MapInterface_TypeDefinitionIndex 5868
+#define MapInterface_TypeDefinitionIndex 3644
 
 	namespace MapInterface {
 
@@ -2494,7 +2499,7 @@ namespace Offsets {
 		constexpr const static size_t scrollRectZoom = 0x30;
 	}
 
-#define ScrollRectZoom_TypeDefinitionIndex 6243
+#define ScrollRectZoom_TypeDefinitionIndex 4556
 
 	namespace ScrollRectZoom {
 
@@ -2502,7 +2507,7 @@ namespace Offsets {
 		constexpr const static size_t zoom = 0x28;
 	}
 
-#define MapView_TypeDefinitionIndex 1077
+#define MapView_TypeDefinitionIndex 6720
 
 	namespace MapView {
 
@@ -2510,7 +2515,7 @@ namespace Offsets {
 		constexpr const static size_t scrollRect = 0x40;
 	}
 
-#define StorageContainer_TypeDefinitionIndex 1071
+#define StorageContainer_TypeDefinitionIndex 6723
 
 	namespace StorageContainer {
 
@@ -2518,7 +2523,7 @@ namespace Offsets {
 		constexpr const static size_t inventorySlots = 0x2c0;
 	}
 
-#define PlayerCorpse_TypeDefinitionIndex 1036
+#define PlayerCorpse_TypeDefinitionIndex 5087
 
 	namespace PlayerCorpse {
 
@@ -2526,7 +2531,7 @@ namespace Offsets {
 		constexpr const static size_t clientClothing = 0x2f0;
 	}
 
-#define TimedExplosive_TypeDefinitionIndex 6701
+#define TimedExplosive_TypeDefinitionIndex 6426
 
 	namespace TimedExplosive {
 
@@ -2534,7 +2539,7 @@ namespace Offsets {
 		constexpr const static size_t explosionRadius = 0x1b4;
 	}
 
-#define SmokeGrenade_TypeDefinitionIndex 4772
+#define SmokeGrenade_TypeDefinitionIndex 6139
 
 	namespace SmokeGrenade {
 
@@ -2542,7 +2547,7 @@ namespace Offsets {
 		constexpr const static size_t smokeEffectInstance = 0x258;
 	}
 
-#define GrenadeWeapon_TypeDefinitionIndex 5918
+#define GrenadeWeapon_TypeDefinitionIndex 6570
 
 	namespace GrenadeWeapon {
 
@@ -2550,7 +2555,7 @@ namespace Offsets {
 		constexpr const static size_t drop = 0x2f8;
 	}
 
-#define ViewmodelLower_TypeDefinitionIndex 2141
+#define ViewmodelLower_TypeDefinitionIndex 3283
 
 	namespace ViewmodelLower {
 
@@ -2561,19 +2566,19 @@ namespace Offsets {
 		constexpr const static size_t rotateAngle = 0x2c;
 	}
 
-	// obf name: ::%f4b7213a3f2f51c909ff4af343cd3a5445316a06
-#define ConVar_Client_Static_ClassName "%ae5841ed633cf16d3c70ca00c4459e9e409c0381/%f4b7213a3f2f51c909ff4af343cd3a5445316a06"
-#define ConVar_Client_Static_ClassNameShort "%f4b7213a3f2f51c909ff4af343cd3a5445316a06"
-#define ConVar_Client_Static_TypeDefinitionIndex 6367
+	// obf name: ::%7a6705e3ef96bea8b6b5c3212b8b708a0a564450
+#define ConVar_Client_Static_ClassName "%7022e73ef165e05869b9e59ea84543db7cf7b2e8/%7a6705e3ef96bea8b6b5c3212b8b708a0a564450"
+#define ConVar_Client_Static_ClassNameShort "%7a6705e3ef96bea8b6b5c3212b8b708a0a564450"
+#define ConVar_Client_Static_TypeDefinitionIndex 6512
 
 	namespace ConVar_Client_Static {
 
 		// Offsets
-		constexpr const static size_t camlerp = 0x1ec;
-		constexpr const static size_t camspeed = 0x850;
+		constexpr const static size_t camlerp = 0x7c0;
+		constexpr const static size_t camspeed = 0x764;
 	}
 
-#define SamSite_TypeDefinitionIndex 473
+#define SamSite_TypeDefinitionIndex 2730
 
 	namespace SamSite {
 
@@ -2582,7 +2587,7 @@ namespace Offsets {
 		constexpr const static size_t Flag_TargetMode = 0x3ec;
 	}
 
-#define ServerProjectile_TypeDefinitionIndex 2339
+#define ServerProjectile_TypeDefinitionIndex 1289
 
 	namespace ServerProjectile {
 
@@ -2593,7 +2598,7 @@ namespace Offsets {
 		constexpr const static size_t radius = 0x5c;
 	}
 
-#define UIFogOverlay_TypeDefinitionIndex 6807
+#define UIFogOverlay_TypeDefinitionIndex 2765
 
 	namespace UIFogOverlay {
 
@@ -2601,7 +2606,7 @@ namespace Offsets {
 		constexpr const static size_t group = 0x20;
 	}
 
-#define FoliageGrid_TypeDefinitionIndex 6422
+#define FoliageGrid_TypeDefinitionIndex 3135
 
 	namespace FoliageGrid {
 
@@ -2609,7 +2614,7 @@ namespace Offsets {
 		constexpr const static size_t CellSize = 0x28;
 	}
 
-#define ItemModWearable_TypeDefinitionIndex 3501
+#define ItemModWearable_TypeDefinitionIndex 1974
 
 	namespace ItemModWearable {
 
@@ -2617,7 +2622,7 @@ namespace Offsets {
 		constexpr const static size_t movementProperties = 0x48;
 	}
 
-#define ClothingMovementProperties_TypeDefinitionIndex 6926
+#define ClothingMovementProperties_TypeDefinitionIndex 449
 
 	namespace ClothingMovementProperties {
 
@@ -2625,7 +2630,7 @@ namespace Offsets {
 		constexpr const static size_t speedReduction = 0x18;
 	}
 
-#define GestureConfig_TypeDefinitionIndex 2156
+#define GestureConfig_TypeDefinitionIndex 1098
 
 	namespace GestureConfig {
 
@@ -2633,7 +2638,7 @@ namespace Offsets {
 		constexpr const static size_t actionType = 0x90;
 	}
 
-#define RCMenu_TypeDefinitionIndex 806
+#define RCMenu_TypeDefinitionIndex 5429
 
 	namespace RCMenu {
 
@@ -2641,21 +2646,21 @@ namespace Offsets {
 		constexpr const static size_t autoTurretFogDistance = 0x134;
 	}
 
-	// obf name: ::%7159d8eaef008e975202970d3448a73257a4e2d4
-#define Facepunch_Network_Raknet_Client_ClassName "%7159d8eaef008e975202970d3448a73257a4e2d4"
-#define Facepunch_Network_Raknet_Client_ClassNameShort "%7159d8eaef008e975202970d3448a73257a4e2d4"
-#define Facepunch_Network_Raknet_Client_TypeDefinitionIndex 23118
+	// obf name: ::%81f8905bb8261857620f7a4ef3d95fa2402224a7
+#define Facepunch_Network_Raknet_Client_ClassName "%81f8905bb8261857620f7a4ef3d95fa2402224a7"
+#define Facepunch_Network_Raknet_Client_ClassNameShort "%81f8905bb8261857620f7a4ef3d95fa2402224a7"
+#define Facepunch_Network_Raknet_Client_TypeDefinitionIndex 22943
 
 	namespace Facepunch_Network_Raknet_Client {
 
 		// Functions
-		constexpr const static size_t IsConnected = 0x64bfc10;
-		constexpr const static size_t IsConnected_vtableoff = 0x428;
+		constexpr const static size_t IsConnected = 0x63f3350;
+		constexpr const static size_t IsConnected_vtableoff = 0x438;
 	}
 
-	// obf name: ::%a16eaa49b590c98740b96aae2126765dffecf7fa
-#define EncryptedValue_ClassName "%a16eaa49b590c98740b96aae2126765dffecf7fa<System/Int32>"
-#define EncryptedValue_ClassNameShort "%a16eaa49b590c98740b96aae2126765dffecf7fa"
+	// obf name: ::%11a1baf559e0bfc3b9018205eb315087ee1ed84c
+#define EncryptedValue_ClassName "%11a1baf559e0bfc3b9018205eb315087ee1ed84c<System/Int32>"
+#define EncryptedValue_ClassNameShort "%11a1baf559e0bfc3b9018205eb315087ee1ed84c"
 #define EncryptedValue_TypeDefinitionIndex -1
 
 	namespace EncryptedValue {
@@ -2665,9 +2670,9 @@ namespace Offsets {
 		constexpr const static size_t _padding = 0x10;
 	}
 
-	// obf name: ::%3519e712b597cdb888edf00e735e8029b87262e9
-#define HiddenValue_ClassName "%3519e712b597cdb888edf00e735e8029b87262e9<BaseNetworkable/%1f51a2517ef3ffd3b51ac024cf55fdbac84e5bb7>"
-#define HiddenValue_ClassNameShort "%3519e712b597cdb888edf00e735e8029b87262e9"
+	// obf name: ::%a7af0a5ce0badce46a6d647aad75c77616b2e4ee
+#define HiddenValue_ClassName "%a7af0a5ce0badce46a6d647aad75c77616b2e4ee<BaseNetworkable/%66323faacf2159c1b2f4947a5b1f230c0bd2b466>"
+#define HiddenValue_ClassNameShort "%a7af0a5ce0badce46a6d647aad75c77616b2e4ee"
 #define HiddenValue_TypeDefinitionIndex -1
 
 	namespace HiddenValue {
@@ -2678,34 +2683,26 @@ namespace Offsets {
 		constexpr const static size_t _hasValue = 0x14;
 	}
 
-#define SimplePrivilege___c__DisplayClass3_0_TypeDefinitionIndex -1
-
-	namespace SimplePrivilege___c__DisplayClass3_0 {
-
-		// Functions
-		constexpr const static size_t IsAuthed = 0x0;
-	}
-
-#define ItemModRFListener_TypeDefinitionIndex 1700
+#define ItemModRFListener_TypeDefinitionIndex 3489
 
 	namespace ItemModRFListener {
 
 		// Functions
-		constexpr const static size_t ConfigureClicked = 0xe58130;
+		constexpr const static size_t ConfigureClicked = 0x2284330;
 	}
 
-#define UIFogOverlay_TypeDefinitionIndex 6807
+#define UIFogOverlay_TypeDefinitionIndex 2765
 
 	namespace UIFogOverlay {
 
 		// Offsets
-		constexpr const static size_t Instance = 0x10;
+		constexpr const static size_t Instance = 0x30;
 	}
 
-	// obf name: ::%3ee051ec1755c04d5da5c37b77b785dbc2ed784a
-#define BufferStream_ClassName "%3ee051ec1755c04d5da5c37b77b785dbc2ed784a"
-#define BufferStream_ClassNameShort "%3ee051ec1755c04d5da5c37b77b785dbc2ed784a"
-#define BufferStream_TypeDefinitionIndex 7571
+	// obf name: ::%e51ecad687ace38b3f82ad33212000f9b9e85db6
+#define BufferStream_ClassName "%e51ecad687ace38b3f82ad33212000f9b9e85db6"
+#define BufferStream_ClassNameShort "%e51ecad687ace38b3f82ad33212000f9b9e85db6"
+#define BufferStream_TypeDefinitionIndex 7501
 
 	namespace BufferStream {
 
@@ -2713,65 +2710,65 @@ namespace Offsets {
 		constexpr const static size_t _buffer = 0x20;
 
 		// Functions
-		constexpr const static size_t EnsureCapacity = 0x8cbd2c0;
+		constexpr const static size_t EnsureCapacity = 0x9883a10;
 	}
 
-#define FreeableLootContainer_TypeDefinitionIndex 4255
+#define FreeableLootContainer_TypeDefinitionIndex 1219
 
 	namespace FreeableLootContainer {
 
 		// Offsets
 	}
 
-#define BlowPipeWeapon_TypeDefinitionIndex 4525
+#define BlowPipeWeapon_TypeDefinitionIndex 337
 
 	namespace BlowPipeWeapon {
 
 		// Offsets
 	}
 
-#define AttackHelicopterRockets_TypeDefinitionIndex 6554
+#define AttackHelicopterRockets_TypeDefinitionIndex 855
 
 	namespace AttackHelicopterRockets {
 
 		// Functions
-		constexpr const static size_t GetProjectedHitPos = 0x43d3c10;
+		constexpr const static size_t GetProjectedHitPos = 0x4b7fa80;
 	}
 
-#define OutlineManager_TypeDefinitionIndex 1378
+#define OutlineManager_TypeDefinitionIndex 2673
 
 	namespace OutlineManager {
 
 		// Offsets
 	}
 
-	// obf name: ::%16273f633cc9f3d8c1547e331e6e4bebcd97b288
-#define ConsoleSystem_Command_ClassName "%f0267d300992b3de7f9b5fa8b1bfede2185e7c6a/%16273f633cc9f3d8c1547e331e6e4bebcd97b288"
-#define ConsoleSystem_Command_ClassNameShort "%16273f633cc9f3d8c1547e331e6e4bebcd97b288"
-#define ConsoleSystem_Command_TypeDefinitionIndex 23604
+	// obf name: ::%354cfc6ffc30c4c45402bc49e92be87746a6a59c
+#define ConsoleSystem_Command_ClassName "%10f0671cb5dd7148fdc54e242b89e51bf4acdcb8/%354cfc6ffc30c4c45402bc49e92be87746a6a59c"
+#define ConsoleSystem_Command_ClassNameShort "%354cfc6ffc30c4c45402bc49e92be87746a6a59c"
+#define ConsoleSystem_Command_TypeDefinitionIndex 23587
 
 	namespace ConsoleSystem_Command {
 
 		// Offsets
-		constexpr const static size_t GetOveride = 0x18;
-		constexpr const static size_t SetOveride = 0x80;
-		constexpr const static size_t Call = 0x90;
+		constexpr const static size_t GetOveride = 0x10;
+		constexpr const static size_t SetOveride = 0x78;
+		constexpr const static size_t Call = 0x38;
 	}
 
-	// obf name: ::%b41c268f942f3ee9b2578977d5f2b664b42f15be
-#define ConsoleSystem_Option_ClassName "%f0267d300992b3de7f9b5fa8b1bfede2185e7c6a/%b41c268f942f3ee9b2578977d5f2b664b42f15be"
-#define ConsoleSystem_Option_ClassNameShort "%b41c268f942f3ee9b2578977d5f2b664b42f15be"
-#define ConsoleSystem_Option_TypeDefinitionIndex 23614
+	// obf name: ::%386ff67ebb7e7bbff93f45817d29374b67916404
+#define ConsoleSystem_Option_ClassName "%10f0671cb5dd7148fdc54e242b89e51bf4acdcb8/%386ff67ebb7e7bbff93f45817d29374b67916404"
+#define ConsoleSystem_Option_ClassNameShort "%386ff67ebb7e7bbff93f45817d29374b67916404"
+#define ConsoleSystem_Option_TypeDefinitionIndex 23597
 
 	namespace ConsoleSystem_Option {
 
 		// Offsets
 	}
 
-	// obf name: ::%664de498b7a51a76899cbf46b9f0c97dceca87f0
-#define ConsoleSystem_Arg_ClassName "%f0267d300992b3de7f9b5fa8b1bfede2185e7c6a/%664de498b7a51a76899cbf46b9f0c97dceca87f0"
-#define ConsoleSystem_Arg_ClassNameShort "%664de498b7a51a76899cbf46b9f0c97dceca87f0"
-#define ConsoleSystem_Arg_TypeDefinitionIndex 23602
+	// obf name: ::%721f8ef1be192bdc63417f1e12f698d091691088
+#define ConsoleSystem_Arg_ClassName "%10f0671cb5dd7148fdc54e242b89e51bf4acdcb8/%721f8ef1be192bdc63417f1e12f698d091691088"
+#define ConsoleSystem_Arg_ClassNameShort "%721f8ef1be192bdc63417f1e12f698d091691088"
+#define ConsoleSystem_Arg_TypeDefinitionIndex 23585
 
 	namespace ConsoleSystem_Arg {
 
@@ -2779,34 +2776,34 @@ namespace Offsets {
 		constexpr const static size_t Option = 0x48;
 	}
 
-	// obf name: ::%1901ba97d3f84a5cb02f7ec9c2066fcd6a4b4c25
-#define ConsoleSystem_Index_Client_ClassName "%f0267d300992b3de7f9b5fa8b1bfede2185e7c6a/%b1e414bf7de63ce834c52a9616965a45d5722de0.%1901ba97d3f84a5cb02f7ec9c2066fcd6a4b4c25"
-#define ConsoleSystem_Index_Client_ClassNameShort "%1901ba97d3f84a5cb02f7ec9c2066fcd6a4b4c25"
-#define ConsoleSystem_Index_Client_TypeDefinitionIndex 23610
+	// obf name: ::%fc2e0c6c8bf33b09d837d2e31460aeb9a207a85d
+#define ConsoleSystem_Index_Client_ClassName "%10f0671cb5dd7148fdc54e242b89e51bf4acdcb8/%c57e089bcdcce47080a39527f5f66dfa7a68f085.%fc2e0c6c8bf33b09d837d2e31460aeb9a207a85d"
+#define ConsoleSystem_Index_Client_ClassNameShort "%fc2e0c6c8bf33b09d837d2e31460aeb9a207a85d"
+#define ConsoleSystem_Index_Client_TypeDefinitionIndex 23593
 
 	namespace ConsoleSystem_Index_Client {
 
 		// Functions
-		constexpr const static size_t Find = 0x639cd50;
+		constexpr const static size_t Find = 0x62b6530;
 	}
 
-#define String_TypeDefinitionIndex 10495
+#define String_TypeDefinitionIndex 10492
 
 	namespace String {
 
 		// Offsets
-		constexpr const static size_t FastAllocateString = 0x853f3f0;
+		constexpr const static size_t FastAllocateString = 0x8450c30;
 	}
 
-	// obf name: ::%86f7b6ccdcc7e9e4b6151118c8e43a691ff1e1d3
-#define EntityRef_ClassName "%86f7b6ccdcc7e9e4b6151118c8e43a691ff1e1d3"
-#define EntityRef_ClassNameShort "%86f7b6ccdcc7e9e4b6151118c8e43a691ff1e1d3"
-#define EntityRef_TypeDefinitionIndex 4257
+	// obf name: ::%f48dc9f86c05ec05f8e02fcf87facfa6951ff707
+#define EntityRef_ClassName "%f48dc9f86c05ec05f8e02fcf87facfa6951ff707"
+#define EntityRef_ClassNameShort "%f48dc9f86c05ec05f8e02fcf87facfa6951ff707"
+#define EntityRef_TypeDefinitionIndex 5079
 
 	namespace EntityRef {
 
 		// Offsets
-		constexpr const static size_t Get = 0x2a89890;
+		constexpr const static size_t Get = 0x3578590;
 	}
 
 #define ConVar_Debugging_TypeDefinitionIndex -1
@@ -2814,21 +2811,21 @@ namespace Offsets {
 	namespace ConVar_Debugging {
 
 		// Functions
-		constexpr const static size_t debugcamera = 0x4476630;
-		constexpr const static size_t noclip = 0x1cf8c60;
+		constexpr const static size_t debugcamera = 0x25a7bc0;
+		constexpr const static size_t noclip = 0x25b5cd0;
 	}
 
-#define CursorManager_TypeDefinitionIndex 1189
+#define CursorManager_TypeDefinitionIndex 4683
 
 	namespace CursorManager {
 
 		// Offsets
 	}
 
-	// obf name: ::%3bc3e0d62a3cc239476464b83f4284d7893b029b
-#define ProtoBuf_ProjectileShoot_ClassName "%3bc3e0d62a3cc239476464b83f4284d7893b029b"
-#define ProtoBuf_ProjectileShoot_ClassNameShort "%3bc3e0d62a3cc239476464b83f4284d7893b029b"
-#define ProtoBuf_ProjectileShoot_TypeDefinitionIndex 7301
+	// obf name: ::%26d21e53fc3454aaf790b97061885ec87be2ebf5
+#define ProtoBuf_ProjectileShoot_ClassName "%26d21e53fc3454aaf790b97061885ec87be2ebf5"
+#define ProtoBuf_ProjectileShoot_ClassNameShort "%26d21e53fc3454aaf790b97061885ec87be2ebf5"
+#define ProtoBuf_ProjectileShoot_TypeDefinitionIndex 7572
 
 	namespace ProtoBuf_ProjectileShoot {
 
@@ -2836,30 +2833,30 @@ namespace Offsets {
 		constexpr const static size_t projectiles = 0x18;
 
 		// Functions
-		constexpr const static size_t WriteToStreamDelta = 0x9293c70;
+		constexpr const static size_t WriteToStreamDelta = 0x8a38b60;
 		constexpr const static size_t WriteToStreamDelta_vtableoff = 0x1b8;
-		constexpr const static size_t WriteToStream = 0x9292020;
+		constexpr const static size_t WriteToStream = 0x8a3a520;
 		constexpr const static size_t WriteToStream_vtableoff = 0x1d8;
 	}
 
-	// obf name: ::%32b709af1617d4d9f277ffd2f63058040167bd9e
-#define ProtoBuf_ProjectileShoot_Projectile_ClassName "%3bc3e0d62a3cc239476464b83f4284d7893b029b/%32b709af1617d4d9f277ffd2f63058040167bd9e"
-#define ProtoBuf_ProjectileShoot_Projectile_ClassNameShort "%32b709af1617d4d9f277ffd2f63058040167bd9e"
-#define ProtoBuf_ProjectileShoot_Projectile_TypeDefinitionIndex 7300
+	// obf name: ::%4b8f6a219d7c0f1c07f3bbfc68732782d17e22f7
+#define ProtoBuf_ProjectileShoot_Projectile_ClassName "%26d21e53fc3454aaf790b97061885ec87be2ebf5/%4b8f6a219d7c0f1c07f3bbfc68732782d17e22f7"
+#define ProtoBuf_ProjectileShoot_Projectile_ClassNameShort "%4b8f6a219d7c0f1c07f3bbfc68732782d17e22f7"
+#define ProtoBuf_ProjectileShoot_Projectile_TypeDefinitionIndex 7571
 
 	namespace ProtoBuf_ProjectileShoot_Projectile {
 
 		// Offsets
 		constexpr const static size_t projectileID = 0x14;
-		constexpr const static size_t startPos = 0x20;
-		constexpr const static size_t startVel = 0x2c;
-		constexpr const static size_t seed = 0x18;
+		constexpr const static size_t startPos = 0x28;
+		constexpr const static size_t startVel = 0x1c;
+		constexpr const static size_t seed = 0x10;
 	}
 
-	// obf name: ::%f57ef9557d7a2817d10a118dac329006f198fd4c
-#define ProtoBuf_PlayerProjectileUpdate_ClassName "%f57ef9557d7a2817d10a118dac329006f198fd4c"
-#define ProtoBuf_PlayerProjectileUpdate_ClassNameShort "%f57ef9557d7a2817d10a118dac329006f198fd4c"
-#define ProtoBuf_PlayerProjectileUpdate_TypeDefinitionIndex 7692
+	// obf name: ::%0951a0ad8d1520feeb5cd757da2f4ce8f270ded4
+#define ProtoBuf_PlayerProjectileUpdate_ClassName "%0951a0ad8d1520feeb5cd757da2f4ce8f270ded4"
+#define ProtoBuf_PlayerProjectileUpdate_ClassNameShort "%0951a0ad8d1520feeb5cd757da2f4ce8f270ded4"
+#define ProtoBuf_PlayerProjectileUpdate_TypeDefinitionIndex 7404
 
 	namespace ProtoBuf_PlayerProjectileUpdate {
 
@@ -2867,41 +2864,41 @@ namespace Offsets {
 		constexpr const static size_t projectileID = 0x20;
 		constexpr const static size_t curPosition = 0x10;
 		constexpr const static size_t curVelocity = 0x28;
-		constexpr const static size_t travelTime = 0x24;
-		constexpr const static size_t ShouldPool = 0x1d;
+		constexpr const static size_t travelTime = 0x1c;
+		constexpr const static size_t ShouldPool = 0x34;
 
 		// Functions
-		constexpr const static size_t Dispose = 0x91561b0;
-		constexpr const static size_t WriteToStreamDelta = 0x915ba80;
+		constexpr const static size_t Dispose = 0x959b350;
+		constexpr const static size_t WriteToStreamDelta = 0x9597180;
 		constexpr const static size_t WriteToStreamDelta_vtableoff = 0x1b8;
-		constexpr const static size_t WriteToStream = 0x915c510;
+		constexpr const static size_t WriteToStream = 0x9592b50;
 		constexpr const static size_t WriteToStream_vtableoff = 0x1d8;
 	}
 
-	// obf name: ::%d04a17ce96f09b46d97e6e89af5381582e222061
-#define ProtoBuf_PlayerProjectileAttack_ClassName "%d04a17ce96f09b46d97e6e89af5381582e222061"
-#define ProtoBuf_PlayerProjectileAttack_ClassNameShort "%d04a17ce96f09b46d97e6e89af5381582e222061"
-#define ProtoBuf_PlayerProjectileAttack_TypeDefinitionIndex 7588
+	// obf name: ::%64257d67498d2687ddaf773d33b032eee6ca534f
+#define ProtoBuf_PlayerProjectileAttack_ClassName "%64257d67498d2687ddaf773d33b032eee6ca534f"
+#define ProtoBuf_PlayerProjectileAttack_ClassNameShort "%64257d67498d2687ddaf773d33b032eee6ca534f"
+#define ProtoBuf_PlayerProjectileAttack_TypeDefinitionIndex 7519
 
 	namespace ProtoBuf_PlayerProjectileAttack {
 
 		// Offsets
-		constexpr const static size_t hitVelocity = 0x24;
-		constexpr const static size_t hitDistance = 0x14;
-		constexpr const static size_t travelTime = 0x10;
-		constexpr const static size_t playerAttack = 0x18;
+		constexpr const static size_t hitVelocity = 0x28;
+		constexpr const static size_t hitDistance = 0x1c;
+		constexpr const static size_t travelTime = 0x14;
+		constexpr const static size_t playerAttack = 0x20;
 
 		// Functions
-		constexpr const static size_t WriteToStreamDelta = 0x8d4ac60;
+		constexpr const static size_t WriteToStreamDelta = 0x99120f0;
 		constexpr const static size_t WriteToStreamDelta_vtableoff = 0x1b8;
-		constexpr const static size_t WriteToStream = 0x8d45c00;
+		constexpr const static size_t WriteToStream = 0x9913720;
 		constexpr const static size_t WriteToStream_vtableoff = 0x1d8;
 	}
 
-	// obf name: ::%829e4e46f9c965dd39b758b25e5ac252976ba57c
-#define ProtoBuf_PlayerAttack_ClassName "%829e4e46f9c965dd39b758b25e5ac252976ba57c"
-#define ProtoBuf_PlayerAttack_ClassNameShort "%829e4e46f9c965dd39b758b25e5ac252976ba57c"
-#define ProtoBuf_PlayerAttack_TypeDefinitionIndex 7367
+	// obf name: ::%48857fb1f1db6587e9d06a2975e70927149df0f9
+#define ProtoBuf_PlayerAttack_ClassName "%48857fb1f1db6587e9d06a2975e70927149df0f9"
+#define ProtoBuf_PlayerAttack_ClassNameShort "%48857fb1f1db6587e9d06a2975e70927149df0f9"
+#define ProtoBuf_PlayerAttack_TypeDefinitionIndex 7282
 
 	namespace ProtoBuf_PlayerAttack {
 
@@ -2910,25 +2907,25 @@ namespace Offsets {
 		constexpr const static size_t attack = 0x18;
 	}
 
-	// obf name: ::%be9cb2f1b3a2fbdebaf61339e611602b99fc9d60
-#define ProtoBuf_Attack_ClassName "%be9cb2f1b3a2fbdebaf61339e611602b99fc9d60"
-#define ProtoBuf_Attack_ClassNameShort "%be9cb2f1b3a2fbdebaf61339e611602b99fc9d60"
-#define ProtoBuf_Attack_TypeDefinitionIndex 7697
+	// obf name: ::%670057548ac177b826c423a71ef6fbe7f579f138
+#define ProtoBuf_Attack_ClassName "%670057548ac177b826c423a71ef6fbe7f579f138"
+#define ProtoBuf_Attack_ClassNameShort "%670057548ac177b826c423a71ef6fbe7f579f138"
+#define ProtoBuf_Attack_TypeDefinitionIndex 7673
 
 	namespace ProtoBuf_Attack {
 
 		// Offsets
-		constexpr const static size_t pointStart = 0x18;
-		constexpr const static size_t pointEnd = 0x70;
-		constexpr const static size_t hitID = 0x10;
-		constexpr const static size_t hitBone = 0x44;
-		constexpr const static size_t hitNormalLocal = 0x48;
-		constexpr const static size_t hitPositionLocal = 0x7c;
-		constexpr const static size_t hitNormalWorld = 0x34;
-		constexpr const static size_t hitPositionWorld = 0x60;
-		constexpr const static size_t hitPartID = 0x40;
-		constexpr const static size_t hitMaterialID = 0x88;
-		constexpr const static size_t srcParentID = 0x28;
-		constexpr const static size_t dstParentID = 0x58;
+		constexpr const static size_t pointStart = 0x30;
+		constexpr const static size_t pointEnd = 0x3c;
+		constexpr const static size_t hitID = 0x78;
+		constexpr const static size_t hitBone = 0x2c;
+		constexpr const static size_t hitNormalLocal = 0x68;
+		constexpr const static size_t hitPositionLocal = 0x5c;
+		constexpr const static size_t hitNormalWorld = 0x18;
+		constexpr const static size_t hitPositionWorld = 0x50;
+		constexpr const static size_t hitPartID = 0x24;
+		constexpr const static size_t hitMaterialID = 0x80;
+		constexpr const static size_t srcParentID = 0x48;
+		constexpr const static size_t dstParentID = 0x10;
 	}
 }
