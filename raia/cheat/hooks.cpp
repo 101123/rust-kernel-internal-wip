@@ -990,6 +990,8 @@ void base_player_client_input_pre_hook( rust::base_player* base_player, rust::in
 	if ( !cache_local_player( base_player ) )
 		return reset_local_player();
 
+	cache_belt_icons();
+
 	if ( interactive_debug.enabled && ( game_input.get_async_key_state( 'V' ) & 0x1 ) ) {
 		if ( !interactive_debug.active ) {
 			interactive_debug.active = try_enter_interactive_debug();
@@ -1199,9 +1201,10 @@ void client_update_pre_hook( rust::client* client ) {
 	if ( !is_valid_ptr( client ) )
 		return;
 
-	cache_belt_icons();
+	// This is the only hook we have that runs in the main menu, so we update these variables here
+	is_rust_focused = unity::application::is_focused();
+	is_cursor_visible = unity::cursor::is_visible();
 
-	// Update scroll delta here as this is the only hook we have that runs in the main menu
 	gui::scroll_delta = unity::input::get_mouse_scroll_delta().y;
 
 	rust::list_hash_set<rust::projectile*>* projectiles_instance_list = rust::list_component<rust::projectile>::static_fields_->instance_list;

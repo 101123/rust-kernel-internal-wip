@@ -49,3 +49,6 @@ inline int screen_height;
 
 inline input game_input;
 inline input render_input;
+
+inline bool is_rust_focused;
+inline bool is_cursor_visible;

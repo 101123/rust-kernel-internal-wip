@@ -270,7 +270,7 @@ void render_stencil() {
 	stencil_texture = unity::render_texture::get_temporary( screen_width, screen_height, 0 );
 
 	command_buffer->set_render_target( unity::render_target_identifier::ctor( stencil_texture ) );
-	command_buffer->clear_render_target( true, true, unity::color( 0.f, 0.f, 0.f, 0.f ) );
+	command_buffer->clear_render_target( true, true, unity::color() );
 
 	for ( auto& [ _, multi_mesh ] : multi_mesh_cache.get() ) {
 		sys::list<unity::renderer*>* renderers_list = multi_mesh->renderers;
@@ -306,7 +306,7 @@ void render_blur() {
 
 	blur_texture = unity::render_texture::get_temporary( blur_tex_dims.x, blur_tex_dims.y, 0 );
 	unity::render_texture* temp = unity::render_texture::get_temporary( blur_tex_dims.x, blur_tex_dims.y, 0 );
-	blur_material->set_float( _BlurScale, glow_blur_scale );
+	blur_material->set_float( _BlurScale, 0.75f );
 
 	unity::graphics::blit( stencil_texture, blur_texture, blur_material );
 
@@ -322,7 +322,7 @@ void render_composite( unity::render_texture* src, unity::render_texture* dest )
 	composite_material->set_texture( _MainTex, src );
 	composite_material->set_texture( _StencilTex, stencil_texture );
 	composite_material->set_texture( _BlurTex, blur_texture );
-	composite_material->set_float( _OutlineScale, glow_outline_scale );
+	composite_material->set_float( _OutlineScale, 0.5f );
 	composite_material->set_color( _OutlineColor, unity::color( glow_outline_color ) );
 
 	unity::graphics::blit( src, dest, composite_material );

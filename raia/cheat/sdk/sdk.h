@@ -336,7 +336,7 @@ namespace unity {
         float r, g, b, a;
 
         color() 
-            : r( 1.f ), g( 1.f ), b( 1.f ), a( 1.f ) {};
+            : r( 0.f ), g( 0.f ), b( 0.f ), a( 0.f ) {};
 
         color( float _r, float _g, float _b, float _a ) 
             : r( _r ), g( _g ), b( _b ), a( _a ) {};
@@ -1365,6 +1365,30 @@ namespace unity {
     struct bounds {
         vector3 center;
         vector3 extents;
+    };
+
+    class application {
+    public:
+        static bool is_focused() {
+            bool ( *get_is_focused )( ) =
+                ( decltype( get_is_focused ) )( unity_player + Offsets::Application::get_isFocused );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_is_focused );
+        }
+    };
+    
+    class cursor {
+    public:
+        static bool is_visible() {
+            bool ( *get_visible )( ) =
+                ( decltype( get_visible ) )( unity_player + Offsets::Cursor::get_visible );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( get_visible );
+        }
     };
 }
 
