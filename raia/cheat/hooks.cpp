@@ -777,7 +777,6 @@ void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot*
 		client_projectiles = &melee_projectile;
 	}
 	
-	// What the fuck happened?
 	if ( !client_projectiles )
 		return;
 
@@ -834,7 +833,7 @@ void protobuf_projectile_shoot_write_to_stream_pre_hook( rust::projectile_shoot*
 		}
 	}
 
-	// Set the created projectiles list size to 0, so IEnumerator.GetNext fails, which in turn will skip Projectile.Launch/AdjustVelocity
+	// Set the created projectiles list size to 0, so IEnumerator.GetNext immediately returns, which in turn will skip Projectile.Launch/AdjustVelocity so we can have control over the launch
 	if ( created_projectiles ) {
 		created_projectiles->size = 0;
 	}
