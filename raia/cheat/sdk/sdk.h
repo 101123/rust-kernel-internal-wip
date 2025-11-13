@@ -904,7 +904,7 @@ namespace unity {
         }
     };
 
-    class texture2d : public texture {
+    class texture_2d : public texture {
     public:
 
     };
@@ -932,8 +932,8 @@ namespace unity {
 
     class sprite : public object {
     public:
-        texture2d* get_texture() {
-            texture2d* ( *get_texture )( sprite* ) =
+        texture_2d* get_texture() {
+            texture_2d* ( *get_texture )( sprite* ) =
                 ( decltype( get_texture ) )( unity_player + Offsets::Sprite::get_texture );
 
             um::caller& caller = um::get_caller_for_thread();

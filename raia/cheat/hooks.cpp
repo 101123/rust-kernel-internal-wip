@@ -89,7 +89,7 @@ void cache_belt_icons() {
 				unity::sprite* sprite = background_image->sprite;
 
 				if ( is_valid_ptr( sprite ) ) {
-					unity::texture2d* texture = sprite->get_texture();
+					unity::texture_2d* texture = sprite->get_texture();
 
 					if ( is_valid_ptr( texture ) ) {
 						belt_icons.background = texture->get_srv();

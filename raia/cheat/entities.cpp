@@ -1050,7 +1050,7 @@ void update_player_inventory( rust::base_player* player, cached_player& cached_p
         if ( !is_valid_ptr( icon_sprite ) )
             return;
 
-        unity::texture2d* icon_texture = icon_sprite->get_texture();
+        unity::texture_2d* icon_texture = icon_sprite->get_texture();
         if ( !is_valid_ptr( icon_texture ) )
             return;
 
