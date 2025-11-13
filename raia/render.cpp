@@ -518,19 +518,6 @@ void draw_dropped_items( const entity_vector<rust::world_item*, cached_dropped_i
 }
 
 void draw_esp() {
-	unity::camera* main_camera = rust::main_camera::static_fields_->main_camera;
-	if ( !is_valid_ptr( main_camera ) )
-		return;
-
-	unity::internals::camera* native_camera = main_camera->get_native_camera();
-	if ( !is_valid_ptr( native_camera ) )
-		return;
-
-	camera.view_matrix = native_camera->culling_matrix;
-	camera.position = native_camera->last_position;
-	camera.forward = vector3( camera.view_matrix.data[ 2 ], camera.view_matrix.data[ 6 ], camera.view_matrix.data[ 10 ] );
-	camera.yaw = -atan2f( -camera.forward.x, camera.forward.z );
-
 	util::scoped_spinlock lock( &entity_manager::cache_lock );
 
 	entity_collection entity_collection = entity_manager::get_entities();
@@ -608,6 +595,23 @@ void draw_anti_flyhack_bar() {
 	renderer::draw_filled_rect( x + 1.f, y + 1.f, ( 200.f - 2.f ) * horizontal, 4.f, COL32( 120, 225, 80, 255 ) );
 }
 
+bool update_camera() {
+	unity::camera* main_camera = rust::main_camera::static_fields_->main_camera;
+	if ( !is_valid_ptr( main_camera ) )
+		return false;
+
+	unity::internals::camera* native_camera = main_camera->get_native_camera();
+	if ( !is_valid_ptr( native_camera ) )
+		return false;
+
+	camera.view_matrix = native_camera->culling_matrix;
+	camera.position = native_camera->last_position;
+	camera.forward = vector3( camera.view_matrix.data[ 2 ], camera.view_matrix.data[ 6 ], camera.view_matrix.data[ 10 ] );
+	camera.yaw = -atan2f( -camera.forward.x, camera.forward.z );
+
+	return true;
+}
+
 bool renderer_init;
 
 void set_draw_overrides() {
@@ -634,11 +638,13 @@ void on_render( IDXGISwapChain* swapchain ) {
 
 	renderer::begin_frame();
 
-	draw_raids();
-	draw_esp();
-	draw_anti_flyhack_bar();
+	if ( update_camera() ) {
+		draw_raids();
+		draw_esp();
+		draw_anti_flyhack_bar();
 
-	notifications::draw( delta_time );
+		notifications::draw( delta_time );
+	}
 
 	if ( render_input.get_async_key_state( VK_END ) & 0x1 ) {
 		gui::open = !gui::open;
