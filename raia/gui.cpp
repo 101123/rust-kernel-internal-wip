@@ -48,6 +48,7 @@ struct draw_command {
             uint32_t font;
             uint32_t flags;
             uint32_t color;
+            float outline_alpha_scale;
 		} text;
 	};
 };
@@ -81,7 +82,7 @@ public:
         add_command( command );
     }
 
-    void add_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const char* text ) {
+    void add_text( float x, float y, uint32_t font, uint32_t flags, uint32_t color, const char* text, float outline_alpha_scale = 0.85f ) {
         draw_command command;
         command.type = draw_commands::text;
         command.bounds = rect( x, y, 0.f, 0.f );
@@ -93,6 +94,7 @@ public:
         command.text.font = font;
         command.text.flags = flags;
         command.text.color = color;
+        command.text.outline_alpha_scale = outline_alpha_scale;
 
         add_command( command );
     }
@@ -180,7 +182,7 @@ private:
                     renderer::draw_filled_rect_multi_color( command.bounds.x, command.bounds.y, command.bounds.w, command.bounds.h, command.filled_rect_multi_color.colors );
                     break;
                 case draw_commands::text:
-                    renderer::draw_text( command.bounds.x, command.bounds.y, command.text.font, command.text.flags, command.text.color, command.text.buffer );
+                    renderer::draw_text( command.bounds.x, command.bounds.y, command.text.font, command.text.flags, command.text.color, command.text.buffer, command.text.outline_alpha_scale );
                     break;
                 case draw_commands::push_clip_rect:
                     renderer::push_clip_rect( command.bounds.x, command.bounds.y, command.bounds.w, command.bounds.h );
@@ -780,7 +782,7 @@ public:
         return *value;
     }
 
-    void keybind( uint32_t* key ) {
+    void keybind( uint32_t* key, uint32_t* trigger_type = nullptr ) {
         auto& draw_list = gui_draw_list.get();
 
         draw_list.push_z_index( 4 );
@@ -810,7 +812,7 @@ public:
             activate_hash_frame = frame_count;
         }
 
-        else if ( hovered && !active_hash && right_mouse_clicked ) {
+        else if ( trigger_type && hovered && !active_hash && right_mouse_clicked ) {
             active_hash = hash2;
             ignore_bounds.current = options_bounds;
         }
@@ -834,22 +836,24 @@ public:
             }
         }
 
-        else if ( active2 ) {
+        else if ( trigger_type && active2 ) {
             draw_styled_rect( options_bounds );
 
             for ( int32_t i = 0; i < _countof( options ); i++ ) {
                 const rect option_bounds = rect( options_bounds.x, options_bounds.y + ( i * 20.f ), options_bounds.w, 20.f );
 
+                const bool selected = *trigger_type == i;
                 const bool hovered = mouse_in_rect( option_bounds );
 
                 if ( hovered ) {
                     if ( left_mouse_clicked ) {
+                        *trigger_type = i;
                         active_hash = 0ull;
                         ignore_bounds.current = rect();
                     }
                 }
 
-                draw_list.add_text( options_bounds.x + 7.f, options_bounds.y + 7.f + ( i * 20.f ), hovered ? fonts::verdana_bold : fonts::verdana, text_flags::none, COLOR_E, options[ i ] );
+                draw_list.add_text( options_bounds.x + 7.f, options_bounds.y + 7.f + ( i * 20.f ), ( selected || hovered ) ? fonts::verdana_bold : fonts::verdana, text_flags::none, selected ? gradient_on[ 0 ] : COLOR_E, options[ i ] );
             }
         }
 
@@ -1061,7 +1065,7 @@ public:
 
     static inline vector2 slider_movement[] = {
         { 0.f, 0.f }, /* None */
-        { 0.f, 0.f }, /* Label -> Slider */
+        { 0.f, 14.f }, /* Label -> Slider */
         { 0.f, 14.f }, /* Toggle -> Slider */
         { 0.f, 30.f }, /* Slider -> Slider */
         { 0.f, 40.f } /* Combobox -> Slider */
@@ -1076,12 +1080,16 @@ public:
         cursor_ += slider_movement[ ( int )previous_id_ ];
         horizontal_stack_ = 0;
 
+        if ( !label ) {
+            cursor_.y -= 16.f;
+        }
+
         draw_list.push_z_index( 2 );
 
         const vector2 position = vector2( bounds_.x + cursor_.x, bounds_.y + cursor_.y );
         const rect slider_bounds = rect( position.x + 20.f, position.y + 17.f, bounds_.w - 98.f, 7.f );
 
-        const rect click_bounds = rect( slider_bounds.x, position.y + 2.f, slider_bounds.w, 28.f );
+        const rect click_bounds = rect( slider_bounds.x, position.y + ( label ? 2.f : 16.f ), slider_bounds.w, label ? 28.f : 12.f );
         const bool hovered = mouse_in_rect( click_bounds ) && !mouse_in_rect( ignore_bounds.previous );
 
         const uint64_t hash = ( uint64_t )value;
@@ -1100,7 +1108,9 @@ public:
             ignore_bounds.current = rect();
         }
 
-        draw_list.add_text( slider_bounds.x, position.y + 4.f, fonts::verdana, text_flags::none, COLOR_E, label );
+        if ( label ) {
+            draw_list.add_text( slider_bounds.x, position.y + 4.f, fonts::verdana, text_flags::none, COLOR_E, label );
+        }
 
         draw_styled_rect( slider_bounds, hovered ? slider_gradient_hovered : slider_gradient );
 
@@ -1109,7 +1119,7 @@ public:
 
         draw_list.add_filled_rect_multi_color( draw_bounds.x, draw_bounds.y, fill_width, draw_bounds.h, gradient_on );
 
-        draw_list.add_text( draw_bounds.x + fill_width, draw_bounds.y + 2.f, fonts::verdana_bold, text_flags::centered | text_flags::outline, COLOR_E, FMT( 64, fmt, *value ) );
+        draw_list.add_text( draw_bounds.x + fill_width, draw_bounds.y + 2.f, fonts::verdana_bold, text_flags::centered | text_flags::outline, COLOR_E, FMT( 64, fmt, *value ), 0.5f );
 
         draw_list.pop_z_index();
 
@@ -1465,14 +1475,14 @@ void visual_impl( group_box& group_box, cvar_visual& visual, const char* label =
     group_box.color_picker( &visual.color );
 
     if ( toggled ) {
-        group_box.slider( J( "Max distance" ), S( "%dm" ), &visual.maximum_distance, 0u, max_distance );
+        group_box.slider( J( "Maximum distance" ), S( "%dm" ), &visual.maximum_distance, 0u, max_distance );
     }
 }
 
 void player_visuals_impl( group_box& left, group_box& right, cvar_player_visuals& visuals ) {
     bool is_player_visuals = &visuals == &player_visuals;
 
-    left.begin();
+    left.begin( J( "Visuals" ) );
 
     left.toggle( J( "Enabled" ), &visuals.enabled );
 
@@ -1483,7 +1493,7 @@ void player_visuals_impl( group_box& left, group_box& right, cvar_player_visuals
     left.toggle( J( "Bounding box" ), &visuals.bounding_box );
     left.color_picker( &visuals.bounding_box_color );
 
-    left.toggle( J( "Health bar" ), &visuals.health_bar );
+    // left.toggle( J( "Health bar" ), &visuals.health_bar );
     left.toggle( J( "Ammo bar" ), &visuals.ammo_bar );
 
     left.toggle( J( "Skeleton" ), &visuals.skeleton );
@@ -1511,25 +1521,47 @@ void player_visuals_impl( group_box& left, group_box& right, cvar_player_visuals
     left.toggle( J( "Distance" ), &visuals.distance );
     left.color_picker( &visuals.distance_color );
 
+    left.toggle( J( "Chams" ), &visuals.chams );
+
+    left.color_picker( &visuals.chams_occluded_color );
+    left.color_picker( &visuals.chams_visible_color );
+
+    //if ( visuals.chams ) {
+    //    left.combo_box( J( "Chams type" ), { J( "Solid" ), J( "Material" ) }, &visuals.chams_type );
+    //}
+
+    left.toggle( J( "Glow" ), &visuals.glow );
+    left.color_picker( &visuals.glow_color );
+
     left.end();
 
-    right.begin();
+    right.begin( J( "Other" ) );
 
-    right.toggle( J( "Chams" ), &visuals.chams );
+    right.slider( J( "Maximum distance" ), S( "%dm" ), &visuals.maximum_distance, 0u, 500u );
 
-    right.color_picker( &visuals.chams_occluded_color );
-    right.color_picker( &visuals.chams_visible_color );
+    if ( is_player_visuals ) {
+        right.toggle( J( "Friend" ), &player_friend.enabled );
+        right.color_picker( &player_friend.color );
+        right.toggle( J( "Treat teammates as friend" ), &treat_teammates_as_friend );
+        right.label( J( "Mark as friend" ) );
+        right.keybind( &mark_as_friend_key );
 
-    if ( visuals.chams ) {
-        right.combo_box( J( "Chams type" ), { J( "Solid" ), J( "Material" ) }, &visuals.chams_type );
-    }
+        if ( player_friend.enabled ) {
+            right.slider( J( "Maximum distance" ), S( "%dm" ), &player_friend.maximum_distance, 0u, 500u );
+        }
 
-    right.toggle( J( "Glow" ), &glow );
-    right.color_picker( &glow_outline_color );
+        right.toggle( J( "Enemy" ), &player_enemy.enabled );
+        right.color_picker( &player_enemy.color );
+        right.label( J( "Mark as enemy" ) );
+        right.keybind( &mark_as_enemy_key );
 
-    if ( glow ) {
-        right.slider( J( "Blur" ), S( "%.2f" ), &glow_blur_scale, 0.f, 1.f );
-        right.slider( J( "Outline" ), S( "%.2f" ), &glow_outline_scale, 0.f, 5.f );
+        if ( player_enemy.enabled ) {
+            right.slider( J( "Maximum distance" ), S( "%dm" ), &player_enemy.maximum_distance, 0u, 500u );
+        }
+
+        visual_impl( right, player_wounded, J( "Wounded" ) );
+        visual_impl( right, player_dead, J( "Dead" ) );
+        visual_impl( right, player_sleeping, J( "Sleeping" ) );
     }
 
     right.end();
@@ -1692,7 +1724,7 @@ void gui::run() {
 
             left.end();
 
-            right.begin();
+            right.begin( J( "World" ) );
 
             right.toggle( J( "Raids" ), &raid_visuals.enabled );
             right.color_picker( &raid_visuals.color );
@@ -1819,7 +1851,7 @@ void gui::run() {
 
             if ( bear_trap.enabled ) {
                 left.toggle( J( "Ignore unarmed" ), &bear_trap_ignore_unarmed );
-                left.slider( J( "Max distance" ), S( "%dm" ), &bear_trap.maximum_distance, 0u, 500u );
+                left.slider( J( "Maximum distance" ), S( "%dm" ), &bear_trap.maximum_distance, 0u, 500u );
             }
 
             left.toggle( J( "SAM site" ), &sam_site.enabled );
@@ -1827,7 +1859,7 @@ void gui::run() {
 
             if ( sam_site.enabled ) {
                 left.toggle( J( "Ignore offline" ), &sam_site_ignore_offline );
-                left.slider( J( "Max distance" ), S( "%dm" ), &sam_site.maximum_distance, 0u, 500u );
+                left.slider( J( "Maximum distance" ), S( "%dm" ), &sam_site.maximum_distance, 0u, 500u );
             }
 
             left.end();
@@ -1874,18 +1906,7 @@ void gui::run() {
             left.begin();
             left.toggle( J( "Instant loot" ), &instant_loot );
             left.toggle( J( "Loot without untie" ), &loot_without_untie );
-
-            if ( left.toggle( J( "FOV changer" ), &fov_changer.enabled ) ) {
-                left.slider( J( "FOV" ), S( "%.0f" ), &fov_changer.fov, 90.f, 170.f );
-            }
-
-            left.toggle( J( "Zoom" ), &zoom.enabled );
-            left.keybind( &zoom.key );
-
-            if ( zoom.enabled ) {
-                left.slider( J( "FOV" ), S( "%.0f" ), &zoom.fov, 10.f, 70.f );
-            }
-
+  
             left.toggle( J( "Auto drop box" ), &auto_drop_box.enabled );
 
             left.toggle( J( "Auto upgrade" ), &auto_upgrade.enabled );
@@ -1915,7 +1936,27 @@ void gui::run() {
         else if ( current_subtab[ tabs::misc ] == misc_subtabs::visuals ) {
             left.begin();
 
-            left.toggle( J( "Minimap" ), &minimap.enabled );
+            if ( left.toggle( J( "Override FOV" ), &fov_changer.enabled ) ) {
+                left.slider( nullptr, ( const char* )S( u8"%.0f°" ), &fov_changer.fov, 90.f, 170.f );
+            }
+
+            left.toggle( J( "Zoom" ), &zoom.enabled );
+            left.keybind( &zoom.key, &zoom.trigger_type );
+
+            if ( zoom.enabled ) {
+                left.slider( nullptr, ( const char* )S( u8"%.0f°" ), &zoom.fov, 1.f, 70.f );
+            }
+
+            left.toggle( J( "Bright night" ), &bright_night.enabled );
+            left.color_picker( &bright_night.color, false );
+            left.keybind( &bright_night.key );
+
+            if ( bright_night.enabled ) {
+                left.slider( J( "Ambient multiplier" ), S( "%.2fx" ), &bright_night.multiplier, 0.f, 3.f );
+                left.slider( J( "Saturation" ), S( "%.2f" ), &bright_night.saturation, 0.f, 0.5f );
+            }
+
+           /* left.toggle( J( "Minimap" ), &minimap.enabled );
             left.color_picker( &minimap.color );
 
             if ( minimap.enabled ) {
@@ -1930,7 +1971,7 @@ void gui::run() {
             if ( bright_night.enabled ) {
                 left.slider( J( "Ambient multiplier" ), S( "%.2fx" ), &bright_night.multiplier, 0.f, 3.f );
                 left.slider( J( "Saturation" ), S( "%.2f" ), &bright_night.saturation, 0.f, 0.5f );
-            }
+            }*/
 
             left.end();
 

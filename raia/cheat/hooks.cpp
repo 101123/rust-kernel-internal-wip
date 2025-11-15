@@ -1317,8 +1317,7 @@ void hook_handlers::post_outline_manager_on_render_image( _CONTEXT* context, voi
 	// Update entities
 	entity_manager::update();
 
-	glow_manager::update();
-	glow_manager::on_render_image_hook( ( unity::render_texture* )context->Rdx, ( unity::render_texture* )context->R8 );
+	glow_manager::on_render_image( ( unity::render_texture* )context->Rdx, ( unity::render_texture* )context->R8 );
 }
 
 bool hook_handlers::pre_player_walk_movement_client_input( _CONTEXT* context, void* user_data ) {

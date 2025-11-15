@@ -17,8 +17,7 @@ namespace glow_manager {
 	void add_player( rust::base_player* player );
 	void remove_player( rust::base_player* player );
 
-	void update();
 	void invalidate_cache();
 
-	void on_render_image_hook( unity::render_texture* src, unity::render_texture* dest );
+	void on_render_image( unity::render_texture* src, unity::render_texture* dest );
 }

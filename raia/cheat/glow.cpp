@@ -7,11 +7,122 @@
 
 #include <vector>
 
+#define P( Property ) unity::shader::property_to_id( Property )
+
+enum shader_property_type {
+	color
+};
+
+struct shader_property {
+	int32_t id;
+	shader_property_type type;
+};
+
+struct configured_shader_property {
+	shader_property property;
+
+	union {
+		uint32_t* color;
+	};
+
+	union {
+		uint32_t previous_color;
+	};
+};
+
+enum materials_index {
+	players,
+	scientists,
+	held_item,
+	hands
+};
+
+class material_collection {
+public:
+	class instance {
+	public:
+		instance() = default;
+		instance( uint64_t hash, unity::material* material ) :
+			id_( hash ), material_( material ), material_instance_id( material->get_instance_id() ) {};
+
+		uint64_t get_id() const { return id_; }
+		int32_t get_instance_id() const { return material_instance_id; }
+		unity::material* get_material() const { return material_; }
+
+		template <typename T>
+		void bind_property( const shader_property& property, T* value ) {
+			configured_properties_.add( configured_shader_property( property, value ) );
+		}
+
+		void update() {
+			for ( auto& configured_property : configured_properties_ ) {
+				if ( configured_property.property.type == shader_property_type::color ) {
+					// Only update if value has changed
+					if ( *configured_property.color != configured_property.previous_color ) {
+						material_->set_color( configured_property.property.id, unity::color( *configured_property.color ) );
+						configured_property.previous_color = *configured_property.color;
+					}
+				}
+			}
+		}
+
+	private:
+		// Hash for identifying instance
+		uint64_t id_;
+		unity::material* material_;
+		// Used to set renderer materials with a single write
+		int32_t material_instance_id;
+		util::array<configured_shader_property, 8> configured_properties_;
+	};
+
+	material_collection() = default;
+	material_collection( unity::shader * shader ) : shader_( shader ) {};
+
+	instance* create_instance( uint64_t hash ) {
+		// Sanity check
+		if ( !shader_ )
+			return nullptr;
+
+		unity::material* material = unity::material::ctor( shader_ );
+		if ( !is_valid_ptr( material ) )
+			return nullptr;
+
+		return instances_.add( instance( hash, material ) );
+	}
+
+	int32_t get_material_id( uint64_t hash ) {
+		for ( const auto& instance : instances_ ) {
+			if ( instance.get_id() == hash ) {
+				return instance.get_instance_id();
+			}
+		}
+
+		return -1;
+	}
+
+	int32_t get_material_id_at_index( int32_t index ) {
+		return instances_[ index ].get_instance_id();
+	}
+
+	unity::material* get_material_at_index( int32_t index ) {
+		return instances_[ index ].get_material();
+	}
+
+	void update() {
+		for ( auto& instance : instances_ ) {
+			instance.update();
+		}
+	}
+
+private:
+	unity::shader* shader_;
+	util::array<instance, 8> instances_;
+};
+
 unity::shader* stencil_shader;
 unity::shader* composite_shader;
 unity::shader* blur_shader;
 
-unity::material* stencil_material;
 unity::material* composite_material;
 unity::material* blur_material;
 
@@ -19,50 +130,17 @@ unity::command_buffer* command_buffer;
 
 unity::render_texture* stencil_texture;
 unity::render_texture* blur_texture;
+unity::render_texture* ping_pong_texture;
 
-int _BlurScale;
 int _MainTex;
-int _StencilTex;
 int _BlurTex;
-int _OutlineScale;
-int _OutlineColor;
+int _StencilTex;
 
-int _VisibleColor;
-int _OccludedColor;
-
-enum material_index {
-	players,
-	scientists,
-	held_item,
-	hands,
-	max
-};
-
-struct configured_material {
-	unity::material* material;
-	int32_t material_id;
-	uint32_t* colors[ 2 ];
-};
-
-using configured_materials = std::array<configured_material, material_index::max>;
-
-configured_materials create_material_collection_from_shader( unity::shader* shader ) {
-	configured_materials collection;
-
-	for ( int32_t i = 0; i < material_index::max; i++ ) {
-		collection[ i ].material = unity::material::ctor( shader );
-		if ( !is_valid_ptr( collection[ i ].material ) )
-			continue;
-
-		collection[ i ].material_id = collection[ i ].material->get_instance_id();
-	}
-
-	return collection;
-}
+material_collection glow_materials;
 
 unity::shader* unlit_shader;
 
-configured_materials unlit_materials;
+material_collection unlit_materials;
 
 util::lazy_initializer<std::vector<std::pair<bool, rust::skinned_multi_mesh*>>> multi_mesh_cache;
 
@@ -87,9 +165,11 @@ bool glow_manager::init( unity::asset_bundle* asset_bundle ) {
 
 	il2cpp_gchandle_new( blur_shader, true );
 
-	stencil_material = unity::material::ctor( stencil_shader );
-	if ( !stencil_material )
+	unlit_shader = asset_bundle->load_asset<unity::shader>( S( L"UnlitShader.shader" ) );
+	if ( !unlit_shader )
 		return false;
+
+	il2cpp_gchandle_new( unlit_shader, true );
 
 	composite_material = unity::material::ctor( composite_shader );
 	if ( !composite_material )
@@ -105,32 +185,45 @@ bool glow_manager::init( unity::asset_bundle* asset_bundle ) {
 
 	il2cpp_gchandle_new( command_buffer, true );
 
-	_BlurScale = unity::shader::property_to_id( S( L"_BlurScale" ) );
 	_MainTex = unity::shader::property_to_id( S( L"_MainTex" ) );
 	_StencilTex = unity::shader::property_to_id( S( L"_StencilTex" ) );
 	_BlurTex = unity::shader::property_to_id( S( L"_BlurTex" ) );
-	_OutlineScale = unity::shader::property_to_id( S( L"_OutlineScale" ) );
-	_OutlineColor = unity::shader::property_to_id( S( L"_OutlineColor" ) );
 
-	unlit_shader = asset_bundle->load_asset<unity::shader>( S( L"UnlitShader.shader" ) );
-	if ( !unlit_shader )
-		return false;
+	shader_property color = shader_property( P( S( L"_Color" ) ), shader_property_type::color );
+	shader_property visible_color = shader_property( P( S( L"_VisibleColor" ) ), shader_property_type::color );
+	shader_property occluded_color = shader_property( P( S( L"_OccludedColor" ) ), shader_property_type::color );
 
-	il2cpp_gchandle_new( unlit_shader, true );
+	glow_materials = material_collection( stencil_shader );
 
-	unlit_materials = create_material_collection_from_shader( unlit_shader );
+	auto players_glow = glow_materials.create_instance( H( "players" ) );
 
-	unlit_materials[ material_index::players ].colors[ 0 ] = &player_visuals.chams_visible_color.value;
-	unlit_materials[ material_index::players ].colors[ 1 ] = &player_visuals.chams_occluded_color.value;
-	unlit_materials[ material_index::scientists ].colors[ 0 ] = &scientist_visuals.chams_visible_color.value;
-	unlit_materials[ material_index::scientists ].colors[ 1 ] = &scientist_visuals.chams_occluded_color.value;
-	unlit_materials[ material_index::held_item ].colors[ 0 ] = &local_chams.held_item_visible_color.value;
-	unlit_materials[ material_index::held_item ].colors[ 1 ] = &local_chams.held_item_occluded_color.value;
-	unlit_materials[ material_index::hands ].colors[ 0 ] = &local_chams.hands_visible_color.value;
-	unlit_materials[ material_index::hands ].colors[ 1 ] = &local_chams.hands_occluded_color.value;
+	players_glow->bind_property( color, &player_visuals.glow_color );
 
-	_VisibleColor = unity::shader::property_to_id( S( L"_VisibleColor" ) );
-	_OccludedColor = unity::shader::property_to_id( S( L"_OccludedColor" ) );
+	auto scientists_glow = glow_materials.create_instance( H( "scientists" ) );
+
+	scientists_glow->bind_property( color, &scientist_visuals.glow_color );
+
+	unlit_materials = material_collection( unlit_shader );
+
+	auto players_unlit = unlit_materials.create_instance( H( "players" ) );
+
+	players_unlit->bind_property( visible_color, &player_visuals.chams_visible_color );
+	players_unlit->bind_property( occluded_color, &player_visuals.chams_occluded_color );
+
+	auto scientists_unlit = unlit_materials.create_instance( H( "scientists" ) );
+
+	scientists_unlit->bind_property( visible_color, &scientist_visuals.chams_visible_color );
+	scientists_unlit->bind_property( occluded_color, &scientist_visuals.chams_occluded_color );
+
+	auto held_item_unlit = unlit_materials.create_instance( H( "held_item" ) );
+
+	held_item_unlit->bind_property( visible_color, &local_chams.held_item_visible_color );
+	held_item_unlit->bind_property( occluded_color, &local_chams.held_item_occluded_color );
+
+	auto hands_unlit = unlit_materials.create_instance( H( "hands" ) );
+
+	hands_unlit->bind_property( visible_color, &local_chams.hands_visible_color );
+	hands_unlit->bind_property( occluded_color, &local_chams.hands_occluded_color );
 
 	multi_mesh_cache.construct();
 
@@ -173,10 +266,74 @@ void glow_manager::remove_player( rust::base_player* player ) {
 	multi_meshes.erase( it );
 }
 
-void update_chams() {
-	for ( const auto& material : unlit_materials ) {
-		material.material->set_color( _VisibleColor, unity::color( *material.colors[ 0 ] ) );
-		material.material->set_color( _OccludedColor, unity::color( *material.colors[ 1 ] ) );
+void glow_manager::invalidate_cache() {
+	multi_mesh_cache.get().clear();
+}
+
+void glow_manager::on_render_image( unity::render_texture* src, unity::render_texture* dest ) {
+	// Update material properties
+	glow_materials.update();
+	unlit_materials.update();
+
+	bool run_glow = player_visuals.glow || scientist_visuals.glow;
+
+	if ( run_glow ) {
+		stencil_texture = unity::render_texture::get_temporary( screen_width, screen_height, 0 );
+
+		const vector2i half_resolution = vector2i( screen_width / 2, screen_height / 2 );
+
+		blur_texture = unity::render_texture::get_temporary( half_resolution.x, half_resolution.y, 0 );
+		ping_pong_texture = unity::render_texture::get_temporary( half_resolution.x, half_resolution.y, 0 );
+
+		command_buffer->set_render_target( unity::render_target_identifier::ctor( stencil_texture ) );
+		command_buffer->clear_render_target( true, true, unity::color() );
+	}
+
+	bool run_chams = player_visuals.chams || scientist_visuals.chams;
+
+	if ( run_glow || run_chams ) {
+		for ( auto& [ is_player, multi_mesh ] : multi_mesh_cache.get() ) {
+			sys::list<unity::renderer*>* renderers_list = multi_mesh->renderers;
+			if ( !is_valid_ptr( renderers_list ) || !is_valid_ptr( renderers_list->items ) )
+				continue;
+
+			sys::array<unity::renderer*>* renderers = renderers_list->items;
+			if ( !is_valid_ptr( renderers ) )
+				continue;
+
+			for ( size_t i = 0; i < renderers->size; i++ ) {
+				unity::renderer* renderer = renderers->buffer[ i ];
+				if ( !is_valid_ptr( renderer ) )
+					continue;
+
+				unity::internals::renderer* native_renderer = renderer->get_native_renderer();
+				if ( !is_valid_ptr( native_renderer ) )
+					continue;
+
+				if ( ( is_player && player_visuals.chams ) || ( !is_player && scientist_visuals.chams ) ) {
+					auto materials = native_renderer->materials;
+
+					if ( is_valid_ptr( materials.buffer ) ) {
+						int32_t material_id = is_player ?
+							unlit_materials.get_material_id_at_index( materials_index::players ) : unlit_materials.get_material_id_at_index( materials_index::scientists );
+
+						for ( size_t i = 0; i < materials.size; i++ ) {
+							materials.buffer[ i ].instance_id = material_id;
+						}
+					}
+				}
+
+				if ( !native_renderer->is_visible_in_scene() )
+					continue;
+
+				if ( ( is_player && player_visuals.glow ) || ( !is_player && scientist_visuals.glow ) ) {
+					unity::material* material = is_player ?
+						glow_materials.get_material_at_index( materials_index::players ) : glow_materials.get_material_at_index( materials_index::scientists );
+
+					command_buffer->draw_renderer( renderer, material );
+				}
+			}
+		}
 	}
 
 	if ( local_chams.held_item || local_chams.hands ) {
@@ -214,131 +371,38 @@ void update_chams() {
 						if ( !is_valid_ptr( materials.buffer ) )
 							continue;
 
+						int32_t instance_id = unlit_materials.get_material_id_at_index( hands ? materials_index::hands : materials_index::held_item );
+
 						for ( size_t i = 0; i < materials.size; i++ ) {
-							materials.buffer[ i ].instance_id = hands ?
-								unlit_materials[ material_index::hands ].material_id : unlit_materials[ material_index::held_item ].material_id;
+							materials.buffer[ i ].instance_id = instance_id;
 						}
+
+						command_buffer->draw_renderer( renderer, glow_materials.get_material_at_index( materials_index::players ) );
 					}
 				}
 			}
 		}
 	}
 
-	for ( auto& [ is_player, multi_mesh ] : multi_mesh_cache.get() ) {
-		if ( ( is_player && !player_visuals.chams ) || ( !is_player && !scientist_visuals.chams ) )
-			continue;
+	if ( run_glow ) {
+		unity::graphics::execute_command_buffer( command_buffer );
 
-		sys::list<unity::renderer*>* renderers_list = multi_mesh->renderers;
-		if ( !is_valid_ptr( renderers_list ) || !is_valid_ptr( renderers_list->items ) )
-			continue;
+		unity::graphics::blit( stencil_texture, blur_texture, blur_material );
 
-		sys::array<unity::renderer*>* renderers = renderers_list->items;
-		if ( !is_valid_ptr( renderers ) )
-			continue;
-
-		for ( size_t i = 0; i < renderers->size; i++ ) {
-			unity::renderer* renderer = renderers->buffer[ i ];
-			if ( !is_valid_ptr( renderer ) )
-				continue;
-
-			unity::internals::renderer* native_renderer = renderer->get_native_renderer();
-			if ( !is_valid_ptr( native_renderer ) )
-				continue;
-
-			auto materials = native_renderer->materials;
-			if ( !is_valid_ptr( materials.buffer ) )
-				continue;
-
-			const configured_material& configured_material = is_player ? unlit_materials[ material_index::players ] : unlit_materials[ material_index::scientists ];
-
-			for ( size_t i = 0; i < materials.size; i++ ) {
-				materials.buffer[ i ].instance_id = configured_material.material_id;
-			}
+		for ( int32_t i = 0; i < 3; i++ ) {
+			unity::graphics::blit( blur_texture, ping_pong_texture, blur_material );
+			unity::graphics::blit( ping_pong_texture, blur_texture, blur_material );
 		}
-	}
-}
 
-void glow_manager::update() {
-	update_chams();
-}
+		composite_material->set_texture( _MainTex, src );
+		composite_material->set_texture( _StencilTex, stencil_texture );
+		composite_material->set_texture( _BlurTex, blur_texture );
 
-void glow_manager::invalidate_cache() {
-	multi_mesh_cache.get().clear();
-}
+		unity::graphics::blit( src, dest, composite_material );
 
-void render_stencil() {
-	stencil_texture = unity::render_texture::get_temporary( screen_width, screen_height, 0 );
-
-	command_buffer->set_render_target( unity::render_target_identifier::ctor( stencil_texture ) );
-	command_buffer->clear_render_target( true, true, unity::color() );
-
-	for ( auto& [ _, multi_mesh ] : multi_mesh_cache.get() ) {
-		sys::list<unity::renderer*>* renderers_list = multi_mesh->renderers;
-		if ( !is_valid_ptr( renderers_list ) || !is_valid_ptr( renderers_list->items ) )
-			continue;
-
-		sys::array<unity::renderer*>* renderers = renderers_list->items;
-		if ( !is_valid_ptr( renderers ) )
-			continue;
-
-		for ( size_t i = 0; i < renderers->size; i++ ) {
-			unity::renderer* renderer = renderers->buffer[ i ];
-			if ( !is_valid_ptr( renderer ) )
-				continue;
-
-			unity::internals::renderer* native_renderer = renderer->get_native_renderer();
-			if ( !is_valid_ptr( native_renderer ) )
-				continue;
-
-			// We only need to check if the renderer is visible
-			if ( !native_renderer->is_visible_in_scene() )
-				continue;
-
-			command_buffer->draw_renderer( renderer, stencil_material );
-		}
-	}
-	
-	unity::graphics::execute_command_buffer( command_buffer );
-}
-
-void render_blur() {
-	vector2i blur_tex_dims = vector2i( screen_width / 2, screen_height / 2 );
-
-	blur_texture = unity::render_texture::get_temporary( blur_tex_dims.x, blur_tex_dims.y, 0 );
-	unity::render_texture* temp = unity::render_texture::get_temporary( blur_tex_dims.x, blur_tex_dims.y, 0 );
-	blur_material->set_float( _BlurScale, 0.75f );
-
-	unity::graphics::blit( stencil_texture, blur_texture, blur_material );
-
-	for ( int32_t i = 0; i < 3; i++ ) {
-		unity::graphics::blit( blur_texture, temp, blur_material );
-		unity::graphics::blit( temp, blur_texture, blur_material );
-	}
-
-	unity::render_texture::release_temporary( temp );
-}
-
-void render_composite( unity::render_texture* src, unity::render_texture* dest ) {
-	composite_material->set_texture( _MainTex, src );
-	composite_material->set_texture( _StencilTex, stencil_texture );
-	composite_material->set_texture( _BlurTex, blur_texture );
-	composite_material->set_float( _OutlineScale, 0.5f );
-	composite_material->set_color( _OutlineColor, unity::color( glow_outline_color ) );
-
-	unity::graphics::blit( src, dest, composite_material );
-
-	unity::render_texture::release_temporary( stencil_texture );
-	unity::render_texture::release_temporary( blur_texture );
-
-	stencil_texture = nullptr;
-	blur_texture = nullptr;
-}
-
-void glow_manager::on_render_image_hook( unity::render_texture* src, unity::render_texture* dest ) {
-	if ( glow && multi_mesh_cache.get().size() > 0 ) {
-		render_stencil();
-		render_blur();
-		render_composite( src, dest );
+		unity::render_texture::release_temporary( stencil_texture );
+		unity::render_texture::release_temporary( blur_texture );
+		unity::render_texture::release_temporary( ping_pong_texture );
 
 		command_buffer->clear();
 	}

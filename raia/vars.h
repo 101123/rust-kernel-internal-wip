@@ -76,9 +76,11 @@ struct cvar_player_visuals {
 	cvar_ui visible_color;
 	cvar_ui occluded_color;
 	cvar chams;
-	cvar_i chams_type;
+	cvar_ui chams_type;
 	cvar_ui chams_visible_color;
 	cvar_ui chams_occluded_color;
+	cvar glow;
+	cvar_ui glow_color;
 	cvar bounding_box;
 	cvar_ui bounding_box_color;
 	cvar health_bar;
@@ -94,9 +96,9 @@ struct cvar_player_visuals {
 	cvar held_item_text;
 	cvar_ui held_item_color;
 	cvar belt;
-	cvar_i belt_type;
-	cvar_i belt_fov;
-	cvar_i maximum_distance;
+	cvar_ui belt_type;
+	cvar_ui belt_fov;
+	cvar_ui maximum_distance;
 };
 
 #define WRAP_PLAYER_CONFIGURATION( Name, R, G, B, A ) { \
@@ -105,12 +107,14 @@ struct cvar_player_visuals {
 	cvar_ui( H( Name " Visible Color" ), COL32( R, G, B, A ) ), \
 	cvar_ui( H( Name " Occluded Color" ), COL32( R, G, B, A ) ), \
 	cvar( H( Name " Chams" ), false ), \
-	cvar_i( H( Name " Chams Type" ), 0 ), \
+	cvar_ui( H( Name " Chams Type" ), 0 ), \
 	cvar_ui( H( Name " Chams Visible Color" ), COL32( R, G, B, A ) ), \
 	cvar_ui( H( Name " Chams Occluded Color" ), COL32( R, G, B, A ) ), \
+	cvar( H( Name " Glow" ), false ), \
+	cvar_ui( H( Name " Glow Color" ), COL32( R, G, B, A ) ), \
 	cvar( H( Name " Bounding Box" ), true ), \
 	cvar_ui( H( Name " Bounding Box Color" ), COL32( R, G, B, 200 ) ), \
-	cvar( H( Name " Health Bar" ), true ), \
+	cvar( H( Name " Health Bar" ), false ), \
 	cvar( H( Name " Ammo Bar" ), true ), \
 	cvar( H( Name " Skeleton" ), true ), \
 	cvar_ui( H( Name " Skeleton Color" ), COL32( R, G, B, 200 ) ), \
@@ -123,17 +127,24 @@ struct cvar_player_visuals {
 	cvar( H( Name " Held Item Text" ), true ), \
 	cvar_ui( H( Name " Held Item Color" ), COL32( R, G, B, 200 ) ), \
 	cvar( H( Name " Belt" ), true ), \
-	cvar_i( H( Name " Belt Type" ), 0 ), \
-	cvar_i( H( Name " Belt FOV" ), 200 ), \
-	cvar_i( H( Name " Maximum Distance" ), 500 ) }
+	cvar_ui( H( Name " Belt Type" ), 0 ), \
+	cvar_ui( H( Name " Belt FOV" ), 200 ), \
+	cvar_ui( H( Name " Maximum Distance" ), 500 ) }
 
 inline cvar_player_visuals player_visuals = WRAP_PLAYER_CONFIGURATION( "Players", 255, 255, 255, 255 );
-inline cvar_visual player_wounded = WRAP_VISUAL( "Wounded Player", true, 500, COL32( 255, 0, 0, 255 ) );
-inline cvar_visual player_sleeper = WRAP_VISUAL( "Sleeper", false, 30, COL32( 255, 255, 255, 255 ) );
+inline cvar_visual player_friend = WRAP_VISUAL( "Friend Player", true, 500, COL32( 0, 255, 0, 200 ) );
+inline cvar_visual player_enemy = WRAP_VISUAL( "Enemy Player", true, 500, COL32( 255, 0, 0, 200 ) );
+inline cvar_visual player_wounded = WRAP_VISUAL( "Wounded Player", true, 500, COL32( 255, 60, 0, 200 ) );
+inline cvar_visual player_dead = WRAP_VISUAL( "Dead Player", true, 500, COL32( 200, 200, 200, 200 ) );
+inline cvar_visual player_sleeping = WRAP_VISUAL( "Sleeping Player", false, 30, COL32( 255, 255, 255, 200 ) );
 inline cvar_visual player_corpse = WRAP_VISUAL( "Corpse", true, 100, COL32( 255, 255, 255, 255 ) );
 inline cvar player_team_id = cvar( H( "Player Team ID" ), true );
 inline cvar_ui player_team_id_color = cvar_ui( H( "Player Team ID Color" ), COL32( 255, 255, 255, 200 ) );
 inline cvar player_avatar = cvar( H( "Player Avatar" ), true );
+
+inline cvar treat_teammates_as_friend = cvar( H( "Treat Teammates As Friend" ), false );
+inline cvar_ui mark_as_friend_key = cvar_ui( H( "Mark As Friend Key" ), VK_F4 );
+inline cvar_ui mark_as_enemy_key = cvar_ui( H( "Mark As Enemy Key" ), VK_F5 );
 
 inline cvar_player_visuals scientist_visuals = WRAP_PLAYER_CONFIGURATION( "Scientists", 125, 195, 255, 255 );
 
@@ -416,7 +427,7 @@ DEFINE_CONTEXT( zoom,
 	// cvar_ui key = cvar_ui( H( "Zoom Key" ), 'X' );
 	cvar_f fov = cvar_f( H( "Zoom FOV" ), 40.f );
 
-	KEYBIND( "Zoom", 1, 1 )
+	KEYBIND( "Zoom", 'X', 1 )
 );
 
 DEFINE_CONTEXT( projectile_tracers,
@@ -424,11 +435,6 @@ DEFINE_CONTEXT( projectile_tracers,
 	cvar_f duration = cvar_f( H( "Projectile Tracer Duration" ), 2.f );
 	cvar_ui color = cvar_ui( H( "Projectile Tracer Color" ), COL32( 255, 255, 255, 255 ) );
 );
-
-inline cvar glow = cvar( H( "Glow" ), false );
-inline cvar_ui glow_outline_color = cvar_ui( H( "Glow Outline Color" ), COL32( 255, 255, 255, 255 ) );
-inline cvar_f glow_blur_scale = cvar_f( H( "Glow Blur Scale" ), 0.75f );
-inline cvar_f glow_outline_scale = cvar_f( H( "Glow Outline Scale" ), 0.5f );
 
 inline cvar loot_without_untie = cvar( H( "Loot Without Untie" ), true );
 inline cvar suicide = cvar( H( "Suicide" ), false );
