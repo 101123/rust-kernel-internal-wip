@@ -1730,7 +1730,7 @@ void gui::run() {
             right.color_picker( &raid_visuals.color );
 
             if ( raid_visuals.enabled ) {
-                right.toggle( J( "Notify on start" ), &raid_visuals.notify );
+                right.toggle( J( "Notify on first explosion" ), &raid_visuals.notify );
 
                 right.multi_combo_box( J( "Explosives" ), {
                         { J( "Rocket" ), &raid_visuals.rocket },

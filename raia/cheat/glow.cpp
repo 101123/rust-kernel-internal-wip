@@ -376,8 +376,6 @@ void glow_manager::on_render_image( unity::render_texture* src, unity::render_te
 						for ( size_t i = 0; i < materials.size; i++ ) {
 							materials.buffer[ i ].instance_id = instance_id;
 						}
-
-						command_buffer->draw_renderer( renderer, glow_materials.get_material_at_index( materials_index::players ) );
 					}
 				}
 			}
