@@ -545,11 +545,12 @@ void protobuf_player_tick_write_to_stream_delta_pre_hook( rust::player_tick* pla
 			model_state->look_dir = interactive_debug.look_direction;
 		}
 
+		// We don't need to continue
 		return;
 	}
 
 	/*
-	* Previously, PlayerTick.eyePos used to be set to PlayerEyes.position, but Rust changed that to be MainCamera.position in order to detect debug camera.
+	* Previously, PlayerTick.eyePos used to be set to PlayerEyes.position, but Facepunch changed that to be MainCamera.position in order to detect debug camera.
 	* The naive approach to solve this is to set PlayerTick.eyePos back to PlayerEyes.position, but this approach has the problem of being incorrect in a few cases, namely while a player is asleep.
 	* If the player is asleep, their camera mode is set to CameraMode.Eyes, which in turn, inside of PlayerEyes.UpdateCamera, sets MainCamera.position to BaseEntity.model.eyeBone.position, - 
 	* which is a slightly different position from PlayerEyes.position. Server plugins exist that leverage this discrepancy to detect the fact that you're cheating.

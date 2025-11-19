@@ -1071,14 +1071,19 @@ void update_player_visibility( rust::base_player* player, cached_player& cached_
     const cvar_player_visuals& visuals =
         cached_player.scientist ? scientist_visuals : player_visuals;
 
-    if ( !visuals.visible_check )
-        return;
+    // If we have any model effects active, disable culling on player
+    if ( visuals.chams || visuals.glow ) {
+        player->make_visible();
+        player->next_vis_think = FLT_MAX;
+    }
 
-    const vector3& origin = camera.position;
-    vector3 direction = cached_player.bone_data.positions[ 1 ] - camera.position;
+    if ( visuals.visible_check ) {
+        const vector3& origin = camera.position;
+        vector3 direction = cached_player.bone_data.positions[ 1 ] - camera.position;
 
-    cached_player.visible = !rust::game_physics::trace(
-        unity::ray( origin, direction ), 0.f, nullptr, vector3::magnitude( direction ), 1218519297, unity::query_trigger_interaction::ignore, local_player.entity );
+        cached_player.visible = !rust::game_physics::trace(
+            unity::ray( origin, direction ), 0.f, nullptr, vector3::magnitude( direction ), 1218519297, unity::query_trigger_interaction::ignore, local_player.entity );
+    }
 }
 
 void update_player_avatar( rust::base_player* player, cached_player& cached_player ) {

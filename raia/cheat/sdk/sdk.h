@@ -2189,8 +2189,9 @@ namespace rust {
         );
 
         FIELD( rust::model_state*, model_state, Offsets::BasePlayer::modelState );
-        FIELD( player_tick*, last_sent_tick, Offsets::BasePlayer::lastSentTick );
         FIELD( entity_ref, mounted, Offsets::BasePlayer::mounted );
+        FIELD( player_tick*, last_sent_tick, Offsets::BasePlayer::lastSentTick );
+        FIELD( float, next_vis_think, Offsets::BasePlayer::nextVisThink );
         FIELD( int, player_flags, Offsets::BasePlayer::playerFlags );
         FIELD( sys::string*, user_id_string, Offsets::BasePlayer::UserIDString );
         FIELD( sys::string*, display_name, Offsets::BasePlayer::_displayName );
@@ -2339,6 +2340,15 @@ namespace rust {
 
         static float get_jump_height() {
             return 1.5f;
+        }
+
+        void make_visible() {
+            void( *make_visible )( base_player* ) =
+                ( decltype( make_visible ) )( game_assembly + Offsets::BasePlayer::MakeVisible );
+
+            um::caller& caller = um::get_caller_for_thread();
+
+            return caller( make_visible, this );
         }
 
         static inline il2cpp_class* klass_;

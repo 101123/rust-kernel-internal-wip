@@ -972,6 +972,8 @@ namespace Offsets {
 		constexpr const static size_t _lookingAt = 0x2f0;
 		constexpr const static size_t lastSentTickTime = 0x564;
 		constexpr const static size_t lastSentTick = 0x5b8;
+		constexpr const static size_t CurrentTutorialAllowance = 0x580;
+		constexpr const static size_t nextVisThink = 0x588;
 		constexpr const static size_t mounted = 0x4e0;
 		constexpr const static size_t Belt = 0x5d8;
 		constexpr const static size_t _lookingAtEntity = 0x4b0;
@@ -983,6 +985,7 @@ namespace Offsets {
 		constexpr const static size_t equippingBlocked = 0x694;
 
 		// Functions
+		constexpr const static size_t MakeVisible = 0x1b2e680;
 		constexpr const static size_t ClientUpdateLocalPlayer = 0x1a91e90;
 		constexpr const static size_t Menu_AssistPlayer = 0x1a07850;
 		constexpr const static size_t OnViewModeChanged = 0x19e25b0;
