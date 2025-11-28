@@ -1952,24 +1952,24 @@ namespace rust {
 
         ENCRYPTED_VALUE( float, ground_time, Offsets::PlayerWalkMovement::groundTime, {},
             {
-                uint32_t a = ( ( 8 * ( values[ i ] - 1495320391 ) ) |
-                    ( ( unsigned __int64 )( unsigned int )( values[ i ] - 1495320391 ) >> 29 ) ) ^ 0xC1936667;
-
-                values[ i ] = ( a << 16 ) | ( unsigned __int64 )HIWORD( a );
+                values[ i ] = ( ( ( values[ i ] ^ 0x8368D75F ) + 376581533 ) << 13 ) |
+                    ( unsigned __int64 )( ( ( values[ i ] ^ 0x8368D75F ) + 376581533 ) >> 19 );
             }
         );
 
         ENCRYPTED_VALUE( float, jump_time, Offsets::PlayerWalkMovement::jumpTime, {},
             {
-                values[ i ] = ( ( ( ( ( 2 * values[ i ] ) | ( values[ i ] >> 31 ) ) - 723039249 ) << 23 ) |
-                    ( ( ( ( 2 * values[ i ] ) | ( values[ i ] >> 31 ) ) - 723039249 ) >> 9 ) ) - 1251034073;
+                int64_t a = 8LL * ( ( ( values[ i ] << 19 ) | 
+                    ( values[ i ] >> 13 ) ) - 482006527 );
+
+                values[ i ] = ( ( unsigned int )a | HIDWORD( a ) ) ^ 0xCC453451LL;
             }
         );
 
         ENCRYPTED_VALUE( float, ground_angle_new, Offsets::PlayerWalkMovement::groundAngleNew, {},
             {
-                values[ i ] = ( ( ( ( values[ i ] ^ 0x25F930BD ) - 1263599072 ) ^ 0xAE3DF005 ) << 26 ) |
-                    ( ( ( ( values[ i ] ^ 0x25F930BD ) - 1263599072 ) ^ 0xAE3DF005 ) >> 6 );
+                values[ i ] = ( ( ( ( 2 * values[ i ] ) | 
+                    ( values[ i ] >> 31 ) ) + 333757399 ) ^ 0x49B69F0F ) - 759972295;
             }
         );
 
@@ -2184,7 +2184,8 @@ namespace rust {
 
         ENCRYPTED_VALUE( uint64_t, cl_active_item, Offsets::BasePlayer::clActiveItem,
             {
-                values[ i ] = ( ( values[ i ] - 1317850993 ) ^ 0xB8B081A6 ) - 1927173347;
+                values[ i ] = ( ( ( ( values[ i ] - 2085634350 ) << 31 ) | 
+                    ( ( unsigned int )( values[ i ] - 2085634350 ) >> 1 ) ) + 1753854132 ) ^ 0xB3FCB78B;
             }, {}
         );
 
@@ -2535,8 +2536,8 @@ namespace rust {
             public:
                 ENCRYPTED_VALUE( float, fov, Offsets::ConVar_Graphics_Static::_fov, {},
                     {
-                        values[ i ] = ( ( ( values[ i ] + 596192430 ) << 31 ) | 
-                            ( ( unsigned int )( values[ i ] + 596192430 ) >> 1 ) ) ^ 0x4045954C;
+                        values[ i ] = ( ( ( ( values[ i ] ^ 0xE56B7B27 ) + 1175458098 ) << 10 ) | 
+                            ( ( ( values[ i ] ^ 0xE56B7B27 ) + 1175458098 ) >> 22 ) ) - 206996334;
                     }
                 );
             };
@@ -3219,7 +3220,7 @@ namespace rust {
     class terrain_texturing {
     public:
         FIELD( float, terrain_size, Offsets::TerrainTexturing::terrainSize );
-        FIELD( int, shore_map_size, Offsets::TerrainTexturing::shoreMapSize );
+        // FIELD( int, shore_map_size, Offsets::TerrainTexturing::shoreMapSize );
         FIELD( float, shore_distance_scale, Offsets::TerrainTexturing::shoreDistanceScale );
         FIELD( unity::collections::native_array<vector4>, shore_vectors, Offsets::TerrainTexturing::shoreVectors );
 
