@@ -1686,6 +1686,7 @@ namespace Offsets {
 
 		// Offsets
 		constexpr const static size_t source = 0x20;
+		constexpr const static size_t entity = 0x30;
 	}
 
 	// obf name: ::%76dea61e7fd9a4e6637da14ec1476dc0ce5f6350

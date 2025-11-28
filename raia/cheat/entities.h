@@ -65,6 +65,7 @@ struct cached_velocity_data {
 struct cached_player {
 	bool init;
 	bool scientist;
+	rust::networkable_id net_id;
 	uint64_t user_id;
 	cached_bone_data bone_data;
 	cached_velocity_data velocity_data;

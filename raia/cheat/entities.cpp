@@ -856,6 +856,10 @@ bool cache_player( rust::base_player* player, cached_player& cached_player ) {
     if ( cached_player.init )
         return true;
 
+    rust::network::networkable* net = player->net;
+    if ( !is_valid_ptr( net ) )
+        return false;
+
     rust::player_eyes* eyes = player->get_eyes();
     if ( !is_valid_ptr( eyes ) )
         return false;
@@ -887,6 +891,7 @@ bool cache_player( rust::base_player* player, cached_player& cached_player ) {
     }
 
     cached_player.scientist = !player->is<rust::base_player>();
+    cached_player.net_id = net->id;
     cached_player.user_id = player->get_user_id();
     cached_player.eyes = eyes;
     cached_player.inventory = inventory;

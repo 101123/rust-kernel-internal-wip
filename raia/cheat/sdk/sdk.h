@@ -2948,6 +2948,7 @@ namespace rust {
 
     class effect_data : public il2cpp_object {
     public:
+        FIELD( networkable_id, entity, Offsets::EffectData::entity );
         FIELD( uint64_t, source, Offsets::EffectData::source );
 
         static inline il2cpp_class* klass_;
